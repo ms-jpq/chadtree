@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
-from typing import Iterable, List, Optional, Union, cast
+from typing import Iterable, List, Optional, Set, Union, cast
 
 
 @dataclass
@@ -45,17 +45,20 @@ def fs_stat(path: str) -> FSStat:
         return FSStat(is_link=False, is_dir=is_dir)
 
 
-def parse(root: str, *, max_depth: int, depth: int = 0) -> Node:
+def parse(root: str, *, index: Set[str], max_depth: int, depth: int = 0) -> Node:
     info = fs_stat(root)
     name = basename(root)
     if not info.is_dir:
         _, ext = splitext(name)
         return File(path=root, is_link=info.is_link, name=name, ext=ext[1:])
-    elif depth < max_depth:
+
+    elif depth < max_depth or root in index:
         files: List[File] = []
         children: List[Dir] = []
         for el in listdir(root):
-            child = parse(join(root, el), max_depth=max_depth, depth=depth + 1)
+            child = parse(
+                join(root, el), index=index, max_depth=max_depth, depth=depth + 1
+            )
             if type(child) is File:
                 files.append(cast(File, child))
             else:
@@ -63,6 +66,7 @@ def parse(root: str, *, max_depth: int, depth: int = 0) -> Node:
         return Dir(
             path=root, is_link=info.is_link, name=name, files=files, children=children
         )
+
     else:
         return Dir(
             path=root, is_link=info.is_link, name=name, files=None, children=None,
