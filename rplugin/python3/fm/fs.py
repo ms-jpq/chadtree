@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
-from typing import Iterable, List, Union, cast
+from typing import Iterable, List, Optional, Union, cast
 
 
 @dataclass
@@ -26,8 +26,8 @@ class Dir:
     path: str
     is_link: bool
     name: str
-    files: Union[Iterable[File], None]
-    children: Union[Iterable[Dir], None]
+    files: Optional[Iterable[File]]
+    children: Optional[Iterable[Dir]]
 
 
 Node = Union[File, Dir]
