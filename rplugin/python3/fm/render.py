@@ -1,37 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Flag, IntEnum, auto
 from itertools import chain
 from locale import strxfrm
-from typing import Iterable, Iterator, List, Optional, Set, Union, cast
+from typing import Iterable, Iterator, List, Optional, Union, cast
 
 from .fs import Dir, File, Node
-
-
-class CompVals(IntEnum):
-    FOLDER = auto()
-    FILE = auto()
-
-
-class Highlight(Flag):
-    FILE = auto()
-    FOLDER = auto()
-    LINK = auto()
-
-
-@dataclass
-class DisplayNode:
-    original: Node
-    name: str
-    children: Iterable[DisplayNode]
-    highlight: Highlight
-
-
-@dataclass
-class DisplayIndex:
-    index: Set[str]
-    root: DisplayNode
+from .types import CompVals, DisplayNode, Highlight
 
 
 def comp(node: Node) -> Iterable[Union[int, str]]:
