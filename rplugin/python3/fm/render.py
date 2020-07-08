@@ -43,13 +43,12 @@ def comp(node: Node) -> Iterable[Union[int, str]]:
 
 
 def dparse(node: Node) -> DisplayNode:
+    name = node.name.replace("\n", r"\n")
     if type(node) == File:
         highlight = Highlight.FILE
         if node.is_link:
             highlight = highlight | Highlight.LINK
-        return DisplayNode(
-            original=node, name=node.name, children=(), highlight=highlight
-        )
+        return DisplayNode(original=node, name=name, children=(), highlight=highlight)
     else:
         node = cast(Dir, node)
         descendants: List[Node] = sorted(
@@ -60,7 +59,7 @@ def dparse(node: Node) -> DisplayNode:
         if node.is_link:
             highlight = highlight | Highlight.LINK
         return DisplayNode(
-            original=node, name=node.name, children=children, highlight=highlight
+            original=node, name=name, children=children, highlight=highlight
         )
 
 
