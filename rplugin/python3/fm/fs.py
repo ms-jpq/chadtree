@@ -49,7 +49,7 @@ def parse(root: str, *, max_depth: int, depth: int = 0) -> Node:
     info = fs_stat(root)
     name = basename(root)
     if not info.is_dir:
-        name, ext = splitext(name)
+        _, ext = splitext(name)
         return File(path=root, is_link=info.is_link, name=name, ext=ext[1:])
     elif depth < max_depth:
         files: List[File] = []

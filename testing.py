@@ -9,10 +9,10 @@ from rplugin.python3.fm.render import dparse, render
 
 async def main() -> None:
     cwd = getcwd()
-    n = parse(cwd)
+    n = parse(cwd, max_depth=5)
     d = dparse(n)
     r = render(d)
-    print(r)
+    print(*r, sep="\n")
 
     pass
 

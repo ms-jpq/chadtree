@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum, Flag, auto
+from enum import Flag, IntEnum, auto
 from itertools import chain
 from locale import strxfrm
-from typing import Any, Iterable, Iterator, List, Union, cast
+from typing import Iterable, Iterator, List, Union, cast
 
-from fs import Dir, File, Node
+from .fs import Dir, File, Node
 
 
-class CompVals(Enum):
+class CompVals(IntEnum):
     FOLDER = auto()
     FILE = auto()
 
@@ -28,7 +28,7 @@ class DisplayNode:
     highlight: Highlights
 
 
-def comp(node: Node) -> Iterable[Union[CompVals, str]]:
+def comp(node: Node) -> Iterable[Union[int, str]]:
     if type(node) == File:
         node = cast(File, node)
         return (CompVals.FILE, strxfrm(node.name), strxfrm(node.ext))
