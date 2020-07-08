@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Flag, IntEnum, auto
 from itertools import chain
 from locale import strxfrm
-from typing import Iterable, Iterator, List, Optional, Union, cast
+from typing import Iterable, Iterator, List, Optional, Set, Union, cast
 
 from .fs import Dir, File, Node
 
@@ -26,6 +26,12 @@ class DisplayNode:
     name: str
     children: Iterable[DisplayNode]
     highlight: Highlight
+
+
+@dataclass
+class DisplayIndex:
+    index: Set[str]
+    root: DisplayNode
 
 
 def comp(node: Node) -> Iterable[Union[int, str]]:
@@ -61,6 +67,8 @@ def dparse(node: Node) -> DisplayNode:
 def decorate(display: str, highlight: Highlight) -> Optional[str]:
     if Highlight.FOLDER in highlight:
         display = display + "/"
+    if Highlight.LINK in highlight:
+        display = display + " →"
     return display
 
 

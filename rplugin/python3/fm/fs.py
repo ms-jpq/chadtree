@@ -30,6 +30,12 @@ class Dir:
     children: Optional[Iterable[Dir]]
 
 
+@dataclass
+class Index:
+    index: Set[str]
+    root: Dir
+
+
 Node = Union[File, Dir]
 
 
@@ -45,20 +51,18 @@ def fs_stat(path: str) -> FSStat:
         return FSStat(is_link=False, is_dir=is_dir)
 
 
-def parse(root: str, *, index: Set[str], max_depth: int, depth: int = 0) -> Node:
+def parse(root: str, *, index: Set[str]) -> Node:
     info = fs_stat(root)
     name = basename(root)
     if not info.is_dir:
         _, ext = splitext(name)
         return File(path=root, is_link=info.is_link, name=name, ext=ext[1:])
 
-    elif depth < max_depth or root in index:
+    elif root in index:
         files: List[File] = []
         children: List[Dir] = []
         for el in listdir(root):
-            child = parse(
-                join(root, el), index=index, max_depth=max_depth, depth=depth + 1
-            )
+            child = parse(join(root, el), index=index)
             if type(child) is File:
                 files.append(cast(File, child))
             else:
@@ -71,3 +75,23 @@ def parse(root: str, *, index: Set[str], max_depth: int, depth: int = 0) -> Node
         return Dir(
             path=root, is_link=info.is_link, name=name, files=None, children=None,
         )
+
+
+def new(root: str, index: Set[str]) -> Index:
+    node = parse(root, index=index)
+    assert type(node) == Dir
+    return Index(index=index, root=cast(Dir, node))
+
+
+def add(index: Index, path: str) -> Index:
+    if path in index.index:
+        return index
+    else:
+        return index
+
+
+def remove(index: Index, path: str) -> Index:
+    if path not in index.index:
+        return index
+    else:
+        return index
