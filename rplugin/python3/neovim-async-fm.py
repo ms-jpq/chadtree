@@ -1,9 +1,6 @@
-from pynvim import plugin
+from pynvim import function
 
 
-@plugin
-class Main(object):
-    pass
-
-
-print("TEST")
+@function("TestFunction", sync=True)
+def testfunction(self, args):
+    return 3
