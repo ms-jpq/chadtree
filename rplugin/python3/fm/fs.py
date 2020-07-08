@@ -2,13 +2,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from os import listdir, stat
-from os.path import abspath, join, splitext
+from os.path import abspath, basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
-from typing import List, Union
+from typing import Iterator, List, Union
+
+
+@dataclass
+class FSStat:
+    is_link: bool
+    is_dir: bool
 
 
 @dataclass
 class File:
+    path: str
     is_link: bool
     name: str
     ext: str
@@ -16,16 +23,14 @@ class File:
 
 @dataclass
 class Dir:
+    path: str
     is_link: bool
     name: str
     files: Union[List[File], None]
     children: Union[List[Dir], None]
 
 
-@dataclass
-class FSStat:
-    is_link: bool
-    is_dir: bool
+Node = Union[File, Dir]
 
 
 def fs_stat(path: str) -> FSStat:
@@ -40,11 +45,12 @@ def fs_stat(path: str) -> FSStat:
         return FSStat(is_link=False, is_dir=is_dir)
 
 
-def parse(root: str, *, max_depth: int, depth: int = 0) -> Union[File, Dir]:
+def parse(root: str, *, max_depth: int, depth: int = 0) -> Node:
     info = fs_stat(root)
+    name = basename(root)
     if not info.is_dir:
-        name, ext = splitext(root)
-        return File(is_link=info.is_link, name=name, ext=ext[1:])
+        name, ext = splitext(name)
+        return File(path=root, is_link=info.is_link, name=name, ext=ext[1:])
     elif depth < max_depth:
         files: List[File] = []
         children: List[Dir] = []
@@ -54,14 +60,33 @@ def parse(root: str, *, max_depth: int, depth: int = 0) -> Union[File, Dir]:
                 files.append(child)
             else:
                 children.append(child)
-        return Dir(is_link=info.is_link, name=root, files=files, children=children)
+        return Dir(
+            path=root, is_link=info.is_link, name=name, files=files, children=children
+        )
     else:
-        return Dir(is_link=info.is_link, name=root, files=None, children=None,)
+        return Dir(
+            path=root, is_link=info.is_link, name=name, files=None, children=None,
+        )
+
+
+def render(node: Node, *, depth: int = 0) -> Iterator[str]:
+    spacer = depth * 2 * " "
+    if type(node) == File:
+        rend = node.name
+        yield spacer + rend
+    else:
+        rend = node.name + "/"
+        yield spacer + rend
+        for child in node.children or ():
+            yield from render(child, depth=depth + 1)
+        for file in node.files or ():
+            yield from render(file, depth=depth + 1)
 
 
 def tree() -> Dir:
     root = abspath(".")
-    ll = parse(root, max_depth=1)
-    print(ll)
+    node = parse(root, max_depth=4)
+    r = render(node)
+    print(*r, sep="\n")
 
     return ""
