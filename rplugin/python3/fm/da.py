@@ -2,7 +2,13 @@ from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from json import load
-from typing import Any, cast
+from typing import Any, AsyncIterator, Awaitable, TypeVar, cast
+
+T = TypeVar("T")
+
+
+def anext(aiter: AsyncIterator[T]) -> Awaitable[T]:
+    return aiter.__anext__()
 
 
 @dataclass(frozen=True)
