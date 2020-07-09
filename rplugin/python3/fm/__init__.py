@@ -1,16 +1,14 @@
-from asyncio import get_running_loop
-from pynvim import Nvim, autocmd, command, plugin
+from asyncio import get_event_loop
+from concurrent.futures import ThreadPoolExecutor
 
-from .consts import icons_json, ignore_json
-from .da import load_json
+from pynvim import Nvim, autocmd, command, plugin
 
 
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
+        self.pool = ThreadPoolExecutor()
         self.nvim = nvim
-        self.icons = load_json(icons_json)
-        self.ignored = load_json(ignore_json)
 
     @command("FMOPEN")
     def fm_open(self, *args) -> None:
@@ -18,10 +16,8 @@ class Main:
 
     @autocmd("BufEnter", pattern="*")
     def on_bufenter(self) -> None:
-        async def commit() -> None:
-            filename = self.nvim.funcs.bufname()
-            self.nvim.out_write("testplugin is in " + str(filename) + "\n")
+        def commit() -> None:
+            self.nvim.out_write("reeeeeeeeeeee" + "\n")
 
-        # loop = get_running_loop()
-        # fut = loop.create_task(commit())
-        # fut.result()
+        loop = get_event_loop()
+        loop.call_soon(commit)
