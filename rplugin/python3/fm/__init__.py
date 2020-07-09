@@ -5,6 +5,7 @@ from typing import Awaitable
 from pynvim import Nvim, autocmd, command, function, plugin
 
 from .state import initial
+from .wm import toggle
 
 
 @plugin
@@ -28,13 +29,10 @@ class Main:
 
     @command("FMOpen")
     def fm_open(self, *args) -> None:
-        async def commit() -> None:
-            self.nvim.current.line = "OWO"
-
-        self._submit(commit())
+        toggle(self.nvim)
 
     @function("FMprimary")
-    def primary() -> None:
+    def primary(self) -> None:
         """
         Folders -> toggle
         File -> open
@@ -42,63 +40,77 @@ class Main:
         pass
 
     @function("FMsecondary")
-    def secondary() -> None:
+    def secondary(self) -> None:
         """
         Folders -> toggle
         File -> preview
         """
         pass
 
+    @function("FMnew")
+    def new(self) -> None:
+        """
+        new file / folder
+        """
+        pass
+
     @function("FMrename")
-    def rename() -> None:
+    def rename(self) -> None:
         """
         rename file / folder
         """
         pass
 
     @function("FMselect")
-    def select() -> None:
+    def select(self) -> None:
         """
         Folder / File -> select
         """
         pass
 
     @function("FMclear")
-    def clear() -> None:
+    def clear(self) -> None:
         """
         Clear selected
         """
         pass
 
     @function("FMdelete")
-    def delete() -> None:
+    def delete(self) -> None:
         """
         Delete selected
         """
         pass
 
     @function("FMcut")
-    def cut() -> None:
+    def cut(self) -> None:
         """
         Cut selected
         """
         pass
 
     @function("FMcopy")
-    def copy() -> None:
+    def copy(self) -> None:
         """
         Copy selected
         """
         pass
 
     @function("FMpaste")
-    def paste() -> None:
+    def paste(self) -> None:
         """
         Paste selected
         """
         pass
 
-    @autocmd("BufEnter", pattern="*")
+    @function("FMcopyname")
+    def copyname(self) -> None:
+        """
+        Copy dirname / filename
+        """
+        pass
+
+    @autocmd("BufEnter", pattern="neovimasyncfm")
     def on_bufenter(self) -> None:
         async def commit() -> None:
             self.nvim.out_write(str(self.state) + "\n")

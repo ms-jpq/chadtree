@@ -6,4 +6,4 @@ set -o pipefail
 
 cd "$(dirname "$0")" || exit 1
 
-mypy -- *.py rplugin/python3/fm/*.py
+mypy --ignore-missing-imports -- *.py rplugin/python3/fm/*.py

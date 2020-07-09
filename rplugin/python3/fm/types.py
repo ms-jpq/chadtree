@@ -41,6 +41,7 @@ class State:
     index: Index
     selection: Selection
     root: Node
+    ignore_filter: Set[str]
     git: GitStatus
     rendered: Sequence[str]
     path_lookup: Sequence[str]
