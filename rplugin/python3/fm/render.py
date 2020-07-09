@@ -23,14 +23,12 @@ class DisplayNode:
 
 
 def comp(node: Node) -> Iterable[Union[int, str]]:
-    if Mode.FOLDER in node.mode:
-        return (CompVals.FOLDER, strxfrm(node.name))
-    else:
-        return (
-            CompVals.FILE,
-            strxfrm(node.ext),
-            strxfrm(node.name),
-        )
+    node_type = CompVals.FOLDER if Mode.FOLDER in node.mode else CompVals.FILE
+    return (
+        node_type,
+        strxfrm(node.ext or ""),
+        strxfrm(node.name),
+    )
 
 
 def dparse(node: Node, *, depth: int = 0) -> DisplayNode:
@@ -41,7 +39,7 @@ def dparse(node: Node, *, depth: int = 0) -> DisplayNode:
     )
 
 
-def show(node: Node, depth: int) -> Optional[str]:
+def show(node: DisplayNode, depth: int) -> Optional[str]:
     if node.hidden:
         return None
     else:

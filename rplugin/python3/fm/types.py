@@ -24,6 +24,11 @@ class Node:
 
 
 @dataclass(frozen=True)
+class Settings:
+    keymap: Dict[str, str]
+
+
+@dataclass(frozen=True)
 class State:
     index: Index
     selection: Selection

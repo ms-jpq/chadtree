@@ -6,4 +6,5 @@ set -o pipefail
 
 cd "$(dirname "$0")" || exit 1
 
-mypy -- *.py rplugin/python3/fm/*.py
+export NVIM_LISTEN_ADDRESS=/tmp/nvim
+exec nvim

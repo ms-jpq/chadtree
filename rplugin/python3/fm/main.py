@@ -1,2 +1,2 @@
 async def main() -> None:
-    pass
+    print("lmao")
