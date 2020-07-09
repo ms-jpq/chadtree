@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Flag, auto
 from typing import Dict, Optional, Sequence, Set
 
@@ -26,6 +26,14 @@ class Node:
 @dataclass(frozen=True)
 class Settings:
     keymap: Dict[str, str]
+    ignored: Sequence[str]
+
+
+@dataclass(frozen=True)
+class GitStatus:
+    ignored: Sequence[str] = field(default_factory=tuple)
+    modified: Sequence[str] = field(default_factory=tuple)
+    staged: Sequence[str] = field(default_factory=tuple)
 
 
 @dataclass(frozen=True)
@@ -33,5 +41,6 @@ class State:
     index: Index
     selection: Selection
     root: Node
+    git: GitStatus
     rendered: Sequence[str]
     path_lookup: Sequence[str]
