@@ -4,12 +4,15 @@ from typing import Awaitable
 
 from pynvim import Nvim, autocmd, command, plugin
 
+from .state import initial
+
 
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.nvim = nvim
+        self.state = initial()
 
     # Work around for coroutine deadlocks
     def _submit(self, coro: Awaitable[None]) -> None:
@@ -28,6 +31,6 @@ class Main:
     @autocmd("BufEnter", pattern="*")
     def on_bufenter(self) -> None:
         async def commit() -> None:
-            self.nvim.out_write("reeeeeeeeeeee" + "\n")
+            self.nvim.out_write(str(self.state) + "\n")
 
         self._submit(commit())
