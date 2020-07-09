@@ -4,8 +4,9 @@ from typing import Awaitable
 
 from pynvim import Nvim, autocmd, command, function, plugin
 
+from .consts import fm_filetype
 from .state import initial
-from .wm import toggle
+from .wm import find
 
 
 @plugin
@@ -29,7 +30,8 @@ class Main:
 
     @command("FMOpen")
     def fm_open(self, *args) -> None:
-        toggle(self.nvim)
+        for i in find(self.nvim):
+            pass
 
     @function("FMprimary")
     def primary(self) -> None:
@@ -110,7 +112,7 @@ class Main:
         """
         pass
 
-    @autocmd("BufEnter", pattern="neovimasyncfm")
+    @autocmd("BufEnter", pattern=fm_filetype)
     def on_bufenter(self) -> None:
         async def commit() -> None:
             self.nvim.out_write(str(self.state) + "\n")
