@@ -1,13 +1,25 @@
-from asyncio import get_event_loop
-from concurrent.futures import ThreadPoolExecutor
+from asyncio import get_event_loop, run_coroutine_threadsafe
+from typing import Awaitable
 
 from pynvim import Nvim, autocmd, command, plugin
+
+from .consts import threadpool
+
+
+# Work around for coroutine deadlocks
+def _submit(coro: Awaitable[None]) -> None:
+    loop = get_event_loop()
+
+    def stage() -> None:
+        fut = run_coroutine_threadsafe(coro, loop)
+        fut.result()
+
+    threadpool.submit(stage)
 
 
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
-        self.pool = ThreadPoolExecutor()
         self.nvim = nvim
 
     @command("FMOPEN")
@@ -16,8 +28,7 @@ class Main:
 
     @autocmd("BufEnter", pattern="*")
     def on_bufenter(self) -> None:
-        def commit() -> None:
+        async def commit() -> None:
             self.nvim.out_write("reeeeeeeeeeee" + "\n")
 
-        loop = get_event_loop()
-        loop.call_soon(commit)
+        _submit(commit())
