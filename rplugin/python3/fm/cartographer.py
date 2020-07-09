@@ -35,14 +35,34 @@ def build(root: str, *, selection: Selection) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
-def new(root: str, selection: Selection) -> Index:
+def new(root: str, *, selection: Selection) -> Index:
     node = build(root, selection=selection)
     return Index(selection=selection, root=node)
 
 
-def add(index: Index, selection: Selection) -> Index:
-    pass
+def add(root: Node, *, selection: Selection) -> Node:
+    if root.path in selection:
+        return build(root, selection=selection)
+    else:
+        children = {k: add(v, selection=selection) for k, v in root.children.items()}
+        return Node(
+            path=root.path,
+            mode=root.mode,
+            name=root.name,
+            children=children,
+            ext=root.ext,
+        )
 
 
-def remove(index: Index, selection: Selection) -> Index:
-    pass
+def remove(root: Node, *, selection: Selection) -> Node:
+    if root.path in selection:
+        return build(root, selection={})
+    else:
+        children = {k: remove(v, selection=selection) for k, v in root.children.items()}
+        return Node(
+            path=root.path,
+            mode=root.mode,
+            name=root.name,
+            children=children,
+            ext=root.ext,
+        )
