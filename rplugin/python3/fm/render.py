@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 from locale import strxfrm
-from typing import Iterable, Iterator, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Iterable, Iterator, List, Optional, Sequence, Tuple, Union
 
 from .types import Mode, Node
 
@@ -31,11 +31,12 @@ def comp(node: Node) -> Iterable[Union[int, str]]:
     )
 
 
-def dparse(node: Node, *, depth: int = 0) -> DisplayNode:
+def dparse(node: Node, ignore: Callable[[str], bool]) -> DisplayNode:
     descendants: List[Node] = sorted((node.children or {}).values(), key=comp)
-    children = tuple(map(dparse, descendants))
+    children = tuple(dparse(d, ignore) for d in descendants)
+    hidden = ignore(node.path)
     return DisplayNode(
-        path=node.path, mode=node.mode, name=node.name, children=children
+        path=node.path, mode=node.mode, name=node.name, children=children, hidden=hidden
     )
 
 
@@ -52,7 +53,9 @@ def show(node: DisplayNode, depth: int) -> Optional[str]:
         return spaces + name
 
 
-def render(node: Node) -> Tuple[Sequence[str], Sequence[str]]:
+def render(
+    node: Node, ignore: Callable[[str], bool]
+) -> Tuple[Sequence[str], Sequence[str]]:
     def render(node: DisplayNode, *, depth: int) -> Iterator[Tuple[str, str]]:
         rend = show(node, depth)
         if rend:
@@ -60,6 +63,6 @@ def render(node: Node) -> Tuple[Sequence[str], Sequence[str]]:
         for child in node.children:
             yield from render(child, depth=depth + 1)
 
-    dnode = dparse(node)
+    dnode = dparse(node, ignore=ignore)
     path_lookup, rendered = zip(*render(dnode, depth=0))
     return path_lookup, rendered

@@ -1,2 +1,2 @@
 async def main() -> None:
-    print("lmao")
+    print(2)
