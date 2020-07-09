@@ -1,58 +1,41 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Flag, IntEnum, auto
-from typing import Iterable, Optional, Set, Union
+from dataclasses import dataclass, field
+from enum import Flag, auto
+from typing import Dict, Iterable, Optional, Set
 
 Selection = Set[str]
 
 
-@dataclass
-class File:
-    path: str
-    is_link: bool
-    name: str
-    ext: str
-
-
-@dataclass
-class Dir:
-    path: str
-    is_link: bool
-    name: str
-    files: Optional[Iterable[File]]
-    children: Optional[Iterable[Dir]]
-
-
-Node = Union[File, Dir]
-
-
-@dataclass
-class Index:
-    index: Set[str]
-    root: Dir
-
-
-class CompVals(IntEnum):
-    FOLDER = auto()
-    FILE = auto()
-
-
-class Highlight(Flag):
+class Mode(Flag):
     FILE = auto()
     FOLDER = auto()
     LINK = auto()
 
 
 @dataclass
-class DisplayNode:
-    original: Node
+class Node:
+    path: str
+    mode: Mode
     name: str
-    children: Iterable[DisplayNode]
-    highlight: Highlight
+    children: Optional[Dict[str, Node]] = None
+    ext: Optional[str] = None
+
+
+@dataclass
+class Index:
+    selection: Selection
+    root: Node
+
+
+@dataclass
+class DisplayNode:
+    path: str
+    name: str
+    children: Iterable[DisplayNode] = field(default_factory=tuple)
 
 
 @dataclass
 class DisplayIndex:
-    index: Set[str]
+    selection: Selection
     root: DisplayNode

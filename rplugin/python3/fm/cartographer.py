@@ -1,73 +1,48 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
-from typing import List, cast
 
-from .types import Dir, File, Index, Node, Selection
-
-
-@dataclass
-class FSStat:
-    is_link: bool
-    is_dir: bool
+from .types import Index, Mode, Node, Selection
 
 
-def fs_stat(path: str) -> FSStat:
+def fs_stat(path: str) -> Mode:
     info = stat(path, follow_symlinks=False)
-    is_link = S_ISLNK(info.st_mode)
-    if is_link:
+    if S_ISLNK(info.st_mode):
         link_info = stat(path, follow_symlinks=True)
-        is_dir = S_ISDIR(link_info.st_mode)
-        return FSStat(is_link=True, is_dir=is_dir)
+        mode = Mode.FOLDER if S_ISDIR(link_info.st_mode) else Mode.FILE
+        return mode | Mode.LINK
     else:
-        is_dir = S_ISDIR(info.st_mode)
-        return FSStat(is_link=False, is_dir=is_dir)
+        mode = Mode.FOLDER if S_ISDIR(info.st_mode) else Mode.FILE
+        return mode
 
 
-def parse(root: str, *, index: Selection) -> Node:
-    info = fs_stat(root)
+def build(root: str, *, selection: Selection) -> Node:
+    mode = fs_stat(root)
     name = basename(root)
-    if not info.is_dir:
+    if Mode.FOLDER not in mode:
         _, ext = splitext(name)
-        return File(path=root, is_link=info.is_link, name=name, ext=ext[1:])
+        return Node(path=root, mode=mode, name=name, ext=ext)
 
-    elif root in index:
-        files: List[File] = []
-        children: List[Dir] = []
-        for el in listdir(root):
-            child = parse(join(root, el), index=index)
-            if type(child) is File:
-                files.append(cast(File, child))
-            else:
-                children.append(cast(Dir, child))
-        return Dir(
-            path=root, is_link=info.is_link, name=name, files=files, children=children
-        )
-
+    elif root in selection:
+        children = {
+            (path := join(root, d)): build(path, selection=selection)
+            for d in listdir(root)
+        }
+        return Node(path=root, mode=mode, name=name, children=children)
     else:
-        return Dir(
-            path=root, is_link=info.is_link, name=name, files=None, children=None,
-        )
+        return Node(path=root, mode=mode, name=name)
 
 
-def new(root: str, index: Selection) -> Index:
-    node = parse(root, index=index)
-    assert type(node) == Dir
-    return Index(index=index, root=cast(Dir, node))
+def new(root: str, selection: Selection) -> Index:
+    node = build(root, selection=selection)
+    return Index(selection=selection, root=node)
 
 
-def add(index: Index, path: str) -> Index:
-    if path in index.index:
-        return index
-    else:
-        return index
+def add(index: Index, selection: Selection) -> Index:
+    pass
 
 
-def remove(index: Index, path: str) -> Index:
-    if path not in index.index:
-        return index
-    else:
-        return index
+def remove(index: Index, selection: Selection) -> Index:
+    pass

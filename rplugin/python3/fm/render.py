@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+from enum import IntEnum, auto
 from itertools import chain
 from locale import strxfrm
 from typing import Iterable, Iterator, List, Optional, Union, cast
 
-from .fs import Dir, File, Node
-from .types import CompVals, DisplayNode, Highlight
+from .types import DisplayNode, Mode, Node
+
+
+class CompVals(IntEnum):
+    FOLDER = auto()
+    FILE = auto()
 
 
 def comp(node: Node) -> Iterable[Union[int, str]]:
-    if type(node) == Dir:
+    if Mode.File in node.mode:
         return (CompVals.FOLDER, strxfrm(node.name))
     else:
         node = cast(File, node)
