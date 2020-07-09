@@ -31,9 +31,9 @@ class Settings:
 
 @dataclass(frozen=True)
 class GitStatus:
-    ignored: Sequence[str] = field(default_factory=tuple)
-    modified: Sequence[str] = field(default_factory=tuple)
-    staged: Sequence[str] = field(default_factory=tuple)
+    ignored: Set[str] = field(default_factory=set)
+    modified: Set[str] = field(default_factory=set)
+    staged: Set[str] = field(default_factory=set)
 
 
 @dataclass(frozen=True)
