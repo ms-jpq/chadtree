@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Flag, auto
-from typing import Dict, Iterable, Optional, Set
+from typing import Dict, Optional, Sequence, Set
 
+Index = Set[str]
 Selection = Set[str]
 
 
@@ -13,7 +14,7 @@ class Mode(Flag):
     LINK = auto()
 
 
-@dataclass
+@dataclass(frozen=True)
 class Node:
     path: str
     mode: Mode
@@ -22,22 +23,10 @@ class Node:
     ext: Optional[str] = None
 
 
-@dataclass
-class Index:
+@dataclass(frozen=True)
+class State:
+    index: Index
     selection: Selection
     root: Node
-
-
-@dataclass
-class DisplayNode:
-    path: str
-    mode: Mode
-    name: str
-    children: Iterable[DisplayNode] = field(default_factory=tuple)
-    hidden: bool = False
-
-
-@dataclass
-class DisplayIndex:
-    selection: Selection
-    root: DisplayNode
+    rendered: Sequence[str]
+    path_lookup: Sequence[str]

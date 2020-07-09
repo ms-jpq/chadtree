@@ -4,7 +4,7 @@ from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
 
-from .types import Index, Mode, Node, Selection
+from .types import Index, Mode, Node
 
 
 def fs_stat(path: str) -> Mode:
@@ -18,33 +18,28 @@ def fs_stat(path: str) -> Mode:
         return mode
 
 
-def build(root: str, *, selection: Selection) -> Node:
+def new(root: str, *, index: Index) -> Node:
     mode = fs_stat(root)
     name = basename(root)
     if Mode.FOLDER not in mode:
         _, ext = splitext(name)
         return Node(path=root, mode=mode, name=name, ext=ext)
 
-    elif root in selection:
+    elif root in index:
         children = {
-            (path := join(root, d)): build(path, selection=selection)
-            for d in listdir(root)
+            path: new(path, index=index)
+            for path in (join(root, d) for d in listdir(root))
         }
         return Node(path=root, mode=mode, name=name, children=children)
     else:
         return Node(path=root, mode=mode, name=name)
 
 
-def new(root: str, *, selection: Selection) -> Index:
-    node = build(root, selection=selection)
-    return Index(selection=selection, root=node)
-
-
-def add(root: Node, *, selection: Selection) -> Node:
-    if root.path in selection:
-        return build(root, selection=selection)
+def add(root: Node, *, index: Index) -> Node:
+    if root.path in index:
+        return new(root, index=index)
     else:
-        children = {k: add(v, selection=selection) for k, v in root.children.items()}
+        children = {k: add(v, index=index) for k, v in root.children.items()}
         return Node(
             path=root.path,
             mode=root.mode,
@@ -54,11 +49,11 @@ def add(root: Node, *, selection: Selection) -> Node:
         )
 
 
-def remove(root: Node, *, selection: Selection) -> Node:
-    if root.path in selection:
-        return build(root, selection={})
+def remove(root: Node, *, index: Index) -> Node:
+    if root.path in index:
+        return Node(path=root.path, mode=root.mode, name=root.name, ext=root.ext,)
     else:
-        children = {k: remove(v, selection=selection) for k, v in root.children.items()}
+        children = {k: remove(v, index=index) for k, v in root.children.items()}
         return Node(
             path=root.path,
             mode=root.mode,
