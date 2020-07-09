@@ -63,4 +63,5 @@ def render(node: Node) -> Tuple[Sequence[str], Sequence[str]]:
             yield from render(child, depth=depth + 1)
 
     dnode = dparse(node)
-    return tuple(zip(*render(dnode, depth=0)))
+    rendered, path_lookup = zip(*render(dnode, depth=0))
+    return rendered, path_lookup
