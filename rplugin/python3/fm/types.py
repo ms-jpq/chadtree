@@ -31,8 +31,10 @@ class Index:
 @dataclass
 class DisplayNode:
     path: str
+    mode: Mode
     name: str
     children: Iterable[DisplayNode] = field(default_factory=tuple)
+    hidden: bool = False
 
 
 @dataclass
