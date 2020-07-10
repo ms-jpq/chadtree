@@ -1,6 +1,6 @@
 from asyncio import get_event_loop, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Awaitable
+from typing import Awaitable
 
 from pynvim import Nvim, autocmd, command, function, plugin
 
@@ -15,9 +15,12 @@ from .wm import is_fm_buffer, toggle_shown, update_buffers
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
+        user_settings = nvim.vars.get("fm_settings", None)
+        user_icons = nvim.vars.get("fm_icons", None)
+        settings = initial_settings(user_settings=user_settings, user_icons=user_icons)
+
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.nvim = nvim
-        settings = initial_settings()
         self.state = initial_state(settings)
         self.settings = settings
 
@@ -51,12 +54,6 @@ class Main:
     def fm_open(self, *args) -> None:
         toggle_shown(self.nvim, settings=self.settings)
         self.redraw()
-
-    @function("FMsettings")
-    def settings(self, settings: Any) -> None:
-        """
-        Settings update
-        """
 
     @function("FMprimary")
     def primary(self) -> None:

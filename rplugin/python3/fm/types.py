@@ -24,12 +24,29 @@ class Node:
 
 
 @dataclass(frozen=True)
+class GitIcons:
+    ignored: str
+    added: str
+    modified: str
+    staged: str
+
+
+@dataclass(frozen=True)
+class IconSet:
+    folder: str
+    link: str
+    git: GitIcons
+    filetype: Dict[str, str]
+
+
+@dataclass(frozen=True)
 class Settings:
     width: int
     keymap: Dict[str, Sequence[str]]
     name_ignore: Sequence[str]
     path_ignore: Sequence[str]
     use_icons: bool
+    icons: IconSet
 
 
 @dataclass(frozen=True)
@@ -47,13 +64,3 @@ class GitStatus:
     added: Set[str] = field(default_factory=set)
     modified: Set[str] = field(default_factory=set)
     staged: Set[str] = field(default_factory=set)
-
-
-@dataclass(frozen=True)
-class IconSet:
-    folder: str
-    link: str
-    git_ignored: str
-    git_modified: str
-    git_staged: str
-    filetype: Dict[str, str]

@@ -5,7 +5,7 @@ from fnmatch import fnmatch
 from locale import strxfrm
 from typing import Callable, Iterable, Iterator, Sequence, Tuple, Union
 
-from .types import GitStatus, Mode, Node, Settings
+from .types import GitStatus, IconSet, Mode, Node, Settings
 
 Ignore = Callable[[Node], bool]
 
@@ -36,7 +36,7 @@ def ignore(settings: Settings, git: GitStatus) -> Ignore:
     return drop
 
 
-def show(node: Node, depth: int) -> str:
+def show(node: Node, icons: IconSet, depth: int) -> str:
     spaces = depth * 2 * " "
     name = node.name.replace("\n", r"\n")
     if Mode.FOLDER in node.mode:
@@ -47,12 +47,12 @@ def show(node: Node, depth: int) -> str:
 
 
 def render(
-    node: Node, settings: Settings, git: GitStatus
+    node: Node, *, settings: Settings, git: GitStatus, icons=IconSet,
 ) -> Tuple[Sequence[str], Sequence[str]]:
     drop = ignore(settings, git)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[str, str]]:
-        rend = show(node, depth=depth)
+        rend = show(node, icons=icons, depth=depth)
         children = (
             child for child in (node.children or {}).values() if not drop(child)
         )

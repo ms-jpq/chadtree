@@ -30,7 +30,7 @@ async def stat() -> Iterable[Tuple[str, str]]:
         return entries
 
 
-def parse(root: str, stats: Tuple[str, str]) -> GitStatus:
+def parse(root: str, stats: Iterable[Tuple[str, str]]) -> GitStatus:
     return GitStatus()
 
 
