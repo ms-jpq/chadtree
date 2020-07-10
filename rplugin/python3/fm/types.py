@@ -27,15 +27,8 @@ class Node:
 class Settings:
     width: int
     keymap: Dict[str, Sequence[str]]
-    ignored: Set[str]
-    icons: Dict[str, str]
-
-
-@dataclass(frozen=True)
-class GitStatus:
-    ignored: Set[str] = field(default_factory=set)
-    modified: Set[str] = field(default_factory=set)
-    staged: Set[str] = field(default_factory=set)
+    name_ignore: Sequence[str]
+    path_ignore: Sequence[str]
 
 
 @dataclass(frozen=True)
@@ -43,5 +36,12 @@ class State:
     index: Index
     selection: Selection
     root: Node
-    rendered: Sequence[str]
     path_lookup: Sequence[str]
+    rendered: Sequence[str]
+
+
+@dataclass(frozen=True)
+class GitStatus:
+    ignored: Set[str] = field(default_factory=set)
+    modified: Set[str] = field(default_factory=set)
+    staged: Set[str] = field(default_factory=set)

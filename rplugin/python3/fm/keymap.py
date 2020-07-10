@@ -9,4 +9,5 @@ def keymap(nvim: Nvim, buffer: Buffer, settings: Settings) -> None:
 
     for function, mappings in settings.keymap.items():
         for mapping in mappings:
-            nvim.api.buf_set_keymap(buffer, "n", mapping, f"{function}()", options)
+            for mode in ("n", "v"):
+                nvim.api.buf_set_keymap(buffer, mode, mapping, f"{function}()", options)

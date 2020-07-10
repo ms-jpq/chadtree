@@ -3,6 +3,7 @@ from __future__ import annotations
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
+from typing import Set
 
 from .types import Index, Mode, Node
 
@@ -35,25 +36,14 @@ def new(root: str, *, index: Index) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
-def add(root: Node, *, index: Index) -> Node:
-    if root.path in index:
+def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
+    if root.path in paths:
         return new(root.path, index=index)
     else:
-        children = {k: add(v, index=index) for k, v in (root.children or {}).items()}
-        return Node(
-            path=root.path,
-            mode=root.mode,
-            name=root.name,
-            children=children,
-            ext=root.ext,
-        )
-
-
-def remove(root: Node, *, index: Index) -> Node:
-    if root.path in index:
-        return Node(path=root.path, mode=root.mode, name=root.name, ext=root.ext,)
-    else:
-        children = {k: remove(v, index=index) for k, v in (root.children or {}).items()}
+        children = {
+            k: update(v, index=index, paths=paths)
+            for k, v in (root.children or {}).items()
+        }
         return Node(
             path=root.path,
             mode=root.mode,

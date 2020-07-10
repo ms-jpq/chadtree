@@ -6,10 +6,10 @@ from pynvim import Nvim, autocmd, command, function, plugin
 
 from .consts import fm_filetype
 from .keymap import keymap
-from .nvim import Buffer
+from .nvim import Buffer, Window
 from .settings import initial as initial_settings
 from .state import initial as initial_state
-from .wm import is_fm_buffer, toggle_shown
+from .wm import is_fm_buffer, toggle_shown, update_buffers
 
 
 @plugin
@@ -38,9 +38,19 @@ class Main:
         write(message)
         write("\n")
 
+    def index(self) -> None:
+        window: Window = self.nvim.current.window
+        row, _ = self.nvim.api.win_get_cursor(window)
+        row = row - 1
+
+    def redraw(self) -> None:
+        lines = self.state.rendered
+        update_buffers(self.nvim, lines=lines)
+
     @command("FMOpen")
     def fm_open(self, *args) -> None:
         toggle_shown(self.nvim, settings=self.settings)
+        self.redraw()
 
     @function("FMsettings")
     def settings(self, settings: Any) -> None:
@@ -62,8 +72,8 @@ class Main:
         File -> preview
         """
 
-    @function("FMredraw")
-    def redraw(self) -> None:
+    @function("FMrefresh")
+    def refresh(self) -> None:
         """
         Redraw buffer
         """
@@ -73,6 +83,7 @@ class Main:
         """
         Toggle hidden
         """
+        self.redraw()
 
     @function("FMnew")
     def new(self) -> None:

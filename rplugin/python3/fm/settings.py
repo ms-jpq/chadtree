@@ -5,8 +5,10 @@ from .types import Settings
 
 def initial() -> Settings:
     config = load_json(config_json)
-    ignored = set(config["ignored"])
-    keymap = config["keymap"]
-    icons = config["icons"]
-    settings = Settings(width=40, keymap=keymap, ignored=ignored, icons=icons)
+    settings = Settings(
+        width=config["width"],
+        keymap=config["keymap"],
+        name_ignore=config["name_ignore"],
+        path_ignore=config["path_ignore"],
+    )
     return settings

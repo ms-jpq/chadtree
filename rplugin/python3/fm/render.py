@@ -25,11 +25,12 @@ def comp(node: Node) -> Iterable[Union[int, str]]:
 
 
 def ignore(settings: Settings, git: GitStatus) -> Ignore:
-    gitignore = git.ignored
-
     def drop(node: Node) -> bool:
-        path = node.path
-        ignore = path in gitignore
+        ignore = (
+            node.path in git.ignored
+            or any(fnmatch(node.name, pattern) for pattern in settings.name_ignore)
+            or any(fnmatch(node.path, pattern) for pattern in settings.path_ignore)
+        )
         return ignore
 
     return drop
