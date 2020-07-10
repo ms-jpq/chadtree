@@ -10,5 +10,5 @@ def initial(settings: Settings) -> State:
     node = new(cwd, index={cwd})
     path_lookup, rendered = render(node, settings=settings, git=GitStatus())
 
-    state = State(index=set(), selection=set(), root=node, rendered=(), path_lookup=(),)
+    state = State(index=set(), selection=set(), root=node, rendered=(), path_lookup=())
     return state

@@ -9,7 +9,7 @@ from .keymap import keymap
 from .nvim import Buffer
 from .settings import initial as initial_settings
 from .state import initial as initial_state
-from .wm import toggle_shown
+from .wm import is_fm_buffer, toggle_shown
 
 
 @plugin
@@ -142,8 +142,7 @@ class Main:
         Update git
         """
         buffer: Buffer = self.nvim.buffers[int(buf)]
-        ft = self.nvim.api.buf_get_option(buffer, "filetype")
-        if ft == fm_filetype:
+        if is_fm_buffer(self.nvim, buffer=buffer):
             pass
 
     @autocmd("FocusGained")

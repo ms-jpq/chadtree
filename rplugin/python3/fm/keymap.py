@@ -4,9 +4,9 @@ from .nvim import Buffer
 from .types import Settings
 
 
-def remap(lhs: str, rhs: str) -> None:
-    pass
-
-
 def keymap(nvim: Nvim, buffer: Buffer, settings: Settings) -> None:
-    pass
+    options = {"noremap": True, "silent": True, "expr": True}
+
+    for function, mappings in settings.keymap.items():
+        for mapping in mappings:
+            nvim.api.buf_set_keymap(buffer, "n", mapping, f"{function}()", options)

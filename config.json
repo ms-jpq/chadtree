@@ -1,5 +1,18 @@
 {
   "icons": {},
   "ignored": ["__pycache__", ".DS_Store"],
-  "keymap": {}
+  "keymap": {
+    "FMclear": ["w"],
+    "FMcopyname": ["yy"],
+    "FMcut": ["x"],
+    "FMdelete": ["d"],
+    "FMhidden": ["."],
+    "FMnew": ["a"],
+    "FMpaste": ["p"],
+    "FMprimary": ["<enter>"],
+    "FMredraw": ["<c-r>"],
+    "FMrename": ["r"],
+    "FMsecondary": ["<tab>", "<2-leftmouse>"],
+    "FMselect": ["<enter>"]
+  }
 }

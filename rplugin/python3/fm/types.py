@@ -26,7 +26,7 @@ class Node:
 @dataclass(frozen=True)
 class Settings:
     width: int
-    keymap: Dict[str, str]
+    keymap: Dict[str, Sequence[str]]
     ignored: Set[str]
     icons: Dict[str, str]
 
