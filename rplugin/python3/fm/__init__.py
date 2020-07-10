@@ -6,8 +6,8 @@ from pynvim import Nvim, autocmd, command, function, plugin
 
 from .consts import fm_filetype
 from .keymap import keymap
-from .state import initial as initial_state
 from .settings import initial as initial_settings
+from .state import initial as initial_state
 from .wm import toggle_shown
 
 
@@ -139,4 +139,4 @@ class Main:
         """
         Setup keybind
         """
-        keymap(self.settings)
+        keymap(self.nvim, settings=self.settings)

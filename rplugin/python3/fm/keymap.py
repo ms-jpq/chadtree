@@ -1,5 +1,11 @@
+from pynvim import Nvim
+
 from .types import Settings
 
 
-def keymap(settings: Settings) -> None:
+def remap(lhs: str, rhs: str) -> None:
+    pass
+
+
+def keymap(nvim: Nvim, settings: Settings) -> None:
     pass
