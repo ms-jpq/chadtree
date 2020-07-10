@@ -6,6 +6,7 @@ from pynvim import Nvim, autocmd, command, function, plugin
 
 from .consts import fm_filetype
 from .keymap import keymap
+from .nvim import Buffer
 from .settings import initial as initial_settings
 from .state import initial as initial_state
 from .wm import toggle_shown
@@ -32,7 +33,7 @@ class Main:
 
         self.chan.submit(stage)
 
-    def _print(self, message: str, error: bool = False) -> None:
+    def print(self, message: str, error: bool = False) -> None:
         write = self.nvim.err_write if error else self.nvim.out_write
         write(message)
         write("\n")
@@ -46,7 +47,6 @@ class Main:
         """
         Settings update
         """
-        pass
 
     @function("FMprimary")
     def primary(self) -> None:
@@ -54,7 +54,6 @@ class Main:
         Folders -> toggle
         File -> open
         """
-        pass
 
     @function("FMsecondary")
     def secondary(self) -> None:
@@ -62,81 +61,93 @@ class Main:
         Folders -> toggle
         File -> preview
         """
-        pass
+
+    @function("FMredraw")
+    def redraw(self) -> None:
+        """
+        Redraw buffer
+        """
 
     @function("FMhidden")
     def hidden(self) -> None:
         """
         Toggle hidden
         """
-        pass
 
     @function("FMnew")
     def new(self) -> None:
         """
         new file / folder
         """
-        pass
 
     @function("FMrename")
     def rename(self) -> None:
         """
         rename file / folder
         """
-        pass
 
     @function("FMselect")
     def select(self) -> None:
         """
         Folder / File -> select
         """
-        pass
 
     @function("FMclear")
     def clear(self) -> None:
         """
         Clear selected
         """
-        pass
 
     @function("FMdelete")
     def delete(self) -> None:
         """
         Delete selected
         """
-        pass
 
     @function("FMcut")
     def cut(self) -> None:
         """
         Cut selected
         """
-        pass
 
     @function("FMcopy")
     def copy(self) -> None:
         """
         Copy selected
         """
-        pass
 
     @function("FMpaste")
     def paste(self) -> None:
         """
         Paste selected
         """
-        pass
 
     @function("FMcopyname")
     def copyname(self) -> None:
         """
         Copy dirname / filename
         """
-        pass
 
-    @autocmd("BufEnter", pattern=fm_filetype)
-    def on_bufenter(self) -> None:
+    @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
+    def on_filetype(self, buf: str) -> None:
         """
         Setup keybind
         """
-        keymap(self.nvim, settings=self.settings)
+        buffer: Buffer = self.nvim.buffers[int(buf)]
+        keymap(self.nvim, buffer=buffer, settings=self.settings)
+
+    @autocmd("BufEnter", eval="expand('<abuf>')")
+    def on_bufenter(self, buf: str) -> None:
+        """
+        Update git
+        """
+        buffer: Buffer = self.nvim.buffers[int(buf)]
+        ft = self.nvim.api.buf_get_option(buffer, "filetype")
+        if ft == fm_filetype:
+            pass
+
+    @autocmd("FocusGained")
+    def on_focus(self) -> None:
+        """
+        Update git
+        """

@@ -1,12 +1,9 @@
-from typing import Any, Iterable, Iterator, Sequence, Tuple
+from typing import Iterable, Iterator, Sequence, Tuple
 
 from pynvim import Nvim
 
 from .consts import fm_filetype
-
-Tab = Any
-Window = Any
-Buffer = Any
+from .nvim import Buffer, Window
 
 
 def sorted_windows(nvim: Nvim, window: Iterable[Window]) -> Sequence[Window]:
