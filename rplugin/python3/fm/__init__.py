@@ -40,7 +40,7 @@ class Main:
 
     @command("FMOpen")
     def fm_open(self, *args) -> None:
-        toggle_shown(self.nvim)
+        toggle_shown(self.nvim, settings=self.settings)
 
     @function("FMsettings")
     def settings(self, settings: Any) -> None:

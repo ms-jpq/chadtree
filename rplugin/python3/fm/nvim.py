@@ -1,5 +1,5 @@
 from typing import Any
 
-Tab = Any
+Tabpage = Any
 Window = Any
 Buffer = Any
