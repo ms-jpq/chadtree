@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
-from typing import Callable, Iterable, Iterator, Optional, Sequence, Set, Tuple, Union
+from typing import Callable, Iterable, Iterator, Sequence, Tuple, Union
 
 from .types import GitStatus, Mode, Node, Settings
 

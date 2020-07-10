@@ -1,17 +1,21 @@
 from asyncio import gather
-from typing import Set
 from shutil import which
+from typing import Set
 
 from .da import call
 from .types import GitStatus
 
 
 async def ignored() -> Set[str]:
-    ret = await call("git", "status", "--ignored", "--short", "-z")
+    ret = await call("git", "status", "--ignored", "--porcelain", "-z")
     if ret.code != 0:
         return set()
     else:
-        files = (line.split(" ", 1)[1] for line in ret.out.split("\0"))
+        files = (
+            file
+            for prefix, file in (line.split(" ", 1) for line in ret.out.split("\0"))
+            if prefix == "!!"
+        )
         return set(files)
 
 
