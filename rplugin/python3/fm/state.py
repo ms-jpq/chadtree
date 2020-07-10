@@ -1,8 +1,6 @@
 from os import getcwd
 
 from .cartographer import new
-from .consts import ignore_json
-from .da import load_json
 from .types import GitStatus, State
 
 
@@ -15,7 +13,6 @@ def initial() -> State:
         selection=set(),
         root=node,
         git=GitStatus(),
-        ignore_filter=load_json(ignore_json),
         rendered=(),
         path_lookup=(),
     )

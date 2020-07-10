@@ -1,12 +1,12 @@
 from asyncio import get_event_loop, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
-from typing import Awaitable
+from typing import Any, Awaitable
 
 from pynvim import Nvim, autocmd, command, function, plugin
 
 from .consts import fm_filetype
 from .state import initial
-from .wm import find
+from .wm import toggle_shown
 
 
 @plugin
@@ -30,8 +30,14 @@ class Main:
 
     @command("FMOpen")
     def fm_open(self, *args) -> None:
-        for i in find(self.nvim):
-            pass
+        toggle_shown(self.nvim)
+
+    @function("FMsettings")
+    def settings(self, settings: Any) -> None:
+        """
+        Settings update
+        """
+        pass
 
     @function("FMprimary")
     def primary(self) -> None:

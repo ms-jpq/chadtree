@@ -25,3 +25,11 @@ def find(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
         ft = nvim.api.buf_get_option(buffer, "filetype")
         if ft == fm_filetype:
             yield window, buffer
+
+
+def new() -> None:
+    pass
+
+
+def toggle_shown(nvim: Nvim) -> None:
+    pass

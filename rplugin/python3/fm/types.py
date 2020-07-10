@@ -25,6 +25,7 @@ class Node:
 
 @dataclass(frozen=True)
 class Settings:
+    width: int
     keymap: Dict[str, str]
     ignored: Sequence[str]
 
@@ -41,7 +42,6 @@ class State:
     index: Index
     selection: Selection
     root: Node
-    ignore_filter: Set[str]
     git: GitStatus
     rendered: Sequence[str]
     path_lookup: Sequence[str]
