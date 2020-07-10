@@ -1,25 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from enum import IntEnum, auto
+from fnmatch import fnmatch
 from locale import strxfrm
-from typing import Callable, Iterable, Iterator, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Iterable, Iterator, Optional, Sequence, Set, Tuple, Union
 
-from .types import Mode, Node
+from .types import GitStatus, Mode, Node, Settings
+
+Ignore = Callable[[Node], bool]
 
 
 class CompVals(IntEnum):
     FOLDER = auto()
     FILE = auto()
-
-
-@dataclass(frozen=True)
-class DisplayNode:
-    path: str
-    mode: Mode
-    name: str
-    children: Iterable[DisplayNode] = field(default_factory=tuple)
-    hidden: bool = False
 
 
 def comp(node: Node) -> Iterable[Union[int, str]]:
@@ -31,38 +24,40 @@ def comp(node: Node) -> Iterable[Union[int, str]]:
     )
 
 
-def dparse(node: Node, ignore: Callable[[str], bool]) -> DisplayNode:
-    descendants: List[Node] = sorted((node.children or {}).values(), key=comp)
-    children = tuple(dparse(d, ignore) for d in descendants)
-    hidden = ignore(node.path)
-    return DisplayNode(
-        path=node.path, mode=node.mode, name=node.name, children=children, hidden=hidden
-    )
+def ignore(settings: Settings, git: GitStatus) -> Ignore:
+    gitignore = git.ignored
+
+    def drop(node: Node) -> bool:
+        path = node.path
+        ignore = path in gitignore
+        return ignore
+
+    return drop
 
 
-def show(node: DisplayNode, depth: int) -> Optional[str]:
-    if node.hidden:
-        return None
-    else:
-        spaces = depth * 2 * " "
-        name = node.name.replace("\n", r"\n")
-        if Mode.FOLDER in node.mode:
-            name = name + "/"
-        if Mode.LINK in node.mode:
-            name = name + " ->"
-        return spaces + name
+def show(node: Node, depth: int) -> str:
+    spaces = depth * 2 * " "
+    name = node.name.replace("\n", r"\n")
+    if Mode.FOLDER in node.mode:
+        name = name + "/"
+    if Mode.LINK in node.mode:
+        name = name + " ->"
+    return spaces + name
 
 
 def render(
-    node: Node, ignore: Callable[[str], bool]
+    node: Node, settings: Settings, git: GitStatus
 ) -> Tuple[Sequence[str], Sequence[str]]:
-    def render(node: DisplayNode, *, depth: int) -> Iterator[Tuple[str, str]]:
-        rend = show(node, depth)
-        if rend:
-            yield node.path, rend
-        for child in node.children:
+    drop = ignore(settings, git)
+
+    def render(node: Node, *, depth: int) -> Iterator[Tuple[str, str]]:
+        rend = show(node, depth=depth)
+        children = (
+            child for child in (node.children or {}).values() if not drop(child)
+        )
+        yield node.path, rend
+        for child in sorted(children, key=comp):
             yield from render(child, depth=depth + 1)
 
-    dnode = dparse(node, ignore=ignore)
-    path_lookup, rendered = zip(*render(dnode, depth=0))
+    path_lookup, rendered = zip(*render(node, depth=0))
     return path_lookup, rendered

@@ -5,7 +5,9 @@ from typing import Any, Awaitable
 from pynvim import Nvim, autocmd, command, function, plugin
 
 from .consts import fm_filetype
-from .state import initial
+from .keymap import keymap
+from .state import initial as initial_state
+from .settings import initial as initial_settings
 from .wm import toggle_shown
 
 
@@ -14,7 +16,9 @@ class Main:
     def __init__(self, nvim: Nvim):
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.nvim = nvim
-        self.state = initial()
+        settings = initial_settings()
+        self.state = initial_state(settings)
+        self.settings = settings
 
     def _submit(self, coro: Awaitable[None]) -> None:
         """
@@ -27,6 +31,11 @@ class Main:
             fut.result()
 
         self.chan.submit(stage)
+
+    def _print(self, message: str, error: bool = False) -> None:
+        write = self.nvim.err_write if error else self.nvim.out_write
+        write(message)
+        write("\n")
 
     @command("FMOpen")
     def fm_open(self, *args) -> None:
@@ -52,6 +61,13 @@ class Main:
         """
         Folders -> toggle
         File -> preview
+        """
+        pass
+
+    @function("FMhidden")
+    def hidden(self) -> None:
+        """
+        Toggle hidden
         """
         pass
 
@@ -120,7 +136,7 @@ class Main:
 
     @autocmd("BufEnter", pattern=fm_filetype)
     def on_bufenter(self) -> None:
-        async def commit() -> None:
-            self.nvim.out_write(str(self.state) + "\n")
-
-        self._submit(commit())
+        """
+        Setup keybind
+        """
+        keymap(self.settings)
