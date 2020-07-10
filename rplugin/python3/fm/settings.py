@@ -10,5 +10,6 @@ def initial() -> Settings:
         keymap=config["keymap"],
         name_ignore=config["name_ignore"],
         path_ignore=config["path_ignore"],
+        use_icons=config["use_icons"],
     )
     return settings

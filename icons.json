@@ -1,4 +1,10 @@
 {
-  "ascii": {},
-  "emoji": {}
+  "filetype": {},
+  "folder": "",
+  "git": {
+    "ignored": "",
+    "modified": "",
+    "staged": ""
+  },
+  "link": ""
 }

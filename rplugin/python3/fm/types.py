@@ -29,6 +29,7 @@ class Settings:
     keymap: Dict[str, Sequence[str]]
     name_ignore: Sequence[str]
     path_ignore: Sequence[str]
+    use_icons: bool
 
 
 @dataclass(frozen=True)
@@ -43,5 +44,16 @@ class State:
 @dataclass(frozen=True)
 class GitStatus:
     ignored: Set[str] = field(default_factory=set)
+    added: Set[str] = field(default_factory=set)
     modified: Set[str] = field(default_factory=set)
     staged: Set[str] = field(default_factory=set)
+
+
+@dataclass(frozen=True)
+class IconSet:
+    folder: str
+    link: str
+    git_ignored: str
+    git_modified: str
+    git_staged: str
+    filetype: Dict[str, str]

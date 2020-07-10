@@ -1,4 +1,5 @@
 {
+  "use_icons": true,
   "keymap": {
     "FMclear": ["C"],
     "FMcopyname": ["yy"],
