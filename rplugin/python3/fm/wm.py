@@ -1,4 +1,4 @@
-from typing import Iterable, Iterator, Sequence, Tuple
+from typing import Iterable, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
 
@@ -20,7 +20,7 @@ def sorted_windows(nvim: Nvim, window: Iterable[Window]) -> Sequence[Window]:
     return sorted(window, key=key_by)
 
 
-def find_windows(nvim: Nvim) -> Iterator[Window]:
+def find_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
     tab: Tabpage = nvim.current.tabpage
     windows: Sequence[Window] = nvim.api.tabpage_list_wins(tab)
 
@@ -48,8 +48,19 @@ def new_window(nvim: Nvim, buffer: Buffer, settings: Settings) -> Window:
     nvim.command("vnew")
     window: Window = nvim.windows[0]
     nvim.api.win_set_buf(window, buffer)
+    nvim.api.win_set_width(window, settings.width)
     return window
 
 
 def toggle_shown(nvim: Nvim, settings: Settings) -> None:
-    pass
+    window: Optional[Window] = next(find_windows_in_tab(nvim), None)
+    if window:
+        nvim.api.win_close(window, True)
+    else:
+        buffer: Buffer = next(find_buffers(nvim), None) or new_buf(nvim)
+        window = new_window(nvim, buffer=buffer, settings=settings)
+
+
+def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
+    for buffer in find_buffers(nvim):
+        nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
