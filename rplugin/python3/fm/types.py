@@ -57,6 +57,14 @@ class Nub:
 
 
 @dataclass(frozen=True)
+class GitStatus:
+    ignored: Set[str] = field(default_factory=set)
+    added: Set[str] = field(default_factory=set)
+    modified: Set[str] = field(default_factory=set)
+    staged: Set[str] = field(default_factory=set)
+
+
+@dataclass(frozen=True)
 class State:
     index: Index
     selection: Selection
@@ -64,11 +72,4 @@ class State:
     root: Node
     path_lookup: Sequence[str]
     rendered: Sequence[str]
-
-
-@dataclass(frozen=True)
-class GitStatus:
-    ignored: Set[str] = field(default_factory=set)
-    added: Set[str] = field(default_factory=set)
-    modified: Set[str] = field(default_factory=set)
-    staged: Set[str] = field(default_factory=set)
+    git: GitStatus

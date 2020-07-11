@@ -4,15 +4,29 @@ from typing import Awaitable, Optional
 
 from pynvim import Nvim, autocmd, command, function, plugin
 
+from .commands import (
+    a_on_bufenter,
+    a_on_filetype,
+    a_on_focus,
+    c_clear,
+    c_copy,
+    c_copy_name,
+    c_cut,
+    c_delete,
+    c_hidden,
+    c_new,
+    c_open,
+    c_paste,
+    c_primary,
+    c_refresh,
+    c_rename,
+    c_secondary,
+    c_select,
+)
 from .consts import fm_filetype
-from .git import status
-from .keymap import keymap
-from .nvim import Buffer, Window, print
 from .settings import initial as initial_settings
-from .state import index
 from .state import initial as initial_state
-from .types import GitStatus
-from .wm import is_fm_buffer, toggle_shown, update_buffers
+from .types import State
 
 
 @plugin
@@ -26,9 +40,8 @@ class Main:
         self.nvim = nvim
         self.state = initial_state(settings)
         self.settings = settings
-        self.git_status = GitStatus()
 
-    def _submit(self, coro: Awaitable[None]) -> None:
+    def _submit(self, coro: Awaitable[Optional[State]]) -> None:
         """
         Work around for coroutine deadlocks
         """
@@ -36,24 +49,20 @@ class Main:
 
         def stage() -> None:
             fut = run_coroutine_threadsafe(coro, loop)
-            fut.result()
+            state = fut.result()
+            if state:
+                self.state = state
 
         self.chan.submit(stage)
 
-    def index(self) -> Optional[str]:
-        window: Window = self.nvim.current.window
-        row, _ = self.nvim.api.win_get_cursor(window)
-        row = row - 1
-        return index(self.state, row)
-
-    def redraw(self) -> None:
-        lines = self.state.rendered
-        update_buffers(self.nvim, lines=lines)
-
     @command("FMOpen")
     def fm_open(self, *_) -> None:
-        toggle_shown(self.nvim, settings=self.settings)
-        self.redraw()
+        """
+        Folders -> toggle
+        File -> open
+        """
+
+        self._submit(c_open(self.nvim, state=self.state))
 
     @function("FMprimary")
     def primary(self, *_) -> None:
@@ -62,9 +71,7 @@ class Main:
         File -> open
         """
 
-        path = self.index()
-        if path:
-            self.redraw()
+        self._submit(c_primary(self.nvim, state=self.state))
 
     @function("FMsecondary")
     def secondary(self, *_) -> None:
@@ -73,9 +80,7 @@ class Main:
         File -> preview
         """
 
-        path = self.index()
-        if path:
-            self.redraw()
+        self._submit(c_secondary(self.nvim, state=self.state))
 
     @function("FMrefresh")
     def refresh(self, *_) -> None:
@@ -83,11 +88,7 @@ class Main:
         Redraw buffers
         """
 
-        async def cont() -> None:
-            self.git_status = await status()
-            self.redraw()
-
-        self._submit(cont())
+        self._submit(c_refresh(self.nvim, state=self.state))
 
     @function("FMhidden")
     def hidden(self, *_) -> None:
@@ -95,7 +96,15 @@ class Main:
         Toggle hidden
         """
 
-        self.redraw()
+        self._submit(c_hidden(self.nvim, state=self.state))
+
+    @function("FMcopyname")
+    def copy_name(self, *_) -> None:
+        """
+        Copy dirname / filename
+        """
+
+        self._submit(c_copy_name(self.nvim, state=self.state))
 
     @function("FMnew")
     def new(self, *_) -> None:
@@ -103,9 +112,7 @@ class Main:
         new file / folder
         """
 
-        path = self.index()
-        if path:
-            self.redraw()
+        self._submit(c_new(self.nvim, state=self.state))
 
     @function("FMrename")
     def rename(self, *_) -> None:
@@ -113,9 +120,7 @@ class Main:
         rename file / folder
         """
 
-        path = self.index()
-        if path:
-            self.redraw()
+        self._submit(c_rename(self.nvim, state=self.state))
 
     @function("FMselect")
     def select(self, *_) -> None:
@@ -123,9 +128,7 @@ class Main:
         Folder / File -> select
         """
 
-        path = self.index()
-        if path:
-            self.redraw()
+        self._submit(c_select(self.nvim, state=self.state))
 
     @function("FMclear")
     def clear(self, *_) -> None:
@@ -133,7 +136,7 @@ class Main:
         Clear selected
         """
 
-        self.redraw()
+        self._submit(c_clear(self.nvim, state=self.state))
 
     @function("FMdelete")
     def delete(self, *_) -> None:
@@ -141,7 +144,7 @@ class Main:
         Delete selected
         """
 
-        self.redraw()
+        self._submit(c_delete(self.nvim, state=self.state))
 
     @function("FMcut")
     def cut(self, *_) -> None:
@@ -149,7 +152,7 @@ class Main:
         Cut selected
         """
 
-        self.redraw()
+        self._submit(c_cut(self.nvim, state=self.state))
 
     @function("FMcopy")
     def copy(self, *_) -> None:
@@ -157,9 +160,7 @@ class Main:
         Copy selected
         """
 
-        path = self.index()
-        if path:
-            self.redraw()
+        self._submit(c_copy(self.nvim, state=self.state))
 
     @function("FMpaste")
     def paste(self, *_) -> None:
@@ -167,21 +168,7 @@ class Main:
         Paste selected
         """
 
-        path = self.index()
-        if path:
-            self.redraw()
-
-    @function("FMcopyname")
-    def copyname(self, *_) -> None:
-        """
-        Copy dirname / filename
-        """
-
-        path = self.index()
-        if path:
-            self.nvim.funcs.setreg("+", path)
-            self.nvim.funcs.setreg("*", path)
-            print(self.nvim, f"📎 {path}")
+        self._submit(c_paste(self.nvim, state=self.state))
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
@@ -189,8 +176,11 @@ class Main:
         Setup keybind
         """
 
-        buffer: Buffer = self.nvim.buffers[int(buf)]
-        keymap(self.nvim, buffer=buffer, settings=self.settings)
+        self._submit(
+            a_on_filetype(
+                self.nvim, state=self.state, settings=self.settings, buf=int(buf)
+            )
+        )
 
     @autocmd("BufEnter", eval="expand('<abuf>')")
     def on_bufenter(self, buf: str) -> None:
@@ -198,12 +188,7 @@ class Main:
         Update git
         """
 
-        async def cont() -> None:
-            self.git_status = await status()
-
-        buffer: Buffer = self.nvim.buffers[int(buf)]
-        if is_fm_buffer(self.nvim, buffer=buffer):
-            self._submit(cont())
+        self._submit(a_on_bufenter(self.nvim, state=self.state, buf=int(buf)))
 
     @autocmd("FocusGained")
     def on_focus(self) -> None:
@@ -211,8 +196,4 @@ class Main:
         Update git
         """
 
-        async def cont() -> None:
-            self.git_status = await status()
-            self.redraw()
-
-        self._submit(cont())
+        self._submit(a_on_focus(self.nvim, state=self.state))
