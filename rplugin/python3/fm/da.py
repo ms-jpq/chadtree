@@ -2,7 +2,7 @@ from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from json import load
-from typing import Any, AsyncIterator, Callable, Optional, TypeVar, cast
+from typing import Any, AsyncIterator, Callable, Optional, Set, TypeVar, cast
 
 T = TypeVar("T")
 
@@ -23,6 +23,13 @@ def constantly(val: T) -> Callable[[Any], T]:
         return val
 
     return ret
+
+
+def toggled(s: Set[T], i: T) -> Set[T]:
+    if i in s:
+        return s - {i}
+    else:
+        return s | {i}
 
 
 @dataclass(frozen=True)

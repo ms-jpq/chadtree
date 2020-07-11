@@ -23,3 +23,16 @@ def find_buffer(nvim: Nvim, bufnr: int) -> Optional[Buffer]:
         if buffer.number == bufnr:
             return buffer
     return None
+
+
+class HoldPosition:
+    def __init__(self, nvim: Nvim, window: Optional[Window] = None):
+        self.nvim = nvim
+        self.window = window or nvim.api.get_current_win()
+
+    def __enter__(self) -> None:
+        pos = self.nvim.api.win_get_cursor(self.window)
+        self.pos = pos
+
+    def __exit__(self, *_) -> None:
+        self.nvim.api.win_set_cursor(self.window, self.pos)

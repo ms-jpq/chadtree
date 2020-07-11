@@ -2,11 +2,12 @@ from os.path import dirname, join
 from typing import Optional
 
 from .cartographer import update
+from .da import toggled
 
 # from .git import status
 from .keymap import keymap
-from .nvim import Nvim, Window, find_buffer
-from .state import index, is_dir, forward
+from .nvim import HoldPosition, Nvim, Window, find_buffer
+from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
 from .wm import find_fm_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
 
@@ -52,15 +53,16 @@ def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
 def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
     node = _index(nvim, state)
     if node:
-        if Mode.FOLDER in node.mode:
-            paths = {node.path}
-            index = state.index | paths
-            root = update(state.root, index=index, paths=paths)
-            new_state = forward(state, settings=settings, root=root, index=index)
-            _redraw(nvim, state=new_state)
-            return new_state
-        else:
-            return state
+        with HoldPosition(nvim):
+            if Mode.FOLDER in node.mode:
+                path = node.path
+                index = toggled(state.index, path)
+                root = update(state.root, index=index, paths={path})
+                new_state = forward(state, settings=settings, root=root, index=index)
+                _redraw(nvim, state=new_state)
+                return new_state
+            else:
+                return state
     else:
         return state
 
