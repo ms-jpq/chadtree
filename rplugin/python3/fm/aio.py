@@ -10,7 +10,7 @@ T = TypeVar("T")
 
 
 def schedule(coro: Awaitable[T]) -> T:
-    fut = Future()
+    fut: Future[T] = Future()
 
     def stage() -> None:
         fu = run_coroutine_threadsafe(coro, loop)
@@ -22,4 +22,4 @@ def schedule(coro: Awaitable[T]) -> T:
             fut.set_result(ret)
 
     chan.submit(stage)
-    return fut
+    return fut.result()

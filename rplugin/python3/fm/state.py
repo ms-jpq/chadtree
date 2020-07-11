@@ -25,7 +25,7 @@ def initial(settings: Settings) -> State:
 
 
 def index(state: State, row: int) -> Optional[Node]:
-    if (1 < row) and (row < len(state.lookup)):
+    if (row > 0) and (row < len(state.lookup)):
         return state.lookup[row]
     else:
         return None

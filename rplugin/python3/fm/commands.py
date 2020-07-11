@@ -2,11 +2,13 @@ from dataclasses import asdict
 from os.path import dirname, join
 from typing import Optional
 
+from .cartographer import update
+
 # from .git import status
 from .keymap import keymap
-from .nvim import Nvim, Window, find_buffer
+from .nvim import Nvim, Window, find_buffer, print
 from .state import index, is_dir
-from .types import Node, Settings, State
+from .types import Mode, Node, Settings, State
 from .wm import find_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
 
 
@@ -30,7 +32,7 @@ def a_on_filetype(nvim: Nvim, state: State, settings: Settings, buf: int) -> Non
 def a_on_bufenter(nvim: Nvim, state: State, buf: int) -> State:
     buffer = find_buffer(nvim, buf)
     if is_fm_buffer(nvim, buffer=buffer):
-        return State(**{**asdict(state), **dict()})
+        return state
     else:
         return state
 
@@ -38,7 +40,9 @@ def a_on_bufenter(nvim: Nvim, state: State, buf: int) -> State:
 def a_on_focus(nvim: Nvim, state: State) -> State:
     window = next(find_windows_in_tab(nvim), None)
     if window:
-        pass
+        return state
+    else:
+        return state
 
 
 def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
@@ -47,19 +51,32 @@ def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 def c_primary(nvim: Nvim, state: State) -> State:
-    pass
+    node = _index(nvim, state)
+    if node:
+        print(nvim, node)
+        if Mode.FOLDER in node.mode:
+            paths = {node.path}
+            root = update(state.root, index=state.index, paths=paths)
+            index = state.index | paths
+            new_state = State(**{**asdict(state), **dict(root=root, index=index)})
+            _redraw(nvim, state=new_state)
+            return new_state
+        else:
+            return state
+    else:
+        return state
 
 
 def c_secondary(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_refresh(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_hidden(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_copy_name(nvim: Nvim, state: State) -> None:
@@ -83,11 +100,11 @@ def c_new(nvim: Nvim, state: State) -> State:
 
 
 def c_rename(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_select(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_clear(nvim: Nvim, state: State) -> State:
@@ -95,16 +112,16 @@ def c_clear(nvim: Nvim, state: State) -> State:
 
 
 def c_delete(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_cut(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_copy(nvim: Nvim, state: State) -> State:
-    pass
+    return state
 
 
 def c_paste(nvim: Nvim, state: State) -> State:
-    pass
+    return state

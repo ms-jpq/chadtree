@@ -53,7 +53,7 @@ class Main:
         File -> open
         """
 
-        c_primary(self.nvim, state=self.state)
+        self.state = c_primary(self.nvim, state=self.state)
 
     @function("FMsecondary")
     def secondary(self, *_) -> None:
@@ -62,7 +62,7 @@ class Main:
         File -> preview
         """
 
-        c_secondary(self.nvim, state=self.state)
+        self.state = c_secondary(self.nvim, state=self.state)
 
     @function("FMrefresh")
     def refresh(self, *_) -> None:
@@ -70,7 +70,7 @@ class Main:
         Redraw buffers
         """
 
-        c_refresh(self.nvim, state=self.state)
+        self.state = c_refresh(self.nvim, state=self.state)
 
     @function("FMhidden")
     def hidden(self, *_) -> None:
@@ -78,7 +78,7 @@ class Main:
         Toggle hidden
         """
 
-        c_hidden(self.nvim, state=self.state)
+        self.state = c_hidden(self.nvim, state=self.state)
 
     @function("FMcopyname")
     def copy_name(self, *_) -> None:
@@ -94,7 +94,7 @@ class Main:
         new file / folder
         """
 
-        c_new(self.nvim, state=self.state)
+        self.state = c_new(self.nvim, state=self.state)
 
     @function("FMrename")
     def rename(self, *_) -> None:
@@ -102,7 +102,7 @@ class Main:
         rename file / folder
         """
 
-        c_rename(self.nvim, state=self.state)
+        self.state = c_rename(self.nvim, state=self.state)
 
     @function("FMselect")
     def select(self, *_) -> None:
@@ -110,7 +110,7 @@ class Main:
         Folder / File -> select
         """
 
-        c_select(self.nvim, state=self.state)
+        self.state = c_select(self.nvim, state=self.state)
 
     @function("FMclear")
     def clear(self, *_) -> None:
@@ -118,7 +118,7 @@ class Main:
         Clear selected
         """
 
-        c_clear(self.nvim, state=self.state)
+        self.state = c_clear(self.nvim, state=self.state)
 
     @function("FMdelete")
     def delete(self, *_) -> None:
@@ -126,7 +126,7 @@ class Main:
         Delete selected
         """
 
-        c_delete(self.nvim, state=self.state)
+        self.state = c_delete(self.nvim, state=self.state)
 
     @function("FMcut")
     def cut(self, *_) -> None:
@@ -134,7 +134,7 @@ class Main:
         Cut selected
         """
 
-        c_cut(self.nvim, state=self.state)
+        self.state = c_cut(self.nvim, state=self.state)
 
     @function("FMcopy")
     def copy(self, *_) -> None:
@@ -142,7 +142,7 @@ class Main:
         Copy selected
         """
 
-        c_copy(self.nvim, state=self.state)
+        self.state = c_copy(self.nvim, state=self.state)
 
     @function("FMpaste")
     def paste(self, *_) -> None:
@@ -150,7 +150,7 @@ class Main:
         Paste selected
         """
 
-        c_paste(self.nvim, state=self.state)
+        self.state = c_paste(self.nvim, state=self.state)
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
@@ -166,4 +166,4 @@ class Main:
         Update git
         """
 
-        a_on_bufenter(self.nvim, state=self.state, buf=int(buf))
+        self.state = a_on_bufenter(self.nvim, state=self.state, buf=int(buf))
