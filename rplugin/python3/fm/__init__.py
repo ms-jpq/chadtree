@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from traceback import format_exc
 from typing import Awaitable, Optional
 
-from pynvim import Nvim, autocmd, command, function, plugin
+from pynvim import Nvim, autocmd, function, plugin
 
 from .commands import (
     a_on_bufenter,
@@ -65,7 +65,7 @@ class Main:
 
         self.chan.submit(stage)
 
-    @command("FMopen")
+    @function("FMopen")
     def fm_open(self, *_) -> None:
         """
         Folders -> toggle
