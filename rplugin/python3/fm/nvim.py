@@ -22,10 +22,10 @@ class Asynced:
 
     def __getattr__(self, name: str) -> AsyncedCallable:
         fut: Future = Future()
+        fn = getattr(self.__attr, name)
 
         def f(*args: Any, **kwargs) -> None:
             nonlocal fut
-            fn = getattr(self.__attr, name)
             ret = fn(*args, **kwargs)
             fut.set_result(ret)
             fut = Future()

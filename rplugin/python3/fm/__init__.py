@@ -65,7 +65,7 @@ class Main:
 
         self.chan.submit(stage)
 
-    @command("FMOpen")
+    @command("FMopen")
     def fm_open(self, *_) -> None:
         """
         Folders -> toggle

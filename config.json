@@ -7,6 +7,7 @@
     "FMdelete": ["d"],
     "FMhidden": ["."],
     "FMnew": ["a"],
+    "FMopen": ["<leader>v"],
     "FMpaste": ["p"],
     "FMprimary": ["<enter>"],
     "FMrefresh": ["<c-r>"],
