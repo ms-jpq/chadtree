@@ -44,8 +44,8 @@ async def a_on_focus(nvim: Nvim2, state: State) -> State:
 
 
 async def c_open(nvim: Nvim2, state: State, settings: Settings) -> None:
-    await nvim.print("HERE")
-    # await toggle_shown(nvim, settings=settings)
+    await toggle_shown(nvim, settings=settings)
+    await _redraw(nvim, state=state)
 
 
 async def c_primary(nvim: Nvim2, state: State) -> State:

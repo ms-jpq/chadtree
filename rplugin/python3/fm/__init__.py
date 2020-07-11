@@ -1,5 +1,6 @@
 from asyncio import get_running_loop, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
+from traceback import format_exc
 from typing import Awaitable, Optional
 
 from pynvim import Nvim, autocmd, command, function, plugin
@@ -38,6 +39,7 @@ class Main:
         settings = initial_settings(user_settings=user_settings, user_icons=user_icons)
 
         self.chan = ThreadPoolExecutor(max_workers=1)
+        self.nvim1 = nvim
         self.nvim2 = Nvim2(nvim)
         self.state = initial_state(settings)
         self.settings = settings
@@ -46,8 +48,19 @@ class Main:
     def schedule(self, coro: Awaitable[Optional[State]]) -> None:
         loop = get_running_loop()
 
+        async def wrapped(nvim1: Nvim) -> Optional[State]:
+            try:
+                return await coro
+            except Exception as e:
+
+                stack = format_exc()
+                msg = f"error caught while executing async callback:\n{stack}\n{e}"
+
+                nvim1.async_call(nvim1.err_write, msg)
+                return None
+
         def stage() -> None:
-            fut = run_coroutine_threadsafe(coro, loop)
+            fut = run_coroutine_threadsafe(wrapped(self.nvim1), loop)
             state = fut.result()
             if state:
                 self.state = state
