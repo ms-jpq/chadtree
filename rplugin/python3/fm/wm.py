@@ -19,17 +19,29 @@ def sorted_windows(nvim: Nvim, windows: Iterable[Window]) -> Sequence[Window]:
     return sorted_windows
 
 
-def find_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
+def find_windows_in_tab(nvim: Nvim) -> Iterator[Tuple[bool, Window]]:
     tab: Tabpage = nvim.api.get_current_tabpage()
     windows: Sequence[Window] = nvim.api.tabpage_list_wins(tab)
 
     for window in sorted_windows(nvim, windows):
         buffer: Buffer = nvim.api.win_get_buf(window)
-        if is_fm_buffer(nvim, buffer=buffer):
+        fm = is_fm_buffer(nvim, buffer=buffer)
+        yield fm, window
+
+
+def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
+    for fm, window in find_windows_in_tab(nvim):
+        if fm:
             yield window
 
 
-def find_buffers(nvim: Nvim) -> Iterator[Buffer]:
+def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
+    for fm, window in find_windows_in_tab(nvim):
+        if not fm:
+            yield window
+
+
+def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
 
     for i in range(len(buffers)):
@@ -54,17 +66,17 @@ def new_window(nvim: Nvim, buffer: Buffer, settings: Settings) -> Window:
 
 
 def toggle_shown(nvim: Nvim, settings: Settings) -> None:
-    window: Optional[Window] = next(find_windows_in_tab(nvim), None)
+    window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
     if window:
         nvim.api.win_close(window, True)
     else:
-        buffer: Buffer = next(find_buffers(nvim), None) or new_buf(nvim)
+        buffer: Buffer = next(find_fm_buffers(nvim), None) or new_buf(nvim)
         window = new_window(nvim, buffer=buffer, settings=settings)
 
 
 def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
 
-    for buffer in find_buffers(nvim):
+    for buffer in find_fm_buffers(nvim):
         nvim.api.buf_set_option(buffer, "modifiable", True)
         nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
         nvim.api.buf_set_option(buffer, "modifiable", False)

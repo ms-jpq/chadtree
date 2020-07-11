@@ -8,7 +8,7 @@ from .keymap import keymap
 from .nvim import Nvim, Window, find_buffer
 from .state import index, is_dir, merge
 from .types import Mode, Node, Settings, State
-from .wm import find_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
+from .wm import find_fm_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
 
 
 def _index(nvim: Nvim, state: State) -> Optional[Node]:
@@ -37,7 +37,7 @@ def a_on_bufenter(nvim: Nvim, state: State, buf: int) -> State:
 
 
 def a_on_focus(nvim: Nvim, state: State) -> State:
-    window = next(find_windows_in_tab(nvim), None)
+    window = next(find_fm_windows_in_tab(nvim), None)
     if window:
         return state
     else:
@@ -54,8 +54,8 @@ def c_primary(nvim: Nvim, state: State) -> State:
     if node:
         if Mode.FOLDER in node.mode:
             paths = {node.path}
-            root = update(state.root, index=state.index, paths=paths)
             index = state.index | paths
+            root = update(state.root, index=index, paths=paths)
             new_state = merge(state, root=root, index=index)
             _redraw(nvim, state=new_state)
             return new_state
