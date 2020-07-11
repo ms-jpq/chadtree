@@ -30,8 +30,8 @@ class Asynced:
             fut.set_result(ret)
             fut = Future()
 
-        def run(*args: Any, **kwargs) -> Awaitable[Any]:
-            self.__nvim.async_call(f, *args, **kwargs)
+        def run(*args: Any) -> Awaitable[Any]:
+            self.__nvim.async_call(f, *args)
             return fut
 
         return run
