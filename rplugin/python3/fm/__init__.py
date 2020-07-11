@@ -1,4 +1,4 @@
-from asyncio import get_event_loop, run_coroutine_threadsafe
+from asyncio import run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from typing import Awaitable, Optional
 
@@ -42,11 +42,9 @@ class Main:
         self.settings = settings
 
     # Work around for coroutine deadlocks
-    def submit(self, coro: Awaitable[Optional[State]]) -> None:
-        loop = get_event_loop()
-
+    def schedule(self, coro: Awaitable[Optional[State]]) -> None:
         def stage() -> None:
-            fut = run_coroutine_threadsafe(coro, loop)
+            fut = run_coroutine_threadsafe(coro, self.nvim.loop)
             state = fut.result()
             if state:
                 self.state = state
@@ -60,7 +58,7 @@ class Main:
         File -> open
         """
 
-        self.submit(c_open(self.nvim, state=self.state, settings=self.settings))
+        self.schedule(c_open(self.nvim, state=self.state, settings=self.settings))
 
     @function("FMprimary")
     def primary(self, *_) -> None:
@@ -69,7 +67,7 @@ class Main:
         File -> open
         """
 
-        self.submit(c_primary(self.nvim, state=self.state))
+        self.schedule(c_primary(self.nvim, state=self.state))
 
     @function("FMsecondary")
     def secondary(self, *_) -> None:
@@ -78,7 +76,7 @@ class Main:
         File -> preview
         """
 
-        self.submit(c_secondary(self.nvim, state=self.state))
+        self.schedule(c_secondary(self.nvim, state=self.state))
 
     @function("FMrefresh")
     def refresh(self, *_) -> None:
@@ -86,7 +84,7 @@ class Main:
         Redraw buffers
         """
 
-        self.submit(c_refresh(self.nvim, state=self.state))
+        self.schedule(c_refresh(self.nvim, state=self.state))
 
     @function("FMhidden")
     def hidden(self, *_) -> None:
@@ -94,7 +92,7 @@ class Main:
         Toggle hidden
         """
 
-        self.submit(c_hidden(self.nvim, state=self.state))
+        self.schedule(c_hidden(self.nvim, state=self.state))
 
     @function("FMcopyname")
     def copy_name(self, *_) -> None:
@@ -102,7 +100,7 @@ class Main:
         Copy dirname / filename
         """
 
-        self.submit(c_copy_name(self.nvim, state=self.state))
+        self.schedule(c_copy_name(self.nvim, state=self.state))
 
     @function("FMnew")
     def new(self, *_) -> None:
@@ -110,7 +108,7 @@ class Main:
         new file / folder
         """
 
-        self.submit(c_new(self.nvim, state=self.state))
+        self.schedule(c_new(self.nvim, state=self.state))
 
     @function("FMrename")
     def rename(self, *_) -> None:
@@ -118,7 +116,7 @@ class Main:
         rename file / folder
         """
 
-        self.submit(c_rename(self.nvim, state=self.state))
+        self.schedule(c_rename(self.nvim, state=self.state))
 
     @function("FMselect")
     def select(self, *_) -> None:
@@ -126,7 +124,7 @@ class Main:
         Folder / File -> select
         """
 
-        self.submit(c_select(self.nvim, state=self.state))
+        self.schedule(c_select(self.nvim, state=self.state))
 
     @function("FMclear")
     def clear(self, *_) -> None:
@@ -134,7 +132,7 @@ class Main:
         Clear selected
         """
 
-        self.submit(c_clear(self.nvim, state=self.state))
+        self.schedule(c_clear(self.nvim, state=self.state))
 
     @function("FMdelete")
     def delete(self, *_) -> None:
@@ -142,7 +140,7 @@ class Main:
         Delete selected
         """
 
-        self.submit(c_delete(self.nvim, state=self.state))
+        self.schedule(c_delete(self.nvim, state=self.state))
 
     @function("FMcut")
     def cut(self, *_) -> None:
@@ -150,7 +148,7 @@ class Main:
         Cut selected
         """
 
-        self.submit(c_cut(self.nvim, state=self.state))
+        self.schedule(c_cut(self.nvim, state=self.state))
 
     @function("FMcopy")
     def copy(self, *_) -> None:
@@ -158,7 +156,7 @@ class Main:
         Copy selected
         """
 
-        self.submit(c_copy(self.nvim, state=self.state))
+        self.schedule(c_copy(self.nvim, state=self.state))
 
     @function("FMpaste")
     def paste(self, *_) -> None:
@@ -166,7 +164,7 @@ class Main:
         Paste selected
         """
 
-        self.submit(c_paste(self.nvim, state=self.state))
+        self.schedule(c_paste(self.nvim, state=self.state))
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
@@ -174,7 +172,7 @@ class Main:
         Setup keybind
         """
 
-        self.submit(
+        self.schedule(
             a_on_filetype(
                 self.nvim, state=self.state, settings=self.settings, buf=int(buf)
             )
@@ -186,12 +184,14 @@ class Main:
         Update git
         """
 
-        self.submit(a_on_bufenter(self.nvim, state=self.state, buf=int(buf)))
+        self.schedule(a_on_bufenter(self.nvim, state=self.state, buf=int(buf)))
 
     @autocmd("FocusGained")
     def on_focus(self) -> None:
         """
         Update git
         """
+
+        self.schedule(a_on_focus(self.nvim, state=self.state))
 
         self.submit(a_on_focus(self.nvim, state=self.state))
