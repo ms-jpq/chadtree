@@ -43,6 +43,7 @@ class IconSet:
 class Settings:
     width: int
     keymap: Dict[str, Sequence[str]]
+    show_hidden: bool
     name_ignore: Sequence[str]
     path_ignore: Sequence[str]
     use_icons: bool
@@ -50,9 +51,16 @@ class Settings:
 
 
 @dataclass(frozen=True)
+class Nub:
+    path: str
+    mode: Mode
+
+
+@dataclass(frozen=True)
 class State:
     index: Index
     selection: Selection
+    show_hidden: bool
     root: Node
     path_lookup: Sequence[str]
     rendered: Sequence[str]

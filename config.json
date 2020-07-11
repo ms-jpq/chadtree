@@ -1,7 +1,7 @@
 {
-  "use_icons": true,
   "keymap": {
     "FMclear": ["C"],
+    "FMcopy": ["y"],
     "FMcopyname": ["yy"],
     "FMcut": ["x"],
     "FMdelete": ["d"],
@@ -16,5 +16,7 @@
   },
   "name_ignore": [".git", ".DS_Store", "__pycache__"],
   "path_ignore": [],
+  "show_hidden": false,
+  "use_icons": true,
   "width": 40
 }

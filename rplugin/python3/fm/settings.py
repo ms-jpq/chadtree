@@ -27,6 +27,7 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
     settings = Settings(
         width=config["width"],
         keymap=config["keymap"],
+        show_hidden=config["show_hidden"],
         name_ignore=config["name_ignore"],
         path_ignore=config["path_ignore"],
         use_icons=config["use_icons"],

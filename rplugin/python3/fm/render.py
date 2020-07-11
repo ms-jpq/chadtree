@@ -51,7 +51,7 @@ def paint(settings: Settings) -> Callable[[Node, int], str]:
 def render(
     node: Node, *, settings: Settings, git: GitStatus,
 ) -> Tuple[Sequence[str], Sequence[str]]:
-    drop = ignore(settings, git)
+    drop = lambda _: True if settings.show_hidden else ignore(settings, git)
     show = paint(settings)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[str, str]]:

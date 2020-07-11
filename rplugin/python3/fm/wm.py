@@ -40,6 +40,7 @@ def find_buffers(nvim: Nvim) -> Iterator[Buffer]:
 
 def new_buf(nvim: Nvim) -> Buffer:
     buffer: Buffer = nvim.api.create_buf(False, True)
+    nvim.api.buf_set_option(buffer, "modifiable", False)
     nvim.api.buf_set_option(buffer, "filetype", fm_filetype)
     return buffer
 
@@ -63,4 +64,6 @@ def toggle_shown(nvim: Nvim, settings: Settings) -> None:
 
 def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
     for buffer in find_buffers(nvim):
+        nvim.api.buf_set_option(buffer, "modifiable", True)
         nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
+        nvim.api.buf_set_option(buffer, "modifiable", False)

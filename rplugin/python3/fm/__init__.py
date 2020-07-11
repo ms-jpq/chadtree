@@ -1,14 +1,15 @@
 from asyncio import get_event_loop, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
-from typing import Awaitable
+from typing import Awaitable, Optional
 
 from pynvim import Nvim, autocmd, command, function, plugin
 
 from .consts import fm_filetype
 from .git import status
 from .keymap import keymap
-from .nvim import Buffer, Window
+from .nvim import Buffer, Window, print
 from .settings import initial as initial_settings
+from .state import index
 from .state import initial as initial_state
 from .types import GitStatus
 from .wm import is_fm_buffer, toggle_shown, update_buffers
@@ -39,15 +40,11 @@ class Main:
 
         self.chan.submit(stage)
 
-    def print(self, message: str, error: bool = False) -> None:
-        write = self.nvim.err_write if error else self.nvim.out_write
-        write(message)
-        write("\n")
-
-    def index(self) -> None:
+    def index(self) -> Optional[str]:
         window: Window = self.nvim.current.window
         row, _ = self.nvim.api.win_get_cursor(window)
         row = row - 1
+        return index(self.state, row)
 
     def redraw(self) -> None:
         lines = self.state.rendered
@@ -65,6 +62,10 @@ class Main:
         File -> open
         """
 
+        path = self.index()
+        if path:
+            self.redraw()
+
     @function("FMsecondary")
     def secondary(self, *_) -> None:
         """
@@ -72,17 +73,28 @@ class Main:
         File -> preview
         """
 
+        path = self.index()
+        if path:
+            self.redraw()
+
     @function("FMrefresh")
     def refresh(self, *_) -> None:
         """
-        Redraw buffer
+        Redraw buffers
         """
+
+        async def cont() -> None:
+            self.git_status = await status()
+            self.redraw()
+
+        self._submit(cont())
 
     @function("FMhidden")
     def hidden(self, *_) -> None:
         """
         Toggle hidden
         """
+
         self.redraw()
 
     @function("FMnew")
@@ -91,11 +103,19 @@ class Main:
         new file / folder
         """
 
+        path = self.index()
+        if path:
+            self.redraw()
+
     @function("FMrename")
     def rename(self, *_) -> None:
         """
         rename file / folder
         """
+
+        path = self.index()
+        if path:
+            self.redraw()
 
     @function("FMselect")
     def select(self, *_) -> None:
@@ -103,11 +123,17 @@ class Main:
         Folder / File -> select
         """
 
+        path = self.index()
+        if path:
+            self.redraw()
+
     @function("FMclear")
     def clear(self, *_) -> None:
         """
         Clear selected
         """
+
+        self.redraw()
 
     @function("FMdelete")
     def delete(self, *_) -> None:
@@ -115,11 +141,15 @@ class Main:
         Delete selected
         """
 
+        self.redraw()
+
     @function("FMcut")
     def cut(self, *_) -> None:
         """
         Cut selected
         """
+
+        self.redraw()
 
     @function("FMcopy")
     def copy(self, *_) -> None:
@@ -127,17 +157,31 @@ class Main:
         Copy selected
         """
 
+        path = self.index()
+        if path:
+            self.redraw()
+
     @function("FMpaste")
     def paste(self, *_) -> None:
         """
         Paste selected
         """
 
+        path = self.index()
+        if path:
+            self.redraw()
+
     @function("FMcopyname")
     def copyname(self, *_) -> None:
         """
         Copy dirname / filename
         """
+
+        path = self.index()
+        if path:
+            self.nvim.funcs.setreg("+", path)
+            self.nvim.funcs.setreg("*", path)
+            print(self.nvim, f"📎 {path}")
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
