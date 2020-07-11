@@ -21,12 +21,14 @@ class Asynced:
         self.__attr = getattr(nvim, attr)
 
     def __getattr__(self, name: str) -> AsyncedCallable:
-        fn = getattr(self.__attr, name)
         fut: Future = Future()
 
         def f(*args: Any, **kwargs) -> None:
+            nonlocal fut
+            fn = getattr(self.__attr, name)
             ret = fn(*args, **kwargs)
             fut.set_result(ret)
+            fut = Future()
 
         def run(*args: Any, **kwargs) -> Awaitable[Any]:
             self.__nvim.async_call(f, *args, **kwargs)
@@ -47,7 +49,7 @@ class Nvim2:
         write = self.api.err_write if error else self.api.out_write
         await write(str(message))
         if flush:
-            await self.print("\n", error=error, flush=False)
+            await write("\n")
 
 
 async def find_buffer(nvim: Nvim2, bufnr: int) -> Optional[Buffer]:

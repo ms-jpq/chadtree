@@ -5,7 +5,7 @@ from typing import Optional
 
 from .git import status
 from .keymap import keymap
-from .nvim import Buffer, Nvim2, Window, find_buffer
+from .nvim import Nvim2, Window, find_buffer
 from .state import index, is_dir
 from .types import Node, Settings, State
 from .wm import is_fm_buffer, toggle_shown, update_buffers
