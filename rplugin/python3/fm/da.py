@@ -7,6 +7,10 @@ from typing import Any, AsyncIterator, Callable, Optional, TypeVar, cast
 T = TypeVar("T")
 
 
+def or_else(thing: Optional[T], default: T) -> T:
+    return default if thing is None else thing
+
+
 async def anext(aiter: AsyncIterator[T], default: Optional[T]) -> Optional[T]:
     try:
         return await aiter.__anext__()

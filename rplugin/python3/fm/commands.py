@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from os.path import dirname, join
 from typing import Optional
 
@@ -6,8 +5,8 @@ from .cartographer import update
 
 # from .git import status
 from .keymap import keymap
-from .nvim import Nvim, Window, find_buffer, print
-from .state import index, is_dir
+from .nvim import Nvim, Window, find_buffer
+from .state import index, is_dir, merge
 from .types import Mode, Node, Settings, State
 from .wm import find_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
 
@@ -53,12 +52,11 @@ def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
 def c_primary(nvim: Nvim, state: State) -> State:
     node = _index(nvim, state)
     if node:
-        print(nvim, node)
         if Mode.FOLDER in node.mode:
             paths = {node.path}
             root = update(state.root, index=state.index, paths=paths)
             index = state.index | paths
-            new_state = State(**{**asdict(state), **dict(root=root, index=index)})
+            new_state = merge(state, root=root, index=index)
             _redraw(nvim, state=new_state)
             return new_state
         else:

@@ -12,7 +12,7 @@
     "FMrefresh": ["<c-r>"],
     "FMrename": ["r"],
     "FMsecondary": ["<tab>", "<2-leftmouse>"],
-    "FMselect": ["<enter>"]
+    "FMselect": ["c"]
   },
   "keys": {
     "FMopen": ["<leader>v"]
