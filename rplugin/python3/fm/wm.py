@@ -1,5 +1,5 @@
 from asyncio import gather
-from typing import Iterable, Iterator, Optional, Sequence, Tuple
+from typing import AsyncIterator, Iterable, Optional, Sequence, Tuple
 
 from .consts import fm_filetype
 from .da import anext
@@ -13,7 +13,7 @@ async def is_fm_buffer(nvim: Nvim2, buffer: Buffer) -> bool:
 
 
 async def sorted_windows(nvim: Nvim2, windows: Iterable[Window]) -> Sequence[Window]:
-    def key_by(window: Window) -> Tuple[int, int]:
+    async def key_by(window: Window) -> Tuple[int, int]:
         row, col = await nvim.api.win_get_position(window)
         return (col, row)
 
@@ -23,7 +23,7 @@ async def sorted_windows(nvim: Nvim2, windows: Iterable[Window]) -> Sequence[Win
     return sorted_windows
 
 
-async def find_windows_in_tab(nvim: Nvim2) -> Iterator[Window]:
+async def find_windows_in_tab(nvim: Nvim2) -> AsyncIterator[Window]:
     tab: Tabpage = await nvim.api.get_current_tabpage()
     windows: Sequence[Window] = await nvim.api.tabpage_list_wins(tab)
 
@@ -33,7 +33,7 @@ async def find_windows_in_tab(nvim: Nvim2) -> Iterator[Window]:
             yield window
 
 
-async def find_buffers(nvim: Nvim2) -> Iterator[Buffer]:
+async def find_buffers(nvim: Nvim2) -> AsyncIterator[Buffer]:
     buffers: Sequence[Buffer] = await nvim.api.list_bufs()
 
     for buffer in buffers:
@@ -70,11 +70,9 @@ async def toggle_shown(nvim: Nvim2, settings: Settings) -> None:
 
 
 async def update_buffers(nvim: Nvim2, lines: Sequence[str]) -> None:
-    async def update(buffer: Buffer) -> None:
+
+    async for buffer in find_buffers(nvim):
         t1 = nvim.api.buf_set_option(buffer, "modifiable", True)
         t2 = nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
         t3 = nvim.api.buf_set_option(buffer, "modifiable", False)
         await gather(t1, t2, t3)
-
-    buffers = await find_buffers(nvim)
-    await gather(*map(update, buffers))

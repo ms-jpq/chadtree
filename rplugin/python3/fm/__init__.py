@@ -1,4 +1,4 @@
-from asyncio import run_coroutine_threadsafe
+from asyncio import get_running_loop, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from typing import Awaitable, Optional
 
@@ -44,8 +44,10 @@ class Main:
 
     # Work around for coroutine deadlocks
     def schedule(self, coro: Awaitable[Optional[State]]) -> None:
+        loop = get_running_loop()
+
         def stage() -> None:
-            fut = run_coroutine_threadsafe(coro, self.nvim2.loop)
+            fut = run_coroutine_threadsafe(coro, loop)
             state = fut.result()
             if state:
                 self.state = state
