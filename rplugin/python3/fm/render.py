@@ -4,6 +4,7 @@ from locale import strxfrm
 from os.path import sep
 from typing import Callable, Iterable, Iterator, Sequence, Tuple, Union
 
+from .da import constantly
 from .types import GitStatus, Mode, Node, Settings
 
 
@@ -50,18 +51,18 @@ def paint(settings: Settings) -> Callable[[Node, int], str]:
 
 def render(
     node: Node, *, settings: Settings, git: GitStatus,
-) -> Tuple[Sequence[str], Sequence[str]]:
-    drop = lambda _: True if settings.show_hidden else ignore(settings, git)
+) -> Tuple[Sequence[Node], Sequence[str]]:
+    drop = constantly(True) if settings.show_hidden else ignore(settings, git)
     show = paint(settings)
 
-    def render(node: Node, *, depth: int) -> Iterator[Tuple[str, str]]:
+    def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
         rend = show(node, depth)
         children = (
             child for child in (node.children or {}).values() if not drop(child)
         )
-        yield node.path, rend
+        yield node, rend
         for child in sorted(children, key=comp):
             yield from render(child, depth=depth + 1)
 
-    path_lookup, rendered = zip(*render(node, depth=0))
-    return path_lookup, rendered
+    lookup, rendered = zip(*render(node, depth=0))
+    return lookup, rendered

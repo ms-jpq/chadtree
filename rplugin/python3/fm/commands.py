@@ -1,17 +1,17 @@
+from dataclasses import asdict
 from typing import Optional
 
-from dataclass import asdict
 from pynvim import Nvim
 
 from .git import status
 from .keymap import keymap
 from .nvim import Buffer, Window
 from .state import index
-from .types import Settings, State
-from .wm import is_fm_buffer, update_buffers
+from .types import Node, Settings, State
+from .wm import is_fm_buffer, toggle_shown, update_buffers
 
 
-def _index(nvim: Nvim, state: State) -> Optional[str]:
+def _index(nvim: Nvim, state: State) -> Optional[Node]:
     window: Window = nvim.current.window
     row, _ = nvim.api.win_get_cursor(window)
     row = row - 1
@@ -41,8 +41,8 @@ async def a_on_focus(nvim: Nvim, state: State) -> State:
     return State(**{**asdict(state), **dict(git=git)})
 
 
-async def c_open(nvim: Nvim, state: State) -> State:
-    pass
+async def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
+    toggle_shown(nvim, settings=settings)
 
 
 async def c_primary(nvim: Nvim, state: State) -> State:
@@ -62,15 +62,21 @@ async def c_hidden(nvim: Nvim, state: State) -> State:
 
 
 async def c_copy_name(nvim: Nvim, state: State) -> None:
-    path = _index(nvim, state)
-    if path:
-        nvim.funcs.setreg("+", path)
-        nvim.funcs.setreg("*", path)
-        print(nvim, f"📎 {path}")
+    node = _index(nvim, state)
+    if node:
+        nvim.funcs.setreg("+", node.path)
+        nvim.funcs.setreg("*", node.path)
+        print(nvim, f"📎 {node}")
 
 
 async def c_new(nvim: Nvim, state: State) -> State:
-    pass
+    node = _index(nvim, state)
+    if node:
+        new = nvim.funcs.input("New name: ", node.path)
+        print(nvim, new)
+        return state
+    else:
+        return state
 
 
 async def c_rename(nvim: Nvim, state: State) -> State:

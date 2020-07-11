@@ -51,12 +51,6 @@ class Settings:
 
 
 @dataclass(frozen=True)
-class Nub:
-    path: str
-    mode: Mode
-
-
-@dataclass(frozen=True)
 class GitStatus:
     ignored: Set[str] = field(default_factory=set)
     added: Set[str] = field(default_factory=set)
@@ -70,6 +64,6 @@ class State:
     selection: Selection
     show_hidden: bool
     root: Node
-    path_lookup: Sequence[str]
+    lookup: Sequence[Node]
     rendered: Sequence[str]
     git: GitStatus

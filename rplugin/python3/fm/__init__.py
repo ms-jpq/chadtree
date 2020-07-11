@@ -62,7 +62,7 @@ class Main:
         File -> open
         """
 
-        self._submit(c_open(self.nvim, state=self.state))
+        self._submit(c_open(self.nvim, state=self.state, settings=self.settings))
 
     @function("FMprimary")
     def primary(self, *_) -> None:
