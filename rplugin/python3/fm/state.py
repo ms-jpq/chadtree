@@ -11,23 +11,24 @@ def initial(settings: Settings) -> State:
     cwd = getcwd()
     node = new(cwd, index={cwd})
     git = GitStatus()
-    path_lookup, rendered = render(node, settings=settings, git=git)
+    lookup, rendered = render(node, settings=settings, git=git)
 
     state = State(
         index=set(),
         selection=set(),
         show_hidden=settings.show_hidden,
         root=node,
-        lookup=path_lookup,
+        lookup=lookup,
         rendered=rendered,
         git=git,
     )
     return state
 
 
-def merge(
+def forward(
     state: State,
     *,
+    settings: Settings,
     index: Optional[Index] = None,
     selection: Optional[Selection] = None,
     show_hidden: Optional[bool] = None,
@@ -36,14 +37,18 @@ def merge(
     rendered: Optional[Sequence[str]] = None,
     git: Optional[GitStatus] = None,
 ) -> State:
+    new_root = or_else(root, state.root)
+    new_git = or_else(git, state.git)
+    lookup, rendered = render(new_root, settings=settings, git=new_git)
+
     new_state = State(
         index=or_else(index, state.index),
         selection=or_else(selection, state.selection),
         show_hidden=or_else(show_hidden, state.show_hidden),
-        root=or_else(root, state.root),
-        lookup=or_else(lookup, state.lookup),
-        rendered=or_else(rendered, state.rendered),
-        git=or_else(git, state.git),
+        root=new_root,
+        lookup=lookup,
+        rendered=rendered,
+        git=new_git,
     )
 
     return new_state

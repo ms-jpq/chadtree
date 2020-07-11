@@ -6,7 +6,7 @@ from .cartographer import update
 # from .git import status
 from .keymap import keymap
 from .nvim import Nvim, Window, find_buffer
-from .state import index, is_dir, merge
+from .state import index, is_dir, forward
 from .types import Mode, Node, Settings, State
 from .wm import find_fm_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
 
@@ -28,7 +28,7 @@ def a_on_filetype(nvim: Nvim, state: State, settings: Settings, buf: int) -> Non
         keymap(nvim, buffer=buffer, settings=settings)
 
 
-def a_on_bufenter(nvim: Nvim, state: State, buf: int) -> State:
+def a_on_bufenter(nvim: Nvim, state: State, settings: Settings, buf: int) -> State:
     buffer = find_buffer(nvim, buf)
     if is_fm_buffer(nvim, buffer=buffer):
         return state
@@ -36,7 +36,7 @@ def a_on_bufenter(nvim: Nvim, state: State, buf: int) -> State:
         return state
 
 
-def a_on_focus(nvim: Nvim, state: State) -> State:
+def a_on_focus(nvim: Nvim, state: State, settings: Settings) -> State:
     window = next(find_fm_windows_in_tab(nvim), None)
     if window:
         return state
@@ -49,14 +49,14 @@ def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
     _redraw(nvim, state=state)
 
 
-def c_primary(nvim: Nvim, state: State) -> State:
+def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
     node = _index(nvim, state)
     if node:
         if Mode.FOLDER in node.mode:
             paths = {node.path}
             index = state.index | paths
             root = update(state.root, index=index, paths=paths)
-            new_state = merge(state, root=root, index=index)
+            new_state = forward(state, settings=settings, root=root, index=index)
             _redraw(nvim, state=new_state)
             return new_state
         else:
@@ -65,19 +65,19 @@ def c_primary(nvim: Nvim, state: State) -> State:
         return state
 
 
-def c_secondary(nvim: Nvim, state: State) -> State:
+def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_refresh(nvim: Nvim, state: State) -> State:
+def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_hidden(nvim: Nvim, state: State) -> State:
+def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_copy_name(nvim: Nvim, state: State) -> None:
+def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
     node = _index(nvim, state)
     if node:
         nvim.funcs.setreg("+", node.path)
@@ -85,7 +85,7 @@ def c_copy_name(nvim: Nvim, state: State) -> None:
         nvim.print(f"📎 {node}")
 
 
-def c_new(nvim: Nvim, state: State) -> State:
+def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
     node = _index(nvim, state)
     if node:
         parent = node.path if is_dir(node) else dirname(node.path)
@@ -97,29 +97,29 @@ def c_new(nvim: Nvim, state: State) -> State:
         return state
 
 
-def c_rename(nvim: Nvim, state: State) -> State:
+def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_select(nvim: Nvim, state: State) -> State:
+def c_select(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_clear(nvim: Nvim, state: State) -> State:
+def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
     pass
 
 
-def c_delete(nvim: Nvim, state: State) -> State:
+def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_cut(nvim: Nvim, state: State) -> State:
+def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_copy(nvim: Nvim, state: State) -> State:
+def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_paste(nvim: Nvim, state: State) -> State:
+def c_paste(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
