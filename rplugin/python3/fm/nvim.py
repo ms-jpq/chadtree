@@ -25,8 +25,13 @@ class Asynced:
         fut: Future = Future()
 
         def f(*args: Any, **kwargs) -> None:
-            ret = fn(*args, **kwargs)
-            fut.set_result(ret)
+            try:
+                ret = fn(*args, **kwargs)
+            except Exception as e:
+                fut.set_exception(e)
+                raise
+            else:
+                fut.set_result(ret)
 
         def run(*args: Any, **kwargs) -> Awaitable[Any]:
             self.__nvim.async_call(f, *args, **kwargs)
