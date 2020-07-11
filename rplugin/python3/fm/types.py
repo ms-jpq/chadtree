@@ -24,6 +24,12 @@ class Node:
 
 
 @dataclass(frozen=True)
+class Keymap:
+    entire: Dict[str, Sequence[str]]
+    buffer: Dict[str, Sequence[str]]
+
+
+@dataclass(frozen=True)
 class GitIcons:
     ignored: str
     added: str
@@ -42,7 +48,7 @@ class IconSet:
 @dataclass(frozen=True)
 class Settings:
     width: int
-    keymap: Dict[str, Sequence[str]]
+    keymap: Keymap
     show_hidden: bool
     name_ignore: Sequence[str]
     path_ignore: Sequence[str]

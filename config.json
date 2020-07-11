@@ -7,13 +7,15 @@
     "FMdelete": ["d"],
     "FMhidden": ["."],
     "FMnew": ["a"],
-    "FMopen": ["<leader>v"],
     "FMpaste": ["p"],
     "FMprimary": ["<enter>"],
     "FMrefresh": ["<c-r>"],
     "FMrename": ["r"],
     "FMsecondary": ["<tab>", "<2-leftmouse>"],
     "FMselect": ["<enter>"]
+  },
+  "keys": {
+    "FMopen": ["<leader>v"]
   },
   "name_ignore": [".git", ".DS_Store", "__pycache__"],
   "path_ignore": [],

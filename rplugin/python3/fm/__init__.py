@@ -25,6 +25,7 @@ from .commands import (
     c_select,
 )
 from .consts import fm_filetype
+from .keymap import keys
 from .nvim import Nvim2
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -43,6 +44,8 @@ class Main:
         self.nvim2 = Nvim2(nvim)
         self.state = initial_state(settings)
         self.settings = settings
+
+        self.schedule(keys(self.nvim2, self.settings))
 
     # Work around for coroutine deadlocks
     def schedule(self, coro: Awaitable[Optional[State]]) -> None:

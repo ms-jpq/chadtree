@@ -2,12 +2,13 @@ from typing import Any
 
 from .consts import config_json, icons_json
 from .da import load_json
-from .types import GitIcons, IconSet, Settings
+from .types import GitIcons, IconSet, Keymap, Settings
 
 
 def initial(user_settings: Any, user_icons: Any) -> Settings:
     config = load_json(config_json)
     icon_c = load_json(icons_json)
+    keymap = Keymap(entire=config["keys"], buffer=config["keymap"])
 
     git_ic = icon_c["git"]
     git_icons = GitIcons(
@@ -26,7 +27,7 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
 
     settings = Settings(
         width=config["width"],
-        keymap=config["keymap"],
+        keymap=keymap,
         show_hidden=config["show_hidden"],
         name_ignore=config["name_ignore"],
         path_ignore=config["path_ignore"],
