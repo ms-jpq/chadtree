@@ -52,10 +52,8 @@ class Main:
             try:
                 return await coro
             except Exception as e:
-
                 stack = format_exc()
                 msg = f"error caught while executing async callback:\n{stack}\n{e}"
-
                 nvim1.async_call(nvim1.err_write, msg)
                 return None
 

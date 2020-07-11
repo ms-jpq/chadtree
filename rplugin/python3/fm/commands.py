@@ -5,7 +5,7 @@ from typing import Optional
 
 from .git import status
 from .keymap import keymap
-from .nvim import Buffer, Nvim2, Window
+from .nvim import Buffer, Nvim2, Window, find_buffer
 from .state import index, is_dir
 from .types import Node, Settings, State
 from .wm import is_fm_buffer, toggle_shown, update_buffers
@@ -25,12 +25,12 @@ async def _redraw(nvim: Nvim2, state: State) -> None:
 async def a_on_filetype(
     nvim: Nvim2, state: State, settings: Settings, buf: int
 ) -> None:
-    buffer: Buffer = (await nvim.api.list_bufs())[buf]
+    buffer = await find_buffer(nvim, buf)
     await keymap(nvim, buffer=buffer, settings=settings)
 
 
 async def a_on_bufenter(nvim: Nvim2, state: State, buf: int) -> State:
-    buffer: Buffer = (await nvim.api.list_bufs())[buf]
+    buffer = await find_buffer(nvim, buf)
     if await is_fm_buffer(nvim, buffer=buffer):
         git = await status()
         return State(**{**asdict(state), **dict(git=git)})

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from asyncio import Future
-from typing import Any, Awaitable, Protocol
+from typing import Any, Awaitable, Optional, Protocol, Sequence
 
 from pynvim import Nvim
 
@@ -48,3 +48,11 @@ class Nvim2:
         await write(str(message))
         if flush:
             await self.print("\n", error=error, flush=False)
+
+
+async def find_buffer(nvim: Nvim2, bufnr: int) -> Optional[Buffer]:
+    buffers: Sequence[Buffer] = await nvim.api.list_bufs()
+    for buffer in buffers:
+        if buffer.number == bufnr:
+            return buffer
+    return None
