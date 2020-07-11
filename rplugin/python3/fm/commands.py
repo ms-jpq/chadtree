@@ -12,6 +12,12 @@ from .types import Node, Settings, State
 from .wm import is_fm_buffer, toggle_shown, update_buffers
 
 
+def print(nvim: Nvim, message: str, error: bool = False) -> None:
+    write = nvim.err_write if error else nvim.out_write
+    write(message)
+    write("\n")
+
+
 def _index(nvim: Nvim, state: State) -> Optional[Node]:
     window: Window = nvim.current.window
     row, _ = nvim.api.win_get_cursor(window)
