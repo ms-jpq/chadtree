@@ -5,10 +5,12 @@ from typing import Awaitable
 from pynvim import Nvim, autocmd, command, function, plugin
 
 from .consts import fm_filetype
+from .git import status
 from .keymap import keymap
 from .nvim import Buffer, Window
 from .settings import initial as initial_settings
 from .state import initial as initial_state
+from .types import GitStatus
 from .wm import is_fm_buffer, toggle_shown, update_buffers
 
 
@@ -23,6 +25,7 @@ class Main:
         self.nvim = nvim
         self.state = initial_state(settings)
         self.settings = settings
+        self.git_status = GitStatus()
 
     def _submit(self, coro: Awaitable[None]) -> None:
         """
@@ -51,87 +54,87 @@ class Main:
         update_buffers(self.nvim, lines=lines)
 
     @command("FMOpen")
-    def fm_open(self, *args) -> None:
+    def fm_open(self, *_) -> None:
         toggle_shown(self.nvim, settings=self.settings)
         self.redraw()
 
     @function("FMprimary")
-    def primary(self) -> None:
+    def primary(self, *_) -> None:
         """
         Folders -> toggle
         File -> open
         """
 
     @function("FMsecondary")
-    def secondary(self) -> None:
+    def secondary(self, *_) -> None:
         """
         Folders -> toggle
         File -> preview
         """
 
     @function("FMrefresh")
-    def refresh(self) -> None:
+    def refresh(self, *_) -> None:
         """
         Redraw buffer
         """
 
     @function("FMhidden")
-    def hidden(self) -> None:
+    def hidden(self, *_) -> None:
         """
         Toggle hidden
         """
         self.redraw()
 
     @function("FMnew")
-    def new(self) -> None:
+    def new(self, *_) -> None:
         """
         new file / folder
         """
 
     @function("FMrename")
-    def rename(self) -> None:
+    def rename(self, *_) -> None:
         """
         rename file / folder
         """
 
     @function("FMselect")
-    def select(self) -> None:
+    def select(self, *_) -> None:
         """
         Folder / File -> select
         """
 
     @function("FMclear")
-    def clear(self) -> None:
+    def clear(self, *_) -> None:
         """
         Clear selected
         """
 
     @function("FMdelete")
-    def delete(self) -> None:
+    def delete(self, *_) -> None:
         """
         Delete selected
         """
 
     @function("FMcut")
-    def cut(self) -> None:
+    def cut(self, *_) -> None:
         """
         Cut selected
         """
 
     @function("FMcopy")
-    def copy(self) -> None:
+    def copy(self, *_) -> None:
         """
         Copy selected
         """
 
     @function("FMpaste")
-    def paste(self) -> None:
+    def paste(self, *_) -> None:
         """
         Paste selected
         """
 
     @function("FMcopyname")
-    def copyname(self) -> None:
+    def copyname(self, *_) -> None:
         """
         Copy dirname / filename
         """
@@ -141,6 +144,7 @@ class Main:
         """
         Setup keybind
         """
+
         buffer: Buffer = self.nvim.buffers[int(buf)]
         keymap(self.nvim, buffer=buffer, settings=self.settings)
 
@@ -149,12 +153,22 @@ class Main:
         """
         Update git
         """
+
+        async def cont() -> None:
+            self.git_status = await status()
+
         buffer: Buffer = self.nvim.buffers[int(buf)]
         if is_fm_buffer(self.nvim, buffer=buffer):
-            pass
+            self._submit(cont())
 
     @autocmd("FocusGained")
     def on_focus(self) -> None:
         """
         Update git
         """
+
+        async def cont() -> None:
+            self.git_status = await status()
+            self.redraw()
+
+        self._submit(cont())

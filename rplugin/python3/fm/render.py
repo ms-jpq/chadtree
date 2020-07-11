@@ -1,13 +1,10 @@
-from __future__ import annotations
-
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
+from os.path import sep
 from typing import Callable, Iterable, Iterator, Sequence, Tuple, Union
 
-from .types import GitStatus, IconSet, Mode, Node, Settings
-
-Ignore = Callable[[Node], bool]
+from .types import GitStatus, Mode, Node, Settings
 
 
 class CompVals(IntEnum):
@@ -24,7 +21,7 @@ def comp(node: Node) -> Iterable[Union[int, str]]:
     )
 
 
-def ignore(settings: Settings, git: GitStatus) -> Ignore:
+def ignore(settings: Settings, git: GitStatus) -> Callable[[Node], bool]:
     def drop(node: Node) -> bool:
         ignore = (
             node.path in git.ignored
@@ -36,23 +33,29 @@ def ignore(settings: Settings, git: GitStatus) -> Ignore:
     return drop
 
 
-def show(node: Node, icons: IconSet, depth: int) -> str:
-    spaces = depth * 2 * " "
-    name = node.name.replace("\n", r"\n")
-    if Mode.FOLDER in node.mode:
-        name = name + "/"
-    if Mode.LINK in node.mode:
-        name = name + " ->"
-    return spaces + name
+def paint(settings: Settings) -> Callable[[Node, int], str]:
+    link_decor = settings.icons.link if settings.use_icons else " ->"
+
+    def show(node: Node, depth: int) -> str:
+        spaces = depth * 2 * " "
+        name = node.name.replace("\n", r"\n")
+        if Mode.FOLDER in node.mode:
+            name = name + sep
+        if Mode.LINK in node.mode:
+            name = name + link_decor
+        return spaces + name
+
+    return show
 
 
 def render(
-    node: Node, *, settings: Settings, git: GitStatus, icons=IconSet,
+    node: Node, *, settings: Settings, git: GitStatus,
 ) -> Tuple[Sequence[str], Sequence[str]]:
     drop = ignore(settings, git)
+    show = paint(settings)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[str, str]]:
-        rend = show(node, icons=icons, depth=depth)
+        rend = show(node, depth)
         children = (
             child for child in (node.children or {}).values() if not drop(child)
         )
