@@ -6,10 +6,10 @@ from .da import toggled
 
 # from .git import status
 from .keymap import keymap
-from .nvim import HoldPosition, Nvim, Window, find_buffer
+from .nvim import HoldPosition, HoldWindowPosition, Nvim, Window, find_buffer
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
-from .wm import find_fm_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
+from .wm import is_fm_buffer, show_file, toggle_shown, update_buffers
 
 
 def _index(nvim: Nvim, state: State) -> Optional[Node]:
@@ -38,11 +38,7 @@ def a_on_bufenter(nvim: Nvim, state: State, settings: Settings, buf: int) -> Sta
 
 
 def a_on_focus(nvim: Nvim, state: State, settings: Settings) -> State:
-    window = next(find_fm_windows_in_tab(nvim), None)
-    if window:
-        return state
-    else:
-        return state
+    return state
 
 
 def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
@@ -62,13 +58,15 @@ def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
                 _redraw(nvim, state=new_state)
                 return new_state
             else:
+                show_file(nvim, file=node.path)
                 return state
     else:
         return state
 
 
 def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
-    return state
+    with HoldWindowPosition(nvim):
+        c_primary(nvim, state=state, settings=settings)
 
 
 def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:

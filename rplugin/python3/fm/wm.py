@@ -60,6 +60,7 @@ def find_buffer_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
 
 def new_buffer_with_file(nvim: Nvim, file: str) -> Buffer:
     buffer: Buffer = nvim.api.create_buf(False, True)
+    nvim.api.buf_set_name(buffer, file)
     return buffer
 
 
@@ -102,6 +103,7 @@ def show_file(nvim: Nvim, file: str) -> None:
 def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
 
     for buffer in find_fm_buffers(nvim):
+        modifiable = nvim.api.buf_get_option(buffer, "modifiable")
         nvim.api.buf_set_option(buffer, "modifiable", True)
         nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
-        nvim.api.buf_set_option(buffer, "modifiable", False)
+        nvim.api.buf_set_option(buffer, "modifiable", modifiable)
