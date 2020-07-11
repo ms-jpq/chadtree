@@ -7,7 +7,7 @@ from .keymap import keymap
 from .nvim import Nvim, Window, find_buffer
 from .state import index, is_dir
 from .types import Node, Settings, State
-from .wm import is_fm_buffer, toggle_shown, update_buffers
+from .wm import find_windows_in_tab, is_fm_buffer, toggle_shown, update_buffers
 
 
 def _index(nvim: Nvim, state: State) -> Optional[Node]:
@@ -36,7 +36,9 @@ def a_on_bufenter(nvim: Nvim, state: State, buf: int) -> State:
 
 
 def a_on_focus(nvim: Nvim, state: State) -> State:
-    pass
+    window = next(find_windows_in_tab(nvim), None)
+    if window:
+        pass
 
 
 def c_open(nvim: Nvim, state: State, settings: Settings) -> None:

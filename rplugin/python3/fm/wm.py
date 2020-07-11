@@ -50,7 +50,6 @@ def new_window(nvim: Nvim, buffer: Buffer, settings: Settings) -> Window:
     window: Window = nvim.api.get_current_win()
     nvim.api.win_set_buf(window, buffer)
     nvim.api.win_set_width(window, settings.width)
-    nvim.api.win_set_position
     return window
 
 
