@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from os.path import dirname, join
 from typing import Optional
 
 from pynvim import Nvim
@@ -6,7 +7,7 @@ from pynvim import Nvim
 from .git import status
 from .keymap import keymap
 from .nvim import Buffer, Window
-from .state import index
+from .state import index, is_dir
 from .types import Node, Settings, State
 from .wm import is_fm_buffer, toggle_shown, update_buffers
 
@@ -72,8 +73,10 @@ async def c_copy_name(nvim: Nvim, state: State) -> None:
 async def c_new(nvim: Nvim, state: State) -> State:
     node = _index(nvim, state)
     if node:
-        new = nvim.funcs.input("New name: ", node.path)
-        print(nvim, new)
+        parent = node.path if is_dir(node) else dirname(node.path)
+        child = nvim.funcs.input("New name: ")
+        new_name = join(parent, child)
+        print(nvim, new_name)
         return state
     else:
         return state

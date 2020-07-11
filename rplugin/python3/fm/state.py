@@ -3,7 +3,7 @@ from typing import Optional
 
 from .cartographer import new
 from .render import render
-from .types import GitStatus, Settings, State, Node
+from .types import GitStatus, Mode, Node, Settings, State
 
 
 def initial(settings: Settings) -> State:
@@ -29,3 +29,7 @@ def index(state: State, row: int) -> Optional[Node]:
         return state.lookup[row]
     else:
         return None
+
+
+def is_dir(node: Node) -> bool:
+    return Mode.FOLDER in node.mode
