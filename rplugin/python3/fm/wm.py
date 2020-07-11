@@ -72,7 +72,6 @@ async def toggle_shown(nvim: Nvim2, settings: Settings) -> None:
 async def update_buffers(nvim: Nvim2, lines: Sequence[str]) -> None:
 
     async for buffer in find_buffers(nvim):
-        t1 = nvim.api.buf_set_option(buffer, "modifiable", True)
-        t2 = nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
-        t3 = nvim.api.buf_set_option(buffer, "modifiable", False)
-        await gather(t1, t2, t3)
+        await nvim.api.buf_set_option(buffer, "modifiable", True)
+        await nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
+        await nvim.api.buf_set_option(buffer, "modifiable", False)

@@ -40,3 +40,11 @@ class Nvim2:
         self.funcs = Asynced(nvim, "funcs")
         self.api = Asynced(nvim, "api")
         self.command = self.api.command
+
+    async def print(
+        self, message: Any, error: bool = False, flush: bool = True
+    ) -> None:
+        write = self.api.err_write if error else self.api.out_write
+        await write(str(message))
+        if flush:
+            await self.print("\n", error=error, flush=False)
