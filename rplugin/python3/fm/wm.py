@@ -17,8 +17,13 @@ def find_windows_in_tab(nvim: Nvim) -> Sequence[Window]:
 
     tab: Tabpage = nvim.api.get_current_tabpage()
     windows: Sequence[Window] = nvim.api.tabpage_list_wins(tab)
+    w = (
+        window
+        for window in windows
+        if not nvim.api.win_get_option(window, "previewwindow")
+    )
 
-    return sorted(windows, key=key_by)
+    return sorted(w, key=key_by)
 
 
 def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
