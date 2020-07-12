@@ -1,7 +1,6 @@
 from os.path import dirname, join
 from typing import Optional
 
-from .cartographer import update
 from .da import toggled
 
 # from .git import status
@@ -53,8 +52,7 @@ def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
             if Mode.FOLDER in node.mode:
                 path = node.path
                 index = toggled(state.index, path)
-                root = update(state.root, index=index, paths={path})
-                new_state = forward(state, settings=settings, root=root, index=index)
+                new_state = forward(state, settings=settings, index=index, paths={path})
                 _redraw(nvim, state=new_state)
                 return new_state
             else:
@@ -75,8 +73,7 @@ def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
         with HoldPosition(nvim):
             paths = {i for i in state.index if i.startswith(node.path)}
             index = state.index - paths
-            root = update(state.root, index=index, paths=paths)
-            new_state = forward(state, settings=settings, root=root)
+            new_state = forward(state, settings=settings, index=index, paths=paths)
             _redraw(nvim, state=new_state)
             return new_state
     else:
@@ -85,9 +82,8 @@ def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
 
 def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
     with HoldPosition(nvim):
-        path = state.root.path
-        root = update(state.root, index=state.index, paths={path})
-        new_state = forward(state, settings=settings, root=root)
+        paths = {state.root.path}
+        new_state = forward(state, settings=settings, paths=paths)
         _redraw(nvim, state=new_state)
         return state
 

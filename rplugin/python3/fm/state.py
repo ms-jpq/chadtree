@@ -1,10 +1,10 @@
 from os import getcwd
 from typing import Optional, Sequence
 
-from .cartographer import new
+from .cartographer import new, update
 from .da import or_else
 from .render import render
-from .types import Index, Mode, Node, Selection, Settings, State, VCStatus
+from .types import Index, Mode, Node, Selection, Set, Settings, State, VCStatus
 
 
 def initial(settings: Settings) -> State:
@@ -39,8 +39,10 @@ def forward(
     lookup: Optional[Sequence[Node]] = None,
     rendered: Optional[Sequence[str]] = None,
     vc: Optional[VCStatus] = None,
+    paths: Optional[Set[str]] = None,
 ) -> State:
-    new_root = or_else(root, state.root)
+    new_index = or_else(index, state.index)
+    new_root = update(state.root, index=new_index, paths=paths) if paths else state.root
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
     lookup, rendered = render(
@@ -48,7 +50,7 @@ def forward(
     )
 
     new_state = State(
-        index=or_else(index, state.index),
+        index=new_index,
         selection=or_else(selection, state.selection),
         show_hidden=new_hidden,
         root=new_root,
