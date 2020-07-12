@@ -2,7 +2,7 @@ from os.path import dirname, exists, join, relpath
 from typing import Iterator, Optional
 
 # from .git import status
-from .fs import new, rename
+from .fs import new, remove, rename
 from .keymap import keymap
 from .nvim import (
     Buffer,
@@ -208,9 +208,20 @@ def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
     else:
         node = _index(nvim, state=state)
         if node:
-            rel_path = relpath(node.path, start=state.root.path)
-            nvim.input(f"🗑  {rel_path}")
-            return state
+            path = node.path
+            rel_path = relpath(path, start=state.root.path)
+            ans = nvim.funcs.confirm(f"🗑  {rel_path}?", "&Yes\n&No\n", 2)
+            if ans == 1:
+                try:
+                    remove(path)
+                finally:
+                    parent = dirname(path)
+                    paths = {parent}
+                    new_state = forward(state, settings=settings, paths=paths)
+                    _redraw(nvim, state=new_state)
+                    return new_state
+            else:
+                return state
         else:
             return state
 

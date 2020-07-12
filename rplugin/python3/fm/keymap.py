@@ -1,7 +1,7 @@
 from .nvim import Buffer, Nvim
 from .types import Settings
 
-_options = {"noremap": True, "silent": True}
+_options = {"noremap": True, "silent": True, "nowait": True}
 
 
 def keys(nvim: Nvim, settings: Settings) -> None:
