@@ -202,9 +202,9 @@ def c_delete(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
     return state
 
 
-def c_cut(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
+def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
 
 
-def c_copy(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
+def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
     return state

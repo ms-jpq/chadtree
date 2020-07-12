@@ -40,7 +40,7 @@ class Main:
         keys(self.nvim, self.settings)
 
     @function("FMopen")
-    def fm_open(self, *_) -> None:
+    def fm_open(self, args: Sequence[Any]) -> None:
         """
         Folders -> toggle
         File -> open
@@ -49,7 +49,7 @@ class Main:
         c_open(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMprimary")
-    def primary(self, *_) -> None:
+    def primary(self, args: Sequence[Any]) -> None:
         """
         Folders -> toggle
         File -> open
@@ -58,7 +58,7 @@ class Main:
         self.state = c_primary(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMsecondary")
-    def secondary(self, *_) -> None:
+    def secondary(self, args: Sequence[Any]) -> None:
         """
         Folders -> toggle
         File -> preview
@@ -67,7 +67,7 @@ class Main:
         self.state = c_secondary(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMrefresh")
-    def refresh(self, *_) -> None:
+    def refresh(self, args: Sequence[Any]) -> None:
         """
         Redraw buffers
         """
@@ -75,7 +75,7 @@ class Main:
         self.state = c_refresh(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMcollapse")
-    def collapse(self, *_) -> None:
+    def collapse(self, args: Sequence[Any]) -> None:
         """
         Collapse folder
         """
@@ -83,7 +83,7 @@ class Main:
         self.state = c_collapse(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMhidden")
-    def hidden(self, *_) -> None:
+    def hidden(self, args: Sequence[Any]) -> None:
         """
         Toggle hidden
         """
@@ -91,7 +91,7 @@ class Main:
         self.state = c_hidden(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMcopyname")
-    def copy_name(self, *_) -> None:
+    def copy_name(self, args: Sequence[Any]) -> None:
         """
         Copy dirname / filename
         """
@@ -99,7 +99,7 @@ class Main:
         c_copy_name(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMnew")
-    def new(self, *_) -> None:
+    def new(self, args: Sequence[Any]) -> None:
         """
         new file / folder
         """
@@ -107,7 +107,7 @@ class Main:
         self.state = c_new(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMrename")
-    def rename(self, *_) -> None:
+    def rename(self, args: Sequence[Any]) -> None:
         """
         rename file / folder
         """
@@ -115,7 +115,7 @@ class Main:
         self.state = c_rename(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMclear")
-    def clear(self, *_) -> None:
+    def clear(self, args: Sequence[Any]) -> None:
         """
         Clear selected
         """
@@ -151,24 +151,16 @@ class Main:
         """
         Cut selected
         """
-        visual, *_ = args
-        is_visual = visual == 1
 
-        self.state = c_cut(
-            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
-        )
+        self.state = c_cut(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMcopy")
     def copy(self, args: Sequence[Any]) -> None:
         """
         Copy selected
         """
-        visual, *_ = args
-        is_visual = visual == 1
 
-        self.state = c_copy(
-            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
-        )
+        self.state = c_copy(self.nvim, state=self.state, settings=self.settings)
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
