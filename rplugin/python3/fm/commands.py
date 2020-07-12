@@ -126,7 +126,3 @@ def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
 
 def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
     return state
-
-
-def c_paste(nvim: Nvim, state: State, settings: Settings) -> State:
-    return state

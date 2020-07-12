@@ -1,13 +1,12 @@
 {
   "keymap": {
     "FMclear": ["C"],
-    "FMcopy": ["y"],
-    "FMcopyname": ["yy"],
+    "FMcopy": ["p"],
+    "FMcopyname": ["y"],
     "FMcut": ["x"],
     "FMdelete": ["d"],
     "FMhidden": ["."],
     "FMnew": ["a"],
-    "FMpaste": ["p"],
     "FMprimary": ["<enter>"],
     "FMrefresh": ["<c-r>"],
     "FMrename": ["r"],

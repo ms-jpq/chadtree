@@ -11,7 +11,6 @@ from .commands import (
     c_hidden,
     c_new,
     c_open,
-    c_paste,
     c_primary,
     c_refresh,
     c_rename,
@@ -143,14 +142,6 @@ class Main:
         """
 
         self.state = c_copy(self.nvim, state=self.state, settings=self.settings)
-
-    @function("FMpaste")
-    def paste(self, *_) -> None:
-        """
-        Paste selected
-        """
-
-        self.state = c_paste(self.nvim, state=self.state, settings=self.settings)
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
