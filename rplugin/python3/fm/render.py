@@ -2,10 +2,10 @@ from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
 from os.path import sep
-from typing import Callable, Iterable, Iterator, Sequence, Tuple, Union
+from typing import Callable, Iterable, Iterator, Optional, Sequence, Tuple, Union
 
 from .da import constantly
-from .types import Index, Mode, Node, Settings, VCStatus
+from .types import Index, Mode, Node, Selection, Settings, VCStatus
 
 
 class CompVals(IntEnum):
@@ -34,26 +34,33 @@ def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     return drop
 
 
-def paint(settings: Settings, index: Index) -> Callable[[Node, int], str]:
+def paint(
+    settings: Settings, index: Index, selection: Selection
+) -> Callable[[Node, int], str]:
     icons = settings.icons
 
     def show_ascii(node: Node, depth: int) -> str:
-        spaces = depth * 2 * " "
+        spaces = (depth - 1) * 2 * " "
+        select = ""
         name = node.name.replace("\n", r"\n")
+
         if Mode.FOLDER in node.mode:
             name = f"{name}{sep}"
         if Mode.LINK in node.mode:
             name = f"{name} ->"
-        return spaces + name
+
+        return f"{spaces} {select}{name}"
 
     def show_icons(node: Node, depth: int) -> str:
-        spaces = depth * 2 * " "
+        spaces = (depth - 1) * 2 * " "
+        select = ""
         name = node.name.replace("\n", r"\n")
+
         if Mode.FOLDER in node.mode:
             decor = icons.folder_open if node.path in index else icons.folder_closed
             name = f"{decor} {name}"
         else:
-            decor = icons.filetype.get(node.ext) or next(
+            decor = icons.filetype.get(node.ext or "") or next(
                 (v for k, v in icons.filename.items() if fnmatch(node.name, k)), None
             )
             if decor:
@@ -62,17 +69,24 @@ def paint(settings: Settings, index: Index) -> Callable[[Node, int], str]:
                 name = f"  {name}"
         if Mode.LINK in node.mode:
             name = f"{name} {icons.link}"
-        return spaces + name
+
+        return f"{spaces} {select}{name}"
 
     show = show_icons if settings.use_icons else show_ascii
     return show
 
 
 def render(
-    node: Node, *, settings: Settings, index: Index, vc: VCStatus, show_hidden: bool
+    node: Node,
+    *,
+    settings: Settings,
+    index: Index,
+    selection: Selection,
+    vc: VCStatus,
+    show_hidden: bool,
 ) -> Tuple[Sequence[Node], Sequence[str]]:
     drop = constantly(False) if show_hidden else ignore(settings, vc)
-    show = paint(settings, index=index)
+    show = paint(settings, index=index, selection=selection)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
         rend = show(node, depth)

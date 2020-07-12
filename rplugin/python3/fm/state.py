@@ -10,15 +10,21 @@ from .types import Index, Mode, Node, Selection, Set, Settings, State, VCStatus
 def initial(settings: Settings) -> State:
     cwd = getcwd()
     index = {cwd}
+    selection: Selection = set()
     node = new(cwd, index=index)
     vc = VCStatus()
     lookup, rendered = render(
-        node, settings=settings, index=index, vc=vc, show_hidden=settings.show_hidden
+        node,
+        settings=settings,
+        index=index,
+        selection=selection,
+        vc=vc,
+        show_hidden=settings.show_hidden,
     )
 
     state = State(
         index=index,
-        selection=set(),
+        selection=selection,
         show_hidden=settings.show_hidden,
         root=node,
         lookup=lookup,
@@ -42,16 +48,22 @@ def forward(
     paths: Optional[Set[str]] = None,
 ) -> State:
     new_index = or_else(index, state.index)
+    new_selection = or_else(selection, state.selection)
     new_root = update(state.root, index=new_index, paths=paths) if paths else state.root
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
     lookup, rendered = render(
-        new_root, settings=settings, index=new_index, vc=new_vc, show_hidden=new_hidden,
+        new_root,
+        settings=settings,
+        index=new_index,
+        selection=new_selection,
+        vc=new_vc,
+        show_hidden=new_hidden,
     )
 
     new_state = State(
         index=new_index,
-        selection=or_else(selection, state.selection),
+        selection=new_selection,
         show_hidden=new_hidden,
         root=new_root,
         lookup=lookup,
