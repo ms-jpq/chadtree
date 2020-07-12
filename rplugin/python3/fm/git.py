@@ -3,7 +3,7 @@ from os.path import sep
 from typing import Iterable, Tuple
 
 from .da import call
-from .types import GitStatus
+from .types import VCStatus
 
 
 class GitError(Exception):
@@ -30,13 +30,13 @@ async def stat() -> Iterable[Tuple[str, str]]:
         return entries
 
 
-def parse(root: str, stats: Iterable[Tuple[str, str]]) -> GitStatus:
-    return GitStatus()
+def parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
+    return VCStatus()
 
 
-async def status() -> GitStatus:
+async def status() -> VCStatus:
     try:
         r, stats = await gather(root(), stat())
         return parse(r, stats)
     except GitError:
-        return GitStatus()
+        return VCStatus()

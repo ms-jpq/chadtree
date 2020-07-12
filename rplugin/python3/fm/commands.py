@@ -78,9 +78,10 @@ def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
-    new_state = forward(state, settings=settings, show_hidden=not state.show_hidden)
-    _redraw(nvim, state=new_state)
-    return new_state
+    with HoldPosition(nvim):
+        new_state = forward(state, settings=settings, show_hidden=not state.show_hidden)
+        _redraw(nvim, state=new_state)
+        return new_state
 
 
 def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:

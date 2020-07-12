@@ -2,7 +2,7 @@ from typing import Any
 
 from .consts import config_json, icons_json
 from .da import load_json
-from .types import GitIcons, IconSet, Keymap, Settings
+from .types import VCIcons, IconSet, Keymap, Settings
 
 
 def initial(user_settings: Any, user_icons: Any) -> Settings:
@@ -10,18 +10,18 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
     icon_c = load_json(icons_json)
     keymap = Keymap(entire=config["keys"], buffer=config["keymap"])
 
-    git_ic = icon_c["git"]
-    git_icons = GitIcons(
-        ignored=git_ic["ignored"],
-        added=git_ic["added"],
-        modified=git_ic["modified"],
-        staged=git_ic["staged"],
+    vc_ic = icon_c["vc"]
+    vc_icons = VCIcons(
+        ignored=vc_ic["ignored"],
+        untracked=vc_ic["untracked"],
+        modified=vc_ic["modified"],
+        staged=vc_ic["staged"],
     )
 
     icons = IconSet(
         folder=icon_c["folder"],
         link=icon_c["link"],
-        git=git_icons,
+        vc=vc_icons,
         filetype=icon_c["filetype"],
     )
 

@@ -154,7 +154,7 @@ class Main:
     @autocmd("BufEnter", eval="expand('<abuf>')")
     def on_bufenter(self, buf: str) -> None:
         """
-        Update git
+        Update background tasks
         """
 
         self.state = a_on_bufenter(

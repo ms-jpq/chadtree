@@ -30,9 +30,9 @@ class Keymap:
 
 
 @dataclass(frozen=True)
-class GitIcons:
+class VCIcons:
     ignored: str
-    added: str
+    untracked: str
     modified: str
     staged: str
 
@@ -41,7 +41,7 @@ class GitIcons:
 class IconSet:
     folder: str
     link: str
-    git: GitIcons
+    vc: VCIcons
     filetype: Dict[str, str]
 
 
@@ -58,7 +58,7 @@ class Settings:
 
 
 @dataclass(frozen=True)
-class GitStatus:
+class VCStatus:
     ignored: Set[str] = field(default_factory=set)
     added: Set[str] = field(default_factory=set)
     modified: Set[str] = field(default_factory=set)
@@ -73,4 +73,4 @@ class State:
     root: Node
     lookup: Sequence[Node]
     rendered: Sequence[str]
-    git: GitStatus
+    vc: VCStatus

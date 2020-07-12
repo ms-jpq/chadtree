@@ -35,7 +35,11 @@ class HoldPosition:
         self.pos = pos
 
     def __exit__(self, *_) -> None:
-        self.nvim.api.win_set_cursor(self.window, self.pos)
+        row, col = self.pos
+        buffer: Buffer = self.nvim.api.win_get_buf(self.window)
+        max_rows = self.nvim.api.buf_line_count(buffer)
+        r = min(row, max_rows)
+        self.nvim.api.win_set_cursor(self.window, (r, col))
 
 
 class HoldWindowPosition:

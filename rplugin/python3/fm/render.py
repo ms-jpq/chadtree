@@ -5,7 +5,7 @@ from os.path import sep
 from typing import Callable, Iterable, Iterator, Sequence, Tuple, Union
 
 from .da import constantly
-from .types import GitStatus, Mode, Node, Settings
+from .types import VCStatus, Mode, Node, Settings
 
 
 class CompVals(IntEnum):
@@ -22,10 +22,10 @@ def comp(node: Node) -> Iterable[Union[int, str]]:
     )
 
 
-def ignore(settings: Settings, git: GitStatus) -> Callable[[Node], bool]:
+def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     def drop(node: Node) -> bool:
         ignore = (
-            node.path in git.ignored
+            node.path in vc.ignored
             or any(fnmatch(node.name, pattern) for pattern in settings.name_ignore)
             or any(fnmatch(node.path, pattern) for pattern in settings.path_ignore)
         )
@@ -50,9 +50,9 @@ def paint(settings: Settings) -> Callable[[Node, int], str]:
 
 
 def render(
-    node: Node, *, settings: Settings, git: GitStatus,
+    node: Node, *, settings: Settings, vc: VCStatus, show_hidden: bool
 ) -> Tuple[Sequence[Node], Sequence[str]]:
-    drop = constantly(False) if settings.show_hidden else ignore(settings, git)
+    drop = constantly(False) if show_hidden else ignore(settings, vc)
     show = paint(settings)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
