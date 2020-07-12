@@ -1,6 +1,6 @@
 # Fast FM (Work in progress)
 
-The BEST file manager for Neovim
+The **BEST** file manager for Neovim
 
 ## Features
 
@@ -35,3 +35,7 @@ The BEST file manager for Neovim
 ## Preview
 
 ## Install
+
+```VimL
+Plug ms-jpq/fast-fm
+```
