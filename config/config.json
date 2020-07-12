@@ -10,8 +10,10 @@
     "FMhidden": ["."],
     "FMnew": ["a", "A"],
     "FMprimary": ["<enter>"],
+    "FMquit": ["q", "Q"],
     "FMrefresh": ["<c-r>"],
     "FMrename": ["r", "R"],
+    "FMresize": ["t", "T"],
     "FMsecondary": ["<tab>", "<2-leftmouse>"],
     "FMselect": ["s", "S"]
   },

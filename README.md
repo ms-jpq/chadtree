@@ -18,7 +18,9 @@ The BEST file manager for Neovim
 
 ### Attention to detail
 
-- Always reuse-buffers, open files in correct windows
+- Visual mode multi select
+
+- Always reuse-buffers, open files in correct windows, auto kill deleted buffers
 
 - Shows symlinks
 

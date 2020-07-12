@@ -67,6 +67,14 @@ class Main:
 
         self.state = c_secondary(self.nvim, state=self.state, settings=self.settings)
 
+    @function("FMquit")
+    def quit(self, args: Sequence[Any]) -> None:
+        pass
+
+    @function("FMresize")
+    def resize(self, args: Sequence[Any]) -> None:
+        pass
+
     @function("FMrefresh")
     def refresh(self, args: Sequence[Any]) -> None:
         """
