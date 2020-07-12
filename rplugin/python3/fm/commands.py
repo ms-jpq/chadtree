@@ -1,9 +1,10 @@
-from os.path import dirname, join
+from os.path import dirname, exists, join
 from typing import Optional
 
 from .da import toggled
 
 # from .git import status
+from .fs import new, rename
 from .keymap import keymap
 from .nvim import HoldPosition, HoldWindowPosition, Nvim, Window, find_buffer, print
 from .state import forward, index, is_dir
@@ -85,7 +86,7 @@ def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
         paths = {state.root.path}
         new_state = forward(state, settings=settings, paths=paths)
         _redraw(nvim, state=new_state)
-        return state
+        return new_state
 
 
 def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
@@ -108,10 +109,19 @@ def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
     node = _index(nvim, state)
     if node:
         parent = node.path if is_dir(node) else dirname(node.path)
-        child = nvim.funcs.input("New name: ")
-        new_name = join(parent, child)
-        nvim.print(new_name)
-        return state
+        child = nvim.funcs.input("✏️  :")
+        name = join(parent, child)
+        if exists(name):
+            msg = f"⚠️  Exists: {name}"
+            print(nvim, msg, error=True)
+            return state
+        else:
+            try:
+                new(name)
+            finally:
+                new_state = forward(state, settings=settings, paths={parent})
+                _redraw(nvim, state=new_state)
+                return new_state
     else:
         return state
 
