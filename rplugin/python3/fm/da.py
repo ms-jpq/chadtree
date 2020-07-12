@@ -26,13 +26,6 @@ def constantly(val: T) -> Callable[[Any], T]:
     return ret
 
 
-def toggled(s: Set[T], i: T) -> Set[T]:
-    if i in s:
-        return s - {i}
-    else:
-        return s | {i}
-
-
 def ancestors(path: str) -> Iterator[str]:
     if not path or path == sep:
         return

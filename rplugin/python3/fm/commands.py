@@ -1,7 +1,6 @@
 from os.path import dirname, exists, join, relpath
 from typing import Iterator, Optional
 
-from .da import toggled
 
 # from .git import status
 from .fs import new, rename
@@ -77,9 +76,9 @@ def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
     node = _index(nvim, state=state)
     if node:
         if Mode.FOLDER in node.mode:
-            path = node.path
-            index = toggled(state.index, path)
-            new_state = forward(state, settings=settings, index=index, paths={path})
+            paths = {node.path}
+            index = state.index ^ paths
+            new_state = forward(state, settings=settings, index=index, paths=paths)
             _redraw(nvim, state=new_state)
             return new_state
         else:
@@ -184,14 +183,14 @@ def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
 def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
     nodes = _indices(nvim, state=state, is_visual=is_visual)
     if is_visual:
-        selection = {n.path for n in nodes}
+        selection = state.selection ^ {n.path for n in nodes}
         new_state = forward(state, settings=settings, selection=selection)
         _redraw(nvim, state=new_state)
         return new_state
     else:
         node = next(nodes, None)
         if node:
-            selection = toggled(state.selection, node.path)
+            selection = state.selection ^ {node.path}
             new_state = forward(state, settings=settings, selection=selection)
             _redraw(nvim, state=new_state)
             return new_state
