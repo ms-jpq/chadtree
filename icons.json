@@ -1,11 +1,14 @@
 {
   "filetype": {},
-  "folder": "",
+  "folder": {
+    "closed": "",
+    "open": ""
+  },
+  "link": "",
   "vc": {
-    "untracked": "",
     "ignored": "",
     "modified": "",
-    "staged": ""
-  },
-  "link": ""
+    "staged": "",
+    "untracked": ""
+  }
 }

@@ -4,6 +4,7 @@ from .commands import (
     a_on_bufenter,
     a_on_filetype,
     c_clear,
+    c_collapse,
     c_copy,
     c_copy_name,
     c_cut,
@@ -70,6 +71,14 @@ class Main:
         """
 
         self.state = c_refresh(self.nvim, state=self.state, settings=self.settings)
+
+    @function("FMcollapse")
+    def collapse(self, *_) -> None:
+        """
+        Collapse folder
+        """
+
+        self.state = c_collapse(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMhidden")
     def hidden(self, *_) -> None:

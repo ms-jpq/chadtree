@@ -1,6 +1,7 @@
 {
   "keymap": {
     "FMclear": ["C"],
+    "FMcollapse": ["`"],
     "FMcopy": ["p"],
     "FMcopyname": ["y"],
     "FMcut": ["x"],

@@ -69,12 +69,27 @@ def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
         return c_primary(nvim, state=state, settings=settings)
 
 
+def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
+    node = _index(nvim, state)
+    if node and Mode.FOLDER in node.mode:
+        with HoldPosition(nvim):
+            paths = {i for i in state.index if i.startswith(node.path)}
+            index = state.index - paths
+            root = update(state.root, index=index, paths=paths)
+            new_state = forward(state, settings=settings, root=root)
+            _redraw(nvim, state=new_state)
+            return new_state
+    else:
+        return state
+
+
 def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
-    path = state.root.path
-    root = update(state.root, index=state.index, paths={path})
-    new_state = forward(state, settings=settings, root=root)
-    _redraw(nvim, state=new_state)
-    return state
+    with HoldPosition(nvim):
+        path = state.root.path
+        root = update(state.root, index=state.index, paths={path})
+        new_state = forward(state, settings=settings, root=root)
+        _redraw(nvim, state=new_state)
+        return state
 
 
 def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
