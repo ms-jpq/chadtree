@@ -58,12 +58,6 @@ def find_buffer_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
             yield buffer
 
 
-def new_buffer_with_file(nvim: Nvim, file: str) -> Buffer:
-    buffer: Buffer = nvim.api.create_buf(False, True)
-    nvim.api.buf_set_name(buffer, file)
-    return buffer
-
-
 def new_fm_buffer(nvim: Nvim) -> Buffer:
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
@@ -71,10 +65,9 @@ def new_fm_buffer(nvim: Nvim) -> Buffer:
     return buffer
 
 
-def new_window(nvim: Nvim, buffer: Buffer) -> Window:
+def new_window(nvim: Nvim) -> Window:
     nvim.command("vnew")
     window: Window = nvim.api.get_current_win()
-    nvim.api.win_set_buf(window, buffer)
     return window
 
 
@@ -84,7 +77,8 @@ def toggle_shown(nvim: Nvim, settings: Settings) -> None:
         nvim.api.win_close(window, True)
     else:
         buffer: Buffer = next(find_fm_buffers(nvim), None) or new_fm_buffer(nvim)
-        window = new_window(nvim, buffer=buffer)
+        window = new_window(nvim)
+        nvim.api.win_set_buf(window, buffer)
         nvim.api.win_set_option(window, "number", False)
         nvim.api.win_set_option(window, "signcolumn", "no")
         nvim.api.win_set_option(window, "cursorline", True)
@@ -92,15 +86,15 @@ def toggle_shown(nvim: Nvim, settings: Settings) -> None:
 
 
 def show_file(nvim: Nvim, file: str) -> None:
-    buffer: Buffer = next(
-        find_buffer_with_file(nvim, file=file), None
-    ) or new_buffer_with_file(nvim, file=file)
+    buffer: Optional[Buffer] = next(find_buffer_with_file(nvim, file=file), None)
     window: Window = next(find_window_with_file_in_tab(nvim, file=file), None) or next(
         find_non_fm_windows_in_tab(nvim), None
-    ) or new_window(nvim, buffer)
-
-    nvim.api.win_set_buf(window, buffer)
+    ) or new_window(nvim)
     nvim.api.set_current_win(window)
+    if buffer:
+        nvim.api.win_set_buf(window, buffer)
+    else:
+        nvim.command(f"edit {file}")
 
 
 def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:

@@ -56,5 +56,5 @@ def _update(root: Node, *, index: Index, paths: Set[str]) -> Node:
 def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
     try:
         return _update(root, index=index, paths=paths)
-    except Exception:
-        return new(root, index=index)
+    except FileNotFoundError:
+        return new(root.path, index=index)
