@@ -9,12 +9,13 @@ from .types import GitStatus, Index, Mode, Node, Selection, Settings, State
 
 def initial(settings: Settings) -> State:
     cwd = getcwd()
-    node = new(cwd, index={cwd})
+    index = {cwd}
+    node = new(cwd, index=index)
     git = GitStatus()
     lookup, rendered = render(node, settings=settings, git=git)
 
     state = State(
-        index={cwd},
+        index=index,
         selection=set(),
         show_hidden=settings.show_hidden,
         root=node,
