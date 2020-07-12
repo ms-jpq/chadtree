@@ -257,7 +257,7 @@ def _operation(
     state: State,
     settings: Settings,
     name: str,
-    exec: Callable[[str, str], None],
+    action: Callable[[str, str], None],
 ) -> State:
     node = _index(nvim, state=state)
     if state.selection and node:
@@ -271,19 +271,26 @@ def _operation(
             print(nvim, f"⚠️  -- {name}: path(s) already exist! :: {msg}", error=True)
             return state
         else:
-            paths = set()
-            index = state.index | paths
-            new_state = forward(state, settings=settings, index=index, paths=paths)
-            _redraw(nvim, state=new_state)
-            return state
+            try:
+                for src, dest in operations:
+                    action(src, dest)
+            finally:
+                paths = {
+                    *operations.values(),
+                    *(dirname(src) for src in operations.keys()),
+                }
+                index = state.index | paths
+                new_state = forward(state, settings=settings, index=index, paths=paths)
+                _redraw(nvim, state=new_state)
+                return new_state
     else:
         print(nvim, "⚠️  -- {name}: nothing selected!", error=True)
         return state
 
 
 def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
-    return _operation(nvim, state=state, settings=settings, name="Cut", exec=cut)
+    return _operation(nvim, state=state, settings=settings, name="Cut", action=cut)
 
 
 def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
-    return _operation(nvim, state=state, settings=settings, name="Copy", exec=copy)
+    return _operation(nvim, state=state, settings=settings, name="Copy", action=copy)
