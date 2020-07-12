@@ -1,4 +1,4 @@
-from os.path import dirname, exists, join, relpath
+from os.path import basename, dirname, exists, join, relpath
 from typing import Iterator, Optional
 
 # from .git import status
@@ -47,6 +47,11 @@ def _indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
 def _redraw(nvim: Nvim, state: State) -> None:
     with HoldPosition(nvim):
         update_buffers(nvim, lines=state.rendered)
+
+
+def _display_path(path: str, state: State) -> str:
+    raw = relpath(path, start=state.root.path)
+    return raw.replace("\n", r"\n")
 
 
 def a_on_filetype(nvim: Nvim, state: State, settings: Settings, buf: int) -> None:
@@ -205,15 +210,15 @@ def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
 
 def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
     if state.selection:
-        paths = tuple(unify(state.selection))
-        rel_paths = "\n".join(relpath(path, start=state.root.path) for path in paths)
-        ans = nvim.funcs.confirm(f"🗑  {rel_paths}?", "&Yes\n&No\n", 2)
+        unified = tuple(unify(state.selection))
+        display_paths = "\n".join(_display_path(path, state=state) for path in unified)
+        ans = nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
         if ans == 1:
             try:
-                for path in paths:
+                for path in unified:
                     remove(path)
             finally:
-                paths = {dirname(path) for path in paths}
+                paths = {dirname(path) for path in unified}
                 new_state = forward(state, settings=settings, paths=paths)
                 _redraw(nvim, state=new_state)
                 return new_state
@@ -223,8 +228,8 @@ def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
         node = _index(nvim, state=state)
         if node:
             path = node.path
-            rel_path = relpath(path, start=state.root.path)
-            ans = nvim.funcs.confirm(f"🗑  {rel_path}?", "&Yes\n&No\n", 2)
+            display_path = _display_path(path, state=state)
+            ans = nvim.funcs.confirm(f"🗑  {display_path}?", "&Yes\n&No\n", 2)
             if ans == 1:
                 try:
                     remove(path)
@@ -239,6 +244,13 @@ def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
             return state
 
 
+def _find_dest(src: str, node: Node) -> str:
+    name = basename(src)
+    parent = node.path if is_dir(node) else dirname(node.path)
+    dst = join(parent, name)
+    return dst
+
+
 def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
     if state.selection:
         return state
@@ -248,7 +260,13 @@ def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
-    if state.selection:
+    node = _index(nvim, state=state)
+    if state.selection and node:
+        dests = tuple(_find_dest(selection, node) for selection in state.selection)
+        pre_existing = tuple(d for d in dests if exists(d))
+        if pre_existing:
+            msg = ",".join(_display_path(path, state=state) for path in pre_existing)
+            print(nvim, f"⚠️  -- Copy: path(s) already exist!\n{msg}", error=True)
         return state
     else:
         print(nvim, "⚠️  -- Copy: nothing selected!", error=True)

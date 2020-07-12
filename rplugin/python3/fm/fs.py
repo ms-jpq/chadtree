@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from os import makedirs
 from os import remove as rm
-from os.path import basename, dirname, isdir, join, sep
+from os.path import dirname, isdir, sep
 from pathlib import Path
 from shutil import copy2, copytree
 from shutil import move as mv
@@ -30,15 +30,11 @@ def remove(src: str) -> None:
 
 
 def move(src: str, dest: str) -> None:
-    name = basename(src)
-    dst = join(dest, name)
-    mv(src, dst)
+    mv(src, dest)
 
 
 def copy(src: str, dest: str) -> None:
-    name = basename(src)
-    dst = join(dest, name)
     if isdir(src):
-        copytree(src, dst)
+        copytree(src, dest)
     else:
-        copy2(src, dst)
+        copy2(src, dest)
