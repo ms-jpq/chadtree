@@ -31,3 +31,7 @@ The BEST file manager for Neovim
 - Session support
 
 - Globbing
+
+## Preview
+
+## Install
