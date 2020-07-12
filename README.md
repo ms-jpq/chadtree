@@ -20,7 +20,7 @@ The **BEST** file manager for Neovim
 
 - Visual mode multi select
 
-- Always reuse-buffers, open files in correct windows, auto kill deleted buffers
+- Always reuse-buffers, open files in correct windows, auto kill stale buffers
 
 - Shows symlinks
 
