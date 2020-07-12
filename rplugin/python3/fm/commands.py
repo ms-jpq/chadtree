@@ -1,4 +1,4 @@
-from os.path import dirname, exists, join
+from os.path import dirname, exists, join, relpath
 from typing import Optional
 
 from .da import toggled
@@ -127,7 +127,29 @@ def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
-    return state
+    node = _index(nvim, state)
+    if node:
+        prev_name = node.path
+        parent = state.root.path
+        rel_path = relpath(prev_name, start=parent)
+        child = nvim.funcs.input("✏️  :", rel_path)
+        new_name = join(parent, child)
+        new_parent = dirname(new_name)
+        if exists(new_name):
+            msg = f"⚠️  Exists: {new_name}"
+            print(nvim, msg, error=True)
+            return state
+        else:
+            try:
+                rename(prev_name, new_name)
+            finally:
+                paths = {parent, new_parent}
+                index = state.index | paths
+                new_state = forward(state, settings=settings, index=index, paths=paths)
+                _redraw(nvim, state=new_state)
+                return new_state
+    else:
+        return state
 
 
 def c_select(nvim: Nvim, state: State, settings: Settings) -> State:
