@@ -20,7 +20,8 @@ def _index(nvim: Nvim, state: State) -> Optional[Node]:
 
 
 def _redraw(nvim: Nvim, state: State) -> None:
-    update_buffers(nvim, lines=state.rendered)
+    with HoldPosition(nvim):
+        update_buffers(nvim, lines=state.rendered)
 
 
 def a_on_filetype(nvim: Nvim, state: State, settings: Settings, buf: int) -> None:
@@ -47,20 +48,19 @@ def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        node = _index(nvim, state)
-        if node:
-            if Mode.FOLDER in node.mode:
-                path = node.path
-                index = toggled(state.index, path)
-                new_state = forward(state, settings=settings, index=index, paths={path})
-                _redraw(nvim, state=new_state)
-                return new_state
-            else:
-                show_file(nvim, settings=settings, file=node.path)
-                return state
+    node = _index(nvim, state)
+    if node:
+        if Mode.FOLDER in node.mode:
+            path = node.path
+            index = toggled(state.index, path)
+            new_state = forward(state, settings=settings, index=index, paths={path})
+            _redraw(nvim, state=new_state)
+            return new_state
         else:
+            show_file(nvim, settings=settings, file=node.path)
             return state
+    else:
+        return state
 
 
 def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
@@ -69,31 +69,28 @@ def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        node = _index(nvim, state)
-        if node and Mode.FOLDER in node.mode:
-            paths = {i for i in state.index if i.startswith(node.path)}
-            index = state.index - paths
-            new_state = forward(state, settings=settings, index=index, paths=paths)
-            _redraw(nvim, state=new_state)
-            return new_state
-        else:
-            return state
+    node = _index(nvim, state)
+    if node and Mode.FOLDER in node.mode:
+        paths = {i for i in state.index if i.startswith(node.path)}
+        index = state.index - paths
+        new_state = forward(state, settings=settings, index=index, paths=paths)
+        _redraw(nvim, state=new_state)
+        return new_state
+    else:
+        return state
 
 
 def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        paths = {state.root.path}
-        new_state = forward(state, settings=settings, paths=paths)
-        _redraw(nvim, state=new_state)
-        return new_state
+    paths = {state.root.path}
+    new_state = forward(state, settings=settings, paths=paths)
+    _redraw(nvim, state=new_state)
+    return new_state
 
 
 def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        new_state = forward(state, settings=settings, show_hidden=not state.show_hidden)
-        _redraw(nvim, state=new_state)
-        return new_state
+    new_state = forward(state, settings=settings, show_hidden=not state.show_hidden)
+    _redraw(nvim, state=new_state)
+    return new_state
 
 
 def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
@@ -106,85 +103,76 @@ def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        node = _index(nvim, state)
-        if node:
-            parent = node.path if is_dir(node) else dirname(node.path)
-            child = nvim.funcs.input("✏️  :")
-            name = join(parent, child)
-            if exists(name):
-                msg = f"⚠️  Exists: {name}"
-                print(nvim, msg, error=True)
-                return state
-            else:
-                try:
-                    new(name)
-                finally:
-                    new_state = forward(state, settings=settings, paths={parent})
-                    _redraw(nvim, state=new_state)
-                    return new_state
-        else:
+    node = _index(nvim, state)
+    if node:
+        parent = node.path if is_dir(node) else dirname(node.path)
+        child = nvim.funcs.input("✏️  :")
+        name = join(parent, child)
+        if exists(name):
+            msg = f"⚠️  Exists: {name}"
+            print(nvim, msg, error=True)
             return state
+        else:
+            try:
+                new(name)
+            finally:
+                new_state = forward(state, settings=settings, paths={parent})
+                _redraw(nvim, state=new_state)
+                return new_state
+    else:
+        return state
 
 
 def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        node = _index(nvim, state)
-        if node:
-            prev_name = node.path
-            parent = state.root.path
-            rel_path = relpath(prev_name, start=parent)
-            child = nvim.funcs.input("✏️  :", rel_path)
-            new_name = join(parent, child)
-            new_parent = dirname(new_name)
-            if exists(new_name):
-                msg = f"⚠️  Exists: {new_name}"
-                print(nvim, msg, error=True)
-                return state
-            else:
-                try:
-                    rename(prev_name, new_name)
-                finally:
-                    paths = {parent, new_parent}
-                    index = state.index | paths
-                    new_state = forward(
-                        state, settings=settings, index=index, paths=paths
-                    )
-                    _redraw(nvim, state=new_state)
-                    return new_state
-        else:
+    node = _index(nvim, state)
+    if node:
+        prev_name = node.path
+        parent = state.root.path
+        rel_path = relpath(prev_name, start=parent)
+        child = nvim.funcs.input("✏️  :", rel_path)
+        new_name = join(parent, child)
+        new_parent = dirname(new_name)
+        if exists(new_name):
+            msg = f"⚠️  Exists: {new_name}"
+            print(nvim, msg, error=True)
             return state
+        else:
+            try:
+                rename(prev_name, new_name)
+            finally:
+                paths = {parent, new_parent}
+                index = state.index | paths
+                new_state = forward(state, settings=settings, index=index, paths=paths)
+                _redraw(nvim, state=new_state)
+                return new_state
+    else:
+        return state
 
 
 def c_select(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        node = _index(nvim, state)
-        if node:
-            selection = toggled(state.selection, node.path)
-            new_state = forward(state, settings=settings, selection=selection)
-            _redraw(nvim, state=new_state)
-            return new_state
-        else:
-            return state
+    node = _index(nvim, state)
+    if node:
+        selection = toggled(state.selection, node.path)
+        new_state = forward(state, settings=settings, selection=selection)
+        _redraw(nvim, state=new_state)
+        return new_state
+    else:
+        return state
 
 
 def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        new_state = forward(state, settings=settings, selection=set())
-        _redraw(nvim, state=new_state)
-        return new_state
+    new_state = forward(state, settings=settings, selection=set())
+    _redraw(nvim, state=new_state)
+    return new_state
 
 
 def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        return state
+    return state
 
 
 def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        return state
+    return state
 
 
 def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
-    with HoldPosition(nvim):
-        return state
+    return state
