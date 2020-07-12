@@ -58,6 +58,7 @@ class Settings:
     path_ignore: Sequence[str]
     use_icons: bool
     icons: IconSet
+    session: bool
 
 
 @dataclass(frozen=True)

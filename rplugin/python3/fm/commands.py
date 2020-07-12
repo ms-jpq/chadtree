@@ -268,12 +268,16 @@ def _operation(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
                 for s, d in pre_existing.items()
             )
-            print(nvim, f"⚠️  -- Copy: path(s) already exist! :: {msg}", error=True)
+            print(nvim, f"⚠️  -- {name}: path(s) already exist! :: {msg}", error=True)
             return state
         else:
+            paths = set()
+            index = state.index | paths
+            new_state = forward(state, settings=settings, index=index, paths=paths)
+            _redraw(nvim, state=new_state)
             return state
     else:
-        print(nvim, "⚠️  -- Copy: nothing selected!", error=True)
+        print(nvim, "⚠️  -- {name}: nothing selected!", error=True)
         return state
 
 

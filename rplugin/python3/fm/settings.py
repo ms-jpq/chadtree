@@ -40,6 +40,7 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
         path_ignore=ignore["path"],
         use_icons=config["use_icons"],
         icons=icons,
+        session=config["session"],
     )
 
     return settings

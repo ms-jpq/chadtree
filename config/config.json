@@ -4,7 +4,7 @@
     "FMclear": ["c", "C"],
     "FMcollapse": ["<s-tab>", "`"],
     "FMcopy": ["p", "P"],
-    "FMcopyname": ["y", "yy"],
+    "FMcopyname": ["y", "Y"],
     "FMcut": ["x", "X"],
     "FMdelete": ["d", "D"],
     "FMhidden": ["."],
@@ -19,6 +19,7 @@
     "FMopen": ["<leader>v"]
   },
   "open_left": true,
+  "session": true,
   "show_hidden": false,
   "use_icons": true,
   "width": 40
