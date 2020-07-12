@@ -1,12 +1,20 @@
 from os.path import dirname, exists, join, relpath
-from typing import Optional
+from typing import Iterator, Optional
 
 from .da import toggled
 
 # from .git import status
 from .fs import new, rename
 from .keymap import keymap
-from .nvim import HoldPosition, HoldWindowPosition, Nvim, Window, find_buffer, print
+from .nvim import (
+    Buffer,
+    HoldPosition,
+    HoldWindowPosition,
+    Nvim,
+    Window,
+    find_buffer,
+    print,
+)
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
 from .wm import is_fm_buffer, show_file, toggle_shown, update_buffers
@@ -17,6 +25,24 @@ def _index(nvim: Nvim, state: State) -> Optional[Node]:
     row, _ = nvim.api.win_get_cursor(window)
     row = row - 1
     return index(state, row)
+
+
+def _indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
+    if is_visual:
+        buffer: Buffer = nvim.api.get_current_buf()
+        r1, _ = nvim.api.buf_get_mark(buffer, "<")
+        r2, _ = nvim.api.buf_get_mark(buffer, ">")
+        for row in range(r1, r2 + 1):
+            node = index(state, row)
+            if node:
+                yield node
+    else:
+        window: Window = nvim.api.get_current_win()
+        row, _ = nvim.api.win_get_cursor(window)
+        row = row - 1
+        node = index(state, row)
+        if node:
+            yield node
 
 
 def _redraw(nvim: Nvim, state: State) -> None:
@@ -48,7 +74,7 @@ def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
-    node = _index(nvim, state)
+    node = _index(nvim, state=state)
     if node:
         if Mode.FOLDER in node.mode:
             path = node.path
@@ -69,7 +95,7 @@ def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
-    node = _index(nvim, state)
+    node = _index(nvim, state=state)
     if node and Mode.FOLDER in node.mode:
         paths = {i for i in state.index if i.startswith(node.path)}
         index = state.index - paths
@@ -94,7 +120,7 @@ def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
-    node = _index(nvim, state)
+    node = _index(nvim, state=state)
     if node:
         path = node.path
         nvim.funcs.setreg("+", path)
@@ -103,7 +129,7 @@ def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
-    node = _index(nvim, state)
+    node = _index(nvim, state=state)
     if node:
         parent = node.path if is_dir(node) else dirname(node.path)
         child = nvim.funcs.input("✏️  :")
@@ -124,7 +150,7 @@ def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
-    node = _index(nvim, state)
+    node = _index(nvim, state=state)
     if node:
         prev_name = node.path
         parent = state.root.path
@@ -149,30 +175,25 @@ def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
         return state
 
 
-def c_select(nvim: Nvim, state: State, settings: Settings) -> State:
-    node = _index(nvim, state)
-    if node:
-        selection = toggled(state.selection, node.path)
-        new_state = forward(state, settings=settings, selection=selection)
-        _redraw(nvim, state=new_state)
-        return new_state
-    else:
-        return state
-
-
 def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
     new_state = forward(state, settings=settings, selection=set())
     _redraw(nvim, state=new_state)
     return new_state
 
 
-def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
+def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
+    indices = _indices(nvim, state=state, is_visual=is_visual)
+    print(nvim, is_visual)
     return state
 
 
-def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
+def c_delete(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
     return state
 
 
-def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
+def c_cut(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
+    return state
+
+
+def c_copy(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
     return state

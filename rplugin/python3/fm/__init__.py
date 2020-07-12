@@ -112,14 +112,6 @@ class Main:
 
         self.state = c_rename(self.nvim, state=self.state, settings=self.settings)
 
-    @function("FMselect")
-    def select(self, *_) -> None:
-        """
-        Folder / File -> select
-        """
-
-        self.state = c_select(self.nvim, state=self.state, settings=self.settings)
-
     @function("FMclear")
     def clear(self, *_) -> None:
         """
@@ -128,29 +120,49 @@ class Main:
 
         self.state = c_clear(self.nvim, state=self.state, settings=self.settings)
 
+    @function("FMselect")
+    def select(self, visual: int, *_) -> None:
+        """
+        Folder / File -> select
+        """
+        is_visual = visual == 1
+
+        self.state = c_select(
+            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
+        )
+
     @function("FMdelete")
-    def delete(self, *_) -> None:
+    def delete(self, visual: int, *_) -> None:
         """
         Delete selected
         """
+        is_visual = visual == 1
 
-        self.state = c_delete(self.nvim, state=self.state, settings=self.settings)
+        self.state = c_delete(
+            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
+        )
 
     @function("FMcut")
-    def cut(self, *_) -> None:
+    def cut(self, visual: int, *_) -> None:
         """
         Cut selected
         """
+        is_visual = visual == 1
 
-        self.state = c_cut(self.nvim, state=self.state, settings=self.settings)
+        self.state = c_cut(
+            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
+        )
 
     @function("FMcopy")
-    def copy(self, *_) -> None:
+    def copy(self, visual: int, *_) -> None:
         """
         Copy selected
         """
+        is_visual = visual == 1
 
-        self.state = c_copy(self.nvim, state=self.state, settings=self.settings)
+        self.state = c_copy(
+            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
+        )
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
