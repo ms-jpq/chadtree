@@ -86,6 +86,11 @@ def new_window(nvim: Nvim, *, open_left: bool) -> Window:
     return window
 
 
+def resize_fm_windows(nvim: Nvim, *, settings: Settings) -> None:
+    for window in find_fm_windows_in_tab(nvim):
+        nvim.api.win_set_width(window, settings.width)
+
+
 def toggle_shown(nvim: Nvim, *, settings: Settings) -> None:
     window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
     if window:
@@ -97,7 +102,7 @@ def toggle_shown(nvim: Nvim, *, settings: Settings) -> None:
         nvim.api.win_set_option(window, "number", False)
         nvim.api.win_set_option(window, "signcolumn", "no")
         nvim.api.win_set_option(window, "cursorline", True)
-        nvim.api.win_set_width(window, settings.width)
+        resize_fm_windows(nvim, settings=settings)
 
 
 def show_file(nvim: Nvim, *, settings: Settings, file: str) -> None:
@@ -110,6 +115,7 @@ def show_file(nvim: Nvim, *, settings: Settings, file: str) -> None:
         nvim.api.win_set_buf(window, buffer)
     else:
         nvim.command(f"edit {file}")
+    resize_fm_windows(nvim, settings=settings)
 
 
 def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
