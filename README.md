@@ -14,7 +14,7 @@ The BEST file manager for Neovim
 
 - Asynchronous parse git status (untracked, modified, staged)
 
-- Full support for git ignore (toggle shown)
+- Full support for git ignore, toggle show / hide
 
 ### Attention to detail
 
@@ -26,4 +26,6 @@ The BEST file manager for Neovim
 
 - Follow mode
 
-- Glob support
+- Session support
+
+- Globbing
