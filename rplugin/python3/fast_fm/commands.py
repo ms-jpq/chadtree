@@ -210,7 +210,8 @@ def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
 
 
 def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
-    selection = state.selection
+    node = _index(nvim, state=state)
+    selection = state.selection or ({node.path} if node else set())
     if selection:
         unified = tuple(unify(selection))
         display_paths = "\n".join(_display_path(path, state=state) for path in unified)
@@ -228,23 +229,7 @@ def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
         else:
             return state
     else:
-        node = _index(nvim, state=state)
-        if node:
-            path = node.path
-            display_path = _display_path(path, state=state)
-            ans = nvim.funcs.confirm(f"🗑  {display_path}?", "&Yes\n&No\n", 2)
-            if ans == 1:
-                try:
-                    remove(path)
-                finally:
-                    paths = {dirname(path)}
-                    new_state = forward(state, settings=settings, paths=paths)
-                    _redraw(nvim, state=new_state)
-                    return new_state
-            else:
-                return state
-        else:
-            return state
+        return state
 
 
 def _find_dest(src: str, node: Node) -> str:
