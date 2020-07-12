@@ -13,7 +13,7 @@ def initial(settings: Settings) -> State:
     node = new(cwd, index=index)
     vc = VCStatus()
     lookup, rendered = render(
-        node, settings=settings, vc=vc, show_hidden=settings.show_hidden
+        node, settings=settings, index=index, vc=vc, show_hidden=settings.show_hidden
     )
 
     state = State(
@@ -46,7 +46,7 @@ def forward(
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
     lookup, rendered = render(
-        new_root, settings=settings, vc=new_vc, show_hidden=new_hidden,
+        new_root, settings=settings, index=new_index, vc=new_vc, show_hidden=new_hidden,
     )
 
     new_state = State(

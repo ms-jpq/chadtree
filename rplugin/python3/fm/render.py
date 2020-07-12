@@ -5,7 +5,7 @@ from os.path import sep
 from typing import Callable, Iterable, Iterator, Sequence, Tuple, Union
 
 from .da import constantly
-from .types import VCStatus, Mode, Node, Settings
+from .types import Index, Mode, Node, Settings, VCStatus
 
 
 class CompVals(IntEnum):
@@ -34,26 +34,45 @@ def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     return drop
 
 
-def paint(settings: Settings) -> Callable[[Node, int], str]:
-    link_decor = settings.icons.link if settings.use_icons else " ->"
+def paint(settings: Settings, index: Index) -> Callable[[Node, int], str]:
+    icons = settings.icons
 
-    def show(node: Node, depth: int) -> str:
+    def show_ascii(node: Node, depth: int) -> str:
         spaces = depth * 2 * " "
         name = node.name.replace("\n", r"\n")
         if Mode.FOLDER in node.mode:
-            name = name + sep
+            name = f"{name}{sep}"
         if Mode.LINK in node.mode:
-            name = name + link_decor
+            name = f"{name} ->"
         return spaces + name
 
+    def show_icons(node: Node, depth: int) -> str:
+        spaces = depth * 2 * " "
+        name = node.name.replace("\n", r"\n")
+        if Mode.FOLDER in node.mode:
+            decor = icons.folder_open if node.path in index else icons.folder_closed
+            name = f"{decor} {name}"
+        else:
+            decor = icons.filetype.get(node.ext) or next(
+                (v for k, v in icons.filename.items() if fnmatch(node.name, k)), None
+            )
+            if decor:
+                name = f"{decor} {name}"
+            else:
+                name = f"  {name}"
+        if Mode.LINK in node.mode:
+            name = f"{name} {icons.link}"
+        return spaces + name
+
+    show = show_icons if settings.use_icons else show_ascii
     return show
 
 
 def render(
-    node: Node, *, settings: Settings, vc: VCStatus, show_hidden: bool
+    node: Node, *, settings: Settings, index: Index, vc: VCStatus, show_hidden: bool
 ) -> Tuple[Sequence[Node], Sequence[str]]:
     drop = constantly(False) if show_hidden else ignore(settings, vc)
-    show = paint(settings)
+    show = paint(settings, index=index)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
         rend = show(node, depth)

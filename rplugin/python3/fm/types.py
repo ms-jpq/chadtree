@@ -39,10 +39,12 @@ class VCIcons:
 
 @dataclass(frozen=True)
 class IconSet:
-    folder: str
+    folder_open: str
+    folder_closed: str
     link: str
     vc: VCIcons
     filetype: Dict[str, str]
+    filename: Dict[str, str]
 
 
 @dataclass(frozen=True)

@@ -2,7 +2,7 @@ from typing import Any
 
 from .consts import config_json, icons_json
 from .da import load_json
-from .types import VCIcons, IconSet, Keymap, Settings
+from .types import IconSet, Keymap, Settings, VCIcons
 
 
 def initial(user_settings: Any, user_icons: Any) -> Settings:
@@ -18,11 +18,15 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
         staged=vc_ic["staged"],
     )
 
+    folder_ic = icon_c["folder"]
+
     icons = IconSet(
-        folder=icon_c["folder"],
+        folder_open=folder_ic["open"],
+        folder_closed=folder_ic["closed"],
         link=icon_c["link"],
         vc=vc_icons,
         filetype=icon_c["filetype"],
+        filename=icon_c["filename"],
     )
 
     settings = Settings(
