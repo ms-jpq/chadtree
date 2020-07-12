@@ -4,7 +4,7 @@ from typing import Optional, Sequence
 from .cartographer import new
 from .da import or_else
 from .render import render
-from .types import VCStatus, Index, Mode, Node, Selection, Settings, State
+from .types import Index, Mode, Node, Selection, Settings, State, VCStatus
 
 
 def initial(settings: Settings) -> State:
@@ -42,14 +42,15 @@ def forward(
 ) -> State:
     new_root = or_else(root, state.root)
     new_vc = or_else(vc, state.vc)
+    new_hidden = or_else(show_hidden, state.show_hidden)
     lookup, rendered = render(
-        new_root, settings=settings, vc=new_vc, show_hidden=state.show_hidden
+        new_root, settings=settings, vc=new_vc, show_hidden=new_hidden,
     )
 
     new_state = State(
         index=or_else(index, state.index),
         selection=or_else(selection, state.selection),
-        show_hidden=or_else(show_hidden, state.show_hidden),
+        show_hidden=new_hidden,
         root=new_root,
         lookup=lookup,
         rendered=rendered,
