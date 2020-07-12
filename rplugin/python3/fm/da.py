@@ -2,7 +2,8 @@ from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from json import load
-from typing import Any, AsyncIterator, Callable, Optional, Set, TypeVar, cast
+from os.path import dirname, sep
+from typing import Any, AsyncIterator, Callable, Iterator, Optional, Set, TypeVar, cast
 
 T = TypeVar("T")
 
@@ -30,6 +31,21 @@ def toggled(s: Set[T], i: T) -> Set[T]:
         return s - {i}
     else:
         return s | {i}
+
+
+def ancestors(path: str) -> Iterator[str]:
+    if not path or path == sep:
+        return
+    else:
+        parent = dirname(path)
+        yield from ancestors(parent)
+        yield parent
+
+
+def unify(paths: Set[str]) -> Iterator[str]:
+    for path in paths:
+        if not any(a in paths for a in ancestors(path)):
+            yield path
 
 
 @dataclass(frozen=True)

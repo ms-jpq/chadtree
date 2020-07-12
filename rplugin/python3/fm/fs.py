@@ -7,24 +7,6 @@ from pathlib import Path
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
-from typing import Iterator
-
-from .types import Selection
-
-
-def ancestors(path: str) -> Iterator[str]:
-    if not path or path == sep:
-        return
-    else:
-        parent = dirname(path)
-        yield from ancestors(parent)
-        yield parent
-
-
-def unify(paths: Selection) -> Iterator[str]:
-    for path in paths:
-        if not any(a in paths for a in ancestors(path)):
-            yield path
 
 
 def new(dest: str, folder_mode: int = 0o755, file_mode: int = 0o644) -> None:
@@ -40,28 +22,25 @@ def rename(src: str, dest: str) -> None:
     mv(src, dest)
 
 
-def remove(src: Selection) -> None:
-    for path in unify(src):
-        if isdir(path):
-            rmtree(path)
-        else:
-            rm(path)
+def remove(src: str) -> None:
+    if isdir(src):
+        rmtree(src)
+    else:
+        rm(src)
 
 
-def move(src: Selection, dest: str) -> None:
+def move(src: str, dest: str) -> None:
     dst_dir = dest if isdir(dest) else dirname(dest)
-    for path in unify(src):
-        name = basename(path)
-        dst = join(dst_dir, name)
-        mv(path, dst)
+    name = basename(src)
+    dst = join(dst_dir, name)
+    mv(src, dst)
 
 
-def copy(src: Selection, dest: str) -> None:
+def copy(src: str, dest: str) -> None:
     dst_dir = dest if isdir(dest) else dirname(dest)
-    for path in unify(src):
-        name = basename(path)
-        dst = join(dst_dir, name)
-        if isdir(path):
-            copytree(path, dst)
-        else:
-            copy2(path, dst)
+    name = basename(src)
+    dst = join(dst_dir, name)
+    if isdir(src):
+        copytree(src, dst)
+    else:
+        copy2(src, dst)

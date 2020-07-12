@@ -17,9 +17,7 @@
   "keys": {
     "FMopen": ["<leader>v"]
   },
-  "name_ignore": [".git", ".DS_Store", "__pycache__"],
   "open_left": true,
-  "path_ignore": [],
   "show_hidden": false,
   "use_icons": true,
   "width": 40

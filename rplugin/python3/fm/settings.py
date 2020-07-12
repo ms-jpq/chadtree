@@ -1,6 +1,6 @@
 from typing import Any
 
-from .consts import config_json, icons_json
+from .consts import config_json, icons_json, ignore_json
 from .da import load_json
 from .types import IconSet, Keymap, Settings, VCIcons
 
@@ -8,6 +8,7 @@ from .types import IconSet, Keymap, Settings, VCIcons
 def initial(user_settings: Any, user_icons: Any) -> Settings:
     config = load_json(config_json)
     icon_c = load_json(icons_json)
+    ignore = load_json(ignore_json)
     keymap = Keymap(entire=config["keys"], buffer=config["keymap"])
 
     vc_ic = icon_c["vc"]
@@ -34,8 +35,8 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
         open_left=config["open_left"],
         keymap=keymap,
         show_hidden=config["show_hidden"],
-        name_ignore=config["name_ignore"],
-        path_ignore=config["path_ignore"],
+        name_ignore=ignore["name"],
+        path_ignore=ignore["path"],
         use_icons=config["use_icons"],
         icons=icons,
     )
