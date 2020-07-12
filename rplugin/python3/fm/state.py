@@ -14,7 +14,7 @@ def initial(settings: Settings) -> State:
     lookup, rendered = render(node, settings=settings, git=git)
 
     state = State(
-        index=set(),
+        index={cwd},
         selection=set(),
         show_hidden=settings.show_hidden,
         root=node,

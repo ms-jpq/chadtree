@@ -19,7 +19,7 @@ async def anext(aiter: AsyncIterator[T], default: Optional[T]) -> Optional[T]:
 
 
 def constantly(val: T) -> Callable[[Any], T]:
-    def ret(*args: Any) -> T:
+    def ret(*args: Any, **kwargs: Any) -> T:
         return val
 
     return ret

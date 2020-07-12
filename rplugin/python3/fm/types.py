@@ -47,6 +47,7 @@ class IconSet:
 
 @dataclass(frozen=True)
 class Settings:
+    open_left: bool
     width: int
     keymap: Keymap
     show_hidden: bool

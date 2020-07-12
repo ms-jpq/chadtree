@@ -65,19 +65,29 @@ def new_fm_buffer(nvim: Nvim) -> Buffer:
     return buffer
 
 
-def new_window(nvim: Nvim) -> Window:
+def new_window(nvim: Nvim, *, open_left: bool) -> Window:
+    split = nvim.api.get_option("splitright")
+
+    windows: Sequence[Window] = find_windows_in_tab(nvim)
+    focus_win = windows[0] if open_left else windows[-1]
+    direction = False if open_left else True
+    nvim.api.set_option("splitright", direction)
+
+    nvim.api.set_current_win(focus_win)
     nvim.command("vnew")
+    nvim.api.set_option("splitright", split)
+
     window: Window = nvim.api.get_current_win()
     return window
 
 
-def toggle_shown(nvim: Nvim, settings: Settings) -> None:
+def toggle_shown(nvim: Nvim, *, settings: Settings) -> None:
     window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
     if window:
         nvim.api.win_close(window, True)
     else:
         buffer: Buffer = next(find_fm_buffers(nvim), None) or new_fm_buffer(nvim)
-        window = new_window(nvim)
+        window = new_window(nvim, open_left=settings.open_left)
         nvim.api.win_set_buf(window, buffer)
         nvim.api.win_set_option(window, "number", False)
         nvim.api.win_set_option(window, "signcolumn", "no")
@@ -85,11 +95,11 @@ def toggle_shown(nvim: Nvim, settings: Settings) -> None:
         nvim.api.win_set_width(window, settings.width)
 
 
-def show_file(nvim: Nvim, file: str) -> None:
+def show_file(nvim: Nvim, *, settings: Settings, file: str) -> None:
     buffer: Optional[Buffer] = next(find_buffer_with_file(nvim, file=file), None)
     window: Window = next(find_window_with_file_in_tab(nvim, file=file), None) or next(
         find_non_fm_windows_in_tab(nvim), None
-    ) or new_window(nvim)
+    ) or new_window(nvim, open_left=not settings.open_left)
     nvim.api.set_current_win(window)
     if buffer:
         nvim.api.win_set_buf(window, buffer)

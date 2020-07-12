@@ -6,7 +6,7 @@ from .da import toggled
 
 # from .git import status
 from .keymap import keymap
-from .nvim import HoldPosition, HoldWindowPosition, Nvim, Window, find_buffer
+from .nvim import HoldPosition, HoldWindowPosition, Nvim, Window, find_buffer, print
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
 from .wm import is_fm_buffer, show_file, toggle_shown, update_buffers
@@ -58,7 +58,7 @@ def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
                 _redraw(nvim, state=new_state)
                 return new_state
             else:
-                show_file(nvim, file=node.path)
+                show_file(nvim, settings=settings, file=node.path)
                 return state
     else:
         return state
@@ -70,19 +70,26 @@ def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
+    path = state.root.path
+    root = update(state.root, index=state.index, paths={path})
+    new_state = forward(state, settings=settings, root=root)
+    _redraw(nvim, state=new_state)
     return state
 
 
 def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
-    return state
+    new_state = forward(state, settings=settings, show_hidden=not state.show_hidden)
+    _redraw(nvim, state=new_state)
+    return new_state
 
 
 def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
     node = _index(nvim, state)
     if node:
-        nvim.funcs.setreg("+", node.path)
-        nvim.funcs.setreg("*", node.path)
-        nvim.print(f"📎 {node}")
+        path = node.path
+        nvim.funcs.setreg("+", path)
+        nvim.funcs.setreg("*", path)
+        print(nvim, f"📎 {path}")
 
 
 def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
