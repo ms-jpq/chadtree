@@ -85,6 +85,9 @@ def toggle_shown(nvim: Nvim, settings: Settings) -> None:
     else:
         buffer: Buffer = next(find_fm_buffers(nvim), None) or new_fm_buffer(nvim)
         window = new_window(nvim, buffer=buffer)
+        nvim.api.win_set_option(window, "number", False)
+        nvim.api.win_set_option(window, "signcolumn", "no")
+        nvim.api.win_set_option(window, "cursorline", True)
         nvim.api.win_set_width(window, settings.width)
 
 

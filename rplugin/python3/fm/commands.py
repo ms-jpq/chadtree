@@ -66,7 +66,7 @@ def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
 
 def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
     with HoldWindowPosition(nvim):
-        c_primary(nvim, state=state, settings=settings)
+        return c_primary(nvim, state=state, settings=settings)
 
 
 def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:

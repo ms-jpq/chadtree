@@ -36,12 +36,12 @@ def new(root: str, *, index: Index) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
-def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
+def _update(root: Node, *, index: Index, paths: Set[str]) -> Node:
     if root.path in paths:
         return new(root.path, index=index)
     else:
         children = {
-            k: update(v, index=index, paths=paths)
+            k: _update(v, index=index, paths=paths)
             for k, v in (root.children or {}).items()
         }
         return Node(
@@ -51,3 +51,10 @@ def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
             children=children,
             ext=root.ext,
         )
+
+
+def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
+    try:
+        return _update(root, index=index, paths=paths)
+    except Exception:
+        return new(root, index=index)
