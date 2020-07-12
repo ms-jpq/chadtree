@@ -30,16 +30,14 @@ def remove(src: str) -> None:
 
 
 def move(src: str, dest: str) -> None:
-    dst_dir = dest if isdir(dest) else dirname(dest)
     name = basename(src)
-    dst = join(dst_dir, name)
+    dst = join(dest, name)
     mv(src, dst)
 
 
 def copy(src: str, dest: str) -> None:
-    dst_dir = dest if isdir(dest) else dirname(dest)
     name = basename(src)
-    dst = join(dst_dir, name)
+    dst = join(dest, name)
     if isdir(src):
         copytree(src, dst)
     else:
