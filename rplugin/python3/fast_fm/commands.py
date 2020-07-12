@@ -16,7 +16,7 @@ from .nvim import (
 )
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
-from .wm import is_fm_buffer, show_file, toggle_shown, update_buffers
+from .wm import is_fm_buffer, kill_buffers, show_file, toggle_shown, update_buffers
 
 
 def _index(nvim: Nvim, state: State) -> Optional[Node]:
@@ -62,7 +62,7 @@ def a_on_filetype(nvim: Nvim, state: State, settings: Settings, buf: int) -> Non
 
 def a_on_bufenter(nvim: Nvim, state: State, settings: Settings, buf: int) -> State:
     buffer = find_buffer(nvim, buf)
-    if is_fm_buffer(nvim, buffer=buffer):
+    if buffer and is_fm_buffer(nvim, buffer=buffer):
         return state
     else:
         return state
@@ -179,6 +179,7 @@ def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
                 index = state.index | paths
                 new_state = forward(state, settings=settings, index=index, paths=paths)
                 _redraw(nvim, state=new_state)
+                kill_buffers(nvim, files={prev_name})
                 return new_state
     else:
         return state
@@ -209,8 +210,9 @@ def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
 
 
 def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
-    if state.selection:
-        unified = tuple(unify(state.selection))
+    selection = state.selection
+    if selection:
+        unified = tuple(unify(selection))
         display_paths = "\n".join(_display_path(path, state=state) for path in unified)
         ans = nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
         if ans == 1:
@@ -221,6 +223,7 @@ def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
                 paths = {dirname(path) for path in unified}
                 new_state = forward(state, settings=settings, paths=paths)
                 _redraw(nvim, state=new_state)
+                kill_buffers(nvim, files=selection)
                 return new_state
         else:
             return state
@@ -260,8 +263,9 @@ def _operation(
     action: Callable[[str, str], None],
 ) -> State:
     node = _index(nvim, state=state)
-    if state.selection and node:
-        operations = {src: _find_dest(src, node) for src in state.selection}
+    selection = state.selection
+    if selection and node:
+        operations = {src: _find_dest(src, node) for src in selection}
         pre_existing = {s: d for s, d in operations.items() if exists(d)}
         if pre_existing:
             msg = ", ".join(
@@ -282,6 +286,7 @@ def _operation(
                 index = state.index | paths
                 new_state = forward(state, settings=settings, index=index, paths=paths)
                 _redraw(nvim, state=new_state)
+                kill_buffers(nvim, files=selection)
                 return new_state
     else:
         print(nvim, "⚠️  -- {name}: nothing selected!", error=True)

@@ -6,6 +6,8 @@ The **BEST** file manager for Neovim
 
 ### Fast & asynchronous where it counts
 
+- Incremental file system scan
+
 - All batch file system operations are async / non-blocking
 
 - Asynchronous background updates
@@ -37,5 +39,5 @@ The **BEST** file manager for Neovim
 ## Install
 
 ```VimL
-Plug ms-jpq/fast-fm
+Plug 'ms-jpq/fast-fm'
 ```

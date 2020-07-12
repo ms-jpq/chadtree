@@ -1,4 +1,4 @@
-from typing import Iterator, Optional, Sequence, Tuple
+from typing import Iterator, Optional, Sequence, Set, Tuple
 
 from .consts import fm_filetype
 from .nvim import Buffer, Nvim, Tabpage, Window
@@ -119,3 +119,11 @@ def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
         nvim.api.buf_set_option(buffer, "modifiable", True)
         nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
         nvim.api.buf_set_option(buffer, "modifiable", modifiable)
+
+
+def kill_buffers(nvim: Nvim, files: Set[str]) -> None:
+    buffers: Sequence[Buffer] = nvim.api.list_bufs()
+    for buffer in buffers:
+        name = nvim.api.buf_get_name(buffer)
+        if name in files:
+            nvim.command(f"bwipeout! {buffer.number}")
