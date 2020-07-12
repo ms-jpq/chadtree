@@ -41,7 +41,7 @@ def paint(
 
     def show_ascii(node: Node, depth: int) -> str:
         spaces = (depth - 1) * 2 * " "
-        select = ""
+        select = "* " if node.path in selection else "  "
         name = node.name.replace("\n", r"\n")
 
         if Mode.FOLDER in node.mode:
@@ -53,7 +53,7 @@ def paint(
 
     def show_icons(node: Node, depth: int) -> str:
         spaces = (depth - 1) * 2 * " "
-        select = ""
+        select = "* " if node.path in selection else "  "
         name = node.name.replace("\n", r"\n")
 
         if Mode.FOLDER in node.mode:
@@ -70,7 +70,7 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"{name} {icons.link}"
 
-        return f"{spaces} {select}{name}"
+        return f"{spaces}{select}{name}"
 
     show = show_icons if settings.use_icons else show_ascii
     return show
