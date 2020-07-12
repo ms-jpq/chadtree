@@ -32,7 +32,7 @@ def _indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
         buffer: Buffer = nvim.api.get_current_buf()
         r1, _ = nvim.api.buf_get_mark(buffer, "<")
         r2, _ = nvim.api.buf_get_mark(buffer, ">")
-        for row in range(r1, r2 + 1):
+        for row in range(r1 - 1, r2):
             node = index(state, row)
             if node:
                 yield node
@@ -182,9 +182,21 @@ def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
-    indices = _indices(nvim, state=state, is_visual=is_visual)
-    print(nvim, is_visual)
-    return state
+    nodes = _indices(nvim, state=state, is_visual=is_visual)
+    if is_visual:
+        selection = {n.path for n in nodes}
+        new_state = forward(state, settings=settings, selection=selection)
+        _redraw(nvim, state=new_state)
+        return new_state
+    else:
+        node = next(nodes, None)
+        if node:
+            selection = toggled(state.selection, node.path)
+            new_state = forward(state, settings=settings, selection=selection)
+            _redraw(nvim, state=new_state)
+            return new_state
+        else:
+            return state
 
 
 def c_delete(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:

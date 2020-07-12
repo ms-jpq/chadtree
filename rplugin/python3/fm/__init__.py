@@ -1,3 +1,5 @@
+from typing import Any, Sequence
+
 from pynvim import Nvim, autocmd, function, plugin
 
 from .commands import (
@@ -121,10 +123,11 @@ class Main:
         self.state = c_clear(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMselect")
-    def select(self, visual: int, *_) -> None:
+    def select(self, args: Sequence[Any]) -> None:
         """
         Folder / File -> select
         """
+        visual, *_ = args
         is_visual = visual == 1
 
         self.state = c_select(
@@ -132,10 +135,11 @@ class Main:
         )
 
     @function("FMdelete")
-    def delete(self, visual: int, *_) -> None:
+    def delete(self, args: Sequence[Any]) -> None:
         """
         Delete selected
         """
+        visual, *_ = args
         is_visual = visual == 1
 
         self.state = c_delete(
@@ -143,10 +147,11 @@ class Main:
         )
 
     @function("FMcut")
-    def cut(self, visual: int, *_) -> None:
+    def cut(self, args: Sequence[Any]) -> None:
         """
         Cut selected
         """
+        visual, *_ = args
         is_visual = visual == 1
 
         self.state = c_cut(
@@ -154,10 +159,11 @@ class Main:
         )
 
     @function("FMcopy")
-    def copy(self, visual: int, *_) -> None:
+    def copy(self, args: Sequence[Any]) -> None:
         """
         Copy selected
         """
+        visual, *_ = args
         is_visual = visual == 1
 
         self.state = c_copy(
