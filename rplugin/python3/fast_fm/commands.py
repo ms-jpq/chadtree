@@ -272,7 +272,7 @@ def _operation(
             return state
         else:
             try:
-                for src, dest in operations:
+                for src, dest in operations.items():
                     action(src, dest)
             finally:
                 paths = {
