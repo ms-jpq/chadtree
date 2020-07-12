@@ -1,9 +1,9 @@
 from os.path import basename, dirname, exists, join, relpath
-from typing import Iterator, Optional
+from typing import Callable, Iterator, Optional
 
 # from .git import status
 from .da import unify
-from .fs import new, remove, rename
+from .fs import copy, cut, new, remove, rename
 from .keymap import keymap
 from .nvim import (
     Buffer,
@@ -251,23 +251,35 @@ def _find_dest(src: str, node: Node) -> str:
     return dst
 
 
-def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
-    if state.selection:
-        return state
-    else:
-        print(nvim, "⚠️  -- Cut: nothing selected!", error=True)
-        return state
-
-
-def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
+def _operation(
+    nvim: Nvim,
+    *,
+    state: State,
+    settings: Settings,
+    name: str,
+    exec: Callable[[str, str], None],
+) -> State:
     node = _index(nvim, state=state)
     if state.selection and node:
-        dests = tuple(_find_dest(selection, node) for selection in state.selection)
-        pre_existing = tuple(d for d in dests if exists(d))
+        operations = {src: _find_dest(src, node) for src in state.selection}
+        pre_existing = {s: d for s, d in operations.items() if exists(d)}
         if pre_existing:
-            msg = ",".join(_display_path(path, state=state) for path in pre_existing)
-            print(nvim, f"⚠️  -- Copy: path(s) already exist!\n{msg}", error=True)
-        return state
+            msg = ", ".join(
+                f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
+                for s, d in pre_existing.items()
+            )
+            print(nvim, f"⚠️  -- Copy: path(s) already exist! :: {msg}", error=True)
+            return state
+        else:
+            return state
     else:
         print(nvim, "⚠️  -- Copy: nothing selected!", error=True)
         return state
+
+
+def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
+    return _operation(nvim, state=state, settings=settings, name="Cut", exec=cut)
+
+
+def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
+    return _operation(nvim, state=state, settings=settings, name="Copy", exec=copy)

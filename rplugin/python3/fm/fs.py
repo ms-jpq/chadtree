@@ -29,7 +29,7 @@ def remove(src: str) -> None:
         rm(src)
 
 
-def move(src: str, dest: str) -> None:
+def cut(src: str, dest: str) -> None:
     mv(src, dest)
 
 
