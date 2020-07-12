@@ -11,6 +11,7 @@ from .commands import (
     c_copy_name,
     c_cut,
     c_delete,
+    c_follow,
     c_hidden,
     c_new,
     c_open,
@@ -90,6 +91,14 @@ class Main:
 
         self.state = c_hidden(self.nvim, state=self.state, settings=self.settings)
 
+    @function("FMfollow")
+    def follow(self, args: Sequence[Any]) -> None:
+        """
+        Toggle hidden
+        """
+
+        self.state = c_follow(self.nvim, state=self.state, settings=self.settings)
+
     @function("FMcopyname")
     def copy_name(self, args: Sequence[Any]) -> None:
         """
@@ -139,12 +148,8 @@ class Main:
         """
         Delete selected
         """
-        visual, *_ = args
-        is_visual = visual == 1
 
-        self.state = c_delete(
-            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
-        )
+        self.state = c_delete(self.nvim, state=self.state, settings=self.settings)
 
     @function("FMcut")
     def cut(self, args: Sequence[Any]) -> None:

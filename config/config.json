@@ -1,4 +1,5 @@
 {
+  "follow": true,
   "keymap": {
     "FMclear": ["C"],
     "FMcollapse": ["`"],

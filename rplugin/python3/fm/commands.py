@@ -1,7 +1,6 @@
 from os.path import dirname, exists, join, relpath
 from typing import Iterator, Optional
 
-
 # from .git import status
 from .fs import new, rename
 from .keymap import keymap
@@ -118,6 +117,11 @@ def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
     return new_state
 
 
+def c_follow(nvim: Nvim, state: State, settings: Settings) -> State:
+    new_state = forward(state, settings=settings, follow=not state.follow)
+    return new_state
+
+
 def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
     node = _index(nvim, state=state)
     if node:
@@ -198,13 +202,30 @@ def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
             return state
 
 
-def c_delete(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
-    return state
+def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
+    if state.selection:
+        return state
+    else:
+        node = _index(nvim, state=state)
+        if node:
+            rel_path = relpath(node.path, start=state.root.path)
+            nvim.input(f"🗑  {rel_path}")
+            return state
+        else:
+            return state
 
 
 def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
-    return state
+    if state.selection:
+        return state
+    else:
+        print(nvim, "⚠️  -- Cut: nothing selected!", error=True)
+        return state
 
 
 def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
-    return state
+    if state.selection:
+        return state
+    else:
+        print(nvim, "⚠️  -- Copy: nothing selected!", error=True)
+        return state

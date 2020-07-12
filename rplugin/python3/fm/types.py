@@ -49,10 +49,11 @@ class IconSet:
 
 @dataclass(frozen=True)
 class Settings:
+    show_hidden: bool
+    follow: bool
     open_left: bool
     width: int
     keymap: Keymap
-    show_hidden: bool
     name_ignore: Sequence[str]
     path_ignore: Sequence[str]
     use_icons: bool
@@ -72,6 +73,7 @@ class State:
     index: Index
     selection: Selection
     show_hidden: bool
+    follow: bool
     root: Node
     lookup: Sequence[Node]
     rendered: Sequence[str]

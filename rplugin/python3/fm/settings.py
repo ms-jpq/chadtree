@@ -35,6 +35,7 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
         open_left=config["open_left"],
         keymap=keymap,
         show_hidden=config["show_hidden"],
+        follow=config["follow"],
         name_ignore=ignore["name"],
         path_ignore=ignore["path"],
         use_icons=config["use_icons"],
