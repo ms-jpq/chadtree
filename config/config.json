@@ -1,8 +1,8 @@
 {
   "follow": true,
   "keymap": {
-    "FMclear": ["C"],
-    "FMcollapse": ["`"],
+    "FMclear": ["c", "C"],
+    "FMcollapse": ["<s-tab>", "`"],
     "FMcopy": ["p", "P"],
     "FMcopyname": ["y", "yy"],
     "FMcut": ["x", "X"],
@@ -11,7 +11,7 @@
     "FMnew": ["a", "A"],
     "FMprimary": ["<enter>"],
     "FMrefresh": ["<c-r>"],
-    "FMrename": ["r"],
+    "FMrename": ["r", "R"],
     "FMsecondary": ["<tab>", "<2-leftmouse>"],
     "FMselect": ["s", "S"]
   },
