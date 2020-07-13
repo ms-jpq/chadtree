@@ -16,3 +16,6 @@ icons_json = join(__config__, "icons.json")
 ignore_json = join(__config__, "ignore.json")
 
 fm_filetype = "fast_fm"
+
+folder_mode = 0o755
+file_mode = 0o644

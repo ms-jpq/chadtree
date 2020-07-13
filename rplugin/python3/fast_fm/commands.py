@@ -2,8 +2,7 @@ from os.path import basename, dirname, exists, join, relpath
 from typing import Callable, Iterator, Optional
 
 # from .git import status
-from .da import unify
-from .fs import copy, cut, is_parent, new, remove, rename
+from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify
 from .keymap import keymap
 from .nvim import (
     Buffer,
@@ -151,7 +150,10 @@ def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
             try:
                 new(name)
             finally:
-                new_state = forward(state, settings=settings, paths={parent})
+                index = state.index | {*ancestors(name)}
+                new_state = forward(
+                    state, settings=settings, index=index, paths={parent}
+                )
                 _redraw(nvim, state=new_state)
                 return new_state
     else:
@@ -175,7 +177,7 @@ def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
             try:
                 rename(prev_name, new_name)
             finally:
-                paths = {parent, new_parent}
+                paths = {parent, new_parent, *ancestors(new_parent)}
                 index = state.index | paths
                 new_state = forward(state, settings=settings, index=index, paths=paths)
                 _redraw(nvim, state=new_state)
