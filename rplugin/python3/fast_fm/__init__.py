@@ -47,12 +47,6 @@ class Main:
         self.state = initial_state(settings)
         self.settings = settings
 
-        self._post_init()
-
-    def _post_init(self) -> None:
-        self._submit(keys(self.nvim, settings=self.settings))
-        self._submit(tasks(), wait=False)
-
     def _submit(self, co: Awaitable[Optional[State]], wait: bool = True) -> None:
         loop: AbstractEventLoop = self.nvim1.loop
 
@@ -75,6 +69,11 @@ class Main:
             self.chan.submit(run, self.nvim1)
         else:
             run_coroutine_threadsafe(co, loop)
+
+    @autocmd("VimEnter")
+    def stub(self) -> None:
+        self._submit(keys(self.nvim, settings=self.settings))
+        self._submit(tasks(), wait=False)
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
