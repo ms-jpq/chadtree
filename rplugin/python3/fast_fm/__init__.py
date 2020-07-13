@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
 
-from pynvim import Nvim, autocmd, function, plugin
+from pynvim import Nvim, command, function, plugin
 
 from .commands import (
     a_on_filetype,
@@ -25,8 +25,7 @@ from .commands import (
     c_select,
 )
 from .consts import fm_filetype
-from .keymap import keys
-from .nvim import Nvim2, print
+from .nvim import Nvim2, autocmd, print
 from .schedule import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -46,6 +45,8 @@ class Main:
         self.nvim = Nvim2(nvim)
         self.state = initial_state(settings)
         self.settings = settings
+
+        self._initialized = False
 
     def _submit(self, co: Awaitable[Optional[State]], wait: bool = True) -> None:
         loop: AbstractEventLoop = self.nvim1.loop
@@ -70,11 +71,11 @@ class Main:
         else:
             run_coroutine_threadsafe(co, loop)
 
-    @autocmd("VimEnter")
-    def stub(self) -> None:
+    def _initialize(self) -> None:
         async def setup() -> None:
-            await keys(self.nvim, settings=self.settings)
-            await print(self.nvim, "FM loaded 🍎")
+            await autocmd(
+                self.nvim, events=("FileType",), filters=(fm_filetype,), fn="_FMkeybind"
+            )
 
         async def cycle() -> None:
             update = self.settings.update
@@ -93,14 +94,28 @@ class Main:
                 except Exception as e:
                     await print(self.nvim, e, error=True)
 
-        self._submit(setup())
-        self._submit(forever(), wait=False)
+        if self._initialized:
+            return
+        else:
+            self._initialized = True
+            self._submit(setup())
+            self._submit(forever(), wait=False)
 
-    @function("FMasyncupdate")
-    def async_udpate(self, args: Sequence[Any]) -> None:
+    @command("FMopen")
+    def fm_open(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Toggle sidebar
+        """
+
+        self._initialize()
+        co = c_open(self.nvim, state=self.state, settings=self.settings)
+        self._submit(co)
+
+    @function("FMscheduleupdate")
+    def schedule_udpate(self, args: Sequence[Any]) -> None:
         self.ch.set()
 
-    @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
+    @function("_FMkeybind")
     def on_filetype(self, buf: str) -> None:
         """
         Setup keybind
@@ -118,15 +133,6 @@ class Main:
         """
 
         co = c_quit(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
-
-    @function("FMopen")
-    def fm_open(self, args: Sequence[Any]) -> None:
-        """
-        Toggle sidebar
-        """
-
-        co = c_open(self.nvim, state=self.state, settings=self.settings)
         self._submit(co)
 
     @function("FMprimary")

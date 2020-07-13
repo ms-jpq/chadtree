@@ -24,12 +24,6 @@ class Node:
 
 
 @dataclass(frozen=True)
-class Keymap:
-    entire: Dict[str, Sequence[str]]
-    buffer: Dict[str, Sequence[str]]
-
-
-@dataclass(frozen=True)
 class IconSet:
     folder_open: str
     folder_closed: str
@@ -50,7 +44,7 @@ class Settings:
     follow: bool
     open_left: bool
     width: int
-    keymap: Keymap
+    keymap: Dict[str, Sequence[str]]
     name_ignore: Sequence[str]
     path_ignore: Sequence[str]
     use_icons: bool

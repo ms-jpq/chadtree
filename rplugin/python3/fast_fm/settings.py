@@ -2,14 +2,13 @@ from typing import Any
 
 from .consts import config_json, icons_json, ignore_json
 from .da import load_json
-from .types import IconSet, Keymap, Settings, UpdateTime
+from .types import IconSet, Settings, UpdateTime
 
 
 def initial(user_settings: Any, user_icons: Any) -> Settings:
     config = load_json(config_json)
     icon_c = load_json(icons_json)
     ignore = load_json(ignore_json)
-    keymap = Keymap(entire=config["keys"], buffer=config["keymap"])
 
     folder_ic = icon_c["folder"]
 
@@ -28,7 +27,7 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
     settings = Settings(
         width=config["width"],
         open_left=config["open_left"],
-        keymap=keymap,
+        keymap=config["keymap"],
         show_hidden=config["show_hidden"],
         follow=config["follow"],
         name_ignore=ignore["name"],

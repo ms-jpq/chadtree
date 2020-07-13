@@ -17,9 +17,6 @@
     "FMsecondary": ["<tab>", "<2-leftmouse>"],
     "FMselect": ["s", "S"]
   },
-  "keys": {
-    "FMopen": ["<leader>v"]
-  },
   "open_left": true,
   "session": true,
   "show_hidden": false,

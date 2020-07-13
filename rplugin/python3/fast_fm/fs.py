@@ -8,7 +8,6 @@ from shutil import move as mv
 from shutil import rmtree
 from typing import Dict, Iterable, Iterator, Set
 
-
 from .consts import file_mode, folder_mode
 
 

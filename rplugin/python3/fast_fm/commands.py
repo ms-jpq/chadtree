@@ -3,13 +3,13 @@ from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify
 from .git import status
-from .keymap import keymap
 from .nvim import (
     Buffer,
     HoldPosition,
     HoldWindowPosition,
     Nvim2,
     Window,
+    buffer_keymap,
     find_buffer,
     print,
 )
@@ -58,7 +58,7 @@ async def a_on_filetype(
 ) -> None:
     buffer = await find_buffer(nvim, buf)
     if buffer is not None:
-        await keymap(nvim, buffer=buffer, settings=settings)
+        await buffer_keymap(nvim, buffer=buffer, keymap=settings.keymap)
 
 
 async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from asyncio import Future
-from typing import Any, Awaitable, Optional, Protocol, Sequence
+from typing import Any, Awaitable, Dict, Iterable, Optional, Protocol, Sequence
+from uuid import uuid4
 
 from pynvim import Nvim
 
@@ -52,6 +53,44 @@ async def print(
     await write(str(message))
     if flush:
         await write("\n")
+
+
+async def autocmd(
+    nvim: Nvim2,
+    *,
+    events: Iterable[str],
+    fn: str,
+    filters: Iterable[str] = ("*",),
+    modifiers: Iterable[str] = (),
+    arg_eval: Iterable[str] = "",
+) -> None:
+    _events = " ".join(events)
+    _filters = " ".join(filters)
+    _modifiers = " ".join(modifiers)
+    _args = ", ".join(arg_eval)
+    name = str(uuid4()).replace("-", "")
+    group = f"augroup {name}"
+    cls = "  autocmd!"
+    cmd = f"  autocmd {_events} {_filters} {_modifiers} call {fn}({_args})"
+    group_end = "augroup END"
+
+    instruction = "\n".join((group, cls, cmd, group_end))
+    await nvim.command(instruction)
+
+
+async def buffer_keymap(
+    nvim: Nvim2, buffer: Buffer, keymap: Dict[str, Sequence[str]]
+) -> None:
+    options = {"noremap": True, "silent": True, "nowait": True}
+
+    for function, mappings in keymap.items():
+        for mapping in mappings:
+            await nvim.api.buf_set_keymap(
+                buffer, "n", mapping, f"<cmd>call {function}(0)<cr>", options
+            )
+            await nvim.api.buf_set_keymap(
+                buffer, "v", mapping, f"<esc><cmd>call {function}(1)<cr>", options
+            )
 
 
 async def find_buffer(nvim: Nvim2, bufnr: int) -> Optional[Buffer]:

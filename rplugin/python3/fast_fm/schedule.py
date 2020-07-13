@@ -11,9 +11,9 @@ async def schedule(
         _, pending = await wait(
             (chan.wait(), sleep(max_time)), return_when=FIRST_COMPLETED
         )
+        chan.clear()
         for p in pending:
             p.cancel()
-        chan.clear()
         t2 = time()
         elapsed = t2 - t1
         await sleep(min_time - elapsed)
