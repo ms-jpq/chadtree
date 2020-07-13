@@ -45,6 +45,9 @@ class Main:
         self.state = initial_state(settings)
         self.settings = settings
 
+        self._post_init()
+
+    def _post_init(self) -> None:
         self._submit(keys(self.nvim, self.settings))
 
     def _submit(self, co: Awaitable[Optional[State]]) -> None:
