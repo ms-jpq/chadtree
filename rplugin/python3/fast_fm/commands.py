@@ -233,10 +233,11 @@ async def c_delete(nvim: Nvim2, state: State, settings: Settings) -> State:
     if selection:
         unified = tuple(unify(selection))
         display_paths = "\n".join(_display_path(path, state=state) for path in unified)
-        ans = nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
+        ans = await nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
         if ans == 1:
             try:
                 await remove(unified)
+                await print(nvim, unified)
             finally:
                 paths = {dirname(path) for path in unified}
                 new_state = await forward(state, settings=settings, paths=paths)

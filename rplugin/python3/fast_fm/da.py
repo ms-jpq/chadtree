@@ -11,7 +11,7 @@ def or_else(thing: Optional[T], default: T) -> T:
     return default if thing is None else thing
 
 
-async def anext(aiter: AsyncIterator[T], default: Optional[T]) -> Optional[T]:
+async def anext(aiter: AsyncIterator[T], default: Optional[T] = None) -> Optional[T]:
     try:
         return await aiter.__anext__()
     except StopAsyncIteration:
