@@ -161,6 +161,8 @@ async def c_new(nvim: Nvim2, state: State, settings: Settings) -> State:
         else:
             try:
                 await new(name)
+            except Exception as e:
+                await print(nvim, e, error=True)
             finally:
                 index = state.index | {*ancestors(name)}
                 new_state = await forward(
@@ -188,6 +190,8 @@ async def c_rename(nvim: Nvim2, state: State, settings: Settings) -> State:
         else:
             try:
                 await rename(prev_name, new_name)
+            except Exception as e:
+                await print(nvim, e, error=True)
             finally:
                 paths = {parent, new_parent, *ancestors(new_parent)}
                 index = state.index | paths
@@ -238,6 +242,8 @@ async def c_delete(nvim: Nvim2, state: State, settings: Settings) -> State:
             try:
                 await remove(unified)
                 await print(nvim, unified)
+            except Exception as e:
+                await print(nvim, e, error=True)
             finally:
                 paths = {dirname(path) for path in unified}
                 new_state = await forward(state, settings=settings, paths=paths)
@@ -282,6 +288,8 @@ async def _operation(
         else:
             try:
                 await action(operations)
+            except Exception as e:
+                await print(nvim, e, error=True)
             finally:
                 paths = {
                     *operations.values(),
