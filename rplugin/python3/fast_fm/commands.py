@@ -57,7 +57,7 @@ async def a_on_filetype(
     nvim: Nvim2, state: State, settings: Settings, buf: int
 ) -> None:
     buffer = await find_buffer(nvim, buf)
-    if buffer:
+    if buffer is not None:
         await keymap(nvim, buffer=buffer, settings=settings)
 
 
@@ -65,7 +65,7 @@ async def a_on_bufenter(
     nvim: Nvim2, state: State, settings: Settings, buf: int
 ) -> State:
     buffer = await find_buffer(nvim, buf)
-    if buffer and await is_fm_buffer(nvim, buffer=buffer):
+    if buffer is not None and await is_fm_buffer(nvim, buffer=buffer):
         return state
     else:
         return state

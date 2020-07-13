@@ -55,6 +55,6 @@ def _update(root: Node, index: Index, paths: Set[str]) -> Node:
 async def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
     loop = get_running_loop()
     try:
-        return await loop.run_in_executor(None, _update, index, paths)
+        return await loop.run_in_executor(None, _update, root, index, paths)
     except FileNotFoundError:
         return await loop.run_in_executor(None, new, root.path, index)
