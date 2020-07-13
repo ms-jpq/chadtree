@@ -55,9 +55,9 @@ class Main:
                 self.state = state
 
         self._submit(keys(self.nvim, self.settings))
-        self._submit(forever())
+        self._submit(forever(), wait=False)
 
-    def _submit(self, co: Awaitable[Optional[State]]) -> None:
+    def _submit(self, co: Awaitable[Optional[State]], wait: bool = True) -> None:
         loop: AbstractEventLoop = self.nvim1.loop
 
         def run(nvim: Nvim) -> None:
@@ -75,7 +75,10 @@ class Main:
 
                 loop.call_soon_threadsafe(cont)
 
-        self.chan.submit(run, self.nvim1)
+        if wait:
+            self.chan.submit(run, self.nvim1)
+        else:
+            run_coroutine_threadsafe(co, loop)
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
