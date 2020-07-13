@@ -1,6 +1,7 @@
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
+from .da import async_throttle
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify
 from .git import status
 from .keymap import keymap
@@ -48,6 +49,7 @@ async def _redraw(nvim: Nvim2, state: State) -> None:
         await update_buffers(nvim, lines=state.rendered)
 
 
+@async_throttle(delay_seconds=1)
 async def _refresh(nvim: Nvim2, state: State, settings: Settings) -> State:
     vc = await status()
     new_state = await forward(state, settings=settings, vc=vc)

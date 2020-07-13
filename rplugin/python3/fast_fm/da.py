@@ -45,7 +45,11 @@ class AnyCallableAsync(Protocol):
         pass
 
 
-def async_throttle(timeout: float):
+async def resolve(val: T) -> T:
+    return val
+
+
+def async_throttle(delay_seconds: float):
     def decor(fn: AnyCallableAsync) -> AnyCallableAsync:
         throttling = False
         handle: Optional[TimerHandle] = None
@@ -57,11 +61,11 @@ def async_throttle(timeout: float):
         def throttled(*args: Any, **kwargs: Any) -> Any:
             nonlocal throttling
             if throttling:
-                return
+                return resolve(None)
             else:
                 throttling = True
                 loop = get_running_loop()
-                loop.call_later(timeout, unthrottle)
+                loop.call_later(delay_seconds, unthrottle)
                 return fn(*args, **kwargs)
 
         def run(*args: Any, **kwargs: Any) -> Any:
@@ -71,7 +75,8 @@ def async_throttle(timeout: float):
             if throttling:
                 f = partial(throttled, *args, **kwargs)
                 loop = get_running_loop()
-                handle = loop.call_later(timeout, f)
+                handle = loop.call_later(delay_seconds, f)
+                return resolve(None)
             else:
                 return throttled(*args, **kwargs)
 

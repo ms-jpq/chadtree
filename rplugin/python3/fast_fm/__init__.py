@@ -60,7 +60,7 @@ class Main:
                 ret = fut.result()
             except Exception as e:
                 stack = format_exc()
-                nvim.async_call(nvim.err_write, f"{stack}{e}")
+                nvim.async_call(nvim.err_write, f"{stack}{e}\n")
             else:
 
                 def cont() -> None:
