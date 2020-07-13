@@ -1,6 +1,7 @@
-from asyncio import create_subprocess_exec, get_running_loop
+from asyncio import TimerHandle, create_subprocess_exec, get_running_loop
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
+from functools import partial
 from json import load
 from typing import (
     Any,
@@ -47,12 +48,13 @@ class AnyCallableAsync(Protocol):
 def async_throttle(timeout: float):
     def decor(fn: AnyCallableAsync) -> AnyCallableAsync:
         throttling = False
+        handle: Optional[TimerHandle] = None
 
         def unthrottle() -> None:
             nonlocal throttling
             throttling = False
 
-        async def throttled(*args: Any, **kwargs: Any) -> Any:
+        def throttled(*args: Any, **kwargs: Any) -> Any:
             nonlocal throttling
             if throttling:
                 return
@@ -60,9 +62,20 @@ def async_throttle(timeout: float):
                 throttling = True
                 loop = get_running_loop()
                 loop.call_later(timeout, unthrottle)
-                return await fn(*args, **kwargs)
+                return fn(*args, **kwargs)
 
-        return throttled
+        def run(*args: Any, **kwargs: Any) -> Any:
+            nonlocal handle
+            if handle:
+                handle.cancel()
+            if throttling:
+                f = partial(throttled, *args, **kwargs)
+                loop = get_running_loop()
+                handle = loop.call_later(timeout, f)
+            else:
+                return throttled(*args, **kwargs)
+
+        return run
 
     return decor
 
