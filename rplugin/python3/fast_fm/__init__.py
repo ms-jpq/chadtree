@@ -1,5 +1,6 @@
 from asyncio import run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
 
@@ -39,12 +40,17 @@ class Main:
         user_icons = nvim.vars.get("fm_icons", None)
         settings = initial_settings(user_settings=user_settings, user_icons=user_icons)
 
+        self.lock = Lock()
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.nvim = nvim
         self.state = initial_state(settings)
         self.settings = settings
 
         keys(self.nvim, self.settings)
+
+    def _update(self, state: State) -> None:
+        with self.lock:
+            self.state = state
 
     def _submit(self, coro: Awaitable[Optional[State]]) -> None:
         loop = self.nvim.loop
@@ -58,7 +64,7 @@ class Main:
                 self.nvim.async_call(print, self.nvim, f"{stack}{e}", error=True)
             else:
                 if ret:
-                    self.state = ret
+                    self._update(ret)
 
         self.chan.submit(run)
 
@@ -78,7 +84,8 @@ class Main:
         File -> open
         """
 
-        self.state = c_primary(self.nvim, state=self.state, settings=self.settings)
+        state = c_primary(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMsecondary")
     def secondary(self, args: Sequence[Any]) -> None:
@@ -87,7 +94,8 @@ class Main:
         File -> preview
         """
 
-        self.state = c_secondary(self.nvim, state=self.state, settings=self.settings)
+        state = c_secondary(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMresize")
     def resize(self, args: Sequence[Any]) -> None:
@@ -99,7 +107,8 @@ class Main:
         Redraw buffers
         """
 
-        self.state = c_refresh(self.nvim, state=self.state, settings=self.settings)
+        state = c_refresh(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMcollapse")
     def collapse(self, args: Sequence[Any]) -> None:
@@ -107,7 +116,8 @@ class Main:
         Collapse folder
         """
 
-        self.state = c_collapse(self.nvim, state=self.state, settings=self.settings)
+        state = c_collapse(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMhidden")
     def hidden(self, args: Sequence[Any]) -> None:
@@ -115,7 +125,8 @@ class Main:
         Toggle hidden
         """
 
-        self.state = c_hidden(self.nvim, state=self.state, settings=self.settings)
+        state = c_hidden(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMfollow")
     def follow(self, args: Sequence[Any]) -> None:
@@ -123,7 +134,8 @@ class Main:
         Toggle hidden
         """
 
-        self.state = c_follow(self.nvim, state=self.state, settings=self.settings)
+        state = c_follow(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMcopyname")
     def copy_name(self, args: Sequence[Any]) -> None:
@@ -139,7 +151,8 @@ class Main:
         new file / folder
         """
 
-        self.state = c_new(self.nvim, state=self.state, settings=self.settings)
+        state = c_new(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMrename")
     def rename(self, args: Sequence[Any]) -> None:
@@ -147,7 +160,8 @@ class Main:
         rename file / folder
         """
 
-        self.state = c_rename(self.nvim, state=self.state, settings=self.settings)
+        state = c_rename(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMclear")
     def clear(self, args: Sequence[Any]) -> None:
@@ -155,7 +169,8 @@ class Main:
         Clear selected
         """
 
-        self.state = c_clear(self.nvim, state=self.state, settings=self.settings)
+        state = c_clear(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMselect")
     def select(self, args: Sequence[Any]) -> None:
@@ -165,9 +180,10 @@ class Main:
         visual, *_ = args
         is_visual = visual == 1
 
-        self.state = c_select(
+        state = c_select(
             self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
         )
+        self._update(state)
 
     @function("FMdelete")
     def delete(self, args: Sequence[Any]) -> None:
@@ -175,7 +191,8 @@ class Main:
         Delete selected
         """
 
-        self.state = c_delete(self.nvim, state=self.state, settings=self.settings)
+        state = c_delete(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMcut")
     def cut(self, args: Sequence[Any]) -> None:
@@ -183,7 +200,8 @@ class Main:
         Cut selected
         """
 
-        self.state = c_cut(self.nvim, state=self.state, settings=self.settings)
+        state = c_cut(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @function("FMcopy")
     def copy(self, args: Sequence[Any]) -> None:
@@ -191,7 +209,8 @@ class Main:
         Copy selected
         """
 
-        self.state = c_copy(self.nvim, state=self.state, settings=self.settings)
+        state = c_copy(self.nvim, state=self.state, settings=self.settings)
+        self._update(state)
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
@@ -207,6 +226,7 @@ class Main:
         Update background tasks
         """
 
-        self.state = a_on_bufenter(
+        state = a_on_bufenter(
             self.nvim, state=self.state, settings=self.settings, buf=int(buf)
         )
+        self._update(state)
