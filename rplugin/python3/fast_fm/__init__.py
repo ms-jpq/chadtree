@@ -1,4 +1,4 @@
-from asyncio import AbstractEventLoop, Queue, run_coroutine_threadsafe
+from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
@@ -41,7 +41,7 @@ class Main:
         settings = initial_settings(user_settings=user_settings, user_icons=user_icons)
 
         self.chan = ThreadPoolExecutor(max_workers=1)
-        self.ch: Queue = Queue(1)
+        self.ch = Event()
         self.nvim1 = nvim
         self.nvim = Nvim2(nvim)
         self.state = initial_state(settings)
@@ -98,10 +98,7 @@ class Main:
 
     @function("FMasyncupdate")
     def async_udpate(self, args: Sequence[Any]) -> None:
-        async def update() -> None:
-            await self.ch.put(None)
-
-        self._submit(update())
+        self.ch.set()
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
