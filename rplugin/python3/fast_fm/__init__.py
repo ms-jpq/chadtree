@@ -8,6 +8,7 @@ from pynvim import Nvim, autocmd, function, plugin
 from .commands import (
     a_on_bufenter,
     a_on_filetype,
+    a_on_focus,
     c_clear,
     c_collapse,
     c_copy,
@@ -90,6 +91,15 @@ class Main:
         co = a_on_bufenter(
             self.nvim, state=self.state, settings=self.settings, buf=int(buf)
         )
+        self._submit(co)
+
+    @autocmd("FocusGained")
+    def on_focusgained(self, *_) -> None:
+        """
+        Update background tasks
+        """
+
+        co = a_on_focus(self.nvim, state=self.state, settings=self.settings)
         self._submit(co)
 
     @function("FMopen")

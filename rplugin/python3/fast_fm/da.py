@@ -1,8 +1,17 @@
-from asyncio import create_subprocess_exec
+from asyncio import create_subprocess_exec, get_running_loop
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from json import load
-from typing import Any, AsyncIterator, Callable, Optional, Protocol, TypeVar, cast
+from typing import (
+    Any,
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Optional,
+    Protocol,
+    TypeVar,
+    cast,
+)
 
 T = TypeVar("T")
 
@@ -28,6 +37,34 @@ def constantly(val: T) -> Callable[[Any], T]:
 class AnyCallable(Protocol):
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         pass
+
+
+class AnyCallableAsync(Protocol):
+    def __call__(self, *args: Any, **kwargs: Any) -> Awaitable[Any]:
+        pass
+
+
+def async_throttle(timeout: float):
+    def decor(fn: AnyCallableAsync) -> AnyCallableAsync:
+        throttling = False
+
+        def unthrottle() -> None:
+            nonlocal throttling
+            throttling = False
+
+        async def throttled(*args: Any, **kwargs: Any) -> Any:
+            nonlocal throttling
+            if throttling:
+                return
+            else:
+                throttling = True
+                loop = get_running_loop()
+                loop.call_later(timeout, unthrottle)
+                return await fn(*args, **kwargs)
+
+        return throttled
+
+    return decor
 
 
 @dataclass(frozen=True)
