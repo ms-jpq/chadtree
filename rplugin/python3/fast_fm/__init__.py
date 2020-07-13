@@ -76,22 +76,32 @@ class Main:
             await keys(self.nvim, settings=self.settings)
             await print(self.nvim, "FM loaded 🍎")
 
+        async def cycle() -> None:
+            update = self.settings.update
+            async for _ in schedule(
+                self.ch, min_time=update.min_time, max_time=update.max_time,
+            ):
+                state = await c_refresh(
+                    self.nvim, state=self.state, settings=self.settings
+                )
+                self.state = state
+
         async def forever() -> None:
             while True:
                 try:
-                    update = self.settings.update
-                    async for _ in schedule(
-                        self.ch, min_time=update.min_time, max_time=update.max_time,
-                    ):
-                        state = await c_refresh(
-                            self.nvim, state=self.state, settings=self.settings
-                        )
-                        self.state = state
+                    await cycle()
                 except Exception as e:
                     await print(self.nvim, e, error=True)
 
         self._submit(setup())
         self._submit(forever(), wait=False)
+
+    @function("FMasyncupdate")
+    def async_udpate(self, args: Sequence[Any]) -> None:
+        async def update() -> None:
+            await self.ch.put(None)
+
+        self._submit(update())
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:
@@ -111,7 +121,6 @@ class Main:
         """
 
         co = c_quit(self.nvim, state=self.state, settings=self.settings)
-
         self._submit(co)
 
     @function("FMopen")
