@@ -1,5 +1,6 @@
 from asyncio import run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
+from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
 
 from pynvim import Nvim, autocmd, function, plugin
@@ -25,6 +26,7 @@ from .commands import (
 )
 from .consts import fm_filetype
 from .keymap import keys
+from .nvim import print
 from .settings import initial as initial_settings
 from .state import initial as initial_state
 from .types import State
@@ -49,9 +51,14 @@ class Main:
 
         def run() -> None:
             fut = run_coroutine_threadsafe(coro, loop)
-            ret = fut.result()
-            if ret:
-                self.state = ret
+            try:
+                ret = fut.result()
+            except Exception as e:
+                stack = format_exc()
+                self.nvim.async_call(print, self.nvim, f"{stack}{e}", error=True)
+            else:
+                if ret:
+                    self.state = ret
 
         self.chan.submit(run)
 
