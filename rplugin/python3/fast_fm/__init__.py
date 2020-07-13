@@ -1,4 +1,6 @@
-from typing import Any, Sequence
+from asyncio import run_coroutine_threadsafe
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Awaitable, Optional, Sequence
 
 from pynvim import Nvim, autocmd, function, plugin
 
@@ -25,6 +27,7 @@ from .consts import fm_filetype
 from .keymap import keys
 from .settings import initial as initial_settings
 from .state import initial as initial_state
+from .types import State
 
 
 @plugin
@@ -34,11 +37,23 @@ class Main:
         user_icons = nvim.vars.get("fm_icons", None)
         settings = initial_settings(user_settings=user_settings, user_icons=user_icons)
 
+        self.chan = ThreadPoolExecutor(max_workers=1)
         self.nvim = nvim
         self.state = initial_state(settings)
         self.settings = settings
 
         keys(self.nvim, self.settings)
+
+    def _submit(self, coro: Awaitable[Optional[State]]) -> None:
+        loop = self.nvim.loop
+
+        def run() -> None:
+            fut = run_coroutine_threadsafe(coro, loop)
+            ret = fut.result()
+            if ret:
+                self.state = ret
+
+        self.chan.submit(run)
 
     @function("FMopen")
     def fm_open(self, args: Sequence[Any]) -> None:
