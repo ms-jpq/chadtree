@@ -1,4 +1,4 @@
-from __future__ import annotations
+from asyncio import get_running_loop
 
 from os import listdir, stat
 from os.path import basename, join, splitext
@@ -19,7 +19,7 @@ def fs_stat(path: str) -> Mode:
         return mode
 
 
-def new(root: str, *, index: Index) -> Node:
+def new(root: str,  index: Index) -> Node:
     mode = fs_stat(root)
     name = basename(root)
     if Mode.FOLDER not in mode:
@@ -36,7 +36,7 @@ def new(root: str, *, index: Index) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
-def _update(root: Node, *, index: Index, paths: Set[str]) -> Node:
+def _update(root: Node,  index: Index, paths: Set[str]) -> Node:
     if root.path in paths:
         return new(root.path, index=index)
     else:
@@ -53,7 +53,8 @@ def _update(root: Node, *, index: Index, paths: Set[str]) -> Node:
         )
 
 
-def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
+async def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
+    loop = get_running_loop()
     try:
         return _update(root, index=index, paths=paths)
     except FileNotFoundError:

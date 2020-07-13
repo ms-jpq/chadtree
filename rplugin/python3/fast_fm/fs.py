@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+from asyncio import get_running_loop
 from os import makedirs
 from os import remove as rm
 from os.path import dirname, isdir, sep
@@ -7,7 +6,7 @@ from pathlib import Path
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
-from typing import Iterator, Set
+from typing import Dict, Iterable, Iterator, Set
 
 from .consts import file_mode, folder_mode
 
@@ -31,7 +30,7 @@ def unify(paths: Set[str]) -> Iterator[str]:
             yield path
 
 
-def new(dest: str) -> None:
+def _new(dest: str) -> None:
     if dest.endswith(sep):
         makedirs(dest, mode=folder_mode, exist_ok=True)
     else:
@@ -40,25 +39,73 @@ def new(dest: str) -> None:
         Path(dest).touch(mode=file_mode, exist_ok=True)
 
 
-def rename(src: str, dest: str) -> None:
+async def new(dest: str) -> None:
+    loop = get_running_loop()
+
+    def cont() -> None:
+        _new(dest)
+
+    await loop.run_in_executor(None, cont)
+
+
+def _rename(src: str, dest: str) -> None:
     parent = dirname(dest)
     makedirs(parent, mode=folder_mode, exist_ok=True)
     mv(src, dest)
 
 
-def remove(src: str) -> None:
+async def rename(src: str, dest: str) -> None:
+    loop = get_running_loop()
+
+    def cont() -> None:
+        _rename(src, dest)
+
+    await loop.run_in_executor(None, cont)
+
+
+def _remove(src: str) -> None:
     if isdir(src):
         rmtree(src)
     else:
         rm(src)
 
 
-def cut(src: str, dest: str) -> None:
+async def remove(paths: Iterable[str]) -> None:
+    loop = get_running_loop()
+
+    def cont() -> None:
+        for path in paths:
+            _remove(path)
+
+    await loop.run_in_executor(None, cont)
+
+
+def _cut(src: str, dest: str) -> None:
     mv(src, dest)
 
 
-def copy(src: str, dest: str) -> None:
+async def cut(operations: Dict[str, str]) -> None:
+    loop = get_running_loop()
+
+    def cont() -> None:
+        for src, dest in operations.items():
+            _cut(src, dest)
+
+    await loop.run_in_executor(None, cont)
+
+
+def _copy(src: str, dest: str) -> None:
     if isdir(src):
         copytree(src, dest)
     else:
         copy2(src, dest)
+
+
+async def copy(operations: Dict[str, str]) -> None:
+    loop = get_running_loop()
+
+    def cont() -> None:
+        for src, dest in operations.items():
+            _copy(src, dest)
+
+    await loop.run_in_executor(None, cont)

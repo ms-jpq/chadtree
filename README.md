@@ -4,13 +4,11 @@ The **BEST** file manager for Neovim
 
 ## Features
 
-### Fast & asynchronous where it counts
+### Fast & asynchronous where it counts, (and doesn't)
 
 - Incremental file system scan
 
-- All batch file system operations are async / non-blocking
-
-- Asynchronous background updates
+- Async all the time. in fact, I went overboard! Literally everything is async.
 
 ### Integrated git support
 

@@ -5,7 +5,7 @@ from typing import Any, Awaitable, Optional, Protocol, Sequence
 
 from pynvim import Nvim
 
-from .da import AnyCallable
+from .da import AnyCallable, constantly
 
 Tabpage = Any
 Window = Any
@@ -39,6 +39,12 @@ class Asynced:
         return run
 
 
+class SafeBuffer:
+    def __new__(cls, buffer: Buffer):
+        buffer.__len__ = constantly(0)
+        return buffer
+
+
 class Nvim2:
     def __init__(self, nvim: Nvim):
         self._nvim = nvim
@@ -46,7 +52,9 @@ class Nvim2:
         self.api = Asynced(nvim, "api")
         self.command = self.api.command
 
-    def async_call(self, fn: AnyCallable, *args: Any, **kwargs: Any) -> Awaitable[Any]:
+        self.o_api = nvim.api
+
+    def _async_call(self, fn: AnyCallable, *args: Any, **kwargs: Any) -> Awaitable[Any]:
         fut: Future = Future()
 
         def f(*args: Any, **kwargs) -> None:
@@ -60,57 +68,54 @@ class Nvim2:
         self._nvim.async_call(f, *args, **kwargs)
         return fut
 
+    def list_bufs(self) -> Sequence[SafeBuffer]:
+        def cont() -> Sequence[SafeBuffer]:
+            buffers: Sequence[Buffer] = self.o_api.list_bufs()
+            safe_buffers = tuple(map(SafeBuffer, buffers))
+            return safe_buffers
 
-def print(nvim: Nvim, message: Any, error: bool = False, flush: bool = True) -> None:
+        return self._async_call(cont)
+
+
+async def print(
+    nvim: Nvim2, message: Any, error: bool = False, flush: bool = True
+) -> None:
     write = nvim.api.err_write if error else nvim.api.out_write
-    write(str(message))
+    await write(str(message))
     if flush:
-        write("\n")
+        await write("\n")
 
 
-def find_buffer(nvim: Nvim, bufnr: int) -> Optional[Buffer]:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
+async def find_buffer(nvim: Nvim2, bufnr: int) -> Optional[Buffer]:
+    buffers: Sequence[Buffer] = await nvim.list_bufs()
     for buffer in buffers:
         if buffer.number == bufnr:
             return buffer
     return None
 
 
-# async def find_buffer(nvim: Nvim2, bufnr: int) -> Optional[Buffer]:
-#     buffers: Sequence[Buffer] = await nvim.api.list_bufs()
-
-#     def cont() -> Sequence[Buffer]:
-#         for buffer in buffers:
-#             if buffer.number == bufnr:
-#                 return buffer
-#         return None
-
-#     return await nvim.async_call(cont)
-
-
 class HoldPosition:
-    def __init__(self, nvim: Nvim, window: Optional[Window] = None):
+    def __init__(self, nvim: Nvim2):
         self.nvim = nvim
-        self.window = window or nvim.api.get_current_win()
 
-    def __enter__(self) -> None:
-        pos = self.nvim.api.win_get_cursor(self.window)
-        self.pos = pos
+    async def __aenter__(self) -> None:
+        self.window = await self.nvim.api.get_current_win()
+        self.pos = await self.nvim.api.win_get_cursor(self.window)
 
-    def __exit__(self, *_) -> None:
+    async def __aexit__(self, *_) -> None:
         row, col = self.pos
-        buffer: Buffer = self.nvim.api.win_get_buf(self.window)
-        max_rows = self.nvim.api.buf_line_count(buffer)
+        buffer: Buffer = await self.nvim.api.win_get_buf(self.window)
+        max_rows = await self.nvim.api.buf_line_count(buffer)
         r = min(row, max_rows)
-        self.nvim.api.win_set_cursor(self.window, (r, col))
+        await self.nvim.api.win_set_cursor(self.window, (r, col))
 
 
 class HoldWindowPosition:
-    def __init__(self, nvim: Nvim):
+    def __init__(self, nvim: Nvim2):
         self.nvim = nvim
 
-    def __enter__(self) -> None:
-        self.window = self.nvim.api.get_current_win()
+    async def __aenter__(self) -> None:
+        self.window = await self.nvim.api.get_current_win()
 
-    def __exit__(self, *_) -> None:
-        self.nvim.api.set_current_win(self.window)
+    async def __aexit__(self, *_) -> None:
+        await self.nvim.api.set_current_win(self.window)

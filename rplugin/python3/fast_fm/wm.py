@@ -1,136 +1,143 @@
-from typing import Iterator, Optional, Sequence, Iterable, Tuple
+from typing import Iterable, Iterator, Optional, Sequence, Tuple
 
 from .consts import fm_filetype
+from .da import anext
 from .fs import is_parent
-from .nvim import Buffer, Nvim, Tabpage, Window
+from .nvim import Buffer, Nvim2, Tabpage, Window
 from .types import Settings
 
 
-def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
-    ft = nvim.api.buf_get_option(buffer, "filetype")
+async def is_fm_buffer(nvim: Nvim2, buffer: Buffer) -> bool:
+    ft = await nvim.api.buf_get_option(buffer, "filetype")
     return ft == fm_filetype
 
 
-def find_windows_in_tab(nvim: Nvim) -> Sequence[Window]:
-    def key_by(window: Window) -> Tuple[int, int]:
-        row, col = nvim.api.win_get_position(window)
+async def find_windows_in_tab(nvim: Nvim2) -> Sequence[Window]:
+    async def key_by(window: Window) -> Tuple[int, int]:
+        row, col = await nvim.api.win_get_position(window)
         return (col, row)
 
-    tab: Tabpage = nvim.api.get_current_tabpage()
-    windows: Sequence[Window] = nvim.api.tabpage_list_wins(tab)
-    w = (
-        window
+    tab: Tabpage = await nvim.api.get_current_tabpage()
+    windows: Sequence[Window] = await nvim.api.tabpage_list_wins(tab)
+    w = [
+        (window, await key_by(window))
         for window in windows
-        if not nvim.api.win_get_option(window, "previewwindow")
-    )
+        if not await nvim.api.win_get_option(window, "previewwindow")
+    ]
 
-    return sorted(w, key=key_by)
+    for w, _ in sorted(w, key=lambda t: t[1]):
+        yield w
 
 
-def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim):
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        if is_fm_buffer(nvim, buffer=buffer):
+async def find_fm_windows_in_tab(nvim: Nvim2) -> Iterator[Window]:
+    async for window in find_windows_in_tab(nvim):
+        buffer: Buffer = await nvim.api.win_get_buf(window)
+        if await is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
-def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim):
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        if not is_fm_buffer(nvim, buffer=buffer):
+async def find_non_fm_windows_in_tab(nvim: Nvim2) -> Iterator[Window]:
+    async for window in find_windows_in_tab(nvim):
+        buffer: Buffer = await nvim.api.win_get_buf(window)
+        if not await is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
-def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim):
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        name = nvim.api.buf_get_name(buffer)
+async def find_window_with_file_in_tab(nvim: Nvim2, file: str) -> Iterator[Window]:
+    async for window in find_windows_in_tab(nvim):
+        buffer: Buffer = await nvim.api.win_get_buf(window)
+        name = await nvim.api.buf_get_name(buffer)
         if name == file:
             yield window
 
 
-def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
+async def find_fm_buffers(nvim: Nvim2) -> Iterator[Buffer]:
+    buffers: Sequence[Buffer] = await nvim.list_bufs()
     for buffer in buffers:
-        if is_fm_buffer(nvim, buffer=buffer):
+        if await is_fm_buffer(nvim, buffer=buffer):
             yield buffer
 
 
-def find_buffer_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
+async def find_buffer_with_file(nvim: Nvim2, file: str) -> Iterator[Buffer]:
+    buffers: Sequence[Buffer] = await nvim.list_bufs()
     for buffer in buffers:
-        name = nvim.api.buf_get_name(buffer)
+        name = await nvim.api.buf_get_name(buffer)
         if name == file:
             yield buffer
 
 
-def new_fm_buffer(nvim: Nvim) -> Buffer:
-    buffer: Buffer = nvim.api.create_buf(False, True)
-    nvim.api.buf_set_option(buffer, "modifiable", False)
-    nvim.api.buf_set_option(buffer, "filetype", fm_filetype)
+async def new_fm_buffer(nvim: Nvim2) -> Buffer:
+    buffer: Buffer = await nvim.api.create_buf(False, True)
+    await nvim.api.buf_set_option(buffer, "modifiable", False)
+    await nvim.api.buf_set_option(buffer, "filetype", fm_filetype)
     return buffer
 
 
-def new_window(nvim: Nvim, *, open_left: bool) -> Window:
-    split = nvim.api.get_option("splitright")
+async def new_window(nvim: Nvim2, *, open_left: bool) -> Window:
+    split = await nvim.api.get_option("splitright")
 
-    windows: Sequence[Window] = find_windows_in_tab(nvim)
+    windows: Sequence[Window] = [w async for w in find_windows_in_tab(nvim)]
     focus_win = windows[0] if open_left else windows[-1]
     direction = False if open_left else True
-    nvim.api.set_option("splitright", direction)
+    await nvim.api.set_option("splitright", direction)
 
-    nvim.api.set_current_win(focus_win)
-    nvim.command("vnew")
-    nvim.api.set_option("splitright", split)
+    await nvim.api.set_current_win(focus_win)
+    await nvim.command("vnew")
+    await nvim.api.set_option("splitright", split)
 
-    window: Window = nvim.api.get_current_win()
+    window: Window = await nvim.api.get_current_win()
     return window
 
 
-def resize_fm_windows(nvim: Nvim, *, settings: Settings) -> None:
-    for window in find_fm_windows_in_tab(nvim):
-        nvim.api.win_set_width(window, settings.width)
+async def resize_fm_windows(nvim: Nvim2, *, settings: Settings) -> None:
+    async for window in find_fm_windows_in_tab(nvim):
+        await nvim.api.win_set_width(window, settings.width)
 
 
-def toggle_shown(nvim: Nvim, *, settings: Settings) -> None:
-    window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
+async def toggle_shown(nvim: Nvim2, *, settings: Settings) -> None:
+    window: Optional[Window] = await anext(find_fm_windows_in_tab(nvim), None)
     if window:
-        nvim.api.win_close(window, True)
+        await nvim.api.win_close(window, True)
     else:
-        buffer: Buffer = next(find_fm_buffers(nvim), None) or new_fm_buffer(nvim)
-        window = new_window(nvim, open_left=settings.open_left)
-        nvim.api.win_set_buf(window, buffer)
-        nvim.api.win_set_option(window, "number", False)
-        nvim.api.win_set_option(window, "signcolumn", "no")
-        nvim.api.win_set_option(window, "cursorline", True)
-        resize_fm_windows(nvim, settings=settings)
+        buffer: Buffer = await anext(find_fm_buffers(nvim), None)
+        if buffer is None:
+            buffer = await new_fm_buffer(nvim)
+        window = await new_window(nvim, open_left=settings.open_left)
+        await nvim.api.win_set_buf(window, buffer)
+        await nvim.api.win_set_option(window, "number", False)
+        await nvim.api.win_set_option(window, "signcolumn", "no")
+        await nvim.api.win_set_option(window, "cursorline", True)
+        await resize_fm_windows(nvim, settings=settings)
 
 
-def show_file(nvim: Nvim, *, settings: Settings, file: str) -> None:
-    buffer: Optional[Buffer] = next(find_buffer_with_file(nvim, file=file), None)
-    window: Window = next(find_window_with_file_in_tab(nvim, file=file), None) or next(
-        find_non_fm_windows_in_tab(nvim), None
-    ) or new_window(nvim, open_left=not settings.open_left)
-    nvim.api.set_current_win(window)
+async def show_file(nvim: Nvim2, *, settings: Settings, file: str) -> None:
+    buffer: Optional[Buffer] = await anext(find_buffer_with_file(nvim, file=file), None)
+    window: Window = await anext(
+        find_window_with_file_in_tab(nvim, file=file), None
+    ) or await anext(find_non_fm_windows_in_tab(nvim), None) or await new_window(
+        nvim, open_left=not settings.open_left
+    )
+
+    await nvim.api.set_current_win(window)
     if buffer:
-        nvim.api.win_set_buf(window, buffer)
+        await nvim.api.win_set_buf(window, buffer)
     else:
-        nvim.command(f"edit {file}")
-    resize_fm_windows(nvim, settings=settings)
+        await nvim.command(f"edit {file}")
+    await resize_fm_windows(nvim, settings=settings)
 
 
-def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
+async def update_buffers(nvim: Nvim2, lines: Sequence[str]) -> None:
 
-    for buffer in find_fm_buffers(nvim):
-        modifiable = nvim.api.buf_get_option(buffer, "modifiable")
-        nvim.api.buf_set_option(buffer, "modifiable", True)
-        nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
-        nvim.api.buf_set_option(buffer, "modifiable", modifiable)
+    async for buffer in find_fm_buffers(nvim):
+        modifiable = await nvim.api.buf_get_option(buffer, "modifiable")
+        await nvim.api.buf_set_option(buffer, "modifiable", True)
+        await nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
+        await nvim.api.buf_set_option(buffer, "modifiable", modifiable)
 
 
-def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
+async def kill_buffers(nvim: Nvim2, paths: Iterable[str]) -> None:
+    buffers: Sequence[Buffer] = await nvim.list_bufs()
     for buffer in buffers:
-        name = nvim.api.buf_get_name(buffer)
+        name = await nvim.api.buf_get_name(buffer)
         if any(is_parent(parent=path, child=name) for path in paths):
-            nvim.command(f"bwipeout! {buffer.number}")
+            await nvim.command(f"bwipeout! {buffer.number}")

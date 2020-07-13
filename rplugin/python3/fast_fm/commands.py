@@ -1,3 +1,4 @@
+from asyncio import get_running_loop
 from os.path import basename, dirname, exists, join, relpath
 from typing import Callable, Iterator, Optional
 
@@ -8,7 +9,7 @@ from .nvim import (
     Buffer,
     HoldPosition,
     HoldWindowPosition,
-    Nvim,
+    Nvim2,
     Window,
     find_buffer,
     print,
@@ -18,14 +19,14 @@ from .types import Mode, Node, Settings, State
 from .wm import is_fm_buffer, kill_buffers, show_file, toggle_shown, update_buffers
 
 
-def _index(nvim: Nvim, state: State) -> Optional[Node]:
-    window: Window = nvim.api.get_current_win()
-    row, _ = nvim.api.win_get_cursor(window)
+async def _index(nvim: Nvim2, state: State) -> Optional[Node]:
+    window: Window = await nvim.api.get_current_win()
+    row, _ = await nvim.api.win_get_cursor(window)
     row = row - 1
     return index(state, row)
 
 
-def _indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
+def _indices(nvim: Nvim2, state: State, is_visual: bool) -> Iterator[Node]:
     if is_visual:
         buffer: Buffer = nvim.api.get_current_buf()
         r1, _ = nvim.api.buf_get_mark(buffer, "<")
@@ -43,9 +44,9 @@ def _indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
             yield node
 
 
-def _redraw(nvim: Nvim, state: State) -> None:
-    with HoldPosition(nvim):
-        update_buffers(nvim, lines=state.rendered)
+async def _redraw(nvim: Nvim2, state: State) -> None:
+    async with HoldPosition(nvim):
+        await update_buffers(nvim, lines=state.rendered)
 
 
 def _display_path(path: str, state: State) -> str:
@@ -53,13 +54,17 @@ def _display_path(path: str, state: State) -> str:
     return raw.replace("\n", r"\n")
 
 
-def a_on_filetype(nvim: Nvim, state: State, settings: Settings, buf: int) -> None:
+async def a_on_filetype(
+    nvim: Nvim2, state: State, settings: Settings, buf: int
+) -> None:
     buffer = find_buffer(nvim, buf)
     if buffer:
         keymap(nvim, buffer=buffer, settings=settings)
 
 
-def a_on_bufenter(nvim: Nvim, state: State, settings: Settings, buf: int) -> State:
+async def a_on_bufenter(
+    nvim: Nvim2, state: State, settings: Settings, buf: int
+) -> State:
     buffer = find_buffer(nvim, buf)
     if buffer and is_fm_buffer(nvim, buffer=buffer):
         return state
@@ -67,16 +72,16 @@ def a_on_bufenter(nvim: Nvim, state: State, settings: Settings, buf: int) -> Sta
         return state
 
 
-def a_on_focus(nvim: Nvim, state: State, settings: Settings) -> State:
+async def a_on_focus(nvim: Nvim2, state: State, settings: Settings) -> State:
     return state
 
 
-def c_open(nvim: Nvim, state: State, settings: Settings) -> None:
-    toggle_shown(nvim, settings=settings)
-    _redraw(nvim, state=state)
+async def c_open(nvim: Nvim2, state: State, settings: Settings) -> None:
+    await toggle_shown(nvim, settings=settings)
+    await _redraw(nvim, state=state)
 
 
-def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_primary(nvim: Nvim2, state: State, settings: Settings) -> State:
     node = _index(nvim, state=state)
     if node:
         if Mode.FOLDER in node.mode:
@@ -92,12 +97,12 @@ def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
         return state
 
 
-def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_secondary(nvim: Nvim2, state: State, settings: Settings) -> State:
     with HoldWindowPosition(nvim):
         return c_primary(nvim, state=state, settings=settings)
 
 
-def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_collapse(nvim: Nvim2, state: State, settings: Settings) -> State:
     node = _index(nvim, state=state)
     if node and Mode.FOLDER in node.mode:
         paths = {i for i in state.index if is_parent(parent=node.path, child=i)}
@@ -109,25 +114,25 @@ def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
         return state
 
 
-def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_refresh(nvim: Nvim2, state: State, settings: Settings) -> State:
     paths = {state.root.path}
     new_state = forward(state, settings=settings, paths=paths)
     _redraw(nvim, state=new_state)
     return new_state
 
 
-def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_hidden(nvim: Nvim2, state: State, settings: Settings) -> State:
     new_state = forward(state, settings=settings, show_hidden=not state.show_hidden)
     _redraw(nvim, state=new_state)
     return new_state
 
 
-def c_follow(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_follow(nvim: Nvim2, state: State, settings: Settings) -> State:
     new_state = forward(state, settings=settings, follow=not state.follow)
     return new_state
 
 
-def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
+async def c_copy_name(nvim: Nvim2, state: State, settings: Settings) -> None:
     node = _index(nvim, state=state)
     if node:
         path = node.path
@@ -136,7 +141,7 @@ def c_copy_name(nvim: Nvim, state: State, settings: Settings) -> None:
         print(nvim, f"📎 {path}")
 
 
-def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_new(nvim: Nvim2, state: State, settings: Settings) -> State:
     node = _index(nvim, state=state)
     if node:
         parent = node.path if is_dir(node) else dirname(node.path)
@@ -160,7 +165,7 @@ def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
         return state
 
 
-def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_rename(nvim: Nvim2, state: State, settings: Settings) -> State:
     node = _index(nvim, state=state)
     if node:
         prev_name = node.path
@@ -187,13 +192,15 @@ def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
         return state
 
 
-def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_clear(nvim: Nvim2, state: State, settings: Settings) -> State:
     new_state = forward(state, settings=settings, selection=set())
     _redraw(nvim, state=new_state)
     return new_state
 
 
-def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> State:
+async def c_select(
+    nvim: Nvim2, state: State, settings: Settings, is_visual: bool
+) -> State:
     nodes = _indices(nvim, state=state, is_visual=is_visual)
     if is_visual:
         selection = state.selection ^ {n.path for n in nodes}
@@ -211,7 +218,7 @@ def c_select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
             return state
 
 
-def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_delete(nvim: Nvim2, state: State, settings: Settings) -> State:
     node = _index(nvim, state=state)
     selection = state.selection or ({node.path} if node else set())
     if selection:
@@ -220,8 +227,7 @@ def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
         ans = nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
         if ans == 1:
             try:
-                for path in unified:
-                    remove(path)
+                await remove(unified)
             finally:
                 paths = {dirname(path) for path in unified}
                 new_state = forward(state, settings=settings, paths=paths)
@@ -241,8 +247,8 @@ def _find_dest(src: str, node: Node) -> str:
     return dst
 
 
-def _operation(
-    nvim: Nvim,
+async def _operation(
+    nvim: Nvim2,
     *,
     state: State,
     settings: Settings,
@@ -280,9 +286,13 @@ def _operation(
         return state
 
 
-def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
-    return _operation(nvim, state=state, settings=settings, name="Cut", action=cut)
+async def c_cut(nvim: Nvim2, state: State, settings: Settings) -> State:
+    return await _operation(
+        nvim, state=state, settings=settings, name="Cut", action=cut
+    )
 
 
-def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
-    return _operation(nvim, state=state, settings=settings, name="Copy", action=copy)
+async def c_copy(nvim: Nvim2, state: State, settings: Settings) -> State:
+    return await _operation(
+        nvim, state=state, settings=settings, name="Copy", action=copy
+    )
