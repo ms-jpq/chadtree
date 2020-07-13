@@ -95,6 +95,11 @@ async def resize_fm_windows(nvim: Nvim2, *, settings: Settings) -> None:
         await nvim.api.win_set_width(window, settings.width)
 
 
+async def kill_fm_windows(nvim: Nvim2, *, settings: Settings) -> None:
+    async for window in find_fm_windows_in_tab(nvim):
+        await nvim.api.win_close(window, True)
+
+
 async def toggle_shown(nvim: Nvim2, *, settings: Settings) -> None:
     window: Optional[Window] = await anext(find_fm_windows_in_tab(nvim))
     if window:

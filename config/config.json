@@ -10,6 +10,7 @@
     "FMhidden": ["."],
     "FMnew": ["a", "A"],
     "FMprimary": ["<enter>"],
+    "FMquit": ["q"],
     "FMrefresh": ["<c-r>"],
     "FMrename": ["r", "R"],
     "FMresize": ["t", "T"],

@@ -20,6 +20,7 @@ from .commands import (
     c_new,
     c_open,
     c_primary,
+    c_quit,
     c_refresh,
     c_rename,
     c_secondary,
@@ -102,11 +103,20 @@ class Main:
         co = a_on_focus(self.nvim, state=self.state, settings=self.settings)
         self._submit(co)
 
+    @function("FMquit")
+    def fm_quit(self, args: Sequence[Any]) -> None:
+        """
+        Close sidebar
+        """
+
+        co = c_quit(self.nvim, state=self.state, settings=self.settings)
+
+        self._submit(co)
+
     @function("FMopen")
     def fm_open(self, args: Sequence[Any]) -> None:
         """
-        Folders -> toggle
-        File -> open
+        Toggle sidebar
         """
 
         co = c_open(self.nvim, state=self.state, settings=self.settings)

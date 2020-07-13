@@ -16,7 +16,14 @@ from .nvim import (
 )
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
-from .wm import is_fm_buffer, kill_buffers, show_file, toggle_shown, update_buffers
+from .wm import (
+    is_fm_buffer,
+    kill_buffers,
+    kill_fm_windows,
+    show_file,
+    toggle_shown,
+    update_buffers,
+)
 
 
 async def _index(nvim: Nvim2, state: State) -> Optional[Node]:
@@ -82,6 +89,10 @@ async def a_on_bufenter(
 
 async def a_on_focus(nvim: Nvim2, state: State, settings: Settings) -> State:
     return await _refresh(nvim, state=state, settings=settings)
+
+
+async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:
+    await kill_fm_windows(nvim, settings=settings)
 
 
 async def c_open(nvim: Nvim2, state: State, settings: Settings) -> None:
