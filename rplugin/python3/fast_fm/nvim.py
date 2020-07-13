@@ -5,8 +5,6 @@ from typing import Any, Awaitable, Optional, Protocol, Sequence
 
 from pynvim import Nvim
 
-from .da import AnyCallable
-
 Tabpage = Any
 Window = Any
 Buffer = Any

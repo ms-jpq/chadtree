@@ -1,8 +1,8 @@
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
-# from .git import status
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify
+from .git import status
 from .keymap import keymap
 from .nvim import (
     Buffer,
@@ -66,6 +66,9 @@ async def a_on_bufenter(
 ) -> State:
     buffer = await find_buffer(nvim, buf)
     if buffer is not None and await is_fm_buffer(nvim, buffer=buffer):
+        vc = await status()
+        new_state = await forward(state, settings=settings, vc=vc)
+        await _redraw(nvim, state=new_state)
         return state
     else:
         return state

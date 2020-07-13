@@ -35,14 +35,14 @@ def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
 
 
 def paint(
-    settings: Settings, index: Index, selection: Selection
+    settings: Settings, index: Index, selection: Selection, vc: VCStatus
 ) -> Callable[[Node, int], str]:
     icons = settings.icons
 
     def show_ascii(node: Node, depth: int) -> str:
         spaces = (depth - 1) * 2 * " "
         select = "*" if node.path in selection else " "
-        vc = " "
+        stat = vc.status.get(node.path, "")
         name = node.name.replace("\n", r"\n")
 
         if Mode.FOLDER in node.mode:
@@ -50,12 +50,12 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"{name} ->"
 
-        return f"{spaces}{select}{vc}{name}"
+        return f"{spaces}{select} {name} {stat}"
 
     def show_icons(node: Node, depth: int) -> str:
         spaces = (depth - 1) * 2 * " "
         select = "*" if node.path in selection else " "
-        vc = " "
+        stat = vc.status.get(node.path, "")
         name = node.name.replace("\n", r"\n")
 
         if Mode.FOLDER in node.mode:
@@ -74,7 +74,7 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"{name} {icons.link}"
 
-        return f"{spaces}{select}{vc}{name}"
+        return f"{spaces}{select} {name} {stat}"
 
     show = show_icons if settings.use_icons else show_ascii
     return show
@@ -90,7 +90,7 @@ def render(
     show_hidden: bool,
 ) -> Tuple[Sequence[Node], Sequence[str]]:
     drop = constantly(False) if show_hidden else ignore(settings, vc)
-    show = paint(settings, index=index, selection=selection)
+    show = paint(settings, index=index, selection=selection, vc=vc)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
         rend = show(node, depth)

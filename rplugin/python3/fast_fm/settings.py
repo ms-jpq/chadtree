@@ -2,7 +2,7 @@ from typing import Any
 
 from .consts import config_json, icons_json, ignore_json
 from .da import load_json
-from .types import IconSet, Keymap, Settings, VCIcons
+from .types import IconSet, Keymap, Settings
 
 
 def initial(user_settings: Any, user_icons: Any) -> Settings:
@@ -11,21 +11,12 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
     ignore = load_json(ignore_json)
     keymap = Keymap(entire=config["keys"], buffer=config["keymap"])
 
-    vc_ic = icon_c["vc"]
-    vc_icons = VCIcons(
-        ignored=vc_ic["ignored"],
-        untracked=vc_ic["untracked"],
-        modified=vc_ic["modified"],
-        staged=vc_ic["staged"],
-    )
-
     folder_ic = icon_c["folder"]
 
     icons = IconSet(
         folder_open=folder_ic["open"],
         folder_closed=folder_ic["closed"],
         link=icon_c["link"],
-        vc=vc_icons,
         filetype=icon_c["filetype"],
         filename=icon_c["filename"],
     )

@@ -30,19 +30,10 @@ class Keymap:
 
 
 @dataclass(frozen=True)
-class VCIcons:
-    ignored: str
-    untracked: str
-    modified: str
-    staged: str
-
-
-@dataclass(frozen=True)
 class IconSet:
     folder_open: str
     folder_closed: str
     link: str
-    vc: VCIcons
     filetype: Dict[str, str]
     filename: Dict[str, str]
 
@@ -64,9 +55,7 @@ class Settings:
 @dataclass(frozen=True)
 class VCStatus:
     ignored: Set[str] = field(default_factory=set)
-    added: Set[str] = field(default_factory=set)
-    modified: Set[str] = field(default_factory=set)
-    staged: Set[str] = field(default_factory=set)
+    status: Dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
