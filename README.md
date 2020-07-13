@@ -36,6 +36,14 @@ The **BEST** file manager for Neovim
 
 ## Install
 
+Requires pyvim (as all python plugins do)
+
+```sh
+pip3 install pynvim
+```
+
+Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
+
 ```VimL
 Plug 'ms-jpq/fast-fm'
 ```
