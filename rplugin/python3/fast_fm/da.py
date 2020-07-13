@@ -2,7 +2,7 @@ from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from json import load
-from typing import Any, AsyncIterator, Callable, Optional, TypeVar, cast
+from typing import Any, AsyncIterator, Callable, Optional, Protocol, TypeVar, cast
 
 T = TypeVar("T")
 
@@ -23,6 +23,11 @@ def constantly(val: T) -> Callable[[Any], T]:
         return val
 
     return ret
+
+
+class AnyCallable(Protocol):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        pass
 
 
 @dataclass(frozen=True)
