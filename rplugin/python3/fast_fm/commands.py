@@ -48,6 +48,13 @@ async def _redraw(nvim: Nvim2, state: State) -> None:
         await update_buffers(nvim, lines=state.rendered)
 
 
+async def _refresh(nvim: Nvim2, state: State, settings: Settings) -> State:
+    vc = await status()
+    new_state = await forward(state, settings=settings, vc=vc)
+    await _redraw(nvim, state=new_state)
+    return new_state
+
+
 def _display_path(path: str, state: State) -> str:
     raw = relpath(path, start=state.root.path)
     return raw.replace("\n", r"\n")
@@ -66,16 +73,13 @@ async def a_on_bufenter(
 ) -> State:
     buffer = await find_buffer(nvim, buf)
     if buffer is not None and await is_fm_buffer(nvim, buffer=buffer):
-        vc = await status()
-        new_state = await forward(state, settings=settings, vc=vc)
-        await _redraw(nvim, state=new_state)
-        return state
+        return await _refresh(nvim, state=state, settings=settings)
     else:
         return state
 
 
 async def a_on_focus(nvim: Nvim2, state: State, settings: Settings) -> State:
-    return state
+    return await _refresh(nvim, state=state, settings=settings)
 
 
 async def c_open(nvim: Nvim2, state: State, settings: Settings) -> None:
