@@ -1,14 +1,12 @@
-from asyncio import AbstractEventLoop, run_coroutine_threadsafe
+from asyncio import AbstractEventLoop, Queue, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
 
 from pynvim import Nvim, autocmd, function, plugin
 
+from .auto_commands import a_on_bufenter, a_on_filetype, a_on_focus
 from .commands import (
-    a_on_bufenter,
-    a_on_filetype,
-    a_on_focus,
     c_clear,
     c_collapse,
     c_copy,
@@ -42,6 +40,7 @@ class Main:
         settings = initial_settings(user_settings=user_settings, user_icons=user_icons)
 
         self.chan = ThreadPoolExecutor(max_workers=1)
+        self.ch: Queue = Queue(1)
         self.nvim1 = nvim
         self.nvim = Nvim2(nvim)
         self.state = initial_state(settings)
@@ -50,7 +49,13 @@ class Main:
         self._post_init()
 
     def _post_init(self) -> None:
+        async def forever() -> None:
+            while True:
+                state = await self.ch.get()
+                self.state = state
+
         self._submit(keys(self.nvim, self.settings))
+        self._submit(forever())
 
     def _submit(self, co: Awaitable[Optional[State]]) -> None:
         loop: AbstractEventLoop = self.nvim1.loop
@@ -90,7 +95,7 @@ class Main:
         """
 
         co = a_on_bufenter(
-            self.nvim, state=self.state, settings=self.settings, buf=int(buf)
+            self.ch, self.nvim, state=self.state, settings=self.settings, buf=int(buf)
         )
         self._submit(co)
 
@@ -100,7 +105,7 @@ class Main:
         Update background tasks
         """
 
-        co = a_on_focus(self.nvim, state=self.state, settings=self.settings)
+        co = a_on_focus(self.ch, self.nvim, state=self.state, settings=self.settings)
         self._submit(co)
 
     @function("FMquit")

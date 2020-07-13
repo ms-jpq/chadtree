@@ -1,29 +1,12 @@
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
-from .da import async_throttle
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify
 from .git import status
-from .keymap import keymap
-from .nvim import (
-    Buffer,
-    HoldPosition,
-    HoldWindowPosition,
-    Nvim2,
-    Window,
-    find_buffer,
-    print,
-)
+from .nvim import Buffer, HoldPosition, HoldWindowPosition, Nvim2, Window, print
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
-from .wm import (
-    is_fm_buffer,
-    kill_buffers,
-    kill_fm_windows,
-    show_file,
-    toggle_shown,
-    update_buffers,
-)
+from .wm import kill_buffers, kill_fm_windows, show_file, toggle_shown, update_buffers
 
 
 async def _index(nvim: Nvim2, state: State) -> Optional[Node]:
@@ -51,44 +34,14 @@ async def _indices(nvim: Nvim2, state: State, is_visual: bool) -> AsyncIterator[
             yield node
 
 
-async def _redraw(nvim: Nvim2, state: State) -> None:
+async def redraw(nvim: Nvim2, state: State) -> None:
     async with HoldPosition(nvim):
         await update_buffers(nvim, lines=state.rendered)
-
-
-@async_throttle(delay_seconds=1)
-async def _refresh(nvim: Nvim2, state: State, settings: Settings) -> State:
-    vc = await status()
-    new_state = await forward(state, settings=settings, vc=vc)
-    await _redraw(nvim, state=new_state)
-    return new_state
 
 
 def _display_path(path: str, state: State) -> str:
     raw = relpath(path, start=state.root.path)
     return raw.replace("\n", r"\n")
-
-
-async def a_on_filetype(
-    nvim: Nvim2, state: State, settings: Settings, buf: int
-) -> None:
-    buffer = await find_buffer(nvim, buf)
-    if buffer is not None:
-        await keymap(nvim, buffer=buffer, settings=settings)
-
-
-async def a_on_bufenter(
-    nvim: Nvim2, state: State, settings: Settings, buf: int
-) -> State:
-    buffer = await find_buffer(nvim, buf)
-    if buffer is not None and await is_fm_buffer(nvim, buffer=buffer):
-        return await _refresh(nvim, state=state, settings=settings)
-    else:
-        return state
-
-
-async def a_on_focus(nvim: Nvim2, state: State, settings: Settings) -> State:
-    return await _refresh(nvim, state=state, settings=settings)
 
 
 async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:
@@ -97,7 +50,7 @@ async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:
 
 async def c_open(nvim: Nvim2, state: State, settings: Settings) -> None:
     await toggle_shown(nvim, settings=settings)
-    await _redraw(nvim, state=state)
+    await redraw(nvim, state=state)
 
 
 async def c_primary(nvim: Nvim2, state: State, settings: Settings) -> State:
@@ -109,7 +62,7 @@ async def c_primary(nvim: Nvim2, state: State, settings: Settings) -> State:
             new_state = await forward(
                 state, settings=settings, index=index, paths=paths
             )
-            await _redraw(nvim, state=new_state)
+            await redraw(nvim, state=new_state)
             return new_state
         else:
             await show_file(nvim, settings=settings, file=node.path)
@@ -129,7 +82,7 @@ async def c_collapse(nvim: Nvim2, state: State, settings: Settings) -> State:
         paths = {i for i in state.index if is_parent(parent=node.path, child=i)}
         index = state.index - paths
         new_state = await forward(state, settings=settings, index=index, paths=paths)
-        await _redraw(nvim, state=new_state)
+        await redraw(nvim, state=new_state)
         return new_state
     else:
         return state
@@ -139,7 +92,7 @@ async def c_refresh(nvim: Nvim2, state: State, settings: Settings) -> State:
     paths = {state.root.path}
     vc = await status()
     new_state = await forward(state, settings=settings, vc=vc, paths=paths)
-    await _redraw(nvim, state=new_state)
+    await redraw(nvim, state=new_state)
     return new_state
 
 
@@ -147,7 +100,7 @@ async def c_hidden(nvim: Nvim2, state: State, settings: Settings) -> State:
     new_state = await forward(
         state, settings=settings, show_hidden=not state.show_hidden
     )
-    await _redraw(nvim, state=new_state)
+    await redraw(nvim, state=new_state)
     return new_state
 
 
@@ -189,7 +142,7 @@ async def c_new(nvim: Nvim2, state: State, settings: Settings) -> State:
                 new_state = await forward(
                     state, settings=settings, index=index, paths={parent}
                 )
-                await _redraw(nvim, state=new_state)
+                await redraw(nvim, state=new_state)
                 return new_state
     else:
         return state
@@ -219,7 +172,7 @@ async def c_rename(nvim: Nvim2, state: State, settings: Settings) -> State:
                 new_state = await forward(
                     state, settings=settings, index=index, paths=paths
                 )
-                await _redraw(nvim, state=new_state)
+                await redraw(nvim, state=new_state)
                 await kill_buffers(nvim, paths=(prev_name,))
                 return new_state
     else:
@@ -228,7 +181,7 @@ async def c_rename(nvim: Nvim2, state: State, settings: Settings) -> State:
 
 async def c_clear(nvim: Nvim2, state: State, settings: Settings) -> State:
     new_state = await forward(state, settings=settings, selection=set())
-    await _redraw(nvim, state=new_state)
+    await redraw(nvim, state=new_state)
     return new_state
 
 
@@ -239,14 +192,14 @@ async def c_select(
     if is_visual:
         selection = state.selection ^ {n.path for n in nodes}
         new_state = await forward(state, settings=settings, selection=selection)
-        await _redraw(nvim, state=new_state)
+        await redraw(nvim, state=new_state)
         return new_state
     else:
         node = next(nodes, None)
         if node:
             selection = state.selection ^ {node.path}
             new_state = await forward(state, settings=settings, selection=selection)
-            await _redraw(nvim, state=new_state)
+            await redraw(nvim, state=new_state)
             return new_state
         else:
             return state
@@ -268,7 +221,7 @@ async def c_delete(nvim: Nvim2, state: State, settings: Settings) -> State:
             finally:
                 paths = {dirname(path) for path in unified}
                 new_state = await forward(state, settings=settings, paths=paths)
-                await _redraw(nvim, state=new_state)
+                await redraw(nvim, state=new_state)
                 await kill_buffers(nvim, paths=selection)
                 return new_state
         else:
@@ -320,7 +273,7 @@ async def _operation(
                 new_state = await forward(
                     state, settings=settings, index=index, paths=paths
                 )
-                await _redraw(nvim, state=new_state)
+                await redraw(nvim, state=new_state)
                 await kill_buffers(nvim, paths=selection)
                 return new_state
     else:

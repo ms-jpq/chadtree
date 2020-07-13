@@ -19,3 +19,5 @@ fm_filetype = "fast_fm"
 
 folder_mode = 0o755
 file_mode = 0o644
+
+throttle_duration = 1
