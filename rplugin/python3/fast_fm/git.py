@@ -1,5 +1,6 @@
 from asyncio import gather
 from os.path import join, sep
+from shutil import which
 from typing import Iterable, Tuple
 
 from .da import call
@@ -19,7 +20,7 @@ async def root() -> str:
 
 
 async def stat() -> Iterable[Tuple[str, str]]:
-    ret = await call("git", "status", "--ignored", "--porcelain", "-z")
+    ret = await call("git", "status", "--ignored", "--renames", "--porcelain", "-z")
     if ret.code != 0:
         raise GitError(ret.err)
     else:
@@ -42,8 +43,11 @@ def parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
 
 
 async def status() -> VCStatus:
-    try:
-        r, stats = await gather(root(), stat())
-        return parse(r, stats)
-    except GitError:
+    if which("git"):
+        try:
+            r, stats = await gather(root(), stat())
+            return parse(r, stats)
+        except GitError:
+            return VCStatus()
+    else:
         return VCStatus()
