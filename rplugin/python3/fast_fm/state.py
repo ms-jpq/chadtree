@@ -35,7 +35,7 @@ def initial(settings: Settings) -> State:
     return state
 
 
-def forward(
+async def forward(
     state: State,
     *,
     settings: Settings,
@@ -51,7 +51,9 @@ def forward(
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
-    new_root = update(state.root, index=new_index, paths=paths) if paths else state.root
+    new_root = (
+        await update(state.root, index=new_index, paths=paths) if paths else state.root
+    )
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
     lookup, rendered = render(

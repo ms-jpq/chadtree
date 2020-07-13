@@ -1,4 +1,4 @@
-from asyncio import run_coroutine_threadsafe
+from asyncio import AbstractEventLoop, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
@@ -41,23 +41,29 @@ class Main:
 
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.nvim1 = nvim
-        self.nvim2 = Nvim2(nvim)
+        self.nvim = Nvim2(nvim)
         self.state = initial_state(settings)
         self.settings = settings
 
         keys(self.nvim1, self.settings)
 
     def _submit(self, co: Awaitable[Optional[State]]) -> None:
+        loop: AbstractEventLoop = self.nvim1.loop
+
         def run(nvim: Nvim) -> None:
-            fut = run_coroutine_threadsafe(co, nvim.loop)
+            fut = run_coroutine_threadsafe(co, loop)
             try:
                 ret = fut.result()
             except Exception as e:
                 stack = format_exc()
                 nvim.async_call(nvim.err_write, f"{stack}{e}")
             else:
-                if ret:
-                    self._update(ret)
+
+                def cont() -> None:
+                    if ret:
+                        self.state = ret
+
+                loop.call_soon_threadsafe(cont)
 
         self.chan.submit(run, self.nvim1)
 
@@ -68,7 +74,7 @@ class Main:
         File -> open
         """
 
-        co = c_open(self.nvim2, state=self.state, settings=self.settings)
+        co = c_open(self.nvim, state=self.state, settings=self.settings)
         self._submit(co)
 
     @function("FMprimary")
@@ -136,8 +142,12 @@ class Main:
         """
         Copy dirname / filename
         """
+        visual, *_ = args
+        is_visual = visual == 1
 
-        co = c_copy_name(self.nvim, state=self.state, settings=self.settings)
+        co = c_copy_name(
+            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
+        )
         self._submit(co)
 
     @function("FMnew")

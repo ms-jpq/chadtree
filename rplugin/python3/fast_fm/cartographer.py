@@ -1,5 +1,4 @@
 from asyncio import get_running_loop
-
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
@@ -19,7 +18,7 @@ def fs_stat(path: str) -> Mode:
         return mode
 
 
-def new(root: str,  index: Index) -> Node:
+def new(root: str, index: Index) -> Node:
     mode = fs_stat(root)
     name = basename(root)
     if Mode.FOLDER not in mode:
@@ -36,7 +35,7 @@ def new(root: str,  index: Index) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
-def _update(root: Node,  index: Index, paths: Set[str]) -> Node:
+def _update(root: Node, index: Index, paths: Set[str]) -> Node:
     if root.path in paths:
         return new(root.path, index=index)
     else:
@@ -56,6 +55,6 @@ def _update(root: Node,  index: Index, paths: Set[str]) -> Node:
 async def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
     loop = get_running_loop()
     try:
-        return _update(root, index=index, paths=paths)
+        return await loop.run_in_executor(None, _update, index, paths)
     except FileNotFoundError:
-        return new(root.path, index=index)
+        return await loop.run_in_executor(None, new, root.path, index)

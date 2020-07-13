@@ -5,7 +5,7 @@ from typing import Any, Awaitable, Optional, Protocol, Sequence
 
 from pynvim import Nvim
 
-from .da import AnyCallable, constantly
+from .da import AnyCallable
 
 Tabpage = Any
 Window = Any
@@ -39,42 +39,12 @@ class Asynced:
         return run
 
 
-class SafeBuffer:
-    def __new__(cls, buffer: Buffer):
-        buffer.__len__ = constantly(0)
-        return buffer
-
-
 class Nvim2:
     def __init__(self, nvim: Nvim):
         self._nvim = nvim
         self.funcs = Asynced(nvim, "funcs")
         self.api = Asynced(nvim, "api")
         self.command = self.api.command
-
-        self.o_api = nvim.api
-
-    def _async_call(self, fn: AnyCallable, *args: Any, **kwargs: Any) -> Awaitable[Any]:
-        fut: Future = Future()
-
-        def f(*args: Any, **kwargs) -> None:
-            try:
-                ret = fn(*args, **kwargs)
-            except Exception as e:
-                fut.set_exception(e)
-            else:
-                fut.set_result(ret)
-
-        self._nvim.async_call(f, *args, **kwargs)
-        return fut
-
-    def list_bufs(self) -> Sequence[SafeBuffer]:
-        def cont() -> Sequence[SafeBuffer]:
-            buffers: Sequence[Buffer] = self.o_api.list_bufs()
-            safe_buffers = tuple(map(SafeBuffer, buffers))
-            return safe_buffers
-
-        return self._async_call(cont)
 
 
 async def print(
@@ -87,7 +57,7 @@ async def print(
 
 
 async def find_buffer(nvim: Nvim2, bufnr: int) -> Optional[Buffer]:
-    buffers: Sequence[Buffer] = await nvim.list_bufs()
+    buffers: Sequence[Buffer] = await nvim.api.list_bufs()
     for buffer in buffers:
         if buffer.number == bufnr:
             return buffer
