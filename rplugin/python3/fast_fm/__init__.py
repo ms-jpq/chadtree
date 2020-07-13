@@ -67,6 +67,28 @@ class Main:
 
         self.chan.submit(run, self.nvim1)
 
+    @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
+    def on_filetype(self, buf: str) -> None:
+        """
+        Setup keybind
+        """
+
+        co = a_on_filetype(
+            self.nvim, state=self.state, settings=self.settings, buf=int(buf)
+        )
+        self._submit(co)
+
+    @autocmd("BufEnter", eval="expand('<abuf>')")
+    def on_bufenter(self, buf: str) -> None:
+        """
+        Update background tasks
+        """
+
+        co = a_on_bufenter(
+            self.nvim, state=self.state, settings=self.settings, buf=int(buf)
+        )
+        self._submit(co)
+
     @function("FMopen")
     def fm_open(self, args: Sequence[Any]) -> None:
         """
@@ -215,26 +237,4 @@ class Main:
         """
 
         co = c_copy(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
-
-    @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
-    def on_filetype(self, buf: str) -> None:
-        """
-        Setup keybind
-        """
-
-        co = a_on_filetype(
-            self.nvim, state=self.state, settings=self.settings, buf=int(buf)
-        )
-        self._submit(co)
-
-    @autocmd("BufEnter", eval="expand('<abuf>')")
-    def on_bufenter(self, buf: str) -> None:
-        """
-        Update background tasks
-        """
-
-        co = a_on_bufenter(
-            self.nvim, state=self.state, settings=self.settings, buf=int(buf)
-        )
         self._submit(co)
