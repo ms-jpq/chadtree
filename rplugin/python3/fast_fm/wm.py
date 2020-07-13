@@ -1,6 +1,7 @@
-from typing import Iterator, Optional, Sequence, Set, Tuple
+from typing import Iterator, Optional, Sequence, Iterable, Tuple
 
 from .consts import fm_filetype
+from .fs import is_parent
 from .nvim import Buffer, Nvim, Tabpage, Window
 from .types import Settings
 
@@ -127,9 +128,9 @@ def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
         nvim.api.buf_set_option(buffer, "modifiable", modifiable)
 
 
-def kill_buffers(nvim: Nvim, files: Set[str]) -> None:
+def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
         name = nvim.api.buf_get_name(buffer)
-        if name in files:
+        if any(is_parent(parent=path, child=name) for path in paths):
             nvim.command(f"bwipeout! {buffer.number}")

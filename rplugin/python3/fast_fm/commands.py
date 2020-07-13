@@ -3,7 +3,7 @@ from typing import Callable, Iterator, Optional
 
 # from .git import status
 from .da import unify
-from .fs import copy, cut, new, remove, rename
+from .fs import copy, cut, is_parent, new, remove, rename
 from .keymap import keymap
 from .nvim import (
     Buffer,
@@ -101,7 +101,7 @@ def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
 def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
     node = _index(nvim, state=state)
     if node and Mode.FOLDER in node.mode:
-        paths = {i for i in state.index if i.startswith(node.path)}
+        paths = {i for i in state.index if is_parent(parent=node.path, child=i)}
         index = state.index - paths
         new_state = forward(state, settings=settings, index=index, paths=paths)
         _redraw(nvim, state=new_state)
@@ -179,7 +179,7 @@ def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
                 index = state.index | paths
                 new_state = forward(state, settings=settings, index=index, paths=paths)
                 _redraw(nvim, state=new_state)
-                kill_buffers(nvim, files={prev_name})
+                kill_buffers(nvim, paths=(prev_name,))
                 return new_state
     else:
         return state
@@ -224,7 +224,7 @@ def c_delete(nvim: Nvim, state: State, settings: Settings) -> State:
                 paths = {dirname(path) for path in unified}
                 new_state = forward(state, settings=settings, paths=paths)
                 _redraw(nvim, state=new_state)
-                kill_buffers(nvim, files=selection)
+                kill_buffers(nvim, paths=selection)
                 return new_state
         else:
             return state
@@ -271,7 +271,7 @@ def _operation(
                 index = state.index | paths
                 new_state = forward(state, settings=settings, index=index, paths=paths)
                 _redraw(nvim, state=new_state)
-                kill_buffers(nvim, files=selection)
+                kill_buffers(nvim, paths=selection)
                 return new_state
     else:
         print(nvim, "⚠️  -- {name}: nothing selected!", error=True)

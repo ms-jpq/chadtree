@@ -9,6 +9,10 @@ from shutil import move as mv
 from shutil import rmtree
 
 
+def is_parent(*, parent: str, child: str) -> bool:
+    return child.startswith(parent)
+
+
 def new(dest: str, folder_mode: int = 0o755, file_mode: int = 0o644) -> None:
     if dest.endswith(sep):
         makedirs(dest, mode=folder_mode, exist_ok=True)
