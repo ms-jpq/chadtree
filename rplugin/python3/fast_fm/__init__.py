@@ -26,10 +26,10 @@ from .commands import (
 )
 from .consts import fm_filetype
 from .keymap import keys
-from .nvim import Nvim2
+from .nvim import Nvim2, print
+from .schedule import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
-from .tasks import tasks
 from .types import State
 
 
@@ -72,8 +72,26 @@ class Main:
 
     @autocmd("VimEnter")
     def stub(self) -> None:
-        self._submit(keys(self.nvim, settings=self.settings))
-        self._submit(tasks(), wait=False)
+        async def setup() -> None:
+            await keys(self.nvim, settings=self.settings)
+            await print(self.nvim, "FM loaded 🍎")
+
+        async def forever() -> None:
+            while True:
+                try:
+                    update = self.settings.update
+                    async for _ in schedule(
+                        self.ch, min_time=update.min_time, max_time=update.max_time,
+                    ):
+                        state = await c_refresh(
+                            self.nvim, state=self.state, settings=self.settings
+                        )
+                        self.state = state
+                except Exception as e:
+                    await print(self.nvim, e, error=True)
+
+        self._submit(setup())
+        self._submit(forever(), wait=False)
 
     @autocmd("FileType", pattern=fm_filetype, eval="expand('<abuf>')")
     def on_filetype(self, buf: str) -> None:

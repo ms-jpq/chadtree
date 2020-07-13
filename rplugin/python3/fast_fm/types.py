@@ -39,6 +39,12 @@ class IconSet:
 
 
 @dataclass(frozen=True)
+class UpdateTime:
+    min_time: float
+    max_time: float
+
+
+@dataclass(frozen=True)
 class Settings:
     show_hidden: bool
     follow: bool
@@ -49,6 +55,7 @@ class Settings:
     path_ignore: Sequence[str]
     use_icons: bool
     icons: IconSet
+    update: UpdateTime
     session: bool
 
 

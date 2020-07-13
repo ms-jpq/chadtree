@@ -23,6 +23,10 @@
   "open_left": true,
   "session": true,
   "show_hidden": false,
+  "update_time": {
+    "max": 3,
+    "min": 1
+  },
   "use_icons": true,
   "width": 40
 }

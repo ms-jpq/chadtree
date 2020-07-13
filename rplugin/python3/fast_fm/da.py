@@ -1,7 +1,6 @@
-from asyncio import TimerHandle, create_subprocess_exec, get_running_loop, sleep
+from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
-from functools import partial
 from json import load
 from typing import (
     Any,
@@ -45,50 +44,8 @@ class AnyCallableAsync(Protocol):
         pass
 
 
-async def tiktok(interval_seconds: float) -> AsyncIterator[None]:
-    while True:
-        yield
-        await sleep(interval_seconds)
-
-
 async def resolve(val: T) -> T:
     return val
-
-
-def async_throttle(delay_seconds: float):
-    def decor(fn: AnyCallableAsync) -> AnyCallableAsync:
-        throttling = False
-        handle: Optional[TimerHandle] = None
-
-        def unthrottle() -> None:
-            nonlocal throttling
-            throttling = False
-
-        def throttled(*args: Any, **kwargs: Any) -> Any:
-            nonlocal throttling
-            if throttling:
-                return resolve(None)
-            else:
-                throttling = True
-                loop = get_running_loop()
-                loop.call_later(delay_seconds, unthrottle)
-                return fn(*args, **kwargs)
-
-        def run(*args: Any, **kwargs: Any) -> Any:
-            nonlocal handle
-            if handle:
-                handle.cancel()
-            if throttling:
-                f = partial(throttled, *args, **kwargs)
-                loop = get_running_loop()
-                handle = loop.call_later(delay_seconds, f)
-                return resolve(None)
-            else:
-                return throttled(*args, **kwargs)
-
-        return run
-
-    return decor
 
 
 @dataclass(frozen=True)

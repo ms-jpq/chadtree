@@ -2,7 +2,7 @@ from typing import Any
 
 from .consts import config_json, icons_json, ignore_json
 from .da import load_json
-from .types import IconSet, Keymap, Settings
+from .types import IconSet, Keymap, Settings, UpdateTime
 
 
 def initial(user_settings: Any, user_icons: Any) -> Settings:
@@ -21,6 +21,10 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
         filename=icon_c["filename"],
     )
 
+    update = UpdateTime(
+        min_time=config["update_time"]["min"], max_time=config["update_time"]["max"]
+    )
+
     settings = Settings(
         width=config["width"],
         open_left=config["open_left"],
@@ -31,6 +35,7 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
         path_ignore=ignore["path"],
         use_icons=config["use_icons"],
         icons=icons,
+        update=update,
         session=config["session"],
     )
 
