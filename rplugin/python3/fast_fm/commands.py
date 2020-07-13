@@ -3,7 +3,16 @@ from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify
 from .git import status
-from .nvim import Buffer, HoldPosition, HoldWindowPosition, Nvim2, Window, print
+from .keymap import keymap
+from .nvim import (
+    Buffer,
+    HoldPosition,
+    HoldWindowPosition,
+    Nvim2,
+    Window,
+    find_buffer,
+    print,
+)
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
 from .wm import kill_buffers, kill_fm_windows, show_file, toggle_shown, update_buffers
@@ -42,6 +51,14 @@ async def redraw(nvim: Nvim2, state: State) -> None:
 def _display_path(path: str, state: State) -> str:
     raw = relpath(path, start=state.root.path)
     return raw.replace("\n", r"\n")
+
+
+async def a_on_filetype(
+    nvim: Nvim2, state: State, settings: Settings, buf: int
+) -> None:
+    buffer = await find_buffer(nvim, buf)
+    if buffer is not None:
+        await keymap(nvim, buffer=buffer, settings=settings)
 
 
 async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:

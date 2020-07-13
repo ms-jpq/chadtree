@@ -1,4 +1,4 @@
-from asyncio import TimerHandle, create_subprocess_exec, get_running_loop
+from asyncio import TimerHandle, create_subprocess_exec, get_running_loop, sleep
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from functools import partial
@@ -43,6 +43,12 @@ class AnyCallable(Protocol):
 class AnyCallableAsync(Protocol):
     def __call__(self, *args: Any, **kwargs: Any) -> Awaitable[Any]:
         pass
+
+
+async def tiktok(interval_seconds: float) -> AsyncIterator[None]:
+    while True:
+        yield
+        await sleep(interval_seconds)
 
 
 async def resolve(val: T) -> T:

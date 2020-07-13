@@ -5,8 +5,8 @@ from typing import Any, Awaitable, Optional, Sequence
 
 from pynvim import Nvim, autocmd, function, plugin
 
-from .auto_commands import a_on_bufenter, a_on_filetype, a_on_focus
 from .commands import (
+    a_on_filetype,
     c_clear,
     c_collapse,
     c_copy,
@@ -29,6 +29,7 @@ from .keymap import keys
 from .nvim import Nvim2
 from .settings import initial as initial_settings
 from .state import initial as initial_state
+from .tasks import tasks
 from .types import State
 
 
@@ -49,13 +50,8 @@ class Main:
         self._post_init()
 
     def _post_init(self) -> None:
-        async def forever() -> None:
-            while True:
-                state = await self.ch.get()
-                self.state = state
-
-        self._submit(keys(self.nvim, self.settings))
-        self._submit(forever(), wait=False)
+        self._submit(keys(self.nvim, settings=self.settings))
+        self._submit(tasks(), wait=False)
 
     def _submit(self, co: Awaitable[Optional[State]], wait: bool = True) -> None:
         loop: AbstractEventLoop = self.nvim1.loop
@@ -89,26 +85,6 @@ class Main:
         co = a_on_filetype(
             self.nvim, state=self.state, settings=self.settings, buf=int(buf)
         )
-        self._submit(co)
-
-    @autocmd("BufEnter", eval="expand('<abuf>')")
-    def on_bufenter(self, buf: str) -> None:
-        """
-        Update background tasks
-        """
-
-        co = a_on_bufenter(
-            self.ch, self.nvim, state=self.state, settings=self.settings, buf=int(buf)
-        )
-        self._submit(co)
-
-    @autocmd("FocusGained")
-    def on_focusgained(self, *_) -> None:
-        """
-        Update background tasks
-        """
-
-        co = a_on_focus(self.ch, self.nvim, state=self.state, settings=self.settings)
         self._submit(co)
 
     @function("FMquit")
