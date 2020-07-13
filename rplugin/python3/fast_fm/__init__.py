@@ -45,7 +45,7 @@ class Main:
         self.state = initial_state(settings)
         self.settings = settings
 
-        keys(self.nvim1, self.settings)
+        self._submit(keys(self.nvim, self.settings))
 
     def _submit(self, co: Awaitable[Optional[State]]) -> None:
         loop: AbstractEventLoop = self.nvim1.loop
