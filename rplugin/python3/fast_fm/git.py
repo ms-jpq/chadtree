@@ -15,7 +15,7 @@ async def root() -> str:
     if ret.code != 0:
         raise GitError(ret.err)
     else:
-        return ret.out
+        return ret.out.rstrip()
 
 
 async def stat() -> Iterable[Tuple[str, str]]:
@@ -24,18 +24,21 @@ async def stat() -> Iterable[Tuple[str, str]]:
         raise GitError(ret.err)
     else:
         entries = (
-            (prefix, file)
+            (prefix, file.rstrip(sep))
             for prefix, file in ((line[:2], line[3:]) for line in ret.out.split("\0"))
         )
         return entries
 
 
 def parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
+    ignored = set()
     status = {}
-    for name, stat in stats:
-        path = join(root, name).rstrip(sep)
+    for stat, name in stats:
+        path = join(root, name)
         status[path] = stat
-    return VCStatus(status=status)
+        if "!" in stat:
+            ignored.add(path)
+    return VCStatus(ignored=ignored, status=status)
 
 
 async def status() -> VCStatus:

@@ -120,7 +120,8 @@ async def c_collapse(nvim: Nvim2, state: State, settings: Settings) -> State:
 
 async def c_refresh(nvim: Nvim2, state: State, settings: Settings) -> State:
     paths = {state.root.path}
-    new_state = await forward(state, settings=settings, paths=paths)
+    vc = await status()
+    new_state = await forward(state, settings=settings, vc=vc, paths=paths)
     await _redraw(nvim, state=new_state)
     return new_state
 

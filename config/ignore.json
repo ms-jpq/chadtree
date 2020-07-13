@@ -1,4 +1,4 @@
 {
-  "name": [".git", ".DS_Store", "__pycache__"],
+  "name": [".DS_Store", ".git", "__pycache__", "node_modules"],
   "path": []
 }
