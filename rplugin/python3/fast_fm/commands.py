@@ -54,9 +54,9 @@ def _display_path(path: str, state: State) -> str:
 
 
 async def a_on_filetype(
-    nvim: Nvim2, state: State, settings: Settings, buf: int
+    nvim: Nvim2, state: State, settings: Settings, bufnr: int
 ) -> None:
-    buffer = await find_buffer(nvim, buf)
+    buffer = await find_buffer(nvim, bufnr)
     if buffer is not None:
         await buffer_keymap(nvim, buffer=buffer, keymap=settings.keymap)
 

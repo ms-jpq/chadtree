@@ -1,7 +1,15 @@
-from __future__ import annotations
-
 from asyncio import Future
-from typing import Any, Awaitable, Dict, Iterable, Optional, Protocol, Sequence
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Iterable,
+    Optional,
+    Protocol,
+    Sequence,
+    TypeVar,
+)
 from uuid import uuid4
 
 from pynvim import Nvim
@@ -9,6 +17,8 @@ from pynvim import Nvim
 Tabpage = Any
 Window = Any
 Buffer = Any
+
+T = TypeVar("T")
 
 
 class AsyncedCallable(Protocol):
@@ -45,6 +55,22 @@ class Nvim2:
         self.api = Asynced(nvim, "api")
         self.command = self.api.command
 
+        self.o_api = nvim.api
+
+    def call(self, fn: Callable[[], T]) -> Awaitable[T]:
+        fut = Future()
+
+        def cont() -> None:
+            try:
+                ret = fn()
+            except Exception as e:
+                fut.set_exception(e)
+            else:
+                fut.set_result(ret)
+
+        self._nvim.async_call(cont)
+        return fut
+
 
 async def print(
     nvim: Nvim2, message: Any, error: bool = False, flush: bool = True
@@ -62,20 +88,25 @@ async def autocmd(
     fn: str,
     filters: Iterable[str] = ("*",),
     modifiers: Iterable[str] = (),
-    arg_eval: Iterable[str] = "",
+    arg_eval: Iterable[str] = (),
 ) -> None:
     _events = " ".join(events)
     _filters = " ".join(filters)
     _modifiers = " ".join(modifiers)
     _args = ", ".join(arg_eval)
-    name = str(uuid4()).replace("-", "")
+    name = "AAAAAAAAAAAAAAAA"
     group = f"augroup {name}"
-    cls = "  autocmd!"
-    cmd = f"  autocmd {_events} {_filters} {_modifiers} call {fn}({_args})"
+    cls = "autocmd!"
+    cmd = f"autocmd {_events} {_filters} {_modifiers} call {fn}({_args})"
     group_end = "augroup END"
 
-    instruction = "\n".join((group, cls, cmd, group_end))
-    await nvim.command(instruction)
+    def cont() -> None:
+        nvim.o_api.command(group)
+        nvim.o_api.command(cls)
+        nvim.o_api.command(cmd)
+        nvim.o_api.command(group_end)
+
+    await nvim.call(cont)
 
 
 async def buffer_keymap(

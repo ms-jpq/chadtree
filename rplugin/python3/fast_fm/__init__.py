@@ -74,7 +74,11 @@ class Main:
     def _initialize(self) -> None:
         async def setup() -> None:
             await autocmd(
-                self.nvim, events=("FileType",), filters=(fm_filetype,), fn="_FMkeybind"
+                self.nvim,
+                events=("FileType",),
+                filters=(fm_filetype,),
+                fn="_FMkeybind",
+                arg_eval=("expand('<abuf>')",),
             )
 
         async def cycle() -> None:
@@ -116,13 +120,15 @@ class Main:
         self.ch.set()
 
     @function("_FMkeybind")
-    def on_filetype(self, buf: str) -> None:
+    def on_filetype(self, args: Sequence[Any]) -> None:
         """
         Setup keybind
         """
+        buf, *_ = args
+        bufnr = int(buf)
 
         co = a_on_filetype(
-            self.nvim, state=self.state, settings=self.settings, buf=int(buf)
+            self.nvim, state=self.state, settings=self.settings, bufnr=bufnr
         )
         self._submit(co)
 
