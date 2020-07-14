@@ -3,7 +3,7 @@ from itertools import chain
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
-from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify
+from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
 from .git import status
 from .nvim import (
     Buffer,
@@ -269,8 +269,8 @@ async def c_select(
 async def c_delete(nvim: Nvim2, state: State, settings: Settings) -> State:
     node = await _index(nvim, state=state)
     selection = state.selection or ({node.path} if node else set())
-    if selection:
-        unified = tuple(unify(selection))
+    unified = tuple(unify_ancestors(selection))
+    if unified:
         display_paths = "\n".join(_display_path(path, state=state) for path in unified)
         ans = await nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
         if ans == 1:
@@ -306,9 +306,9 @@ async def _operation(
     action: Callable[[Dict[str, str]], Awaitable[None]],
 ) -> State:
     node = await _index(nvim, state=state)
-    selection = state.selection
-    if selection and node:
-        operations = {src: _find_dest(src, node) for src in selection}
+    unified = tuple(unify_ancestors(state.selection))
+    if unified and node:
+        operations = {src: _find_dest(src, node) for src in unified}
         pre_existing = {s: d for s, d in operations.items() if exists(d)}
         if pre_existing:
             msg = ", ".join(

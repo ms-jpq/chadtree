@@ -24,7 +24,7 @@ def is_parent(*, parent: str, child: str) -> bool:
     return any(parent == ancestor for ancestor in ancestors(child))
 
 
-def unify(paths: Set[str]) -> Iterator[str]:
+def unify_ancestors(paths: Set[str]) -> Iterator[str]:
     for path in paths:
         if not any(a in paths for a in ancestors(path)):
             yield path
