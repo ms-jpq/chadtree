@@ -232,7 +232,7 @@ class Main:
         rename file / folder
         """
 
-        self._run(c_new)
+        self._run(c_rename)
 
     @function("FMclear")
     def clear(self, args: Sequence[Any]) -> None:

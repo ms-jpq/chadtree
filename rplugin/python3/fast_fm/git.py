@@ -1,9 +1,11 @@
 from asyncio import gather
+from locale import strxfrm
 from os.path import join, sep
 from shutil import which
-from typing import Iterable, Tuple
+from typing import Dict, Set
 
 from .da import call
+from .fs import ancestors
 from .types import VCStatus
 
 
@@ -19,26 +21,37 @@ async def root() -> str:
         return ret.out.rstrip()
 
 
-async def stat() -> Iterable[Tuple[str, str]]:
+async def stat() -> Dict[str, str]:
     ret = await call("git", "status", "--ignored", "--renames", "--porcelain", "-z")
     if ret.code != 0:
         raise GitError(ret.err)
     else:
-        entries = (
-            (prefix, file.rstrip(sep))
+        entries = {
+            file.rstrip(sep): prefix
             for prefix, file in ((line[:2], line[3:]) for line in ret.out.split("\0"))
-        )
+        }
         return entries
 
 
-def parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
-    ignored = set()
-    status = {}
-    for stat, name in stats:
+def parse(root: str, stats: Dict[str, str]) -> VCStatus:
+    ignored: Set[str] = set()
+    status: Dict[str, str] = {}
+    directories: Dict[str, Set[str]] = {}
+
+    for name, stat in stats.items():
         path = join(root, name)
         status[path] = stat
         if "!" in stat:
             ignored.add(path)
+        else:
+            for ancestor in ancestors(path):
+                aggregate = directories.setdefault(ancestor, set())
+                aggregate.update(stat)
+
+    for directory, stat in directories.items():
+        symbols = sorted((s for s in stat if s != " "), key=strxfrm)
+        status[directory] = "".join(symbols)
+
     return VCStatus(ignored=ignored, status=status)
 
 
