@@ -1,8 +1,10 @@
 from asyncio import gather
 from itertools import chain
+from os import chdir
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
+from .cartographer import new as new_root
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
 from .git import status
 from .nvim import (
@@ -91,7 +93,11 @@ async def a_on_filetype(
 
 
 async def a_changedir(nvim: Nvim2, state: State, settings: Settings) -> State:
-    return state
+    cwd = await nvim.funcs.getcwd()
+    chdir(cwd)
+    root = await new_root(cwd, index=state.index)
+    new_state = await forward(state, settings=settings, root=root)
+    return new_state
 
 
 async def a_follow(nvim: Nvim2, state: State, settings: Settings) -> State:

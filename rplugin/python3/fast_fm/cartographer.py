@@ -18,7 +18,7 @@ def fs_stat(path: str) -> Mode:
         return mode
 
 
-def new(root: str, index: Index) -> Node:
+def _new(root: str, index: Index) -> Node:
     mode = fs_stat(root)
     name = basename(root)
     if Mode.FOLDER not in mode:
@@ -27,7 +27,7 @@ def new(root: str, index: Index) -> Node:
 
     elif root in index:
         children = {
-            path: new(path, index=index)
+            path: _new(path, index=index)
             for path in (join(root, d) for d in listdir(root))
         }
         return Node(path=root, mode=mode, name=name, children=children)
@@ -35,9 +35,14 @@ def new(root: str, index: Index) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
+async def new(root: str, index: Index) -> Node:
+    loop = get_running_loop()
+    return await loop.run_in_executor(None, _new, root, index)
+
+
 def _update(root: Node, index: Index, paths: Set[str]) -> Node:
     if root.path in paths:
-        return new(root.path, index=index)
+        return _new(root.path, index=index)
     else:
         children = {
             k: _update(v, index=index, paths=paths)
@@ -57,4 +62,4 @@ async def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
     try:
         return await loop.run_in_executor(None, _update, root, index, paths)
     except FileNotFoundError:
-        return await loop.run_in_executor(None, new, root.path, index)
+        return await new(root.path, index=index)

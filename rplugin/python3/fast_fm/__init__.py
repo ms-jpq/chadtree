@@ -96,6 +96,10 @@ class Main:
             )
 
             await autocmd(
+                self.nvim, events=("DirChanged",), fn="_FMchangedir",
+            )
+
+            await autocmd(
                 self.nvim, events=("BufEnter",), fn="_FMfollow",
             )
 
@@ -140,12 +144,16 @@ class Main:
 
     @function("FMscheduleupdate")
     def schedule_udpate(self, args: Sequence[Any]) -> None:
+        """
+        Follow directory
+        """
+
         self.ch.set()
 
     @function("_FMchangedir")
     def on_changedir(self, args: Sequence[Any]) -> None:
         """
-        Follow directory
+        Follow files
         """
 
         self._run(a_changedir)

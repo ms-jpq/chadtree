@@ -12,7 +12,7 @@ async def initial(settings: Settings) -> State:
     cwd = getcwd()
     index = {cwd}
     selection: Selection = set()
-    node = new(cwd, index=index)
+    node = await new(cwd, index=index)
     vc = VCStatus() if settings.defer_vc else await status()
     current = None
     lookup, rendered = render(
@@ -44,12 +44,12 @@ async def forward(
     state: State,
     *,
     settings: Settings,
+    root: Optional[Node] = None,
     index: Optional[Index] = None,
     selection: Optional[Selection] = None,
     show_hidden: Optional[bool] = None,
     follow: Optional[bool] = None,
     width: Optional[int] = None,
-    root: Optional[Node] = None,
     lookup: Optional[Sequence[Node]] = None,
     rendered: Optional[Sequence[str]] = None,
     vc: Optional[VCStatus] = None,
@@ -59,7 +59,7 @@ async def forward(
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
     new_current = or_else(current, state.current)
-    new_root = (
+    new_root = root or (
         await update(state.root, index=new_index, paths=paths) if paths else state.root
     )
     new_vc = or_else(vc, state.vc)
