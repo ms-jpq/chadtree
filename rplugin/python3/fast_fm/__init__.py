@@ -72,10 +72,19 @@ class Main:
         else:
             run_coroutine_threadsafe(co, loop)
 
+    def _run(self, fn: Any, *args: Any, **kwargs: Any) -> None:
+        async def run() -> Optional[State]:
+            if not self.state:
+                self.state = await initial_state(self.settings)
+
+            return await fn(
+                self.nvim, state=self.state, settings=self.settings, *args, **kwargs
+            )
+
+        self._submit(run())
+
     def _initialize(self) -> None:
         async def setup() -> None:
-            self.state = await initial_state(self.settings)
-
             await autocmd(
                 self.nvim,
                 events=("FileType",),
@@ -121,8 +130,7 @@ class Main:
         """
 
         self._initialize()
-        co = c_open(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_open)
 
     @function("FMscheduleupdate")
     def schedule_udpate(self, args: Sequence[Any]) -> None:
@@ -136,10 +144,7 @@ class Main:
         buf, *_ = args
         bufnr = int(buf)
 
-        co = a_on_filetype(
-            self.nvim, state=self.state, settings=self.settings, bufnr=bufnr
-        )
-        self._submit(co)
+        self._run(a_on_filetype, bufnr=bufnr)
 
     @function("FMquit")
     def fm_quit(self, args: Sequence[Any]) -> None:
@@ -147,8 +152,7 @@ class Main:
         Close sidebar
         """
 
-        co = c_quit(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_quit)
 
     @function("FMprimary")
     def primary(self, args: Sequence[Any]) -> None:
@@ -157,8 +161,7 @@ class Main:
         File -> open
         """
 
-        co = c_primary(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_primary)
 
     @function("FMsecondary")
     def secondary(self, args: Sequence[Any]) -> None:
@@ -167,8 +170,7 @@ class Main:
         File -> preview
         """
 
-        co = c_secondary(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_secondary)
 
     @function("FMresize")
     def resize(self, args: Sequence[Any]) -> None:
@@ -180,8 +182,7 @@ class Main:
         Redraw buffers
         """
 
-        co = c_refresh(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_refresh)
 
     @function("FMcollapse")
     def collapse(self, args: Sequence[Any]) -> None:
@@ -189,8 +190,7 @@ class Main:
         Collapse folder
         """
 
-        co = c_collapse(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_collapse)
 
     @function("FMhidden")
     def hidden(self, args: Sequence[Any]) -> None:
@@ -198,8 +198,7 @@ class Main:
         Toggle hidden
         """
 
-        co = c_hidden(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_hidden)
 
     @function("FMfollow")
     def follow(self, args: Sequence[Any]) -> None:
@@ -207,8 +206,7 @@ class Main:
         Toggle hidden
         """
 
-        co = c_follow(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_follow)
 
     @function("FMcopyname")
     def copy_name(self, args: Sequence[Any]) -> None:
@@ -218,10 +216,7 @@ class Main:
         visual, *_ = args
         is_visual = visual == 1
 
-        co = c_copy_name(
-            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
-        )
-        self._submit(co)
+        self._run(c_copy_name, is_visual=is_visual)
 
     @function("FMnew")
     def new(self, args: Sequence[Any]) -> None:
@@ -229,8 +224,7 @@ class Main:
         new file / folder
         """
 
-        co = c_new(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_new)
 
     @function("FMrename")
     def rename(self, args: Sequence[Any]) -> None:
@@ -238,8 +232,7 @@ class Main:
         rename file / folder
         """
 
-        co = c_rename(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_new)
 
     @function("FMclear")
     def clear(self, args: Sequence[Any]) -> None:
@@ -247,8 +240,7 @@ class Main:
         Clear selected
         """
 
-        co = c_clear(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_clear)
 
     @function("FMselect")
     def select(self, args: Sequence[Any]) -> None:
@@ -258,10 +250,7 @@ class Main:
         visual, *_ = args
         is_visual = visual == 1
 
-        co = c_select(
-            self.nvim, state=self.state, settings=self.settings, is_visual=is_visual
-        )
-        self._submit(co)
+        self._run(c_select, is_visual=is_visual)
 
     @function("FMdelete")
     def delete(self, args: Sequence[Any]) -> None:
@@ -269,8 +258,7 @@ class Main:
         Delete selected
         """
 
-        co = c_delete(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_delete)
 
     @function("FMcut")
     def cut(self, args: Sequence[Any]) -> None:
@@ -278,8 +266,7 @@ class Main:
         Cut selected
         """
 
-        co = c_cut(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_cut)
 
     @function("FMcopy")
     def copy(self, args: Sequence[Any]) -> None:
@@ -287,5 +274,4 @@ class Main:
         Copy selected
         """
 
-        co = c_copy(self.nvim, state=self.state, settings=self.settings)
-        self._submit(co)
+        self._run(c_copy)

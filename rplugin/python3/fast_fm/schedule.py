@@ -19,7 +19,6 @@ async def schedule(
         await sleep(min_time - elapsed)
         return time() - t2
 
-    yield 0
     while True:
         t = await wheel()
         yield t
