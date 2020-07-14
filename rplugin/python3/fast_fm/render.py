@@ -35,7 +35,11 @@ def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
 
 
 def paint(
-    settings: Settings, index: Index, selection: Selection, vc: VCStatus
+    settings: Settings,
+    index: Index,
+    selection: Selection,
+    vc: VCStatus,
+    current: Optional[str],
 ) -> Callable[[Node, int], str]:
     icons = settings.icons
 
@@ -93,9 +97,10 @@ def render(
     selection: Selection,
     vc: VCStatus,
     show_hidden: bool,
+    current: Optional[str],
 ) -> Tuple[Sequence[Node], Sequence[str]]:
     drop = constantly(False) if show_hidden else ignore(settings, vc)
-    show = paint(settings, index=index, selection=selection, vc=vc)
+    show = paint(settings, index=index, selection=selection, vc=vc, current=current)
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
         rend = show(node, depth)

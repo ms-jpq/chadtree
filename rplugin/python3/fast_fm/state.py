@@ -14,6 +14,7 @@ async def initial(settings: Settings) -> State:
     selection: Selection = set()
     node = new(cwd, index=index)
     vc = VCStatus() if settings.defer_vc else await status()
+    current = None
     lookup, rendered = render(
         node,
         settings=settings,
@@ -21,6 +22,7 @@ async def initial(settings: Settings) -> State:
         selection=selection,
         vc=vc,
         show_hidden=settings.show_hidden,
+        current=current,
     )
 
     state = State(
@@ -33,6 +35,7 @@ async def initial(settings: Settings) -> State:
         lookup=lookup,
         rendered=rendered,
         vc=vc,
+        current=current,
     )
     return state
 
@@ -51,9 +54,11 @@ async def forward(
     rendered: Optional[Sequence[str]] = None,
     vc: Optional[VCStatus] = None,
     paths: Optional[Set[str]] = None,
+    current: Optional[str] = None,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
+    new_current = or_else(current, state.current)
     new_root = (
         await update(state.root, index=new_index, paths=paths) if paths else state.root
     )
@@ -66,6 +71,7 @@ async def forward(
         selection=new_selection,
         vc=new_vc,
         show_hidden=new_hidden,
+        current=new_current,
     )
 
     new_state = State(
@@ -78,13 +84,14 @@ async def forward(
         lookup=lookup,
         rendered=rendered,
         vc=new_vc,
+        current=new_current,
     )
 
     return new_state
 
 
 def index(state: State, row: int) -> Optional[Node]:
-    if (row > 0) and (row < len(state.lookup)):
+    if (row >= 0) and (row < len(state.lookup)):
         return state.lookup[row]
     else:
         return None

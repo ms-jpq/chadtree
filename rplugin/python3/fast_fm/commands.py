@@ -85,6 +85,7 @@ async def a_follow(nvim: Nvim2, state: State, settings: Settings, bufnr: int) ->
             new_state = await forward(
                 state, settings=settings, index=index, paths=paths
             )
+            await redraw(nvim, state=new_state)
             return new_state
         else:
             return state

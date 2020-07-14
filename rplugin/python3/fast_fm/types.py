@@ -71,3 +71,4 @@ class State:
     lookup: Sequence[Node]
     rendered: Sequence[str]
     vc: VCStatus
+    current: Optional[str]
