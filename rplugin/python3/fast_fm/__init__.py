@@ -79,7 +79,7 @@ class Main:
             state = await fn(
                 self.nvim, state=self.state, settings=self.settings, *args, **kwargs
             )
-            if state and state.uuid != self.state.uuid:
+            if state:
                 await redraw(self.nvim, state=state)
                 self.state = state
 
