@@ -90,7 +90,7 @@ async def a_on_filetype(
         await buffer_keymap(nvim, buffer=buffer, keymap=settings.keymap)
 
 
-async def a_change_dir(nvim: Nvim2, state: State, settings: Settings) -> State:
+async def a_changedir(nvim: Nvim2, state: State, settings: Settings) -> State:
     return state
 
 

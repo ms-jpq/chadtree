@@ -7,6 +7,7 @@ from typing import Any, Awaitable, Sequence, cast
 from pynvim import Nvim, command, function, plugin
 
 from .commands import (
+    a_changedir,
     a_follow,
     a_on_filetype,
     c_clear,
@@ -140,6 +141,14 @@ class Main:
     @function("FMscheduleupdate")
     def schedule_udpate(self, args: Sequence[Any]) -> None:
         self.ch.set()
+
+    @function("_FMchangedir")
+    def on_changedir(self, args: Sequence[Any]) -> None:
+        """
+        Follow directory
+        """
+
+        self._run(a_changedir)
 
     @function("_FMfollow")
     def on_bufenter(self, args: Sequence[Any]) -> None:
