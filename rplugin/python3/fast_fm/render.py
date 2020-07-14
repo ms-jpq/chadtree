@@ -47,7 +47,7 @@ def paint(
         stat = vc.status.get(node.path)
 
         spaces = (depth * 2 - 1) * " "
-        curr = "▶" if node.path == current else " "
+        curr = ">" if node.path == current else " "
         select = "*" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace("\n", r"\n")
@@ -65,7 +65,7 @@ def paint(
 
         spaces = (depth * 2 - 1) * " "
         curr = "▶" if node.path == current else " "
-        select = "*" if node.path in selection else " "
+        select = "✸" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace("\n", r"\n")
 
