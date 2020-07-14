@@ -1,3 +1,5 @@
+from dataclasses import asdict
+from hashlib import sha1
 from os.path import exists, join
 from typing import Optional, Sequence
 
@@ -6,27 +8,34 @@ from .consts import session_dir
 from .da import dump_json, load_json, or_else
 from .git import status
 from .render import render
-from .types import Index, Mode, Node, Selection, Set, Settings, State, VCStatus
+from .types import Index, Mode, Node, Selection, Session, Set, Settings, State, VCStatus
+
+
+def session_path(cwd: str) -> str:
+    hashed = sha1(cwd).hexdigest()
+    part = join(session_dir, hashed)
+    return f"{part}.json"
 
 
 def load_session(cwd: str) -> Index:
-    hashed = cwd
-    load_path = join(session_dir, hashed)
+    load_path = session_path(cwd)
     if exists(load_path):
-        return load_json(load_path)
+        json = load_json(load_path)
+        session = Session(**json)
+        return session.index
     else:
         return set()
 
 
 def dump_session(state: State) -> None:
-    hashed = state.node.path
-    load_path = join(session_dir, hashed)
-    dump_json(load_path, {})
+    load_path = session_path(state.root.path)
+    session = Session(index=state.index)
+    dump_json(load_path, asdict(session))
 
 
 async def initial(settings: Settings, cwd: str) -> State:
     index = {cwd}
-    selection: Selection = set()
+    selection = load_session(cwd) if settings.session else set()
     node = await new(cwd, index=index)
     vc = VCStatus() if settings.defer_vc else await status()
     current = None

@@ -24,6 +24,11 @@ class Node:
 
 
 @dataclass(frozen=True)
+class Session:
+    index: Index
+
+
+@dataclass(frozen=True)
 class IconSet:
     folder_open: str
     folder_closed: str
