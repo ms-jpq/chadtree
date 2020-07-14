@@ -67,6 +67,19 @@ def _display_path(path: str, state: State) -> str:
     return raw.replace("\n", r"\n")
 
 
+async def _current(nvim: Nvim2, state: State, settings: Settings, buffer: Buffer) -> State:
+    current = await nvim.api.buf_get_name(buffer)
+    if is_parent(parent=state.root.path, child=current):
+        paths = {*ancestors(current)} if state.follow else set()
+        index = state.index | paths
+        new_state = await forward(
+            state, settings=settings, index=index, paths=paths, current=current
+        )
+        return new_state
+    else:
+        return state
+
+
 async def a_on_filetype(
     nvim: Nvim2, state: State, settings: Settings, bufnr: int
 ) -> None:
@@ -78,16 +91,7 @@ async def a_on_filetype(
 async def a_follow(nvim: Nvim2, state: State, settings: Settings, bufnr: int) -> State:
     buffer = await find_buffer(nvim, bufnr)
     if buffer is not None:
-        current = await nvim.api.buf_get_name(buffer)
-        if is_parent(parent=state.root.path, child=current):
-            paths = {*ancestors(current)} if state.follow else set()
-            index = state.index | paths
-            new_state = await forward(
-                state, settings=settings, index=index, paths=paths, current=current
-            )
-            return new_state
-        else:
-            return state
+        return await _current(nvim, state=state, settings=settings, buffer=buffer)
     else:
         return state
 
@@ -96,9 +100,10 @@ async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:
     await kill_fm_windows(nvim, settings=settings)
 
 
-async def c_open(nvim: Nvim2, state: State, settings: Settings) -> None:
+async def c_open(nvim: Nvim2, state: State, settings: Settings) -> State:
+    buffer: Buffer = await nvim.api.get_current_buf()
     await toggle_shown(nvim, state=state, settings=settings)
-    await redraw(nvim, state=state)
+    return await _current(nvim, state=state, settings=settings, buffer=buffer)
 
 
 async def c_resize(
