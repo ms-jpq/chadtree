@@ -279,15 +279,18 @@ async def c_select(
             return state
 
 
-async def c_delete(nvim: Nvim2, state: State, settings: Settings) -> State:
-    node = await _index(nvim, state=state)
-    selection = state.selection or ({node.path} if node else set())
+async def c_delete(
+    nvim: Nvim2, state: State, settings: Settings, is_visual: bool
+) -> State:
+    selection = state.selection or {
+        node.path async for node in _indices(nvim, state=state, is_visual=is_visual)
+    }
     unified = tuple(unify_ancestors(selection))
     if unified:
         display_paths = "\n".join(
             sorted((_display_path(path, state=state) for path in unified), key=strxfrm)
         )
-        ans = await nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
+        ans = await nvim.funcs.confirm(f"🗑\n{display_paths}?", "&Yes\n&No\n", 2)
         if ans == 1:
             try:
                 await remove(unified)
@@ -317,7 +320,7 @@ async def _operation(
     *,
     state: State,
     settings: Settings,
-    name: str,
+    op_name: str,
     action: Callable[[Dict[str, str]], Awaitable[None]],
 ) -> State:
     node = await _index(nvim, state=state)
@@ -332,7 +335,7 @@ async def _operation(
                 for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
             )
             await print(
-                nvim, f"⚠️  -- {name}: path(s) already exist! :: {msg}", error=True
+                nvim, f"⚠️  -- {op_name}: path(s) already exist! :: {msg}", error=True
             )
             return state
         else:
@@ -357,11 +360,11 @@ async def _operation(
 
 async def c_cut(nvim: Nvim2, state: State, settings: Settings) -> State:
     return await _operation(
-        nvim, state=state, settings=settings, name="Cut", action=cut
+        nvim, state=state, settings=settings, op_name="Cut", action=cut
     )
 
 
 async def c_copy(nvim: Nvim2, state: State, settings: Settings) -> State:
     return await _operation(
-        nvim, state=state, settings=settings, name="Copy", action=copy
+        nvim, state=state, settings=settings, op_name="Copy", action=copy
     )

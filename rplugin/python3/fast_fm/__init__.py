@@ -299,8 +299,10 @@ class Main:
         """
         Delete selected
         """
+        visual, *_ = args
+        is_visual = visual == 1
 
-        self._run(c_delete)
+        self._run(c_delete, is_visual=is_visual)
 
     @function("FMcut")
     def cut(self, args: Sequence[Any]) -> None:
