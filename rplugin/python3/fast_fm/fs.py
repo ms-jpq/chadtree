@@ -11,10 +11,6 @@ from typing import Dict, Iterable, Iterator, Set
 from .consts import file_mode, folder_mode
 
 
-def is_parent(*, parent: str, child: str) -> bool:
-    return child.startswith(parent)
-
-
 def ancestors(path: str) -> Iterator[str]:
     if not path or path == sep:
         return
@@ -22,6 +18,10 @@ def ancestors(path: str) -> Iterator[str]:
         parent = dirname(path)
         yield from ancestors(parent)
         yield parent
+
+
+def is_parent(*, parent: str, child: str) -> bool:
+    return any(parent == ancestor for ancestor in ancestors(child))
 
 
 def unify(paths: Set[str]) -> Iterator[str]:

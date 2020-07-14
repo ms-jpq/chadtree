@@ -67,7 +67,9 @@ def _display_path(path: str, state: State) -> str:
     return raw.replace("\n", r"\n")
 
 
-async def _current(nvim: Nvim2, state: State, settings: Settings, buffer: Buffer) -> State:
+async def _current(
+    nvim: Nvim2, state: State, settings: Settings, buffer: Buffer
+) -> State:
     current = await nvim.api.buf_get_name(buffer)
     if is_parent(parent=state.root.path, child=current):
         paths = {*ancestors(current)} if state.follow else set()
