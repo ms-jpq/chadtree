@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from hashlib import sha1
 from os.path import exists, join
 from typing import Optional, Sequence
@@ -20,9 +19,13 @@ def session_path(cwd: str) -> str:
 def load_session(cwd: str) -> Index:
     load_path = session_path(cwd)
     if exists(load_path):
-        json = load_json(load_path)
-        session = Session(**json)
-        return session.index
+        try:
+            json = load_json(load_path)
+        except Exception:
+            return set()
+        else:
+            session = Session(index=json["index"])
+            return {*session.index}
     else:
         return set()
 
@@ -30,12 +33,13 @@ def load_session(cwd: str) -> Index:
 def dump_session(state: State) -> None:
     load_path = session_path(state.root.path)
     session = Session(index=state.index)
-    dump_json(load_path, asdict(session))
+    json = {"index": [*session.index]}
+    dump_json(load_path, json)
 
 
 async def initial(settings: Settings, cwd: str) -> State:
-    index = {cwd}
-    selection = load_session(cwd) if settings.session else set()
+    index = load_session(cwd) if settings.session else {cwd}
+    selection: Selection = set()
     node = await new(cwd, index=index)
     vc = VCStatus() if settings.defer_vc else await status()
     current = None

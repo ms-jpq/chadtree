@@ -112,7 +112,7 @@ class Main:
             )
 
             await autocmd(
-                self.nvim, events=("FocusLost", "VimLeavePre."), fn="_FMsession"
+                self.nvim, events=("FocusLost", "VimLeavePre"), fn="_FMsession"
             )
 
         async def cycle() -> None:

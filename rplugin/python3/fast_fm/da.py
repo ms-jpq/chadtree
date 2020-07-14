@@ -2,6 +2,8 @@ from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from json import dump, load
+from os import makedirs
+from os.path import dirname
 from typing import (
     Any,
     AsyncIterator,
@@ -12,6 +14,8 @@ from typing import (
     TypeVar,
     cast,
 )
+
+from .consts import folder_mode
 
 T = TypeVar("T")
 
@@ -88,5 +92,7 @@ def load_json(path: str) -> Any:
 
 
 def dump_json(path: str, json: Any) -> None:
-    with open(path) as fd:
+    parent = dirname(path)
+    makedirs(parent, mode=folder_mode, exist_ok=True)
+    with open(path, "w") as fd:
         return dump(json, fd, ensure_ascii=False, indent=2)
