@@ -156,23 +156,26 @@ async def c_new(nvim: Nvim2, state: State, settings: Settings) -> State:
     if node:
         parent = node.path if is_dir(node) else dirname(node.path)
         child = await nvim.funcs.input("✏️  :")
-        name = join(parent, child)
-        if exists(name):
-            msg = f"⚠️  Exists: {name}"
-            await print(nvim, msg, error=True)
-            return state
+        if child:
+            name = join(parent, child)
+            if exists(name):
+                msg = f"⚠️  Exists: {name}"
+                await print(nvim, msg, error=True)
+                return state
+            else:
+                try:
+                    await new(name)
+                except Exception as e:
+                    await print(nvim, e, error=True)
+                finally:
+                    index = state.index | {*ancestors(name)}
+                    new_state = await forward(
+                        state, settings=settings, index=index, paths={parent}
+                    )
+                    await redraw(nvim, state=new_state)
+                    return new_state
         else:
-            try:
-                await new(name)
-            except Exception as e:
-                await print(nvim, e, error=True)
-            finally:
-                index = state.index | {*ancestors(name)}
-                new_state = await forward(
-                    state, settings=settings, index=index, paths={parent}
-                )
-                await redraw(nvim, state=new_state)
-                return new_state
+            return state
     else:
         return state
 
@@ -184,26 +187,29 @@ async def c_rename(nvim: Nvim2, state: State, settings: Settings) -> State:
         parent = state.root.path
         rel_path = relpath(prev_name, start=parent)
         child = await nvim.funcs.input("✏️  :", rel_path)
-        new_name = join(parent, child)
-        new_parent = dirname(new_name)
-        if exists(new_name):
-            msg = f"⚠️  Exists: {new_name}"
-            await print(nvim, msg, error=True)
-            return state
+        if child:
+            new_name = join(parent, child)
+            new_parent = dirname(new_name)
+            if exists(new_name):
+                msg = f"⚠️  Exists: {new_name}"
+                await print(nvim, msg, error=True)
+                return state
+            else:
+                try:
+                    await rename(prev_name, new_name)
+                except Exception as e:
+                    await print(nvim, e, error=True)
+                finally:
+                    paths = {parent, new_parent, *ancestors(new_parent)}
+                    index = state.index | paths
+                    new_state = await forward(
+                        state, settings=settings, index=index, paths=paths
+                    )
+                    await redraw(nvim, state=new_state)
+                    await kill_buffers(nvim, paths=(prev_name,))
+                    return new_state
         else:
-            try:
-                await rename(prev_name, new_name)
-            except Exception as e:
-                await print(nvim, e, error=True)
-            finally:
-                paths = {parent, new_parent, *ancestors(new_parent)}
-                index = state.index | paths
-                new_state = await forward(
-                    state, settings=settings, index=index, paths=paths
-                )
-                await redraw(nvim, state=new_state)
-                await kill_buffers(nvim, paths=(prev_name,))
-                return new_state
+            return state
     else:
         return state
 
