@@ -42,7 +42,7 @@ def paint(
     def show_ascii(node: Node, depth: int) -> str:
         stat = vc.status.get(node.path)
 
-        spaces = (depth - 1) * 2 * " "
+        spaces = depth * 2 * " "
         select = "*" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace("\n", r"\n")
@@ -57,7 +57,7 @@ def paint(
     def show_icons(node: Node, depth: int) -> str:
         stat = vc.status.get(node.path)
 
-        spaces = (depth - 1) * 2 * " "
+        spaces = depth * 2 * " "
         select = "*" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace("\n", r"\n")

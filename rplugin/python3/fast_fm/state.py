@@ -13,7 +13,7 @@ async def initial(settings: Settings) -> State:
     index = {cwd}
     selection: Selection = set()
     node = new(cwd, index=index)
-    vc = await status()
+    vc = VCStatus() if settings.defer_vc else await status()
     lookup, rendered = render(
         node,
         settings=settings,

@@ -51,6 +51,7 @@ class Settings:
     icons: IconSet
     update: UpdateTime
     session: bool
+    defer_vc: bool
 
 
 @dataclass(frozen=True)

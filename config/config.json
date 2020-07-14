@@ -1,4 +1,5 @@
 {
+  "defer_version_control": false,
   "follow": true,
   "keymap": {
     "FMclear": ["c", "C"],

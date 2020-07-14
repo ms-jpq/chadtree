@@ -36,6 +36,7 @@ def initial(user_settings: Any, user_icons: Any) -> Settings:
         icons=icons,
         update=update,
         session=config["session"],
+        defer_vc=config["defer_version_control"],
     )
 
     return settings
