@@ -180,6 +180,7 @@ async def c_hidden(nvim: Nvim2, state: State, settings: Settings) -> State:
 
 async def c_follow(nvim: Nvim2, state: State, settings: Settings) -> State:
     new_state = await forward(state, settings=settings, follow=not state.follow)
+    await print(nvim, f"🐶 follow mode: {new_state.follow}")
     return new_state
 
 

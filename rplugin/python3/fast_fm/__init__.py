@@ -245,7 +245,7 @@ class Main:
     @function("FMfollow")
     def follow(self, args: Sequence[Any]) -> None:
         """
-        Toggle hidden
+        Toggle follow
         """
 
         self._run(c_follow)
