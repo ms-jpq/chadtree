@@ -48,8 +48,8 @@ def parse(root: str, stats: Dict[str, str]) -> VCStatus:
                 aggregate = directories.setdefault(ancestor, set())
                 aggregate.update(stat)
 
-    for directory, stat in directories.items():
-        symbols = sorted((s for s in stat if s != " "), key=strxfrm)
+    for directory, syms in directories.items():
+        symbols = sorted((s for s in syms if s != " "), key=strxfrm)
         status[directory] = "".join(symbols)
 
     return VCStatus(ignored=ignored, status=status)
