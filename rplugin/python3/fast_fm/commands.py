@@ -1,3 +1,4 @@
+from asyncio import gather
 from itertools import chain
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
@@ -146,8 +147,7 @@ async def c_copy_name(
     ]
     clip = "\n".join(paths)
     clap = ", ".join(paths)
-    await nvim.funcs.setreg("+", clip)
-    await nvim.funcs.setreg("*", clip)
+    await gather(nvim.funcs.setreg("+", clip), nvim.funcs.setreg("*", clip))
     await print(nvim, f"📎 {clap}")
 
 
