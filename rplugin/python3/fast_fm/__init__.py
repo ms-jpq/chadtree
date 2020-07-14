@@ -117,7 +117,6 @@ class Main:
                 )
                 self.state = state
                 await redraw(self.nvim, state=state)
-                await print(self.nvim, elapsed)
 
         async def forever() -> None:
             while True:
