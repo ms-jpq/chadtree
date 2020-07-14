@@ -95,8 +95,9 @@ async def a_on_filetype(
 async def a_changedir(nvim: Nvim2, state: State, settings: Settings) -> State:
     cwd = await nvim.funcs.getcwd()
     chdir(cwd)
-    root = await new_root(cwd, index=state.index)
-    new_state = await forward(state, settings=settings, root=root)
+    index = state.index | {cwd}
+    root = await new_root(cwd, index=index)
+    new_state = await forward(state, settings=settings, root=root, index=index)
     return new_state
 
 
