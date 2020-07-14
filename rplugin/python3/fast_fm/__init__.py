@@ -11,6 +11,7 @@ from .commands import (
     a_changedir,
     a_follow,
     a_on_filetype,
+    a_session,
     c_clear,
     c_collapse,
     c_copy,
@@ -110,6 +111,10 @@ class Main:
                 fn="FMscheduleupdate",
             )
 
+            await autocmd(
+                self.nvim, events=("FocusLost", "VimLeavePre."), fn="_FMsession"
+            )
+
         async def cycle() -> None:
             update = self.settings.update
             async for elapsed in schedule(
@@ -177,6 +182,14 @@ class Main:
         bufnr = int(buf)
 
         self._run(a_on_filetype, bufnr=bufnr)
+
+    @function("_FMsession")
+    def on_leave(self, args: Sequence[Any]) -> None:
+        """
+        Follow buffer
+        """
+
+        self._run(a_session)
 
     @function("FMquit")
     def fm_quit(self, args: Sequence[Any]) -> None:

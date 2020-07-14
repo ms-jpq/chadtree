@@ -18,7 +18,7 @@ from .nvim import (
     find_buffer,
     print,
 )
-from .state import forward, index, is_dir
+from .state import dump_session, forward, index, is_dir
 from .types import Mode, Node, Settings, State
 from .wm import (
     is_fm_buffer,
@@ -108,6 +108,10 @@ async def a_follow(nvim: Nvim2, state: State, settings: Settings) -> State:
         return await _current(nvim, state=state, settings=settings, buffer=buffer)
     else:
         return state
+
+
+async def a_session(nvim: Nvim2, state: State, settings: Settings) -> None:
+    dump_session(state)
 
 
 async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:

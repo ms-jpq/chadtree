@@ -12,7 +12,7 @@ from .types import Index, Mode, Node, Selection, Session, Set, Settings, State, 
 
 
 def session_path(cwd: str) -> str:
-    hashed = sha1(cwd).hexdigest()
+    hashed = sha1(cwd.encode()).hexdigest()
     part = join(session_dir, hashed)
     return f"{part}.json"
 
