@@ -137,7 +137,6 @@ async def show_file(nvim: Nvim2, *, state: State, settings: Settings) -> None:
 
 
 async def update_buffers(nvim: Nvim2, lines: Sequence[str]) -> None:
-
     async for buffer in find_fm_buffers(nvim):
         modifiable = await nvim.api.buf_get_option(buffer, "modifiable")
         await nvim.api.buf_set_option(buffer, "modifiable", True)
