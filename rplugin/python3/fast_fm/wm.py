@@ -118,22 +118,22 @@ async def toggle_shown(nvim: Nvim2, *, state: State, settings: Settings) -> None
         await resize_fm_windows(nvim, state.width)
 
 
-async def show_file(
-    nvim: Nvim2, *, state: State, settings: Settings, file: str
-) -> None:
-    buffer: Optional[Buffer] = await anext(find_buffer_with_file(nvim, file=file))
-    window: Window = await anext(
-        find_window_with_file_in_tab(nvim, file=file)
-    ) or await anext(find_non_fm_windows_in_tab(nvim)) or await new_window(
-        nvim, open_left=not settings.open_left
-    )
+async def show_file(nvim: Nvim2, *, state: State, settings: Settings) -> None:
+    path = state.current
+    if path:
+        buffer: Optional[Buffer] = await anext(find_buffer_with_file(nvim, file=path))
+        window: Window = await anext(
+            find_window_with_file_in_tab(nvim, file=path)
+        ) or await anext(find_non_fm_windows_in_tab(nvim)) or await new_window(
+            nvim, open_left=not settings.open_left
+        )
 
-    await nvim.api.set_current_win(window)
-    if buffer is None:
-        await nvim.command(f"edit {file}")
-    else:
-        await nvim.api.win_set_buf(window, buffer)
-    await resize_fm_windows(nvim, width=state.width)
+        await nvim.api.set_current_win(window)
+        if buffer is None:
+            await nvim.command(f"edit {path}")
+        else:
+            await nvim.api.win_set_buf(window, buffer)
+        await resize_fm_windows(nvim, width=state.width)
 
 
 async def update_buffers(nvim: Nvim2, lines: Sequence[str]) -> None:

@@ -129,8 +129,9 @@ async def c_primary(nvim: Nvim2, state: State, settings: Settings) -> State:
             )
             return new_state
         else:
-            await show_file(nvim, state=state, settings=settings, file=node.path)
-            return state
+            new_state = await forward(state, settings=settings, current=node.path)
+            await show_file(nvim, state=new_state, settings=settings)
+            return new_state
     else:
         return state
 
