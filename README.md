@@ -47,3 +47,5 @@ Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vun
 ```VimL
 Plug 'ms-jpq/fast-fm', {'branch': 'nvim', 'do': ':UpdateRemotePlugins'}
 ```
+
+## Documentation

@@ -58,7 +58,7 @@ class Nvim2:
         self.o_api = nvim.api
 
     def call(self, fn: Callable[[], T]) -> Awaitable[T]:
-        fut = Future()
+        fut: Future = Future()
 
         def cont() -> None:
             try:

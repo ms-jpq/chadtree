@@ -1,7 +1,7 @@
 from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from traceback import format_exc
-from typing import Any, Awaitable, Optional, Sequence
+from typing import Any, Awaitable, Optional, Sequence, cast
 
 from pynvim import Nvim, command, function, plugin
 
@@ -37,9 +37,10 @@ class Main:
     def __init__(self, nvim: Nvim):
         user_settings = nvim.vars.get("fast_fm_settings", None)
         user_icons = nvim.vars.get("fast_fm_icons", None)
-        settings = initial_settings(user_settings=user_settings, user_icons=user_icons)
-        self.state = initial_state(settings)
-        self.settings = settings
+        self.settings = initial_settings(
+            user_settings=user_settings, user_icons=user_icons
+        )
+        self.state = cast(State, None)
 
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.ch = Event()
@@ -73,6 +74,8 @@ class Main:
 
     def _initialize(self) -> None:
         async def setup() -> None:
+            self.state = await initial_state(self.settings)
+
             await autocmd(
                 self.nvim,
                 events=("FileType",),

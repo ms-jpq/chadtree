@@ -15,14 +15,25 @@ from .nvim import (
 )
 from .state import forward, index, is_dir
 from .types import Mode, Node, Settings, State
-from .wm import kill_buffers, kill_fm_windows, show_file, toggle_shown, update_buffers
+from .wm import (
+    is_fm_buffer,
+    kill_buffers,
+    kill_fm_windows,
+    show_file,
+    toggle_shown,
+    update_buffers,
+)
 
 
 async def _index(nvim: Nvim2, state: State) -> Optional[Node]:
     window: Window = await nvim.api.get_current_win()
-    row, _ = await nvim.api.win_get_cursor(window)
-    row = row - 1
-    return index(state, row)
+    buffer: Buffer = await nvim.api.win_get_buf(window)
+    if await is_fm_buffer(nvim, buffer=buffer):
+        row, _ = await nvim.api.win_get_cursor(window)
+        row = row - 1
+        return index(state, row)
+    else:
+        return None
 
 
 async def _indices(nvim: Nvim2, state: State, is_visual: bool) -> AsyncIterator[Node]:

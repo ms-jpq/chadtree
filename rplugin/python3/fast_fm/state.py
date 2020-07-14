@@ -3,16 +3,17 @@ from typing import Optional, Sequence
 
 from .cartographer import new, update
 from .da import or_else
+from .git import status
 from .render import render
 from .types import Index, Mode, Node, Selection, Set, Settings, State, VCStatus
 
 
-def initial(settings: Settings) -> State:
+async def initial(settings: Settings) -> State:
     cwd = getcwd()
     index = {cwd}
     selection: Selection = set()
     node = new(cwd, index=index)
-    vc = VCStatus()
+    vc = await status()
     lookup, rendered = render(
         node,
         settings=settings,
