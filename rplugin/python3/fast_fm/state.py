@@ -22,12 +22,12 @@ def load_session(cwd: str) -> Index:
         try:
             json = load_json(load_path)
         except Exception:
-            return set()
+            return {cwd}
         else:
             session = Session(index=json["index"])
             return {*session.index}
     else:
-        return set()
+        return {cwd}
 
 
 def dump_session(state: State) -> None:
