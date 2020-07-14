@@ -75,6 +75,23 @@ async def a_on_filetype(
         await buffer_keymap(nvim, buffer=buffer, keymap=settings.keymap)
 
 
+async def a_follow(nvim: Nvim2, state: State, settings: Settings, bufnr: int) -> State:
+    buffer = await find_buffer(nvim, bufnr)
+    if buffer is not None:
+        name = await nvim.api.buf_get_name(buffer)
+        if is_parent(parent=state.root.path, child=name):
+            paths = {*ancestors(name)}
+            index = state.index | paths
+            new_state = await forward(
+                state, settings=settings, index=index, paths=paths
+            )
+            return new_state
+        else:
+            return state
+    else:
+        return state
+
+
 async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:
     await kill_fm_windows(nvim, settings=settings)
 

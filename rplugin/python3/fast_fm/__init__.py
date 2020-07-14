@@ -7,6 +7,7 @@ from typing import Any, Awaitable, Optional, Sequence, cast
 from pynvim import Nvim, command, function, plugin
 
 from .commands import (
+    a_follow,
     a_on_filetype,
     c_clear,
     c_collapse,
@@ -98,6 +99,13 @@ class Main:
 
             await autocmd(
                 self.nvim,
+                events=("BufEnter",),
+                fn="_FMfollow",
+                arg_eval=("expand('<abuf>')",),
+            )
+
+            await autocmd(
+                self.nvim,
                 events=("BufWritePost", "FocusGained"),
                 fn="FMscheduleupdate",
             )
@@ -138,6 +146,16 @@ class Main:
     @function("FMscheduleupdate")
     def schedule_udpate(self, args: Sequence[Any]) -> None:
         self.ch.set()
+
+    @function("_FMfollow")
+    def on_bufenter(self, args: Sequence[Any]) -> None:
+        """
+        Follow buffer
+        """
+        buf, *_ = args
+        bufnr = int(buf)
+
+        self._run(a_follow, bufnr=bufnr)
 
     @function("_FMkeybind")
     def on_filetype(self, args: Sequence[Any]) -> None:
