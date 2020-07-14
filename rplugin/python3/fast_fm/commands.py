@@ -78,12 +78,12 @@ async def a_on_filetype(
 async def a_follow(nvim: Nvim2, state: State, settings: Settings, bufnr: int) -> State:
     buffer = await find_buffer(nvim, bufnr)
     if buffer is not None:
-        name = await nvim.api.buf_get_name(buffer)
-        if is_parent(parent=state.root.path, child=name):
-            paths = {*ancestors(name)}
+        current = await nvim.api.buf_get_name(buffer)
+        if is_parent(parent=state.root.path, child=current):
+            paths = {*ancestors(current)} if state.follow else set()
             index = state.index | paths
             new_state = await forward(
-                state, settings=settings, index=index, paths=paths
+                state, settings=settings, index=index, paths=paths, current=current
             )
             await redraw(nvim, state=new_state)
             return new_state

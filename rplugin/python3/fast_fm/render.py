@@ -46,7 +46,8 @@ def paint(
     def show_ascii(node: Node, depth: int) -> str:
         stat = vc.status.get(node.path)
 
-        spaces = depth * 2 * " "
+        spaces = (depth * 2 - 1) * " "
+        curr = "▶" if node.path == current else " "
         select = "*" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace("\n", r"\n")
@@ -57,12 +58,13 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"  {name} ->"
 
-        return f"{spaces}{select} {name} {status}"
+        return f"{spaces}{select}{curr} {name} {status}"
 
     def show_icons(node: Node, depth: int) -> str:
         stat = vc.status.get(node.path)
 
-        spaces = depth * 2 * " "
+        spaces = (depth * 2 - 1) * " "
+        curr = "▶" if node.path == current else " "
         select = "*" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace("\n", r"\n")
@@ -83,7 +85,7 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"{name} {icons.link}"
 
-        return f"{spaces}{select} {name} {status}"
+        return f"{spaces}{select}{curr} {name} {status}"
 
     show = show_icons if settings.use_icons else show_ascii
     return show

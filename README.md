@@ -4,6 +4,8 @@ Work in progress
 
 The **BEST** file manager for Neovim
 
+Fast and Unique features not found in other FMs
+
 ## Features
 
 ### Fast & asynchronous where it counts, (and doesn't), either way, it's async all the time
