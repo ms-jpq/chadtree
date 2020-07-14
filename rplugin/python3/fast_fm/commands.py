@@ -90,8 +90,8 @@ async def a_on_filetype(
         await buffer_keymap(nvim, buffer=buffer, keymap=settings.keymap)
 
 
-async def a_follow(nvim: Nvim2, state: State, settings: Settings, bufnr: int) -> State:
-    buffer = await find_buffer(nvim, bufnr)
+async def a_follow(nvim: Nvim2, state: State, settings: Settings) -> State:
+    buffer = await nvim.api.get_current_buf()
     if buffer is not None:
         return await _current(nvim, state=state, settings=settings, buffer=buffer)
     else:

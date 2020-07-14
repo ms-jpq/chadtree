@@ -97,10 +97,7 @@ class Main:
             )
 
             await autocmd(
-                self.nvim,
-                events=("BufEnter",),
-                fn="_FMfollow",
-                arg_eval=("expand('<abuf>')",),
+                self.nvim, events=("BufEnter",), fn="_FMfollow",
             )
 
             await autocmd(
@@ -151,10 +148,8 @@ class Main:
         """
         Follow buffer
         """
-        buf, *_ = args
-        bufnr = int(buf)
 
-        self._run(a_follow, bufnr=bufnr)
+        self._run(a_follow)
 
     @function("_FMkeybind")
     def on_filetype(self, args: Sequence[Any]) -> None:
