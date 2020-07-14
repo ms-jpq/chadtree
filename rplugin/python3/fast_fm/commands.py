@@ -1,3 +1,4 @@
+from itertools import chain
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
 
@@ -294,8 +295,7 @@ async def _operation(
                 await print(nvim, e, error=True)
             finally:
                 paths = {
-                    *operations.values(),
-                    *(dirname(src) for src in operations.keys()),
+                    dirname(p) for p in chain(operations.keys(), operations.values())
                 }
                 index = state.index | paths
                 new_state = await forward(
