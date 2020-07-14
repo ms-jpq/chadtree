@@ -60,16 +60,14 @@ class Main:
 
         def run(nvim: Nvim) -> None:
             fut = run_coroutine_threadsafe(co, loop)
-            try:
-                fut.result()
-            except Exception as e:
-                stack = format_exc()
-                nvim.async_call(nvim.err_write, f"{stack}{e}\n")
+            if wait:
+                try:
+                    fut.result()
+                except Exception as e:
+                    stack = format_exc()
+                    nvim.async_call(nvim.err_write, f"{stack}{e}\n")
 
-        if wait:
-            self.chan.submit(run, self.nvim1)
-        else:
-            run_coroutine_threadsafe(co, loop)
+        self.chan.submit(run, self.nvim1)
 
     def _run(self, fn: Any, *args: Any, **kwargs: Any) -> None:
         async def run() -> None:
