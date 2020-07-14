@@ -1,5 +1,6 @@
 from asyncio import gather
 from itertools import chain
+from locale import strxfrm
 from os import chdir
 from os.path import basename, dirname, exists, join, relpath
 from typing import AsyncIterator, Awaitable, Callable, Dict, Optional, Sequence
@@ -283,7 +284,9 @@ async def c_delete(nvim: Nvim2, state: State, settings: Settings) -> State:
     selection = state.selection or ({node.path} if node else set())
     unified = tuple(unify_ancestors(selection))
     if unified:
-        display_paths = "\n".join(_display_path(path, state=state) for path in unified)
+        display_paths = "\n".join(
+            sorted((_display_path(path, state=state) for path in unified), key=strxfrm)
+        )
         ans = await nvim.funcs.confirm(f"🗑  {display_paths}?", "&Yes\n&No\n", 2)
         if ans == 1:
             try:
@@ -326,7 +329,7 @@ async def _operation(
         if pre_existing:
             msg = ", ".join(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
-                for s, d in pre_existing.items()
+                for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
             )
             await print(
                 nvim, f"⚠️  -- {name}: path(s) already exist! :: {msg}", error=True
