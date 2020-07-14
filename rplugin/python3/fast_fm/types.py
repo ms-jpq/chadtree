@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Flag, auto
 from typing import Dict, Optional, Sequence, Set
+from uuid import UUID, uuid4
 
 Index = Set[str]
 Selection = Set[str]
@@ -72,3 +73,4 @@ class State:
     rendered: Sequence[str]
     vc: VCStatus
     current: Optional[str]
+    uuid: UUID = field(default_factory=uuid4)

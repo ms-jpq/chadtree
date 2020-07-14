@@ -90,6 +90,10 @@ async def a_on_filetype(
         await buffer_keymap(nvim, buffer=buffer, keymap=settings.keymap)
 
 
+async def a_change_dir(nvim: Nvim2, state: State, settings: Settings) -> State:
+    return state
+
+
 async def a_follow(nvim: Nvim2, state: State, settings: Settings) -> State:
     buffer = await nvim.api.get_current_buf()
     if buffer is not None:
@@ -307,7 +311,8 @@ async def _operation(
     action: Callable[[Dict[str, str]], Awaitable[None]],
 ) -> State:
     node = await _index(nvim, state=state)
-    unified = tuple(unify_ancestors(state.selection))
+    selection = state.selection
+    unified = tuple(unify_ancestors(selection))
     if unified and node:
         operations = {src: _find_dest(src, node) for src in unified}
         pre_existing = {s: d for s, d in operations.items() if exists(d)}

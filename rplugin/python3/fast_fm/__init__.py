@@ -2,7 +2,7 @@ from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
 from traceback import format_exc
-from typing import Any, Awaitable, Optional, Sequence, cast
+from typing import Any, Awaitable, Sequence, cast
 
 from pynvim import Nvim, command, function, plugin
 
@@ -54,7 +54,7 @@ class Main:
 
         self._initialized = False
 
-    def _submit(self, co: Awaitable[Optional[State]], wait: bool = True) -> None:
+    def _submit(self, co: Awaitable[None], wait: bool = True) -> None:
         loop: AbstractEventLoop = self.nvim1.loop
 
         def run(nvim: Nvim) -> None:
@@ -71,18 +71,16 @@ class Main:
             run_coroutine_threadsafe(co, loop)
 
     def _run(self, fn: Any, *args: Any, **kwargs: Any) -> None:
-        async def run() -> Optional[State]:
+        async def run() -> None:
             if not self.state:
                 self.state = await initial_state(self.settings)
 
             state = await fn(
                 self.nvim, state=self.state, settings=self.settings, *args, **kwargs
             )
-            if state:
+            if state and state.uuid != self.state.uuid:
                 await redraw(self.nvim, state=state)
                 self.state = state
-
-            return state
 
         self._submit(run())
 
