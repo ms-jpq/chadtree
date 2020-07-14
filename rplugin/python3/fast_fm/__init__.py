@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
+from os import chdir
 from traceback import format_exc
 from typing import Any, Awaitable, Sequence, cast
 
@@ -72,7 +73,9 @@ class Main:
     def _run(self, fn: Any, *args: Any, **kwargs: Any) -> None:
         async def run() -> None:
             if not self.state:
-                self.state = await initial_state(self.settings)
+                cwd = await self.nvim.funcs.getcwd()
+                chdir(cwd)
+                self.state = await initial_state(self.settings, cwd=cwd)
 
             state = await fn(
                 self.nvim, state=self.state, settings=self.settings, *args, **kwargs

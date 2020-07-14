@@ -1,15 +1,30 @@
-from os import getcwd
+from os.path import exists, join
 from typing import Optional, Sequence
 
 from .cartographer import new, update
-from .da import or_else
+from .consts import session_dir
+from .da import dump_json, load_json, or_else
 from .git import status
 from .render import render
 from .types import Index, Mode, Node, Selection, Set, Settings, State, VCStatus
 
 
-async def initial(settings: Settings) -> State:
-    cwd = getcwd()
+def load_session(cwd: str) -> Index:
+    hashed = cwd
+    load_path = join(session_dir, hashed)
+    if exists(load_path):
+        return load_json(load_path)
+    else:
+        return set()
+
+
+def dump_session(state: State) -> None:
+    hashed = state.node.path
+    load_path = join(session_dir, hashed)
+    dump_json(load_path, {})
+
+
+async def initial(settings: Settings, cwd: str) -> State:
     index = {cwd}
     selection: Selection = set()
     node = await new(cwd, index=index)
@@ -91,7 +106,7 @@ async def forward(
 
 
 def index(state: State, row: int) -> Optional[Node]:
-    if (row >= 0) and (row < len(state.lookup)):
+    if (row > 0) and (row < len(state.lookup)):
         return state.lookup[row]
     else:
         return None

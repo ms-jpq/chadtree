@@ -1,7 +1,7 @@
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
-from json import load
+from json import dump, load
 from typing import (
     Any,
     AsyncIterator,
@@ -85,3 +85,8 @@ async def call(prog: str, *args: str) -> ProcReturn:
 def load_json(path: str) -> Any:
     with open(path) as fd:
         return load(fd)
+
+
+def dump_json(path: str, json: Any) -> None:
+    with open(path) as fd:
+        return dump(json, fd, ensure_ascii=False, indent=2)
