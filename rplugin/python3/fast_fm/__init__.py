@@ -109,13 +109,15 @@ class Main:
 
         async def cycle() -> None:
             update = self.settings.update
-            async for _ in schedule(
+            async for elapsed in schedule(
                 self.ch, min_time=update.min_time, max_time=update.max_time,
             ):
                 state = await c_refresh(
                     self.nvim, state=self.state, settings=self.settings
                 )
                 self.state = state
+                await redraw(self.nvim, state=state)
+                await print(self.nvim, elapsed)
 
         async def forever() -> None:
             while True:

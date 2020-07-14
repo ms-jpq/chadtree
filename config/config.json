@@ -16,6 +16,7 @@
     "FMquit": ["q"],
     "FMrefresh": ["<c-r>"],
     "FMrename": ["r", "R"],
+    "FMscheduleupdate": ["u", "U"],
     "FMsecondary": ["<tab>", "<2-leftmouse>"],
     "FMselect": ["s", "S"],
     "FMsmaller": ["-", "_"]

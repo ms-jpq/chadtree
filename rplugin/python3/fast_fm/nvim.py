@@ -90,7 +90,7 @@ async def autocmd(
     modifiers: Iterable[str] = (),
     arg_eval: Iterable[str] = (),
 ) -> None:
-    _events = " ".join(events)
+    _events = ",".join(events)
     _filters = " ".join(filters)
     _modifiers = " ".join(modifiers)
     _args = ", ".join(arg_eval)
