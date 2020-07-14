@@ -48,9 +48,10 @@ def paint(
         name = node.name.replace("\n", r"\n")
 
         if Mode.FOLDER in node.mode:
-            name = f"{name}{sep}"
+            decor = "-" if node.path in index else "+"
+            name = f"{decor} {name}{sep}"
         if Mode.LINK in node.mode:
-            name = f"{name} ->"
+            name = f"  {name} ->"
 
         return f"{spaces}{select} {name} {status}"
 
