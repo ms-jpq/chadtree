@@ -38,6 +38,8 @@ Fast and Unique features not found in other FMs
 
 - Full globbing support
 
+- Ubiquitous locale-aware sorting
+
 ## Preview
 
 ## Install
