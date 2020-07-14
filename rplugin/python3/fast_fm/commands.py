@@ -21,6 +21,7 @@ from .wm import (
     is_fm_buffer,
     kill_buffers,
     kill_fm_windows,
+    resize_fm_windows,
     show_file,
     toggle_shown,
     update_buffers,
@@ -79,8 +80,18 @@ async def c_quit(nvim: Nvim2, state: State, settings: Settings) -> None:
 
 
 async def c_open(nvim: Nvim2, state: State, settings: Settings) -> None:
-    await toggle_shown(nvim, settings=settings)
+    await toggle_shown(nvim, state=state, settings=settings)
     await redraw(nvim, state=state)
+
+
+async def c_resize(
+    nvim: Nvim2, state: State, settings: Settings, direction: Callable[[int, int], int]
+) -> State:
+    new_state = await forward(
+        state, settings=settings, width=direction(state.width, 10)
+    )
+    await resize_fm_windows(nvim, width=new_state.width)
+    return new_state
 
 
 async def c_primary(nvim: Nvim2, state: State, settings: Settings) -> State:
@@ -95,7 +106,7 @@ async def c_primary(nvim: Nvim2, state: State, settings: Settings) -> State:
             await redraw(nvim, state=new_state)
             return new_state
         else:
-            await show_file(nvim, settings=settings, file=node.path)
+            await show_file(nvim, state=state, settings=settings, file=node.path)
             return state
     else:
         return state

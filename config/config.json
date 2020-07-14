@@ -2,6 +2,7 @@
   "defer_version_control": false,
   "follow": true,
   "keymap": {
+    "FMbigger": ["+", "="],
     "FMclear": ["c", "C"],
     "FMcollapse": ["<s-tab>", "`"],
     "FMcopy": ["p", "P"],
@@ -16,7 +17,8 @@
     "FMrename": ["r", "R"],
     "FMresize": ["t", "T"],
     "FMsecondary": ["<tab>", "<2-leftmouse>"],
-    "FMselect": ["s", "S"]
+    "FMselect": ["s", "S"],
+    "FMsmaller": ["-", "_"]
   },
   "open_left": true,
   "session": true,

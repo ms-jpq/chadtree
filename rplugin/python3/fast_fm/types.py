@@ -66,6 +66,7 @@ class State:
     selection: Selection
     show_hidden: bool
     follow: bool
+    width: int
     root: Node
     lookup: Sequence[Node]
     rendered: Sequence[str]

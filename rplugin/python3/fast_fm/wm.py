@@ -5,7 +5,7 @@ from .consts import fm_filetype
 from .da import anext
 from .fs import is_parent
 from .nvim import Buffer, Nvim2, Tabpage, Window
-from .types import Settings
+from .types import Settings, State
 
 
 async def is_fm_buffer(nvim: Nvim2, buffer: Buffer) -> bool:
@@ -90,9 +90,9 @@ async def new_window(nvim: Nvim2, *, open_left: bool) -> Window:
     return window
 
 
-async def resize_fm_windows(nvim: Nvim2, *, settings: Settings) -> None:
+async def resize_fm_windows(nvim: Nvim2, width: int) -> None:
     async for window in find_fm_windows_in_tab(nvim):
-        await nvim.api.win_set_width(window, settings.width)
+        await nvim.api.win_set_width(window, width)
 
 
 async def kill_fm_windows(nvim: Nvim2, *, settings: Settings) -> None:
@@ -100,7 +100,7 @@ async def kill_fm_windows(nvim: Nvim2, *, settings: Settings) -> None:
         await nvim.api.win_close(window, True)
 
 
-async def toggle_shown(nvim: Nvim2, *, settings: Settings) -> None:
+async def toggle_shown(nvim: Nvim2, *, state: State, settings: Settings) -> None:
     window: Optional[Window] = await anext(find_fm_windows_in_tab(nvim))
     if window:
         await nvim.api.win_close(window, True)
@@ -115,10 +115,12 @@ async def toggle_shown(nvim: Nvim2, *, settings: Settings) -> None:
             nvim.api.win_set_option(window, "signcolumn", "no"),
             nvim.api.win_set_option(window, "cursorline", True),
         )
-        await resize_fm_windows(nvim, settings=settings)
+        await resize_fm_windows(nvim, state.width)
 
 
-async def show_file(nvim: Nvim2, *, settings: Settings, file: str) -> None:
+async def show_file(
+    nvim: Nvim2, *, state: State, settings: Settings, file: str
+) -> None:
     buffer: Optional[Buffer] = await anext(find_buffer_with_file(nvim, file=file))
     window: Window = await anext(
         find_window_with_file_in_tab(nvim, file=file)
@@ -131,7 +133,7 @@ async def show_file(nvim: Nvim2, *, settings: Settings, file: str) -> None:
         await nvim.command(f"edit {file}")
     else:
         await nvim.api.win_set_buf(window, buffer)
-    await resize_fm_windows(nvim, settings=settings)
+    await resize_fm_windows(nvim, width=state.width)
 
 
 async def update_buffers(nvim: Nvim2, lines: Sequence[str]) -> None:

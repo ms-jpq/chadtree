@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
+from operator import add, sub
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence, cast
 
@@ -21,6 +22,7 @@ from .commands import (
     c_quit,
     c_refresh,
     c_rename,
+    c_resize,
     c_secondary,
     c_select,
 )
@@ -35,9 +37,9 @@ from .types import State
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
-        user_config = nvim.vars.get("fast_fm_settings", None)
-        user_icons = nvim.vars.get("fast_fm_icons", None)
-        user_ignores = nvim.vars.get("fast_fm_ignores", None)
+        user_config = nvim.vars.get("fast_fm_settings", {})
+        user_icons = nvim.vars.get("fast_fm_icons", {})
+        user_ignores = nvim.vars.get("fast_fm_ignores", {})
         self.settings = initial_settings(
             user_config=user_config, user_icons=user_icons, user_ignores=user_ignores
         )
@@ -173,9 +175,21 @@ class Main:
 
         self._run(c_secondary)
 
-    @function("FMresize")
-    def resize(self, args: Sequence[Any]) -> None:
-        pass
+    @function("FMbigger")
+    def bigger(self, args: Sequence[Any]) -> None:
+        """
+        Bigger sidebar
+        """
+
+        self._run(c_resize, direction=add)
+
+    @function("FMsmaller")
+    def smaller(self, args: Sequence[Any]) -> None:
+        """
+        Smaller sidebar
+        """
+
+        self._run(c_resize, direction=sub)
 
     @function("FMrefresh")
     def refresh(self, args: Sequence[Any]) -> None:
