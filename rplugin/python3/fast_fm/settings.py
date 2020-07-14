@@ -1,14 +1,14 @@
 from typing import Any
 
 from .consts import config_json, icons_json, ignore_json
-from .da import load_json
+from .da import load_json, merge
 from .types import IconSet, Settings, UpdateTime
 
 
-def initial(user_settings: Any, user_icons: Any) -> Settings:
-    config = load_json(config_json)
-    icon_c = load_json(icons_json)
-    ignore = load_json(ignore_json)
+def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
+    config = merge(load_json(config_json), user_config)
+    icon_c = merge(load_json(icons_json), user_icons)
+    ignore = merge(load_json(ignore_json), user_ignores)
 
     folder_ic = icon_c["folder"]
 

@@ -35,10 +35,11 @@ from .types import State
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
-        user_settings = nvim.vars.get("fast_fm_settings", None)
+        user_config = nvim.vars.get("fast_fm_settings", None)
         user_icons = nvim.vars.get("fast_fm_icons", None)
+        user_ignores = nvim.vars.get("fast_fm_ignores", None)
         self.settings = initial_settings(
-            user_settings=user_settings, user_icons=user_icons
+            user_config=user_config, user_icons=user_icons, user_ignores=user_ignores
         )
         self.state = cast(State, None)
 
