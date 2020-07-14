@@ -26,6 +26,7 @@ from .commands import (
     c_resize,
     c_secondary,
     c_select,
+    redraw,
 )
 from .consts import fm_filetype
 from .nvim import Nvim2, autocmd, print
@@ -59,17 +60,10 @@ class Main:
         def run(nvim: Nvim) -> None:
             fut = run_coroutine_threadsafe(co, loop)
             try:
-                ret = fut.result()
+                fut.result()
             except Exception as e:
                 stack = format_exc()
                 nvim.async_call(nvim.err_write, f"{stack}{e}\n")
-            else:
-
-                def cont() -> None:
-                    if ret:
-                        self.state = ret
-
-                loop.call_soon_threadsafe(cont)
 
         if wait:
             self.chan.submit(run, self.nvim1)
@@ -81,9 +75,15 @@ class Main:
             if not self.state:
                 self.state = await initial_state(self.settings)
 
-            return await fn(
+            state = await fn(
                 self.nvim, state=self.state, settings=self.settings, *args, **kwargs
             )
+            if state:
+                if state.uuid != self.state.uuid:
+                    await redraw(self.nvim, state=state)
+                self.state = state
+
+            return state
 
         self._submit(run())
 
