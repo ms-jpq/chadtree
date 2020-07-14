@@ -1,4 +1,6 @@
-# Fast FM (Work in progress)
+# Fast FM (100% async)
+
+Work in progress
 
 The **BEST** file manager for Neovim
 
@@ -8,7 +10,7 @@ The **BEST** file manager for Neovim
 
 - Incremental file system scan
 
-- Async all the time. in fact, I went overboard! Literally everything is async.
+- Literally every API call and file system update is async.
 
 ### Integrated git support
 
@@ -30,7 +32,7 @@ The **BEST** file manager for Neovim
 
 - Session support
 
-- Globbing
+- Full globbing support
 
 ## Preview
 
