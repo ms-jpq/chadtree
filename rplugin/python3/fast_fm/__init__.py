@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
 from os import chdir
 from traceback import format_exc
-from typing import Any, Awaitable, Sequence, cast
+from typing import Any, Awaitable, Optional, Sequence
 
 from pynvim import Nvim, command, function, plugin
 
@@ -48,7 +48,7 @@ class Main:
         self.settings = initial_settings(
             user_config=user_config, user_icons=user_icons, user_ignores=user_ignores
         )
-        self.state = cast(State, None)
+        self.state: Optional[State] = None
 
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.ch = Event()
@@ -71,19 +71,23 @@ class Main:
 
         self.chan.submit(run, self.nvim1)
 
+    async def _curr_state(self) -> State:
+        if not self.state:
+            cwd = await self.nvim.funcs.getcwd()
+            chdir(cwd)
+            self.state = await initial_state(self.settings, cwd=cwd)
+
+        return self.state
+
     def _run(self, fn: Any, *args: Any, **kwargs: Any) -> None:
         async def run() -> None:
-            if not self.state:
-                cwd = await self.nvim.funcs.getcwd()
-                chdir(cwd)
-                self.state = await initial_state(self.settings, cwd=cwd)
-
-            state = await fn(
-                self.nvim, state=self.state, settings=self.settings, *args, **kwargs
+            state = await self._curr_state()
+            new_state = await fn(
+                self.nvim, state=state, settings=self.settings, *args, **kwargs
             )
-            if state:
-                await redraw(self.nvim, state=state)
-                self.state = state
+            if new_state:
+                await redraw(self.nvim, state=new_state)
+                self.state = new_state
 
         self._submit(run())
 
@@ -111,20 +115,19 @@ class Main:
                 fn="FMscheduleupdate",
             )
 
-            await autocmd(
-                self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession"
-            )
+            await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
 
         async def cycle() -> None:
             update = self.settings.update
             async for elapsed in schedule(
                 self.ch, min_time=update.min_time, max_time=update.max_time,
             ):
-                state = await c_refresh(
-                    self.nvim, state=self.state, settings=self.settings
+                state = await self._curr_state()
+                new_state = await c_refresh(
+                    self.nvim, state=state, settings=self.settings
                 )
-                self.state = state
-                await redraw(self.nvim, state=state)
+                self.state = new_state
+                await redraw(self.nvim, state=new_state)
 
         async def forever() -> None:
             while True:
