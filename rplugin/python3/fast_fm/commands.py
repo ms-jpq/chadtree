@@ -121,20 +121,11 @@ async def a_on_filetype(
 
 
 async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
-    loop = get_running_loop()
     cwd = await getcwd(nvim)
     chdir(cwd)
-
-    def cont() -> Tuple[Index, Selection]:
-        index = {i for i in state.index if exists(i)} | {cwd}
-        selection = {s for s in state.selection if exists(s)}
-        return index, selection
-
-    index, selection = await loop.run_in_executor(None, cont)
+    index = state.index | {cwd}
     root = await new_root(cwd, index=index)
-    new_state = await forward(
-        state, settings=settings, root=root, index=index, selection=selection
-    )
+    new_state = await forward(state, settings=settings, root=root, index=index)
     return new_state
 
 
@@ -225,11 +216,22 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
-    cwd = getcwd(nvim)
+    loop = get_running_loop()
+    cwd = await getcwd(nvim)
     chdir(cwd)
+
     paths = {cwd}
+
+    def cont() -> Tuple[Index, Selection]:
+        index = {i for i in state.index if exists(i)} | paths
+        selection = {s for s in state.selection if exists(s)}
+        return index, selection
+
+    index, selection = await loop.run_in_executor(None, cont)
     vc = await status()
-    new_state = await forward(state, settings=settings, vc=vc, paths=paths)
+    new_state = await forward(
+        state, settings=settings, index=index, selection=selection, vc=vc, paths=paths
+    )
     return new_state
 
 
