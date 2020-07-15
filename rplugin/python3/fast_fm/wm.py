@@ -147,5 +147,5 @@ def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
         name = nvim.api.buf_get_name(buffer)
-        if any(is_parent(parent=path, child=name) for path in paths):
+        if any(name == path or is_parent(parent=path, child=name) for path in paths):
             nvim.command(f"bwipeout! {buffer.number}")
