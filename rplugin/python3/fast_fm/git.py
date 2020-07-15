@@ -2,7 +2,7 @@ from asyncio import gather
 from locale import strxfrm
 from os.path import join, sep
 from shutil import which
-from typing import Dict, Set
+from typing import Dict, Iterator, Set, Tuple
 
 from .da import call
 from .fs import ancestors
@@ -26,10 +26,19 @@ async def stat() -> Dict[str, str]:
     if ret.code != 0:
         raise GitError(ret.err)
     else:
-        entries = {
-            file.rstrip(sep): prefix
-            for prefix, file in ((line[:2], line[3:]) for line in ret.out.split("\0"))
-        }
+
+        def items() -> Iterator[Tuple[str, str]]:
+            rename = False
+            for line in ret.out.split("\0"):
+                if rename:
+                    rename = False
+                else:
+                    prefix, file = line[:2], line[3:]
+                    if "R" in prefix:
+                        rename = True
+                    yield prefix, file.rstrip(sep)
+
+        entries = {file: prefix for prefix, file in items()}
         return entries
 
 
