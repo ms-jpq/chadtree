@@ -247,7 +247,13 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
     node = await _index(nvim, state=state)
     if node:
         parent = node.path if is_dir(node) else dirname(node.path)
-        child = await nvim.funcs.input("✏️  :")
+
+        def ask() -> Optional[str]:
+            resp = nvim.funcs.input("✏️  :")
+            return resp
+
+        child = await call(nvim, ask)
+
         if child:
             name = join(parent, child)
             if exists(name):
@@ -277,7 +283,12 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
         prev_name = node.path
         parent = state.root.path
         rel_path = relpath(prev_name, start=parent)
-        child = await nvim.funcs.input("✏️  :", rel_path)
+
+        def ask() -> Optional[str]:
+            resp = nvim.funcs.input("✏️  :", rel_path)
+            return resp
+
+        child = await call(nvim, ask)
         if child:
             new_name = join(parent, child)
             new_parent = dirname(new_name)
@@ -342,7 +353,12 @@ async def c_delete(
         display_paths = "\n".join(
             sorted((_display_path(path, state=state) for path in unified), key=strxfrm)
         )
-        ans = await nvim.funcs.confirm(f"🗑\n{display_paths}?", "&Yes\n&No\n", 2)
+
+        def ask() -> int:
+            resp = nvim.funcs.confirm(f"🗑\n{display_paths}?", "&Yes\n&No\n", 2)
+            return resp
+
+        ans = await call(nvim, ask)
         if ans == 1:
             try:
                 await remove(unified)

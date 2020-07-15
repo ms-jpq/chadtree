@@ -66,26 +66,17 @@ async def autocmd(
     await call(nvim, cont)
 
 
-async def buffer_keymap(
-    nvim: Nvim, buffer: Buffer, keymap: Dict[str, Sequence[str]]
-) -> None:
+def buffer_keymap(nvim: Nvim, buffer: Buffer, keymap: Dict[str, Sequence[str]]) -> None:
     options = {"noremap": True, "silent": True, "nowait": True}
 
-    def cont() -> None:
-        for function, mappings in keymap.items():
-            for mapping in mappings:
-                nvim.api.buf_set_keymap(
-                    buffer, "n", mapping, f"<cmd>call {function}(v:false)<cr>", options
-                )
-                nvim.api.buf_set_keymap(
-                    buffer,
-                    "v",
-                    mapping,
-                    f"<esc><cmd>call {function}(v:true)<cr>",
-                    options,
-                )
-
-    await call(nvim, cont)
+    for function, mappings in keymap.items():
+        for mapping in mappings:
+            nvim.api.buf_set_keymap(
+                buffer, "n", mapping, f"<cmd>call {function}(v:false)<cr>", options
+            )
+            nvim.api.buf_set_keymap(
+                buffer, "v", mapping, f"<esc><cmd>call {function}(v:true)<cr>", options,
+            )
 
 
 class HoldPosition:
