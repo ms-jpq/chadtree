@@ -266,36 +266,33 @@ async def c_copy_name(
 
 
 async def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
-    node = await _index(nvim, state=state)
-    if node:
-        parent = node.path if is_dir(node) else dirname(node.path)
+    node = await _index(nvim, state=state) or state.root
+    parent = node.path if is_dir(node) else dirname(node.path)
 
-        def ask() -> Optional[str]:
-            resp = nvim.funcs.input("✏️  :")
-            return resp
+    def ask() -> Optional[str]:
+        resp = nvim.funcs.input("✏️  :")
+        return resp
 
-        child = await call(nvim, ask)
+    child = await call(nvim, ask)
 
-        if child:
-            name = join(parent, child)
-            if exists(name):
-                msg = f"⚠️  Exists: {name}"
-                await print(nvim, msg, error=True)
-                return state
-            else:
-                try:
-                    await new(name)
-                except Exception as e:
-                    await print(nvim, e, error=True)
-                    return await c_refresh(nvim, state=state, settings=settings)
-                else:
-                    index = state.index | {*ancestors(name)}
-                    new_state = await forward(
-                        state, settings=settings, index=index, paths={parent}
-                    )
-                    return new_state
-        else:
+    if child:
+        name = join(parent, child)
+        if exists(name):
+            msg = f"⚠️  Exists: {name}"
+            await print(nvim, msg, error=True)
             return state
+        else:
+            try:
+                await new(name)
+            except Exception as e:
+                await print(nvim, e, error=True)
+                return await c_refresh(nvim, state=state, settings=settings)
+            else:
+                index = state.index | {*ancestors(name)}
+                new_state = await forward(
+                    state, settings=settings, index=index, paths={parent}
+                )
+                return new_state
     else:
         return state
 
