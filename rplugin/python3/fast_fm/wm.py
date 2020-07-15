@@ -1,6 +1,7 @@
 from typing import Iterable, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
+from pynvim.api.common import NvimError
 
 from .consts import fm_filetype
 from .fs import is_parent
@@ -135,7 +136,10 @@ def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
     for buffer in find_fm_buffers(nvim):
         modifiable = nvim.api.buf_get_option(buffer, "modifiable")
         nvim.api.buf_set_option(buffer, "modifiable", True)
-        nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
+        try:
+            nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
+        except NvimError:
+            pass
         nvim.api.buf_set_option(buffer, "modifiable", modifiable)
 
 
