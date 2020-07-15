@@ -111,9 +111,10 @@ async def toggle_shown(nvim: Nvim2, *, state: State, settings: Settings) -> None
         window = await new_window(nvim, open_left=settings.open_left)
         await gather(
             nvim.api.win_set_buf(window, buffer),
-            nvim.api.win_set_option(window, "number", False),
-            nvim.api.win_set_option(window, "signcolumn", "no"),
-            nvim.api.win_set_option(window, "cursorline", True),
+            nvim.api.command("setlocal nonumber"),
+            nvim.api.command("setlocal signcolumn=no"),
+            nvim.api.command("setlocal cursorline"),
+            nvim.api.command("setlocal winfixwidth"),
         )
         await resize_fm_windows(nvim, state.width)
 
