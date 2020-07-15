@@ -3,7 +3,7 @@ from itertools import chain
 from locale import strxfrm
 from os import chdir
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
-from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence
+from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
 
@@ -23,7 +23,7 @@ from .nvim import (
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
-from .types import Index, Mode, Node, Selection, Settings, State, Tuple
+from .types import Index, Mode, Node, Selection, Settings, State
 from .wm import (
     is_fm_buffer,
     kill_buffers,
