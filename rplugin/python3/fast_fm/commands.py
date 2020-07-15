@@ -1,4 +1,4 @@
-from asyncio import gather
+from asyncio import gather, get_running_loop
 from itertools import chain
 from locale import strxfrm
 from os import chdir
@@ -17,12 +17,13 @@ from .nvim import (
     Window,
     buffer_keymap,
     call,
+    getcwd,
     print,
 )
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
-from .types import Mode, Node, Settings, State
+from .types import Index, Mode, Node, Selection, Settings, State, Tuple
 from .wm import (
     is_fm_buffer,
     kill_buffers,
@@ -120,11 +121,20 @@ async def a_on_filetype(
 
 
 async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
-    cwd = await call(nvim, nvim.funcs.getcwd)
+    loop = get_running_loop()
+    cwd = await getcwd()
     chdir(cwd)
-    index = state.index | {cwd}
+
+    def cont() -> Tuple[Index, Selection]:
+        index = {i for i in state.index if exists(i)} | {cwd}
+        selection = {s for s in state.selection if exists(s)}
+        return index, selection
+
+    index, selection = await loop.run_in_executor(None, cont)
     root = await new_root(cwd, index=index)
-    new_state = await forward(state, settings=settings, root=root, index=index)
+    new_state = await forward(
+        state, settings=settings, root=root, index=index, selection=selection
+    )
     return new_state
 
 
@@ -215,7 +225,9 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
-    paths = {state.root.path}
+    cwd = getcwd(nvim)
+    chdir(cwd)
+    paths = {cwd}
     vc = await status()
     new_state = await forward(state, settings=settings, vc=vc, paths=paths)
     return new_state

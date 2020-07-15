@@ -32,7 +32,7 @@ from .commands import (
     redraw,
 )
 from .consts import fm_filetype
-from .nvim import autocmd, call, print
+from .nvim import autocmd, getcwd, print
 from .schedule import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -72,7 +72,7 @@ class Main:
 
     async def _curr_state(self) -> State:
         if not self.state:
-            cwd = await call(self.nvim, self.nvim.funcs.getcwd)
+            cwd = await getcwd(self.nvim)
             chdir(cwd)
             self.state = await initial_state(self.settings, cwd=cwd)
 

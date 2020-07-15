@@ -40,6 +40,11 @@ async def print(
     await call(nvim, cont)
 
 
+async def getcwd(nvim: Nvim) -> str:
+    cwd = await call(nvim, nvim.funcs.getcwd)
+    return cwd
+
+
 async def autocmd(
     nvim: Nvim,
     *,
