@@ -85,8 +85,8 @@ class Main:
                 self.nvim, state=state, settings=self.settings, *args, **kwargs
             )
             if new_state:
-                await redraw(self.nvim, state=new_state)
                 self.state = new_state
+                await redraw(self.nvim, state=new_state)
 
         self._submit(run())
 
