@@ -1,4 +1,4 @@
-from asyncio import gather, get_running_loop
+from asyncio import get_running_loop
 from itertools import chain
 from locale import strxfrm
 from os import chdir
@@ -256,7 +256,12 @@ async def c_copy_name(
 
     clip = "\n".join(paths)
     clap = ", ".join(paths)
-    await gather(nvim.funcs.setreg("+", clip), nvim.funcs.setreg("*", clip))
+
+    def cont() -> None:
+        nvim.funcs.setreg("+", clip)
+        nvim.funcs.setreg("*", clip)
+
+    await call(nvim, cont)
     await print(nvim, f"📎 {clap}")
 
 
@@ -282,7 +287,8 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
                     await new(name)
                 except Exception as e:
                     await print(nvim, e, error=True)
-                finally:
+                    return await c_refresh(nvim, state=state, settings=settings)
+                else:
                     index = state.index | {*ancestors(name)}
                     new_state = await forward(
                         state, settings=settings, index=index, paths={parent}
@@ -318,7 +324,8 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
                     await rename(prev_name, new_name)
                 except Exception as e:
                     await print(nvim, e, error=True)
-                finally:
+                    return await c_refresh(nvim, state=state, settings=settings)
+                else:
                     paths = {parent, new_parent, *ancestors(new_parent)}
                     index = state.index | paths
                     new_state = await forward(
@@ -381,7 +388,8 @@ async def c_delete(
                 await remove(unified)
             except Exception as e:
                 await print(nvim, e, error=True)
-            finally:
+                return await c_refresh(nvim, state=state, settings=settings)
+            else:
                 paths = {dirname(path) for path in unified}
                 new_selection: Selection = set()
                 new_state = await forward(
@@ -446,7 +454,8 @@ async def _operation(
                     await action(operations)
                 except Exception as e:
                     await print(nvim, e, error=True)
-                finally:
+                    return await c_refresh(nvim, state=state, settings=settings)
+                else:
                     paths = {
                         dirname(p)
                         for p in chain(operations.keys(), operations.values())
