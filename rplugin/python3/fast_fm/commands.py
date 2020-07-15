@@ -362,7 +362,6 @@ async def c_delete(
         if ans == 1:
             try:
                 await remove(unified)
-                await print(nvim, unified)
             except Exception as e:
                 await print(nvim, e, error=True)
             finally:
@@ -411,24 +410,39 @@ async def _operation(
             )
             return state
         else:
-            try:
-                await action(operations)
-            except Exception as e:
-                await print(nvim, e, error=True)
-            finally:
-                paths = {
-                    dirname(p) for p in chain(operations.keys(), operations.values())
-                }
-                index = state.index | paths
-                new_state = await forward(
-                    state, settings=settings, index=index, paths=paths
-                )
 
-                def cont() -> None:
-                    kill_buffers(nvim, paths=selection)
+            msg = "\n".join(
+                f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
+                for s, d in sorted(operations.items(), key=lambda t: strxfrm(t[0]))
+            )
 
-                await call(nvim, cont)
-                return new_state
+            def ask() -> int:
+                resp = nvim.funcs.confirm(f"{op_name}\n{msg}?", "&Yes\n&No\n", 2)
+                return resp
+
+            ans = await call(nvim, ask)
+            if ans == 1:
+                try:
+                    await action(operations)
+                except Exception as e:
+                    await print(nvim, e, error=True)
+                finally:
+                    paths = {
+                        dirname(p)
+                        for p in chain(operations.keys(), operations.values())
+                    }
+                    index = state.index | paths
+                    new_state = await forward(
+                        state, settings=settings, index=index, paths=paths
+                    )
+
+                    def cont() -> None:
+                        kill_buffers(nvim, paths=selection)
+
+                    await call(nvim, cont)
+                    return new_state
+            else:
+                return state
     else:
         await print(nvim, "⚠️  -- {name}: nothing selected!", error=True)
         return state
