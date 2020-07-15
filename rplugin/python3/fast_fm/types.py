@@ -44,6 +44,11 @@ class UpdateTime:
 
 
 @dataclass(frozen=True)
+class VersionControlOptions:
+    defer: bool
+
+
+@dataclass(frozen=True)
 class Settings:
     show_hidden: bool
     follow: bool
@@ -55,8 +60,8 @@ class Settings:
     use_icons: bool
     icons: IconSet
     update: UpdateTime
+    version_ctl: VersionControlOptions
     session: bool
-    defer_vc: bool
 
 
 @dataclass(frozen=True)

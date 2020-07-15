@@ -1,5 +1,4 @@
 {
-  "defer_version_control": false,
   "follow": true,
   "keymap": {
     "FMbigger": ["+", "="],
@@ -29,5 +28,8 @@
     "min": 1
   },
   "use_icons": true,
+  "version_control": {
+    "defer": false
+  },
   "width": 40
 }

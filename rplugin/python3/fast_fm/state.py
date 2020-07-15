@@ -41,7 +41,7 @@ async def initial(settings: Settings, cwd: str) -> State:
     index = load_session(cwd) if settings.session else {cwd}
     selection: Selection = set()
     node = await new(cwd, index=index)
-    vc = VCStatus() if settings.defer_vc else await status()
+    vc = VCStatus() if settings.version_ctl.defer else await status()
     current = None
     lookup, rendered = render(
         node,

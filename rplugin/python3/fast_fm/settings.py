@@ -2,7 +2,7 @@ from typing import Any
 
 from .consts import config_json, icons_json, ignore_json
 from .da import load_json, merge
-from .types import IconSet, Settings, UpdateTime
+from .types import IconSet, Settings, UpdateTime, VersionControlOptions
 
 
 def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
@@ -24,6 +24,8 @@ def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
         min_time=config["update_time"]["min"], max_time=config["update_time"]["max"]
     )
 
+    version_ctl = VersionControlOptions(defer=config["version_control"]["defer"])
+
     settings = Settings(
         width=config["width"],
         open_left=config["open_left"],
@@ -36,7 +38,7 @@ def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
         icons=icons,
         update=update,
         session=config["session"],
-        defer_vc=config["defer_version_control"],
+        version_ctl=version_ctl,
     )
 
     return settings
