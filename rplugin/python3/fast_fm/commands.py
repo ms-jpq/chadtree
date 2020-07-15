@@ -432,8 +432,13 @@ async def _operation(
                         for p in chain(operations.keys(), operations.values())
                     }
                     index = state.index | paths
+                    new_selection = {*operations.values()}
                     new_state = await forward(
-                        state, settings=settings, index=index, paths=paths
+                        state,
+                        settings=settings,
+                        index=index,
+                        selection=new_selection,
+                        paths=paths,
                     )
 
                     def cont() -> None:
