@@ -56,7 +56,7 @@ class Nvim2:
         self.command = self.api.command
 
         self.o_api = nvim.api
-        self.o_func = nvim.func
+        self.o_funcs = nvim.funcs
 
     def call(self, fn: Callable[[], T]) -> Awaitable[T]:
         fut: Future = Future()
