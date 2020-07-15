@@ -32,7 +32,7 @@ from .commands import (
     redraw,
 )
 from .consts import fm_filetype
-from .nvim import Nvim2, autocmd, print
+from .nvim import autocmd, call, print
 from .schedule import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -52,13 +52,12 @@ class Main:
 
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.ch = Event()
-        self.nvim1 = nvim
-        self.nvim = Nvim2(nvim)
+        self.nvim = nvim
 
         self._initialized = False
 
     def _submit(self, co: Awaitable[None], wait: bool = True) -> None:
-        loop: AbstractEventLoop = self.nvim1.loop
+        loop: AbstractEventLoop = self.nvim.loop
 
         def run(nvim: Nvim) -> None:
             fut = run_coroutine_threadsafe(co, loop)
@@ -69,11 +68,11 @@ class Main:
                     stack = format_exc()
                     nvim.async_call(nvim.err_write, f"{stack}{e}\n")
 
-        self.chan.submit(run, self.nvim1)
+        self.chan.submit(run, self.nvim)
 
     async def _curr_state(self) -> State:
         if not self.state:
-            cwd = await self.nvim.funcs.getcwd()
+            cwd = await call(self.nvim, self.nvim.funcs.getcwd)
             chdir(cwd)
             self.state = await initial_state(self.settings, cwd=cwd)
 
@@ -273,8 +272,7 @@ class Main:
         """
         Copy dirname / filename
         """
-        visual, *_ = args
-        is_visual = visual == 1
+        is_visual, *_ = args
 
         self._run(c_copy_name, is_visual=is_visual)
 
@@ -307,8 +305,7 @@ class Main:
         """
         Folder / File -> select
         """
-        visual, *_ = args
-        is_visual = visual == 1
+        is_visual, *_ = args
 
         self._run(c_select, is_visual=is_visual)
 
@@ -317,8 +314,7 @@ class Main:
         """
         Delete selected
         """
-        visual, *_ = args
-        is_visual = visual == 1
+        is_visual, *_ = args
 
         self._run(c_delete, is_visual=is_visual)
 

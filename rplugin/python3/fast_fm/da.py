@@ -6,7 +6,6 @@ from os import makedirs
 from os.path import dirname
 from typing import (
     Any,
-    AsyncIterator,
     Awaitable,
     Callable,
     Optional,
@@ -42,13 +41,6 @@ def merge_all(ds1: Any, *dss: Any, replace: bool = False) -> Any:
 
 def or_else(thing: Optional[T], default: T) -> T:
     return default if thing is None else thing
-
-
-async def anext(aiter: AsyncIterator[T], default: Optional[T] = None) -> Optional[T]:
-    try:
-        return await aiter.__anext__()
-    except StopAsyncIteration:
-        return default
 
 
 def constantly(val: T) -> Callable[[Any], T]:
