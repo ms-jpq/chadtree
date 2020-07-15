@@ -2,7 +2,7 @@ from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from os import chdir
-from os.path import basename, dirname, exists, join, relpath
+from os.path import basename, dirname, exists, isdir, join, relpath, sep
 from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence
 
 from pynvim import Nvim
@@ -90,7 +90,10 @@ async def redraw(nvim: Nvim, state: State) -> None:
 
 def _display_path(path: str, state: State) -> str:
     raw = relpath(path, start=state.root.path)
-    return raw.replace("\n", r"\n")
+    name = raw.replace("\n", r"\n")
+    if isdir(path):
+        name = f"{name}{sep}"
+    return name
 
 
 async def _current(nvim: Nvim, state: State, settings: Settings, current: str) -> State:
@@ -366,7 +369,7 @@ async def c_delete(
                 await print(nvim, e, error=True)
             finally:
                 paths = {dirname(path) for path in unified}
-                new_selection = set()
+                new_selection = {p for p in selection if exists(p)}
                 new_state = await forward(
                     state, settings=settings, selection=new_selection, paths=paths
                 )
