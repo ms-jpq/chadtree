@@ -1,8 +1,9 @@
 from asyncio import Future
-from typing import Any, Awaitable, Callable, Dict, Iterable, Optional, Sequence, TypeVar
+from typing import Any, Awaitable, Callable, Dict, Iterable, Sequence, TypeVar
 from uuid import uuid4
 
 from pynvim import Nvim
+from pynvim.api.common import NvimError
 
 Tabpage = Any
 Window = Any
@@ -106,7 +107,7 @@ class HoldWindowPosition:
         def cont() -> None:
             try:
                 self.nvim.api.set_current_win(self.window)
-            except Exception:
+            except NvimError:
                 pass
 
         await call(self.nvim, cont)
