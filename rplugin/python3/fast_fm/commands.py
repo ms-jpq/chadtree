@@ -122,7 +122,7 @@ async def a_on_filetype(
 
 async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
     loop = get_running_loop()
-    cwd = await getcwd()
+    cwd = await getcwd(nvim)
     chdir(cwd)
 
     def cont() -> Tuple[Index, Selection]:
