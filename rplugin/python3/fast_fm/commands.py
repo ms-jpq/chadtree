@@ -383,7 +383,7 @@ async def c_delete(
                 await print(nvim, e, error=True)
             finally:
                 paths = {dirname(path) for path in unified}
-                new_selection = {p for p in selection if exists(p)}
+                new_selection: Selection = set()
                 new_state = await forward(
                     state, settings=settings, selection=new_selection, paths=paths
                 )
@@ -452,9 +452,7 @@ async def _operation(
                         for p in chain(operations.keys(), operations.values())
                     }
                     index = state.index | paths
-                    new_selection = {
-                        dest for dest in operations.values() if exists(dest)
-                    }
+                    new_selection = {dest for dest in operations.values()}
                     new_state = await forward(
                         state,
                         settings=settings,
