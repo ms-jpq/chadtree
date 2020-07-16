@@ -116,22 +116,10 @@ class Main:
 
             await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
 
-        async def cycle() -> None:
-            update = self.settings.update
-            async for elapsed in schedule(
-                self.ch, min_time=update.min_time, max_time=update.max_time,
-            ):
-                state = await self._curr_state()
-                new_state = await c_refresh(
-                    self.nvim, state=state, settings=self.settings
-                )
-                self.state = new_state
-                await redraw(self.nvim, state=new_state)
-
         async def forever() -> None:
             while True:
                 try:
-                    await cycle()
+                    await self._ooda_loop()
                 except Exception as e:
                     await print(self.nvim, e, error=True)
 
@@ -141,6 +129,16 @@ class Main:
             self._initialized = True
             self._submit(setup())
             self._submit(forever(), wait=False)
+
+    async def _ooda_loop(self) -> None:
+        update = self.settings.update
+        async for elapsed in schedule(
+            self.ch, min_time=update.min_time, max_time=update.max_time,
+        ):
+            state = await self._curr_state()
+            new_state = await c_refresh(self.nvim, state=state, settings=self.settings)
+            self.state = new_state
+            await redraw(self.nvim, state=new_state)
 
     @command("FMopen")
     def fm_open(self, *args: Any, **kwargs: Any) -> None:
