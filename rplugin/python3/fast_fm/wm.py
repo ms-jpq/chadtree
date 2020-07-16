@@ -116,12 +116,12 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
         if buffer is None:
             buffer = new_fm_buffer(nvim, keymap=settings.keymap)
         window = new_window(nvim, open_left=settings.open_left)
-        nvim.api.win_set_buf(window, buffer),
-        nvim.api.command("setlocal nonumber"),
-        nvim.api.command("setlocal nowrap"),
-        nvim.api.command("setlocal signcolumn=no"),
-        nvim.api.command("setlocal cursorline"),
-        nvim.api.command("setlocal winfixwidth"),
+        nvim.api.win_set_buf(window, buffer)
+        nvim.api.command("setlocal nonumber")
+        nvim.api.command("setlocal nowrap")
+        nvim.api.command("setlocal signcolumn=no")
+        nvim.api.command("setlocal cursorline")
+        nvim.api.command("setlocal winfixwidth")
         resize_fm_windows(nvim, state.width)
 
 
