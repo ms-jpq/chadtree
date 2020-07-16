@@ -288,9 +288,10 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
                 await print(nvim, e, error=True)
                 return await c_refresh(nvim, state=state, settings=settings)
             else:
-                index = state.index | {*ancestors(name)}
+                paths = {*ancestors(name)}
+                index = state.index | paths
                 new_state = await forward(
-                    state, settings=settings, index=index, paths={parent}
+                    state, settings=settings, index=index, paths=paths
                 )
                 return new_state
     else:
