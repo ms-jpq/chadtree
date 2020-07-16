@@ -10,7 +10,6 @@ from pynvim import Nvim, command, function, plugin
 from .commands import (
     a_changedir,
     a_follow,
-    a_on_filetype,
     a_session,
     c_clear,
     c_collapse,
@@ -93,14 +92,6 @@ class Main:
     def _initialize(self) -> None:
         async def setup() -> None:
             await autocmd(
-                self.nvim,
-                events=("FileType",),
-                filters=(fm_filetype,),
-                fn="_FMkeybind",
-                arg_eval=("expand('<abuf>')",),
-            )
-
-            await autocmd(
                 self.nvim, events=("DirChanged",), fn="_FMchangedir",
             )
 
@@ -172,16 +163,6 @@ class Main:
         """
 
         self._run(a_follow)
-
-    @function("_FMkeybind")
-    def on_filetype(self, args: Sequence[Any]) -> None:
-        """
-        Setup keybind
-        """
-        buf, *_ = args
-        bufnr = int(buf)
-
-        self._run(a_on_filetype, bufnr=bufnr)
 
     @function("_FMsession")
     def on_leave(self, args: Sequence[Any]) -> None:

@@ -1,5 +1,5 @@
 from asyncio import Future
-from typing import Any, Awaitable, Callable, Dict, Iterable, Sequence, TypeVar
+from typing import Any, Awaitable, Callable, Iterable, TypeVar
 from uuid import uuid4
 
 from pynvim import Nvim
@@ -70,19 +70,6 @@ async def autocmd(
         nvim.api.command(group_end)
 
     await call(nvim, cont)
-
-
-def buffer_keymap(nvim: Nvim, buffer: Buffer, keymap: Dict[str, Sequence[str]]) -> None:
-    options = {"noremap": True, "silent": True, "nowait": True}
-
-    for function, mappings in keymap.items():
-        for mapping in mappings:
-            nvim.api.buf_set_keymap(
-                buffer, "n", mapping, f"<cmd>call {function}(v:false)<cr>", options
-            )
-            nvim.api.buf_set_keymap(
-                buffer, "v", mapping, f"<esc><cmd>call {function}(v:true)<cr>", options,
-            )
 
 
 class HoldPosition:

@@ -1,4 +1,4 @@
-from typing import Iterable, Iterator, Optional, Sequence, Tuple
+from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
 from pynvim.api.common import NvimError
@@ -64,10 +64,20 @@ def find_buffer_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
             yield buffer
 
 
-def new_fm_buffer(nvim: Nvim) -> Buffer:
+def new_fm_buffer(nvim: Nvim, keymap: Dict[str, Sequence[str]]) -> Buffer:
+    options = {"noremap": True, "silent": True, "nowait": True}
     buffer: Buffer = nvim.api.create_buf(False, True)
-    nvim.api.buf_set_option(buffer, "modifiable", False),
-    nvim.api.buf_set_option(buffer, "filetype", fm_filetype),
+    nvim.api.buf_set_option(buffer, "modifiable", False)
+    nvim.api.buf_set_option(buffer, "filetype", fm_filetype)
+
+    for function, mappings in keymap.items():
+        for mapping in mappings:
+            nvim.api.buf_set_keymap(
+                buffer, "n", mapping, f"<cmd>call {function}(v:false)<cr>", options
+            )
+            nvim.api.buf_set_keymap(
+                buffer, "v", mapping, f"<esc><cmd>call {function}(v:true)<cr>", options,
+            )
     return buffer
 
 
@@ -104,7 +114,7 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
     else:
         buffer: Buffer = next(find_fm_buffers(nvim), None)
         if buffer is None:
-            buffer = new_fm_buffer(nvim)
+            buffer = new_fm_buffer(nvim, keymap=settings.keymap)
         window = new_window(nvim, open_left=settings.open_left)
         nvim.api.win_set_buf(window, buffer),
         nvim.api.command("setlocal nonumber"),

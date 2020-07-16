@@ -15,7 +15,6 @@ from .nvim import (
     HoldPosition,
     HoldWindowPosition,
     Window,
-    buffer_keymap,
     call,
     getcwd,
     print,
@@ -107,17 +106,6 @@ async def _current(nvim: Nvim, state: State, settings: Settings, current: str) -
         return new_state
     else:
         return state
-
-
-async def a_on_filetype(
-    nvim: Nvim, state: State, settings: Settings, bufnr: int
-) -> None:
-    def cont() -> None:
-        buffer = find_buffer(nvim, bufnr)
-        if buffer is not None:
-            buffer_keymap(nvim, buffer=buffer, keymap=settings.keymap)
-
-    await call(nvim, cont)
 
 
 async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
