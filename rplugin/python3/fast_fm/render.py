@@ -58,7 +58,7 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"  {name} ->"
 
-        return f"{spaces}{select}{curr} {name} {status}"
+        return f"{spaces}{select}{curr} {name}  {status}"
 
     def show_icons(node: Node, depth: int) -> str:
         stat = vc.status.get(node.path)
@@ -85,7 +85,7 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"{name} {icons.link}"
 
-        return f"{spaces}{select}{curr} {name} {status}"
+        return f"{spaces}{select}{curr} {name}  {status}"
 
     show = show_icons if settings.use_icons else show_ascii
     return show

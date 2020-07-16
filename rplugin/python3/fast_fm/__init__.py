@@ -33,7 +33,7 @@ from .commands import (
 )
 from .consts import fm_filetype
 from .nvim import autocmd, getcwd, print
-from .schedule import schedule
+from .scheduler import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
 from .types import State
