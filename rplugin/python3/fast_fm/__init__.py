@@ -30,7 +30,6 @@ from .commands import (
     c_select,
     redraw,
 )
-from .consts import fm_filetype
 from .nvim import autocmd, getcwd, print
 from .scheduler import schedule
 from .settings import initial as initial_settings
