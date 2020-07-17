@@ -64,6 +64,12 @@ def find_buffer_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
             yield buffer
 
 
+def find_current_buffer_name(nvim: Nvim) -> str:
+    buffer = nvim.api.get_current_buf()
+    name = nvim.api.buf_get_name(buffer)
+    return name
+
+
 def new_fm_buffer(nvim: Nvim, keymap: Dict[str, Sequence[str]]) -> Buffer:
     options = {"noremap": True, "silent": True, "nowait": True}
     buffer: Buffer = nvim.api.create_buf(False, True)

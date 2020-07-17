@@ -10,20 +10,13 @@ from pynvim import Nvim
 from .cartographer import new as new_root
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
 from .git import status
-from .nvim import (
-    Buffer,
-    HoldPosition,
-    HoldWindowPosition,
-    Window,
-    call,
-    getcwd,
-    print,
-)
+from .nvim import Buffer, HoldPosition, HoldWindowPosition, Window, call, getcwd, print
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
 from .types import Index, Mode, Node, Selection, Settings, State
 from .wm import (
+    find_current_buffer_name,
     is_fm_buffer,
     kill_buffers,
     kill_fm_windows,
@@ -119,9 +112,7 @@ async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
 
 async def a_follow(nvim: Nvim, state: State, settings: Settings) -> State:
     def cont() -> str:
-        buffer = nvim.api.get_current_buf()
-        name = nvim.api.buf_get_name(buffer)
-        return name
+        return find_current_buffer_name(nvim)
 
     current = await call(nvim, cont)
     return await _current(nvim, state=state, settings=settings, current=current)
