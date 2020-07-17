@@ -131,8 +131,7 @@ async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
 
 async def c_open(nvim: Nvim, state: State, settings: Settings) -> State:
     def cont() -> str:
-        buffer = nvim.api.get_current_buf()
-        name = nvim.api.buf_get_name(buffer)
+        name = find_current_buffer_name(nvim)
         toggle_fm_window(nvim, state=state, settings=settings)
         return name
 
