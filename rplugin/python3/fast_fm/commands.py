@@ -210,7 +210,8 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
         return index, selection
 
     index, selection = await loop.run_in_executor(None, cont)
-    new_index = index if new_current is None else index | {new_current}
+    current_paths = {*ancestors(current)} if state.follow else set()
+    new_index = index if new_current is None else index | current_paths
 
     vc = await status()
     new_state = await forward(
