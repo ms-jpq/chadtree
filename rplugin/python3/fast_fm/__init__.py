@@ -1,4 +1,4 @@
-from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
+from asyncio import AbstractEventLoop, Event, create_task, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
 from os import chdir
@@ -54,17 +54,16 @@ class Main:
 
         self._initialized = False
 
-    def _submit(self, co: Awaitable[None], wait: bool = True) -> None:
+    def _submit(self, co: Awaitable[None]) -> None:
         loop: AbstractEventLoop = self.nvim.loop
 
         def run(nvim: Nvim) -> None:
             fut = run_coroutine_threadsafe(co, loop)
-            if wait:
-                try:
-                    fut.result()
-                except Exception as e:
-                    stack = format_exc()
-                    nvim.async_call(nvim.err_write, f"{stack}{e}\n")
+            try:
+                fut.result()
+            except Exception as e:
+                stack = format_exc()
+                nvim.async_call(nvim.err_write, f"{stack}{e}\n")
 
         self.chan.submit(run, self.nvim)
 
@@ -118,7 +117,7 @@ class Main:
         else:
             self._initialized = True
             self._submit(setup())
-            self._submit(forever(), wait=False)
+            create_task(forever())
 
     async def _ooda_loop(self) -> None:
         update = self.settings.update
