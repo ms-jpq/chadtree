@@ -1,4 +1,4 @@
-from asyncio import get_running_loop
+from asyncio import gather, get_running_loop
 from itertools import chain
 from locale import strxfrm
 from os import chdir
@@ -194,11 +194,15 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
-    loop = get_running_loop()
-    cwd = await getcwd(nvim)
-    chdir(cwd)
+    def co() -> Optional[str]:
+        current = find_current_buffer_name(nvim)
+        return current
 
+    loop = get_running_loop()
+    cwd, current = await gather(getcwd(nvim), call(nvim, co))
     paths = {cwd}
+    new_current = current if is_parent(parent=cwd, child=current) else None
+    chdir(cwd)
 
     def cont() -> Tuple[Index, Selection]:
         index = {i for i in state.index if exists(i)} | paths
@@ -206,9 +210,17 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
         return index, selection
 
     index, selection = await loop.run_in_executor(None, cont)
+    new_index = index if new_current is None else index | {new_current}
+
     vc = await status()
     new_state = await forward(
-        state, settings=settings, index=index, selection=selection, vc=vc, paths=paths
+        state,
+        settings=settings,
+        index=new_index,
+        selection=selection,
+        vc=vc,
+        paths=paths,
+        current=new_current,
     )
     return new_state
 
