@@ -149,6 +149,7 @@ def show_file(nvim: Nvim, *, state: State, settings: Settings) -> None:
         else:
             nvim.api.win_set_buf(window, buffer)
         resize_fm_windows(nvim, width=state.width)
+        nvim.api.command("filetype detect")
 
 
 def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
