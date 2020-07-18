@@ -194,7 +194,7 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
 
 
 async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
-    def co() -> Optional[str]:
+    def co() -> str:
         current = find_current_buffer_name(nvim)
         return current
 

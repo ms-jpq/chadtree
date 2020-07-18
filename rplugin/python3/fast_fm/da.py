@@ -52,10 +52,6 @@ class AnyCallableAsync(Protocol):
         pass
 
 
-async def resolve(val: T) -> T:
-    return val
-
-
 @dataclass(frozen=True)
 class ProcReturn:
     code: int
