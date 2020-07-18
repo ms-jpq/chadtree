@@ -89,14 +89,8 @@ class HoldWindowPosition:
     def __init__(self, nvim: Nvim):
         self.nvim = nvim
 
-    async def __aenter__(self) -> None:
-        self.window = await call(self.nvim, self.nvim.api.get_current_win)
+    def __enter__(self) -> None:
+        self.window = self.nvim.api.get_current_win()
 
-    async def __aexit__(self, *_) -> None:
-        def cont() -> None:
-            try:
-                self.nvim.api.set_current_win(self.window)
-            except NvimError:
-                pass
-
-        await call(self.nvim, cont)
+    def __exit__(self, *_) -> None:
+        self.nvim.api.set_current_win(self.window)

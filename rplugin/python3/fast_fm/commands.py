@@ -154,7 +154,9 @@ async def c_resize(
     return new_state
 
 
-async def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
+async def _toggle(
+    nvim: Nvim, state: State, settings: Settings, hold_window: bool
+) -> State:
     node = await _index(nvim, state=state)
     if node:
         if Mode.FOLDER in node.mode:
@@ -168,7 +170,11 @@ async def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
             new_state = await forward(state, settings=settings, current=node.path)
 
             def cont() -> None:
-                show_file(nvim, state=new_state, settings=settings)
+                if hold_window:
+                    with HoldWindowPosition(nvim):
+                        show_file(nvim, state=new_state, settings=settings)
+                else:
+                    show_file(nvim, state=new_state, settings=settings)
 
             await call(nvim, cont)
 
@@ -177,9 +183,12 @@ async def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
         return state
 
 
+async def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
+    return await _toggle(nvim, state=state, settings=settings, hold_window=False)
+
+
 async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
-    async with HoldWindowPosition(nvim):
-        return await c_primary(nvim, state=state, settings=settings)
+    return await _toggle(nvim, state=state, settings=settings, hold_window=True)
 
 
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
