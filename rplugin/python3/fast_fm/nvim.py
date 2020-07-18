@@ -4,7 +4,6 @@ from uuid import uuid4
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
-from pynvim.api.common import NvimError
 
 T = TypeVar("T")
 
@@ -77,7 +76,7 @@ class HoldPosition:
         self.window = self.nvim.api.get_current_win()
         self.pos = self.nvim.api.win_get_cursor(self.window)
 
-    def __exit__(self, *_) -> None:
+    def __exit__(self, *_: Any) -> None:
         row, col = self.pos
         buffer: Buffer = self.nvim.api.win_get_buf(self.window)
         max_rows = self.nvim.api.buf_line_count(buffer)
@@ -92,5 +91,5 @@ class HoldWindowPosition:
     def __enter__(self) -> None:
         self.window = self.nvim.api.get_current_win()
 
-    def __exit__(self, *_) -> None:
+    def __exit__(self, *_: Any) -> None:
         self.nvim.api.set_current_win(self.window)
