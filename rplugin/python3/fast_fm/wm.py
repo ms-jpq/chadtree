@@ -158,8 +158,8 @@ def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
         nvim.api.buf_set_option(buffer, "modifiable", True)
         try:
             nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
-        except NvimError:
-            pass
+        except NvimError as e:
+            nvim.api.err_write(f"{e}\n")
         nvim.api.buf_set_option(buffer, "modifiable", modifiable)
 
 
