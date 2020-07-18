@@ -3,11 +3,8 @@ from typing import Any, Awaitable, Callable, Iterable, TypeVar
 from uuid import uuid4
 
 from pynvim import Nvim
+from pynvim.api.buffer import Buffer
 from pynvim.api.common import NvimError
-
-Tabpage = Any
-Window = Any
-Buffer = Any
 
 T = TypeVar("T")
 

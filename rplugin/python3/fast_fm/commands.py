@@ -5,11 +5,13 @@ from os.path import basename, dirname, exists, isdir, join, relpath, sep
 from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
+from pynvim.api.buffer import Buffer
+from pynvim.api.window import Window
 
 from .cartographer import new as new_root
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
 from .git import status
-from .nvim import Buffer, HoldPosition, HoldWindowPosition, Window, call, getcwd, print
+from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir

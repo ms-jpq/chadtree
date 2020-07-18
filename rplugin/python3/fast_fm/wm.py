@@ -1,11 +1,13 @@
 from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
+from pynvim.api.buffer import Buffer
 from pynvim.api.common import NvimError
+from pynvim.api.tabpage import Tabpage
+from pynvim.api.window import Window
 
 from .consts import fm_filetype
 from .fs import is_parent
-from .nvim import Buffer, Tabpage, Window
 from .types import Settings, State
 
 
