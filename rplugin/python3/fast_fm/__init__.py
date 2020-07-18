@@ -1,7 +1,6 @@
 from asyncio import AbstractEventLoop, Event, create_task, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
-from os import chdir
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
 
@@ -70,7 +69,6 @@ class Main:
     async def _curr_state(self) -> State:
         if not self.state:
             cwd = await getcwd(self.nvim)
-            chdir(cwd)
             self.state = await initial_state(self.settings, cwd=cwd)
 
         return self.state

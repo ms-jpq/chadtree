@@ -1,7 +1,6 @@
 from asyncio import gather, get_running_loop
 from itertools import chain
 from locale import strxfrm
-from os import chdir
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
 from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence, Tuple
 
@@ -103,7 +102,6 @@ async def _current(nvim: Nvim, state: State, settings: Settings, current: str) -
 
 async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
     cwd = await getcwd(nvim)
-    chdir(cwd)
     index = state.index | {cwd}
     root = await new_root(cwd, index=index)
     new_state = await forward(state, settings=settings, root=root, index=index)
@@ -202,7 +200,6 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
     cwd, current = await gather(getcwd(nvim), call(nvim, co))
     paths = {cwd}
     new_current = current if is_parent(parent=cwd, child=current) else None
-    chdir(cwd)
 
     def cont() -> Tuple[Index, Selection]:
         index = {i for i in state.index if exists(i)} | paths
