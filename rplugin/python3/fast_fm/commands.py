@@ -2,14 +2,16 @@ from asyncio import gather, get_running_loop
 from itertools import chain
 from locale import strxfrm
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
-from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence, Tuple
+from typing import (Awaitable, Callable, Dict, Iterator, Optional, Sequence,
+                    Set, Tuple)
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 
 from .cartographer import new as new_root
-from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
+from .fs import (ancestors, copy, cut, is_parent, new, remove, rename,
+                 unify_ancestors)
 from .git import status
 from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
 from .opener import OpenError, open_gui
@@ -17,16 +19,9 @@ from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
 from .types import Index, Mode, Node, Selection, Settings, State
-from .wm import (
-    find_current_buffer_name,
-    is_fm_buffer,
-    kill_buffers,
-    kill_fm_windows,
-    resize_fm_windows,
-    show_file,
-    toggle_fm_window,
-    update_buffers,
-)
+from .wm import (find_current_buffer_name, is_fm_buffer, kill_buffers,
+                 kill_fm_windows, resize_fm_windows, show_file,
+                 toggle_fm_window, update_buffers)
 
 
 def find_buffer(nvim: Nvim, bufnr: int) -> Optional[Buffer]:
@@ -98,7 +93,7 @@ def _display_path(path: str, state: State) -> str:
 
 async def _current(nvim: Nvim, state: State, settings: Settings, current: str) -> State:
     if is_parent(parent=state.root.path, child=current):
-        paths = {*ancestors(current)} if state.follow else set()
+        paths: Set[str] = {*ancestors(current)} if state.follow else set()
         index = state.index | paths
         new_state = await forward(
             state, settings=settings, index=index, paths=paths, current=current
@@ -228,7 +223,7 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
         return index, selection
 
     index, selection = await loop.run_in_executor(None, cont)
-    current_paths = {*ancestors(current)} if state.follow else set()
+    current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
     new_index = index if new_current is None else index | current_paths
 
     vc = await status()
@@ -506,3 +501,4 @@ async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> State:
             await open_gui(node.path)
         except OpenError as e:
             await print(nvim, e)
+    return state

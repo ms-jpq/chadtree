@@ -2,7 +2,7 @@ from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
 from os.path import sep
-from typing import Callable, Iterable, Iterator, Optional, Sequence, Tuple, Union
+from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from .da import constantly
 from .types import Index, Mode, Node, Selection, Settings, VCStatus
@@ -13,7 +13,7 @@ class CompVals(IntEnum):
     FILE = auto()
 
 
-def comp(node: Node) -> Iterable[Union[int, str]]:
+def comp(node: Node) -> Tuple[int, str, str]:
     node_type = CompVals.FOLDER if Mode.FOLDER in node.mode else CompVals.FILE
     return (
         node_type,
@@ -114,4 +114,4 @@ def render(
             yield from render(child, depth=depth + 1)
 
     lookup, rendered = zip(*render(node, depth=0))
-    return lookup, rendered
+    return cast(Sequence[Node], lookup), cast(Sequence[str], rendered)

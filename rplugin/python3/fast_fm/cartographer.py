@@ -2,7 +2,7 @@ from asyncio import get_running_loop
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
-from typing import Set
+from typing import Dict, Set, cast
 
 from .types import Index, Mode, Node
 
@@ -12,7 +12,7 @@ def fs_stat(path: str) -> Mode:
     if S_ISLNK(info.st_mode):
         link_info = stat(path, follow_symlinks=True)
         mode = Mode.FOLDER if S_ISDIR(link_info.st_mode) else Mode.FILE
-        return mode | Mode.LINK
+        return mode | Mode.LINK  # type: ignore
     else:
         mode = Mode.FOLDER if S_ISDIR(info.st_mode) else Mode.FILE
         return mode
@@ -46,7 +46,7 @@ def _update(root: Node, index: Index, paths: Set[str]) -> Node:
     else:
         children = {
             k: _update(v, index=index, paths=paths)
-            for k, v in (root.children or {}).items()
+            for k, v in (root.children or cast(Dict[str, Node], {})).items()
         }
         return Node(
             path=root.path,
