@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from json import dump, load
 from os import makedirs
 from os.path import dirname
-from typing import Any, Awaitable, Callable, Optional, Protocol, TypeVar, cast
+from typing import Any, Callable, Optional, TypeVar, cast
 
 from .consts import folder_mode
 
