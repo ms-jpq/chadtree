@@ -200,7 +200,11 @@ async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
     node = await _index(nvim, state=state)
     if node and Mode.FOLDER in node.mode:
-        paths = {i for i in state.index if is_parent(parent=node.path, child=i)}
+        paths = {
+            i
+            for i in state.index
+            if i == node.path or is_parent(parent=node.path, child=i)
+        }
         index = state.index - paths
         new_state = await forward(state, settings=settings, index=index, paths=paths)
         return new_state
