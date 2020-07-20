@@ -20,6 +20,7 @@ from .commands import (
     c_hidden,
     c_new,
     c_open,
+    c_open_system,
     c_primary,
     c_quit,
     c_refresh,
@@ -88,7 +89,7 @@ class Main:
     def _initialize(self) -> None:
         async def setup() -> None:
             await autocmd(
-                self.nvim, events=("DirChanged",), fn="_FMchangedir",
+                self.nvim, events=("DirChanged",), fn="_FMchange_dir",
             )
 
             await autocmd(
@@ -98,7 +99,7 @@ class Main:
             await autocmd(
                 self.nvim,
                 events=("BufWritePost", "FocusGained"),
-                fn="FMscheduleupdate",
+                fn="FMschedule_update",
             )
 
             await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
@@ -136,7 +137,7 @@ class Main:
         self._initialize()
         self._run(c_open)
 
-    @function("FMscheduleupdate")
+    @function("FMschedule_update")
     def schedule_udpate(self, args: Sequence[Any]) -> None:
         """
         Follow directory
@@ -144,7 +145,7 @@ class Main:
 
         self.ch.set()
 
-    @function("_FMchangedir")
+    @function("_FMchange_dir")
     def on_changedir(self, args: Sequence[Any]) -> None:
         """
         Follow files
@@ -242,7 +243,7 @@ class Main:
 
         self._run(c_follow)
 
-    @function("FMcopyname")
+    @function("FMcopy_name")
     def copy_name(self, args: Sequence[Any]) -> None:
         """
         Copy dirname / filename
@@ -308,3 +309,11 @@ class Main:
         """
 
         self._run(c_copy)
+
+    @function("FMopen_sys")
+    def open_sys(self, args: Sequence[Any]) -> None:
+        """
+        Open using finder / dolphin, etc
+        """
+
+        self._run(c_open_system)

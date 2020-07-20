@@ -12,6 +12,7 @@ from .cartographer import new as new_root
 from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
 from .git import status
 from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
+from .opener import OpenError, open_gui
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
@@ -492,3 +493,12 @@ async def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
     return await _operation(
         nvim, state=state, settings=settings, op_name="Copy", action=copy
     )
+
+
+async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> State:
+    node = await _index(nvim, state=state)
+    if node:
+        try:
+            await open_gui(node.path)
+        except OpenError as e:
+            await print(nvim, e)
