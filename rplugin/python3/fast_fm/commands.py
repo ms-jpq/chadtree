@@ -1,6 +1,7 @@
 from asyncio import gather, get_running_loop
 from itertools import chain
 from locale import strxfrm
+from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
 from typing import (Awaitable, Callable, Dict, Iterator, Optional, Sequence,
                     Set, Tuple)
@@ -85,7 +86,7 @@ async def redraw(nvim: Nvim, state: State) -> None:
 
 def _display_path(path: str, state: State) -> str:
     raw = relpath(path, start=state.root.path)
-    name = raw.replace("\n", r"\n")
+    name = raw.replace(linesep, r"\n")
     if isdir(path):
         name = f"{name}{sep}"
     return name
@@ -258,7 +259,7 @@ async def c_copy_name(
     nodes = await _indices(nvim, state=state, is_visual=is_visual)
     paths = tuple(n.path for n in nodes)
 
-    clip = "\n".join(paths)
+    clip = linesep.join(paths)
     clap = ", ".join(paths)
 
     def cont() -> None:
@@ -376,12 +377,12 @@ async def c_delete(
     }
     unified = tuple(unify_ancestors(selection))
     if unified:
-        display_paths = "\n".join(
+        display_paths = linesep.join(
             sorted((_display_path(path, state=state) for path in unified), key=strxfrm)
         )
 
         def ask() -> int:
-            resp = nvim.funcs.confirm(f"🗑\n{display_paths}?", "&Yes\n&No\n", 2)
+            resp = nvim.funcs.confirm(f"🗑{linesep}{display_paths}?", "&Yes{linesep}&No{linesep}", 2)
             return resp
 
         ans = await call(nvim, ask)
@@ -440,13 +441,13 @@ async def _operation(
             return state
         else:
 
-            msg = "\n".join(
+            msg = linesep.join(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
                 for s, d in sorted(operations.items(), key=lambda t: strxfrm(t[0]))
             )
 
             def ask() -> int:
-                resp = nvim.funcs.confirm(f"{op_name}\n{msg}?", "&Yes\n&No\n", 2)
+                resp = nvim.funcs.confirm(f"{op_name}{linesep}{msg}?", "&Yes{linesep}&No{linesep}", 2)
                 return resp
 
             ans = await call(nvim, ask)

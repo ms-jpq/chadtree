@@ -1,4 +1,5 @@
 from asyncio import Future
+from os import linesep
 from typing import Any, Awaitable, Callable, Iterable, TypeVar
 from uuid import uuid4
 
@@ -31,7 +32,7 @@ async def print(
     def cont() -> None:
         write(str(message))
         if flush:
-            write("\n")
+            write(linesep)
 
     await call(nvim, cont)
 

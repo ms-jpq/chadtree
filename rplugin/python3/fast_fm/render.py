@@ -1,6 +1,7 @@
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
+from os import linesep
 from os.path import sep
 from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 
@@ -50,7 +51,7 @@ def paint(
         curr = ">" if node.path == current else " "
         select = "*" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
-        name = node.name.replace("\n", r"\n")
+        name = node.name.replace(linesep, r"\n")
 
         if Mode.FOLDER in node.mode:
             decor = "-" if node.path in index else "+"
@@ -67,7 +68,7 @@ def paint(
         curr = "▶" if node.path == current else " "
         select = "✸" if node.path in selection else " "
         status = f"[{stat}]" if stat else ""
-        name = node.name.replace("\n", r"\n")
+        name = node.name.replace(linesep, r"\n")
 
         if Mode.FOLDER in node.mode:
             decor: Optional[

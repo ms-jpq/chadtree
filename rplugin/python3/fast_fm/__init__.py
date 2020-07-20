@@ -1,6 +1,7 @@
 from asyncio import AbstractEventLoop, Event, create_task, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
+from os import linesep
 from traceback import format_exc
 from typing import Any, Awaitable, Optional, Sequence
 
@@ -63,7 +64,7 @@ class Main:
                 fut.result()
             except Exception as e:
                 stack = format_exc()
-                nvim.async_call(nvim.err_write, f"{stack}{e}\n")
+                nvim.async_call(nvim.err_write, f"{stack}{e}{linesep}")
 
         self.chan.submit(run, self.nvim)
 

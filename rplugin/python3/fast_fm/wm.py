@@ -1,3 +1,4 @@
+from os import linesep
 from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
@@ -159,7 +160,7 @@ def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
         try:
             nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
         except NvimError as e:
-            nvim.api.err_write(f"{e}\n")
+            nvim.api.err_write(f"{e}{linesep}")
         nvim.api.buf_set_option(buffer, "modifiable", modifiable)
 
 
