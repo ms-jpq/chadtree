@@ -42,16 +42,6 @@ def constantly(val: T) -> Callable[[Any], T]:
     return ret
 
 
-class AnyCallable(Protocol):
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        pass
-
-
-class AnyCallableAsync(Protocol):
-    def __call__(self, *args: Any, **kwargs: Any) -> Awaitable[Any]:
-        pass
-
-
 @dataclass(frozen=True)
 class ProcReturn:
     code: int
