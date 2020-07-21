@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
 from os import linesep
 from traceback import format_exc
-from typing import Any, Awaitable, Optional, Sequence
+from typing import Any, Awaitable, Callable, Optional, Sequence
 
 from pynvim import Nvim, command, function, plugin
 
@@ -75,7 +75,9 @@ class Main:
 
         return self.state
 
-    def _run(self, fn: Any, *args: Any, **kwargs: Any) -> None:
+    def _run(
+        self, fn: Callable[..., Awaitable[Optional[State]]], *args: Any, **kwargs: Any
+    ) -> None:
         async def run() -> None:
             state = await self._curr_state()
             new_state = await fn(
