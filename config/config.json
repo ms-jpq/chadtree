@@ -5,7 +5,7 @@
     "FMclear": ["c", "C"],
     "FMcollapse": ["<s-tab>", "`"],
     "FMcopy": ["p", "P"],
-    "FMcopy_name": ["u", "U"],
+    "FMcopy_name": ["y", "Y"],
     "FMcut": ["x", "X"],
     "FMdelete": ["d", "D"],
     "FMfollow": ["f", "F"],
