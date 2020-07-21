@@ -14,7 +14,7 @@ async def schedule(
         chan.clear()
         for p in pending:
             p.cancel()
-        await gather(*pending, *done)
+        await gather(*done)
         t2 = time()
         elapsed = t2 - t1
         await sleep(min_time - elapsed)
