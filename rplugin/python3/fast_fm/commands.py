@@ -3,16 +3,14 @@ from itertools import chain
 from locale import strxfrm
 from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
-from typing import (Awaitable, Callable, Dict, Iterator, Optional, Sequence,
-                    Set, Tuple)
+from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence, Set, Tuple
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 
 from .cartographer import new as new_root
-from .fs import (ancestors, copy, cut, is_parent, new, remove, rename,
-                 unify_ancestors)
+from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
 from .git import status
 from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
 from .opener import OpenError, open_gui
@@ -20,9 +18,16 @@ from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
 from .types import Index, Mode, Node, Selection, Settings, State
-from .wm import (find_current_buffer_name, is_fm_buffer, kill_buffers,
-                 kill_fm_windows, resize_fm_windows, show_file,
-                 toggle_fm_window, update_buffers)
+from .wm import (
+    find_current_buffer_name,
+    is_fm_buffer,
+    kill_buffers,
+    kill_fm_windows,
+    resize_fm_windows,
+    show_file,
+    toggle_fm_window,
+    update_buffers,
+)
 
 
 def find_buffer(nvim: Nvim, bufnr: int) -> Optional[Buffer]:
@@ -382,7 +387,9 @@ async def c_delete(
         )
 
         def ask() -> int:
-            resp = nvim.funcs.confirm(f"🗑{linesep}{display_paths}?", "&Yes{linesep}&No{linesep}", 2)
+            resp = nvim.funcs.confirm(
+                f"🗑{linesep}{display_paths}?", f"&Yes{linesep}&No{linesep}", 2
+            )
             return resp
 
         ans = await call(nvim, ask)
@@ -447,7 +454,9 @@ async def _operation(
             )
 
             def ask() -> int:
-                resp = nvim.funcs.confirm(f"{op_name}{linesep}{msg}?", "&Yes{linesep}&No{linesep}", 2)
+                resp = nvim.funcs.confirm(
+                    f"{op_name}{linesep}{msg}?", f"&Yes{linesep}&No{linesep}", 2
+                )
                 return resp
 
             ans = await call(nvim, ask)
