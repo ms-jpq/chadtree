@@ -41,9 +41,9 @@ from .types import State
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
-        user_config = nvim.vars.get("fast_fm_settings", {})
-        user_icons = nvim.vars.get("fast_fm_icons", {})
-        user_ignores = nvim.vars.get("fast_fm_ignores", {})
+        user_config = nvim.vars.get("fancy_fm_settings", {})
+        user_icons = nvim.vars.get("fancy_fm_icons", {})
+        user_ignores = nvim.vars.get("fancy_fm_ignores", {})
         self.settings = initial_settings(
             user_config=user_config, user_icons=user_icons, user_ignores=user_ignores
         )
