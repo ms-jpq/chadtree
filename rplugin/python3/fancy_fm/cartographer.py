@@ -12,7 +12,7 @@ def fs_stat(path: str) -> Mode:
     if S_ISLNK(info.st_mode):
         link_info = stat(path, follow_symlinks=True)
         mode = Mode.FOLDER if S_ISDIR(link_info.st_mode) else Mode.FILE
-        return mode | Mode.LINK  # type: ignore
+        return mode | Mode.LINK
     else:
         mode = Mode.FOLDER if S_ISDIR(info.st_mode) else Mode.FILE
         return mode
