@@ -1,5 +1,6 @@
-from asyncio import Future
+from asyncio import Future, Task, create_task, sleep
 from os import linesep
+from traceback import format_exc
 from typing import Any, Awaitable, Callable, Iterable, TypeVar
 from uuid import uuid4
 
@@ -37,6 +38,24 @@ async def print(
     await call(nvim, cont)
 
 
+def run_forever(
+    nvim: Nvim,
+    thing: Callable[[], Awaitable[None]],
+    retries: int = 3,
+    timeout: float = 1.0,
+) -> Task:
+    async def loop() -> None:
+        for _ in range(retries):
+            try:
+                await thing()
+            except Exception as e:
+                stack = format_exc()
+                await print(nvim, f"{stack}{e}", error=True)
+                await sleep(timeout)
+
+    return create_task(loop())
+
+
 async def getcwd(nvim: Nvim) -> str:
     cwd = await call(nvim, nvim.funcs.getcwd)
     return cwd
@@ -55,7 +74,7 @@ async def autocmd(
     _filters = " ".join(filters)
     _modifiers = " ".join(modifiers)
     _args = ", ".join(arg_eval)
-    group = f"augroup {uuid4()}"
+    group = f"augroup {uuid4().hex}"
     cls = "autocmd!"
     cmd = f"autocmd {_events} {_filters} {_modifiers} call {fn}({_args})"
     group_end = "augroup END"

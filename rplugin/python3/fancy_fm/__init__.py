@@ -1,4 +1,4 @@
-from asyncio import AbstractEventLoop, Event, create_task, run_coroutine_threadsafe
+from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from operator import add, sub
 from os import linesep
@@ -31,7 +31,7 @@ from .commands import (
     c_select,
     redraw,
 )
-from .nvim import autocmd, getcwd, print
+from .nvim import autocmd, getcwd, print, run_forever
 from .scheduler import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -107,19 +107,12 @@ class Main:
 
             await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
 
-        async def forever() -> None:
-            while True:
-                try:
-                    await self._ooda_loop()
-                except Exception as e:
-                    await print(self.nvim, e, error=True)
-
         if self._initialized:
             return
         else:
             self._initialized = True
             self._submit(setup())
-            create_task(forever())
+            run_forever(self.nvim, self._ooda_loop)
 
     async def _ooda_loop(self) -> None:
         update = self.settings.update
