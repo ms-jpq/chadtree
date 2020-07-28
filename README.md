@@ -16,6 +16,10 @@ Fast and Unique features not found in other FMs
 
 - Literally every FS call is async.
 
+### Integrated quickfix support
+
+- Asynchronous refresh of quickfix status
+
 ### Integrated git support
 
 - Asynchronous parse git status (untracked, modified, staged)
