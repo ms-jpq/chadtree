@@ -7,7 +7,7 @@ from typing import Any, Awaitable, Callable, Optional, Sequence
 
 from pynvim import Nvim, command, function, plugin
 
-from .commands import (
+from .transitions import (
     a_changedir,
     a_follow,
     a_session,
