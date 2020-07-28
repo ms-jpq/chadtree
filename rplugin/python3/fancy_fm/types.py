@@ -65,6 +65,11 @@ class Settings:
 
 
 @dataclass(frozen=True)
+class QuickFix:
+    locations: Dict[str, int]
+
+
+@dataclass(frozen=True)
 class VCStatus:
     ignored: Set[str] = field(default_factory=set)
     status: Dict[str, str] = field(default_factory=dict)
@@ -78,7 +83,8 @@ class State:
     follow: bool
     width: int
     root: Node
-    lookup: Sequence[Node]
-    rendered: Sequence[str]
+    qf: QuickFix
     vc: VCStatus
     current: Optional[str]
+    lookup: Sequence[Node]
+    rendered: Sequence[str]

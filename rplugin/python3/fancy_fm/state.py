@@ -1,13 +1,29 @@
+from asyncio import gather
 from hashlib import sha1
 from os.path import exists, join
 from typing import Optional, Sequence
+
+from pynvim import Nvim
 
 from .cartographer import new, update
 from .consts import session_dir
 from .da import dump_json, load_json, or_else
 from .git import status
+from .nvim import getcwd
+from .quickfix import quickfix
 from .render import render
-from .types import Index, Mode, Node, Selection, Session, Set, Settings, State, VCStatus
+from .types import (
+    Index,
+    Mode,
+    Node,
+    QuickFix,
+    Selection,
+    Session,
+    Set,
+    Settings,
+    State,
+    VCStatus,
+)
 
 
 def session_path(cwd: str) -> str:
@@ -37,10 +53,11 @@ def dump_session(state: State) -> None:
     dump_json(load_path, json)
 
 
-async def initial(settings: Settings, cwd: str) -> State:
+async def initial(nvim: Nvim, settings: Settings) -> State:
+    cwd = await getcwd(nvim)
     index = load_session(cwd) if settings.session else {cwd}
     selection: Selection = set()
-    node = await new(cwd, index=index)
+    node, qf = await gather(new(cwd, index=index), quickfix(nvim))
     vc = VCStatus() if settings.version_ctl.defer else await status()
     current = None
     lookup, rendered = render(
@@ -60,10 +77,11 @@ async def initial(settings: Settings, cwd: str) -> State:
         follow=settings.follow,
         width=settings.width,
         root=node,
-        lookup=lookup,
-        rendered=rendered,
+        qf=qf,
         vc=vc,
         current=current,
+        lookup=lookup,
+        rendered=rendered,
     )
     return state
 
@@ -78,11 +96,12 @@ async def forward(
     show_hidden: Optional[bool] = None,
     follow: Optional[bool] = None,
     width: Optional[int] = None,
+    qf: Optional[QuickFix] = None,
+    vc: Optional[VCStatus] = None,
+    current: Optional[str] = None,
+    paths: Optional[Set[str]] = None,
     lookup: Optional[Sequence[Node]] = None,
     rendered: Optional[Sequence[str]] = None,
-    vc: Optional[VCStatus] = None,
-    paths: Optional[Set[str]] = None,
-    current: Optional[str] = None,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
@@ -109,10 +128,11 @@ async def forward(
         follow=or_else(follow, state.follow),
         width=or_else(width, state.width),
         root=new_root,
-        lookup=lookup,
-        rendered=rendered,
+        qf=or_else(qf, state.qf),
         vc=new_vc,
         current=new_current,
+        lookup=lookup,
+        rendered=rendered,
     )
 
     return new_state

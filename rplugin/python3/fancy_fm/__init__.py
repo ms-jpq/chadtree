@@ -31,7 +31,7 @@ from .commands import (
     c_select,
     redraw,
 )
-from .nvim import autocmd, getcwd, print, run_forever
+from .nvim import autocmd, run_forever
 from .scheduler import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -70,8 +70,7 @@ class Main:
 
     async def _curr_state(self) -> State:
         if not self.state:
-            cwd = await getcwd(self.nvim)
-            self.state = await initial_state(self.settings, cwd=cwd)
+            self.state = await initial_state(self.nvim, settings=self.settings)
 
         return self.state
 
