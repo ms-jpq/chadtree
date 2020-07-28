@@ -107,7 +107,7 @@ class Main:
 
             await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
 
-            await autocmd(self.nvim, events=("QuickFixCmdPost",), fn="_FMquickfix")
+            await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_FMquickfix")
 
         if self._initialized:
             return
