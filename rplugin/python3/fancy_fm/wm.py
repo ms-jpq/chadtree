@@ -1,4 +1,3 @@
-from itertools import chain
 from typing import Any, Dict, Iterable, Iterator, Optional, Sequence, Tuple, cast
 
 from pynvim import Nvim

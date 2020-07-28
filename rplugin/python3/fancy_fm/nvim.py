@@ -27,7 +27,6 @@ def call(nvim: Nvim, fn: Callable[[], T]) -> Awaitable[T]:
 
 def atomic(nvim: Nvim, *instructions: Tuple[str, Sequence[str]]) -> Tuple[Any, Any]:
     inst = tuple((f"nvim_{instruction}", args) for instruction, args in instructions)
-    nvim.api.out_write(str(inst) + "\n")
     out, err = nvim.api.call_atomic(inst)
     return out, err
 
