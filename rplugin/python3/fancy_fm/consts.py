@@ -16,6 +16,7 @@ icons_json = join(__config__, "icons.json")
 ignore_json = join(__config__, "ignore.json")
 
 fm_filetype = "fancy_fm"
+fm_namespace = "fancy_fm_ns"
 
 folder_mode = 0o755
 file_mode = 0o644

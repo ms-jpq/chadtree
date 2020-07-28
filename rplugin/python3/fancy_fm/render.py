@@ -47,8 +47,8 @@ def paint(
 
     def show_ascii(node: Node, depth: int) -> Render:
         path = node.path
-        qf_badge = qf.locations[path]
-        badge = f"({qf_badge})" if qf_badge else ""
+        qf_count = qf.locations[path]
+        qf_badge = f"({qf_count})" if qf_count else ""
         stat = vc.status.get(path)
 
         spaces = (depth * 2 - 1) * " "
@@ -63,12 +63,15 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"  {name} ->"
 
-        return f"{spaces}{select}{curr} {name} {badge} {status}"
+        line = f"{spaces}{select}{curr} {name}"
+        badge = f"{qf_badge} {status}"
+        render = Render(line=line, badge=badge, highlights=())
+        return render
 
     def show_icons(node: Node, depth: int) -> Render:
         path = node.path
-        qf_badge = qf.locations[path]
-        badge = f"({qf_badge})" if qf_badge else ""
+        qf_count = qf.locations[path]
+        qf_badge = f"({qf_count})" if qf_count else ""
         stat = vc.status.get(path)
 
         spaces = (depth * 2 - 1) * " "
@@ -93,7 +96,10 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"{name} {icons.link}"
 
-        return f"{spaces}{select}{curr} {name} {badge} {status}"
+        line = f"{spaces}{select}{curr} {name}"
+        badge = f"{qf_badge} {status}"
+        render = Render(line=line, badge=badge, highlights=())
+        return render
 
     show = show_icons if settings.use_icons else show_ascii
     return show
@@ -115,7 +121,7 @@ def render(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
 
-    def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
+    def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, Render]]:
         rend = show(node, depth)
         children = (
             child for child in (node.children or {}).values() if not drop(child)

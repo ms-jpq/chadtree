@@ -1,13 +1,11 @@
-from os import linesep
 from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
-from pynvim.api.common import NvimError
 from pynvim.api.tabpage import Tabpage
 from pynvim.api.window import Window
 
-from .consts import fm_filetype
+from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
 from .types import Render, Settings, State
 
@@ -161,12 +159,34 @@ def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
             nvim.command(f"bwipeout! {buffer.number}")
 
 
+def buf_setlines(nvim: Nvim, buffer: Buffer, lines: Sequence[str]) -> None:
+    modifiable = nvim.api.buf_get_option(buffer, "modifiable")
+    nvim.api.buf_set_option(buffer, "modifiable", True)
+    nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
+    nvim.api.buf_set_option(buffer, "modifiable", modifiable)
+
+
+def buf_set_virtualtext(
+    nvim: Nvim, buffer: Buffer, ns: int, vtext: Sequence[str], group: str
+) -> None:
+    for idx, text in enumerate(vtext):
+        nvim.api.buf_set_virtual_text(buffer, ns, idx, ((text, group),), {})
+
+
+def buf_set_highlights(nvim: Nvim, buffer: Buffer, ns: int) -> None:
+    pass
+
+
 def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
+    lines, badges, highlights = tuple(
+        zip(*((render.line, render.badge, render.highlights) for render in rendering))
+    )
+    ns = nvim.api.create_namespace(fm_namespace)
+
     for buffer in find_fm_buffers(nvim):
-        modifiable = nvim.api.buf_get_option(buffer, "modifiable")
-        nvim.api.buf_set_option(buffer, "modifiable", True)
-        try:
-            nvim.api.buf_set_lines(buffer, 0, -1, True, rendering)
-        except NvimError as e:
-            nvim.api.err_write(f"{e}{linesep}")
-        nvim.api.buf_set_option(buffer, "modifiable", modifiable)
+        nvim.api.buf_clear_namespace(buffer, ns, 0, -1)
+        buf_setlines(nvim, buffer=buffer, lines=lines)
+        buf_set_virtualtext(
+            nvim, buffer=buffer, ns=ns, vtext=badges, group="LspDiagnosticHint"
+        )
+        buf_set_highlights(nvim, buffer=buffer, ns=ns)
