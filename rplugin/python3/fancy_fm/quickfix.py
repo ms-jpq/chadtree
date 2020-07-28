@@ -1,11 +1,13 @@
+from asyncio import gather
 from collections import Counter, defaultdict
 from itertools import chain
+from os.path import join
 from typing import Iterator, Sequence
 
 from pynvim import Nvim
 
 from .fs import ancestors
-from .nvim import call
+from .nvim import call, getcwd
 from .types import QuickFix
 
 
@@ -21,9 +23,10 @@ async def quickfix(nvim: Nvim) -> QuickFix:
 
         return tuple(c())
 
-    filenames = await call(nvim, cont)
-    parents = (ancestor for filename in filenames for ancestor in ancestors(filename))
-    count = Counter(chain(filenames, parents))
+    cwd, filenames = await gather(getcwd(nvim), call(nvim, cont))
+    full_names = tuple(join(cwd, filename) for filename in filenames)
+    parents = (ancestor for fullname in full_names for ancestor in ancestors(fullname))
+    count = Counter(chain(full_names, parents))
     locations = defaultdict(int, count)
     qf = QuickFix(locations=locations)
     return qf
