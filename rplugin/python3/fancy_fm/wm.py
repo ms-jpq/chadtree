@@ -160,10 +160,9 @@ def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
 
 
 def buf_setlines(nvim: Nvim, buffer: Buffer, lines: Sequence[str]) -> None:
-    modifiable = nvim.api.buf_get_option(buffer, "modifiable")
     nvim.api.buf_set_option(buffer, "modifiable", True)
     nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
-    nvim.api.buf_set_option(buffer, "modifiable", modifiable)
+    nvim.api.buf_set_option(buffer, "modifiable", False)
 
 
 def buf_set_virtualtext(
@@ -191,6 +190,6 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
             buffer=buffer,
             ns=ns,
             vtext=cast(Sequence[str], badges),
-            group="LspDiagnosticHint",
+            group="Comment",
         )
         buf_set_highlights(nvim, buffer=buffer, ns=ns)
