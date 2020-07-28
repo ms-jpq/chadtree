@@ -96,7 +96,10 @@ class Main:
             )
 
             await autocmd(
-                self.nvim, events=("BufEnter",), fn="_FMfollow",
+                self.nvim,
+                events=("BufEnter",),
+                fn="_FMfollow",
+                arg_eval=("expand('<abuf>')",),
             )
 
             await autocmd(
@@ -156,8 +159,9 @@ class Main:
         """
         Follow buffer
         """
+        bufnr, *_ = args
 
-        self._run(a_follow)
+        self._run(a_follow, bufnr=int(bufnr))
 
     @function("_FMsession")
     def on_leave(self, args: Sequence[Any]) -> None:

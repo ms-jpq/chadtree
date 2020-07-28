@@ -98,7 +98,9 @@ def _display_path(path: str, state: State) -> str:
     return name
 
 
-async def _current(nvim: Nvim, state: State, settings: Settings, current: str) -> State:
+async def _current(
+    nvim: Nvim, state: State, settings: Settings, current: str
+) -> Optional[State]:
     if is_parent(parent=state.root.path, child=current):
         paths: Set[str] = {*ancestors(current)} if state.follow else set()
         index = state.index | paths
@@ -107,7 +109,7 @@ async def _current(nvim: Nvim, state: State, settings: Settings, current: str) -
         )
         return new_state
     else:
-        return state
+        return None
 
 
 async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
@@ -118,12 +120,18 @@ async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
     return new_state
 
 
-async def a_follow(nvim: Nvim, state: State, settings: Settings) -> State:
+async def a_follow(
+    nvim: Nvim, state: State, settings: Settings, bufnr: int
+) -> Optional[State]:
     def cont() -> str:
-        return find_current_buffer_name(nvim)
+        return nvim.funcs.bufname(bufnr)
 
-    current = await call(nvim, cont)
-    return await _current(nvim, state=state, settings=settings, current=current)
+    cwd, bufname = await gather(getcwd(nvim), call(nvim, cont))
+    if bufname:
+        current = join(cwd, bufname)
+        return await _current(nvim, state=state, settings=settings, current=current)
+    else:
+        return None
 
 
 async def a_session(nvim: Nvim, state: State, settings: Settings) -> None:
@@ -143,7 +151,7 @@ async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     await call(nvim, cont)
 
 
-async def c_open(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_open(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     def cont() -> str:
         name = find_current_buffer_name(nvim)
         toggle_fm_window(nvim, state=state, settings=settings)
@@ -170,7 +178,7 @@ async def c_resize(
 
 async def _toggle(
     nvim: Nvim, state: State, settings: Settings, hold_window: bool
-) -> State:
+) -> Optional[State]:
     node = await _index(nvim, state=state)
     if node:
         if Mode.FOLDER in node.mode:
@@ -194,18 +202,18 @@ async def _toggle(
 
             return new_state
     else:
-        return state
+        return None
 
 
-async def c_primary(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     return await _toggle(nvim, state=state, settings=settings, hold_window=False)
 
 
-async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     return await _toggle(nvim, state=state, settings=settings, hold_window=True)
 
 
-async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     node = await _index(nvim, state=state)
     if node and Mode.FOLDER in node.mode:
         paths = {
@@ -217,7 +225,7 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> State:
         new_state = await forward(state, settings=settings, index=index, paths=paths)
         return new_state
     else:
-        return state
+        return None
 
 
 async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
@@ -283,7 +291,7 @@ async def c_copy_name(
     await print(nvim, f"📎 {clap}")
 
 
-async def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     node = await _index(nvim, state=state) or state.root
     parent = node.path if is_dir(node) else dirname(node.path)
 
@@ -313,10 +321,10 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> State:
                 )
                 return new_state
     else:
-        return state
+        return None
 
 
-async def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     node = await _index(nvim, state=state)
     if node:
         prev_name = node.path
@@ -354,9 +362,9 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> State:
                     await call(nvim, cont)
                     return new_state
         else:
-            return state
+            return None
     else:
-        return state
+        return None
 
 
 async def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
@@ -366,7 +374,7 @@ async def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
 
 async def c_select(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> State:
+) -> Optional[State]:
     nodes = iter(await _indices(nvim, state=state, is_visual=is_visual))
     if is_visual:
         selection = state.selection ^ {n.path for n in nodes}
@@ -379,12 +387,12 @@ async def c_select(
             new_state = await forward(state, settings=settings, selection=selection)
             return new_state
         else:
-            return state
+            return None
 
 
 async def c_delete(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> State:
+) -> Optional[State]:
     selection = state.selection or {
         node.path for node in await _indices(nvim, state=state, is_visual=is_visual)
     }
@@ -419,9 +427,9 @@ async def c_delete(
                 await call(nvim, cont)
                 return new_state
         else:
-            return state
+            return None
     else:
-        return state
+        return None
 
 
 def _find_dest(src: str, node: Node) -> str:
@@ -438,7 +446,7 @@ async def _operation(
     settings: Settings,
     op_name: str,
     action: Callable[[Dict[str, str]], Awaitable[None]],
-) -> State:
+) -> Optional[State]:
     node = await _index(nvim, state=state)
     selection = state.selection
     unified = tuple(unify_ancestors(selection))
@@ -453,7 +461,7 @@ async def _operation(
             await print(
                 nvim, f"⚠️  -- {op_name}: path(s) already exist! :: {msg}", error=True
             )
-            return state
+            return None
         else:
 
             msg = linesep.join(
@@ -494,29 +502,28 @@ async def _operation(
                     await call(nvim, cont)
                     return new_state
             else:
-                return state
+                return None
     else:
         await print(nvim, "⚠️  -- {name}: nothing selected!", error=True)
-        return state
+        return None
 
 
-async def c_cut(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_cut(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     return await _operation(
         nvim, state=state, settings=settings, op_name="Cut", action=cut
     )
 
 
-async def c_copy(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_copy(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     return await _operation(
         nvim, state=state, settings=settings, op_name="Copy", action=copy
     )
 
 
-async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> None:
     node = await _index(nvim, state=state)
     if node:
         try:
             await open_gui(node.path)
         except OpenError as e:
             await print(nvim, e)
-    return state
