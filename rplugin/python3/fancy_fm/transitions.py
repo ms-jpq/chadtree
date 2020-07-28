@@ -83,9 +83,9 @@ async def redraw(nvim: Nvim, state: State) -> None:
         buffer: Buffer = nvim.api.win_get_buf(window)
         if is_fm_buffer(nvim, buffer=buffer):
             with HoldPosition(nvim):
-                update_buffers(nvim, lines=state.rendered)
+                update_buffers(nvim, rendering=state.rendered)
         else:
-            update_buffers(nvim, lines=state.rendered)
+            update_buffers(nvim, rendering=state.rendered)
 
     await call(nvim, cont)
 

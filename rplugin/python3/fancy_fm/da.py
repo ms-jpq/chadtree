@@ -35,7 +35,7 @@ def or_else(thing: Optional[T], default: T) -> T:
     return default if thing is None else thing
 
 
-def constantly(val: T) -> Callable[[Any], T]:
+def constantly(val: T) -> Callable[..., T]:
     def ret(*args: Any, **kwargs: Any) -> T:
         return val
 

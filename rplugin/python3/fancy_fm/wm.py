@@ -9,7 +9,7 @@ from pynvim.api.window import Window
 
 from .consts import fm_filetype
 from .fs import is_parent
-from .types import Settings, State
+from .types import Render, Settings, State
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
@@ -153,20 +153,20 @@ def show_file(nvim: Nvim, *, state: State, settings: Settings) -> None:
         nvim.api.command("filetype detect")
 
 
-def update_buffers(nvim: Nvim, lines: Sequence[str]) -> None:
-    for buffer in find_fm_buffers(nvim):
-        modifiable = nvim.api.buf_get_option(buffer, "modifiable")
-        nvim.api.buf_set_option(buffer, "modifiable", True)
-        try:
-            nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
-        except NvimError as e:
-            nvim.api.err_write(f"{e}{linesep}")
-        nvim.api.buf_set_option(buffer, "modifiable", modifiable)
-
-
 def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
         name = nvim.api.buf_get_name(buffer)
         if any(name == path or is_parent(parent=path, child=name) for path in paths):
             nvim.command(f"bwipeout! {buffer.number}")
+
+
+def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
+    for buffer in find_fm_buffers(nvim):
+        modifiable = nvim.api.buf_get_option(buffer, "modifiable")
+        nvim.api.buf_set_option(buffer, "modifiable", True)
+        try:
+            nvim.api.buf_set_lines(buffer, 0, -1, True, rendering)
+        except NvimError as e:
+            nvim.api.err_write(f"{e}{linesep}")
+        nvim.api.buf_set_option(buffer, "modifiable", modifiable)

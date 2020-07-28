@@ -101,8 +101,6 @@ async def forward(
     vc: Optional[VCStatus] = None,
     current: Optional[str] = None,
     paths: Optional[Set[str]] = None,
-    lookup: Optional[Sequence[Node]] = None,
-    rendered: Optional[Sequence[str]] = None,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)

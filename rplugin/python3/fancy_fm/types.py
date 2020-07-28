@@ -76,6 +76,20 @@ class VCStatus:
 
 
 @dataclass(frozen=True)
+class Highlight:
+    begin: int
+    end: int
+    group: str
+
+
+@dataclass(frozen=True)
+class Render:
+    line: str
+    badge: str
+    highlights: Sequence[Highlight]
+
+
+@dataclass(frozen=True)
 class State:
     index: Index
     selection: Selection
@@ -87,4 +101,4 @@ class State:
     vc: VCStatus
     current: Optional[str]
     lookup: Sequence[Node]
-    rendered: Sequence[str]
+    rendered: Sequence[Render]

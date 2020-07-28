@@ -6,7 +6,7 @@ from os.path import sep
 from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from .da import constantly
-from .types import Index, Mode, Node, QuickFix, Selection, Settings, VCStatus
+from .types import Index, Mode, Node, QuickFix, Render, Selection, Settings, VCStatus
 
 
 class CompVals(IntEnum):
@@ -42,10 +42,10 @@ def paint(
     qf: QuickFix,
     vc: VCStatus,
     current: Optional[str],
-) -> Callable[[Node, int], str]:
+) -> Callable[[Node, int], Render]:
     icons = settings.icons
 
-    def show_ascii(node: Node, depth: int) -> str:
+    def show_ascii(node: Node, depth: int) -> Render:
         path = node.path
         qf_badge = qf.locations[path]
         badge = f"({qf_badge})" if qf_badge else ""
@@ -65,7 +65,7 @@ def paint(
 
         return f"{spaces}{select}{curr} {name} {badge} {status}"
 
-    def show_icons(node: Node, depth: int) -> str:
+    def show_icons(node: Node, depth: int) -> Render:
         path = node.path
         qf_badge = qf.locations[path]
         badge = f"({qf_badge})" if qf_badge else ""
@@ -109,7 +109,7 @@ def render(
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[str],
-) -> Tuple[Sequence[Node], Sequence[str]]:
+) -> Tuple[Sequence[Node], Sequence[Render]]:
     drop = constantly(False) if show_hidden else ignore(settings, vc)
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
@@ -125,4 +125,4 @@ def render(
             yield from render(child, depth=depth + 1)
 
     lookup, rendered = zip(*render(node, depth=0))
-    return cast(Sequence[Node], lookup), cast(Sequence[str], rendered)
+    return cast(Sequence[Node], lookup), cast(Sequence[Render], rendered)
