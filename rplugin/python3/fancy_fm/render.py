@@ -6,7 +6,17 @@ from os.path import sep
 from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from .da import constantly
-from .types import Index, Mode, Node, QuickFix, Render, Selection, Settings, VCStatus
+from .types import (
+    Badge,
+    Index,
+    Mode,
+    Node,
+    QuickFix,
+    Render,
+    Selection,
+    Settings,
+    VCStatus,
+)
 
 
 class CompVals(IntEnum):
@@ -45,16 +55,20 @@ def paint(
 ) -> Callable[[Node, int], Render]:
     icons = settings.icons
 
+    def parse_badges(path: str) -> Iterator[Badge]:
+        qf_count = qf.locations[path]
+        stat = vc.status.get(path)
+        if qf_count:
+            yield Badge(text=f"({qf_count})", group="Label")
+        if stat:
+            yield Badge(text=f"[{stat}]", group="Comment")
+
     def show_ascii(node: Node, depth: int) -> Render:
         path = node.path
-        qf_count = qf.locations[path]
-        qf_badge = f"({qf_count})" if qf_count else ""
-        stat = vc.status.get(path)
 
         spaces = (depth * 2 - 1) * " "
         curr = ">" if path == current else " "
         select = "*" if path in selection else " "
-        status = f"[{stat}]" if stat else ""
         name = node.name.replace(linesep, r"\n")
 
         if Mode.FOLDER in node.mode:
@@ -64,20 +78,16 @@ def paint(
             name = f"  {name} ->"
 
         line = f"{spaces}{select}{curr} {name}"
-        badge = f"{qf_badge} {status}"
-        render = Render(line=line, badge=badge, highlights=())
+        badges = tuple(parse_badges(path))
+        render = Render(line=line, badges=badges, highlights=())
         return render
 
     def show_icons(node: Node, depth: int) -> Render:
         path = node.path
-        qf_count = qf.locations[path]
-        qf_badge = f"({qf_count})" if qf_count else ""
-        stat = vc.status.get(path)
 
         spaces = (depth * 2 - 1) * " "
         curr = "▶" if path == current else " "
         select = "✸" if path in selection else " "
-        status = f"[{stat}]" if stat else ""
         name = node.name.replace(linesep, r"\n")
 
         if Mode.FOLDER in node.mode:
@@ -97,8 +107,8 @@ def paint(
             name = f"{name} {icons.link}"
 
         line = f"{spaces}{select}{curr} {name}"
-        badge = f"{qf_badge} {status}"
-        render = Render(line=line, badge=badge, highlights=())
+        badges = tuple(parse_badges(path))
+        render = Render(line=line, badges=badges, highlights=())
         return render
 
     show = show_icons if settings.use_icons else show_ascii

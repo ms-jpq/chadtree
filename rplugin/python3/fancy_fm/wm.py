@@ -8,7 +8,7 @@ from pynvim.api.window import Window
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
 from .nvim import atomic
-from .types import Render, Settings, State
+from .types import Badge, Render, Settings, State
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
@@ -169,10 +169,17 @@ def buf_setlines(
 
 
 def buf_set_virtualtext(
-    nvim: Nvim, buffer: Buffer, ns: int, vtext: Sequence[str], group: str
+    nvim: Nvim, buffer: Buffer, ns: int, vtext: Sequence[Sequence[Badge]]
 ) -> Iterator[Tuple[str, Sequence[Any]]]:
-    for idx, text in enumerate(vtext):
-        yield "buf_set_virtual_text", (buffer, ns, idx, ((text, group),), {})
+    for idx, badges in enumerate(vtext):
+        vtxt = tuple((badge.text, badge.group) for badge in badges)
+        yield "buf_set_virtual_text", (
+            buffer,
+            ns,
+            idx,
+            vtxt,
+            {},
+        )
 
 
 def buf_set_highlights(
@@ -183,7 +190,7 @@ def buf_set_highlights(
 
 def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
     lines, badges, highlights = tuple(
-        zip(*((render.line, render.badge, render.highlights) for render in rendering))
+        zip(*((render.line, render.badges, render.highlights) for render in rendering))
     )
     ns = nvim.api.create_namespace(fm_namespace)
 
@@ -191,11 +198,7 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
         it1 = (("buf_clear_namespace", (buffer, ns, 0, -1)),)
         it2 = buf_setlines(nvim, buffer=buffer, lines=cast(Sequence[str], lines))
         it3 = buf_set_virtualtext(
-            nvim,
-            buffer=buffer,
-            ns=ns,
-            vtext=cast(Sequence[str], badges),
-            group="Comment",
+            nvim, buffer=buffer, ns=ns, vtext=cast(Sequence[Badge], badges),
         )
         # it4 = buf_set_highlights(nvim, buffer=buffer, ns=ns)
         atomic(nvim, *it1, *it2, *it3)

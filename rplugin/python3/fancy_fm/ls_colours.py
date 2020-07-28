@@ -3,7 +3,12 @@ from os import environ
 
 def parse_ls_colours() -> None:
     colours = environ.get("LS_COLORS", "")
-    lookup = dict(segment.split("=") for segment in colours.strip(":").split(":"))
+    lookup = {
+        k: v
+        for k, _, v in (
+            segment.partition("=") for segment in colours.strip(":").split(":")
+        )
+    }
 
     normal = lookup.pop("no", None)
     file = lookup.pop("fi", None)

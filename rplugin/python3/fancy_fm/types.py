@@ -83,9 +83,15 @@ class Highlight:
 
 
 @dataclass(frozen=True)
+class Badge:
+    text: str
+    group: str
+
+
+@dataclass(frozen=True)
 class Render:
     line: str
-    badge: str
+    badges: Sequence[Badge]
     highlights: Sequence[Highlight]
 
 
