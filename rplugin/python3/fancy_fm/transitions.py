@@ -159,7 +159,11 @@ async def c_open(nvim: Nvim, state: State, settings: Settings) -> Optional[State
 
     current = await call(nvim, cont)
 
-    return await _current(nvim, state=state, settings=settings, current=current)
+    new_state = await _current(nvim, state=state, settings=settings, current=current)
+    if new_state:
+        return new_state
+    else:
+        return state
 
 
 async def c_resize(
