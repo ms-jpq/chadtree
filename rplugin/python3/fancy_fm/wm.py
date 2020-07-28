@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple
+from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple, cast
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -185,8 +185,12 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
 
     for buffer in find_fm_buffers(nvim):
         nvim.api.buf_clear_namespace(buffer, ns, 0, -1)
-        buf_setlines(nvim, buffer=buffer, lines=lines)
+        buf_setlines(nvim, buffer=buffer, lines=cast(Sequence[str], lines))
         buf_set_virtualtext(
-            nvim, buffer=buffer, ns=ns, vtext=badges, group="LspDiagnosticHint"
+            nvim,
+            buffer=buffer,
+            ns=ns,
+            vtext=cast(Sequence[str], badges),
+            group="LspDiagnosticHint",
         )
         buf_set_highlights(nvim, buffer=buffer, ns=ns)
