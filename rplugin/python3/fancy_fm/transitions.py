@@ -120,15 +120,13 @@ async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
     return new_state
 
 
-async def a_follow(
-    nvim: Nvim, state: State, settings: Settings, bufnr: int
-) -> Optional[State]:
+async def a_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     def cont() -> str:
-        return nvim.funcs.bufname(bufnr)
+        name = find_current_buffer_name(nvim)
+        return name
 
-    cwd, bufname = await gather(getcwd(nvim), call(nvim, cont))
-    if bufname:
-        current = join(cwd, bufname)
+    current = await call(nvim, cont)
+    if current:
         return await _current(nvim, state=state, settings=settings, current=current)
     else:
         return None
