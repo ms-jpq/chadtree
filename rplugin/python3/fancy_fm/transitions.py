@@ -151,7 +151,7 @@ async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     await call(nvim, cont)
 
 
-async def c_open(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
+async def c_open(nvim: Nvim, state: State, settings: Settings) -> State:
     def cont() -> str:
         name = find_current_buffer_name(nvim)
         toggle_fm_window(nvim, state=state, settings=settings)
@@ -180,7 +180,7 @@ async def c_resize(
     return new_state
 
 
-async def _toggle(
+async def _click(
     nvim: Nvim, state: State, settings: Settings, hold_window: bool
 ) -> Optional[State]:
     node = await _index(nvim, state=state)
@@ -210,11 +210,11 @@ async def _toggle(
 
 
 async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
-    return await _toggle(nvim, state=state, settings=settings, hold_window=False)
+    return await _click(nvim, state=state, settings=settings, hold_window=False)
 
 
 async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
-    return await _toggle(nvim, state=state, settings=settings, hold_window=True)
+    return await _click(nvim, state=state, settings=settings, hold_window=True)
 
 
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
