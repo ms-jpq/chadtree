@@ -1,7 +1,7 @@
 from asyncio import Future, Task, create_task, sleep
 from os import linesep
 from traceback import format_exc
-from typing import Any, Awaitable, Callable, Iterable, TypeVar
+from typing import Any, Awaitable, Callable, Iterable, Sequence, Tuple, TypeVar
 from uuid import uuid4
 
 from pynvim import Nvim
@@ -23,6 +23,13 @@ def call(nvim: Nvim, fn: Callable[[], T]) -> Awaitable[T]:
 
     nvim.async_call(cont)
     return fut
+
+
+def atomic(nvim: Nvim, *instructions: Tuple[str, Sequence[str]]) -> Tuple[Any, Any]:
+    inst = tuple((f"nvim_{instruction}", args) for instruction, args in instructions)
+    nvim.api.out_write(str(inst) + "\n")
+    out, err = nvim.api.call_atomic(inst)
+    return out, err
 
 
 async def print(

@@ -1,4 +1,5 @@
-from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple, cast
+from itertools import chain
+from typing import Any, Dict, Iterable, Iterator, Optional, Sequence, Tuple, cast
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -7,6 +8,7 @@ from pynvim.api.window import Window
 
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
+from .nvim import atomic
 from .types import Render, Settings, State
 
 
@@ -159,20 +161,24 @@ def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
             nvim.command(f"bwipeout! {buffer.number}")
 
 
-def buf_setlines(nvim: Nvim, buffer: Buffer, lines: Sequence[str]) -> None:
-    nvim.api.buf_set_option(buffer, "modifiable", True)
-    nvim.api.buf_set_lines(buffer, 0, -1, True, lines)
-    nvim.api.buf_set_option(buffer, "modifiable", False)
+def buf_setlines(
+    nvim: Nvim, buffer: Buffer, lines: Sequence[str]
+) -> Iterator[Tuple[str, Sequence[Any]]]:
+    yield "buf_set_option", (buffer, "modifiable", True)
+    yield "buf_set_lines", (buffer, 0, -1, True, lines)
+    yield "buf_set_option", (buffer, "modifiable", False)
 
 
 def buf_set_virtualtext(
     nvim: Nvim, buffer: Buffer, ns: int, vtext: Sequence[str], group: str
-) -> None:
+) -> Iterator[Tuple[str, Sequence[Any]]]:
     for idx, text in enumerate(vtext):
-        nvim.api.buf_set_virtual_text(buffer, ns, idx, ((text, group),), {})
+        yield "buf_set_virtual_text", (buffer, ns, idx, ((text, group),), {})
 
 
-def buf_set_highlights(nvim: Nvim, buffer: Buffer, ns: int) -> None:
+def buf_set_highlights(
+    nvim: Nvim, buffer: Buffer, ns: int
+) -> Iterator[Tuple[str, Sequence[Any]]]:
     pass
 
 
@@ -183,13 +189,14 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
     ns = nvim.api.create_namespace(fm_namespace)
 
     for buffer in find_fm_buffers(nvim):
-        nvim.api.buf_clear_namespace(buffer, ns, 0, -1)
-        buf_setlines(nvim, buffer=buffer, lines=cast(Sequence[str], lines))
-        buf_set_virtualtext(
+        it1 = (("buf_clear_namespace", (buffer, ns, 0, -1)),)
+        it2 = buf_setlines(nvim, buffer=buffer, lines=cast(Sequence[str], lines))
+        it3 = buf_set_virtualtext(
             nvim,
             buffer=buffer,
             ns=ns,
             vtext=cast(Sequence[str], badges),
             group="Comment",
         )
-        buf_set_highlights(nvim, buffer=buffer, ns=ns)
+        # it4 = buf_set_highlights(nvim, buffer=buffer, ns=ns)
+        atomic(nvim, *it1, *it2, *it3)
