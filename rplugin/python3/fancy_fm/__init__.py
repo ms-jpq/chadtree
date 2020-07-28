@@ -7,9 +7,14 @@ from typing import Any, Awaitable, Callable, Optional, Sequence
 
 from pynvim import Nvim, command, function, plugin
 
+from .nvim import autocmd, run_forever
+from .scheduler import schedule
+from .settings import initial as initial_settings
+from .state import initial as initial_state
 from .transitions import (
     a_changedir,
     a_follow,
+    a_quickfix,
     a_session,
     c_clear,
     c_collapse,
@@ -31,10 +36,6 @@ from .transitions import (
     c_select,
     redraw,
 )
-from .nvim import autocmd, run_forever
-from .scheduler import schedule
-from .settings import initial as initial_settings
-from .state import initial as initial_state
 from .types import State
 
 
@@ -106,6 +107,8 @@ class Main:
 
             await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
 
+            await autocmd(self.nvim, events=("QuickFixCmdPost",), fn="_FMquickfix")
+
         if self._initialized:
             return
         else:
@@ -163,6 +166,14 @@ class Main:
         """
 
         self._run(a_session)
+
+    @function("_FMquickfix")
+    def on_quickfix(self, args: Sequence[Any]) -> None:
+        """
+        Update quickfix list
+        """
+
+        self._run(a_quickfix)
 
     @function("FMquit")
     def fm_quit(self, args: Sequence[Any]) -> None:

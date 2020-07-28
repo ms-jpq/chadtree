@@ -6,7 +6,7 @@ from os.path import sep
 from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from .da import constantly
-from .types import Index, Mode, Node, Selection, Settings, VCStatus
+from .types import Index, Mode, Node, QuickFix, Selection, Settings, VCStatus
 
 
 class CompVals(IntEnum):
@@ -39,41 +39,48 @@ def paint(
     settings: Settings,
     index: Index,
     selection: Selection,
+    qf: QuickFix,
     vc: VCStatus,
     current: Optional[str],
 ) -> Callable[[Node, int], str]:
     icons = settings.icons
 
     def show_ascii(node: Node, depth: int) -> str:
-        stat = vc.status.get(node.path)
+        path = node.path
+        qf_badge = qf.locations[path]
+        badge = f"({qf_badge})" if qf_badge else ""
+        stat = vc.status.get(path)
 
         spaces = (depth * 2 - 1) * " "
-        curr = ">" if node.path == current else " "
-        select = "*" if node.path in selection else " "
+        curr = ">" if path == current else " "
+        select = "*" if path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace(linesep, r"\n")
 
         if Mode.FOLDER in node.mode:
-            decor = "-" if node.path in index else "+"
+            decor = "-" if path in index else "+"
             name = f"{decor} {name}{sep}"
         if Mode.LINK in node.mode:
             name = f"  {name} ->"
 
-        return f"{spaces}{select}{curr} {name}  {status}"
+        return f"{spaces}{select}{curr} {name} {badge} {status}"
 
     def show_icons(node: Node, depth: int) -> str:
-        stat = vc.status.get(node.path)
+        path = node.path
+        qf_badge = qf.locations[path]
+        badge = f"({qf_badge})" if qf_badge else ""
+        stat = vc.status.get(path)
 
         spaces = (depth * 2 - 1) * " "
-        curr = "▶" if node.path == current else " "
-        select = "✸" if node.path in selection else " "
+        curr = "▶" if path == current else " "
+        select = "✸" if path in selection else " "
         status = f"[{stat}]" if stat else ""
         name = node.name.replace(linesep, r"\n")
 
         if Mode.FOLDER in node.mode:
             decor: Optional[
                 str
-            ] = icons.folder_open if node.path in index else icons.folder_closed
+            ] = icons.folder_open if path in index else icons.folder_closed
             name = f"{decor} {name}"
         else:
             decor = icons.filetype.get(node.ext or "") or next(
@@ -86,7 +93,7 @@ def paint(
         if Mode.LINK in node.mode:
             name = f"{name} {icons.link}"
 
-        return f"{spaces}{select}{curr} {name}  {status}"
+        return f"{spaces}{select}{curr} {name} {badge} {status}"
 
     show = show_icons if settings.use_icons else show_ascii
     return show
@@ -98,12 +105,15 @@ def render(
     settings: Settings,
     index: Index,
     selection: Selection,
+    qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[str],
 ) -> Tuple[Sequence[Node], Sequence[str]]:
     drop = constantly(False) if show_hidden else ignore(settings, vc)
-    show = paint(settings, index=index, selection=selection, vc=vc, current=current)
+    show = paint(
+        settings, index=index, selection=selection, qf=qf, vc=vc, current=current
+    )
 
     def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, str]]:
         rend = show(node, depth)

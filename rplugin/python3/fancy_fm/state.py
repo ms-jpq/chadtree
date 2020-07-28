@@ -65,6 +65,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         settings=settings,
         index=index,
         selection=selection,
+        qf=qf,
         vc=vc,
         show_hidden=settings.show_hidden,
         current=current,
@@ -109,6 +110,7 @@ async def forward(
     new_root = root or (
         await update(state.root, index=new_index, paths=paths) if paths else state.root
     )
+    new_qf = or_else(qf, state.qf)
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
     lookup, rendered = render(
@@ -116,6 +118,7 @@ async def forward(
         settings=settings,
         index=new_index,
         selection=new_selection,
+        qf=new_qf,
         vc=new_vc,
         show_hidden=new_hidden,
         current=new_current,
@@ -128,7 +131,7 @@ async def forward(
         follow=or_else(follow, state.follow),
         width=or_else(width, state.width),
         root=new_root,
-        qf=or_else(qf, state.qf),
+        qf=new_qf,
         vc=new_vc,
         current=new_current,
         lookup=lookup,

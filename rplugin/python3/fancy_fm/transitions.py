@@ -14,6 +14,7 @@ from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ance
 from .git import status
 from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
 from .opener import OpenError, open_gui
+from .quickfix import quickfix
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
@@ -129,6 +130,12 @@ async def a_session(nvim: Nvim, state: State, settings: Settings) -> None:
     dump_session(state)
 
 
+async def a_quickfix(nvim: Nvim, state: State, settings: Settings) -> State:
+    qf = await quickfix(nvim)
+    new_state = await forward(state, settings=settings, qf=qf)
+    return new_state
+
+
 async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     def cont() -> None:
         kill_fm_windows(nvim, settings=settings)
@@ -232,12 +239,13 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
     current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
     new_index = index if new_current is None else index | current_paths
 
-    vc = await status()
+    qf, vc = await gather(quickfix(nvim), status())
     new_state = await forward(
         state,
         settings=settings,
         index=new_index,
         selection=selection,
+        qf=qf,
         vc=vc,
         paths=paths,
         current=new_current,

@@ -9,7 +9,7 @@ from .types import QuickFix
 
 async def quickfix(nvim: Nvim) -> QuickFix:
     def cont() -> Sequence[str]:
-        ql = nvim.api.getqflist()
+        ql = nvim.funcs.getqflist()
 
         def c() -> Iterator[str]:
             for q in ql:
