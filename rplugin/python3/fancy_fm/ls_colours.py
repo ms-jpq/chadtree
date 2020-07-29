@@ -148,11 +148,13 @@ def parse_codes(
 
 def parse_fuck(codes: str) -> None:
     styles: Set[Style] = set()
+    colours: Dict[Ground, Union[AnsiColour, Colour]] = {}
     for ret in parse_codes(codes):
         if type(ret) is Style:
             styles.add(cast(Style, ret))
         elif type(ret) is tuple:
             ground, colour = cast(Tuple[Ground, Union[AnsiColour, Colour]], ret)
+            colours[ground] = colour
 
 
 def parse_ls_colours() -> None:
