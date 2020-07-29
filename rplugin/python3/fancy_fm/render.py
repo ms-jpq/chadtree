@@ -79,6 +79,7 @@ def paint(
             yield Badge(text=f"[{stat}]", group="Comment")
 
     def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
+        yield gen_spacer(depth)
         yield gen_status(node.path)
         yield " "
         if Mode.folder in node.mode:
@@ -104,13 +105,11 @@ def paint(
             yield sym_link
 
     def show(node: Node, depth: int) -> Render:
-        spaces = gen_spacer(depth)
-
         pre = "".join(gen_decor_pre(node, depth=depth))
         name = "".join(gen_name(node))
         post = "".join(gen_decor_post(node))
 
-        line = f"{spaces}{pre}{name}{post}"
+        line = f"{pre}{name}{post}"
         badges = tuple(gen_badges(node.path))
         render = Render(line=line, badges=badges, highlights=())
         return render
