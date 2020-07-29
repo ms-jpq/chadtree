@@ -21,11 +21,11 @@ class Mode(Enum):
     orphan_link = auto()
     other_writable = auto()
     pipe = auto()
+    set_gid = auto()
+    set_uid = auto()
     socket = auto()
     sticky_dir = auto()
     sticky_writable = auto()
-    set_gid = auto()
-    set_uid = auto()
 
 
 @dataclass(frozen=True)

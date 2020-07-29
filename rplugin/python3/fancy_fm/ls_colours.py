@@ -51,6 +51,13 @@ class Colour:
     b: int
 
 
+@dataclass(frozen=True)
+class Styling:
+    styles: Set[Style]
+    foreground: Union[AnsiColour, Colour, None]
+    background: Union[AnsiColour, Colour, None]
+
+
 SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
     "bd": Mode.block_device,
     "cd": Mode.char_device,
@@ -100,16 +107,11 @@ E_BASIC_TABLE: Dict[int, AnsiColour] = {i: c for i, c in enumerate(AnsiColour)}
 
 E_GREY_TABLE: Dict[int, Colour] = {
     i: Colour(r=s, g=s, b=s)
-    for i, s in enumerate((step / 23 * 255 for step in range(24)), 232)
+    for i, s in enumerate((round(step / 23 * 255) for step in range(24)), 232)
 }
 
 
-def to_hex(colour: Colour) -> str:
-    r, g, b = format(colour.r, "02x"), format(colour.g, "02x"), format(colour.b, "02x")
-    return f"#{r}{g}{b}"
-
-
-def parse_8(codes: Iterator[str]) -> Optional[Colour]:
+def parse_8(codes: Iterator[str]) -> Union[AnsiColour, Colour, None]:
     try:
         ansi_code = int(next(codes, ""))
     except ValueError:
@@ -127,7 +129,7 @@ def parse_8(codes: Iterator[str]) -> Optional[Colour]:
             r = code // 36
             g = code % 36 // 6
             b = code % 36 % 6
-            return Colour(r=r * ratio, g=g * ratio, b=b * ratio)
+            return Colour(r=round(r * ratio), g=round(g * ratio), b=round(b * ratio))
         else:
             return None
 
@@ -144,7 +146,7 @@ def parse_24(codes: Iterator[str]) -> Optional[Colour]:
             return None
 
 
-PARSE_TABLE: Dict[str, Callable[[Iterator[str]], Optional[Colour]]] = {
+PARSE_TABLE: Dict[str, Callable[[Iterator[str]], Union[AnsiColour, Colour, None]]] = {
     "2": parse_8,
     "5": parse_24,
 }
@@ -152,7 +154,7 @@ PARSE_TABLE: Dict[str, Callable[[Iterator[str]], Optional[Colour]]] = {
 
 def parse_codes(
     codes: str,
-) -> Iterator[Union[Style, Tuple[Ground, AnsiColour], Tuple[Ground, Colour]]]:
+) -> Iterator[Union[Style, Tuple[Ground, Union[AnsiColour, Colour]]]]:
     it = (code.lstrip("0") for code in codes.split(";"))
     for code in it:
         style = STYLE_TABLE.get(code)
@@ -172,7 +174,12 @@ def parse_codes(
                     yield ground, colour
 
 
-def parse_fuck(codes: str) -> None:
+def to_hex(colour: Colour) -> str:
+    r, g, b = format(colour.r, "02x"), format(colour.g, "02x"), format(colour.b, "02x")
+    return f"#{r}{g}{b}"
+
+
+def parse_styling(codes: str) -> Styling:
     styles: Set[Style] = set()
     colours: Dict[Ground, Union[AnsiColour, Colour]] = {}
     for ret in parse_codes(codes):
@@ -181,6 +188,13 @@ def parse_fuck(codes: str) -> None:
         elif type(ret) is tuple:
             ground, colour = cast(Tuple[Ground, Union[AnsiColour, Colour]], ret)
             colours[ground] = colour
+
+    styling = Styling(
+        styles=styles,
+        foreground=colours.get(Ground.fore),
+        background=colours.get(Ground.back),
+    )
+    return styling
 
 
 def parse_ls_colours() -> None:
