@@ -1,10 +1,10 @@
-from dataclasses import dataclass, field
 from os import linesep
-from typing import Iterator, Optional, Set
+from typing import Iterator, Set
 
 from pynvim import Nvim
 
 from .nvim import call
+from .types import HLgroup
 
 LEGAL_CTERM: Set[str] = {
     "bold",
@@ -19,20 +19,9 @@ LEGAL_CTERM: Set[str] = {
 LEGAL_CTERM_COLOURS = range(8)
 
 
-@dataclass(frozen=True)
-class HLgroup:
-    name: str
-    cterm: Set[str] = field(default_factory=set)
-    ctermfg: Optional[str] = None
-    ctermbg: Optional[str] = None
-    guifg: Optional[str] = None
-    guibg: Optional[str] = None
-
-
 async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
     def parse() -> Iterator[str]:
         for group in groups:
-            assert group.cterm <= LEGAL_CTERM
             name = group.name
             _cterm = ",".join(group.cterm)
             cterm = f"cterm={_cterm}"

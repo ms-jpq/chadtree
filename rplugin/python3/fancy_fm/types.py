@@ -66,6 +66,24 @@ class VersionControlOptions:
 
 
 @dataclass(frozen=True)
+class HLgroup:
+    name: str
+    cterm: Set[str] = field(default_factory=set)
+    ctermfg: Optional[str] = None
+    ctermbg: Optional[str] = None
+    guifg: Optional[str] = None
+    guibg: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class HLcontext:
+    groups: Sequence[HLgroup]
+    mode_lookup_pre: Dict[Mode, HLgroup]
+    mode_lookup_post: Dict[Optional[Mode], HLgroup]
+    name_lookup: Dict[str, HLgroup]
+
+
+@dataclass(frozen=True)
 class Settings:
     show_hidden: bool
     follow: bool

@@ -5,8 +5,7 @@ from itertools import chain, repeat
 from os import environ
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
 
-from .highlight import HLgroup
-from .types import Mode
+from .types import HLcontext, HLgroup, Mode, Node
 
 
 class Style(IntEnum):
@@ -132,17 +131,15 @@ PARSE_TABLE: Dict[str, Callable[[Iterator[str]], Union[AnsiColour, Colour, None]
 }
 
 
-SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
+SPECIAL_PRE_TABLE: Dict[str, Mode] = {
     "bd": Mode.block_device,
     "cd": Mode.char_device,
     "do": Mode.door,
     "ex": Mode.executable,
-    "fi": Mode.file,
     "ca": Mode.file_w_capacity,
     "di": Mode.folder,
     "ln": Mode.link,
     "mh": Mode.multi_hardlink,
-    "no": None,
     "or": Mode.orphan_link,
     "ow": Mode.other_writable,
     "pi": Mode.pipe,
@@ -151,6 +148,12 @@ SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
     "tw": Mode.sticky_writable,
     "sg": Mode.set_gid,
     "su": Mode.set_uid,
+}
+
+
+SPECIAL_POST_TABLE: Dict[str, Optional[Mode]] = {
+    "fi": Mode.file,
+    "no": None,
 }
 
 
@@ -234,7 +237,7 @@ def parseHLGroup(name: str, styling: Styling) -> HLgroup:
     return group
 
 
-def parse_ls_colours() -> None:
+def parse_ls_colours() -> HLcontext:
     colours = environ.get("LS_COLORS", "")
     hl_lookup: Dict[str, HLgroup] = {
         k: parseHLGroup(k, parse_styling(v))
@@ -242,25 +245,44 @@ def parse_ls_colours() -> None:
             segment.partition("=") for segment in colours.strip(":").split(":")
         )
     }
+    groups = tuple(hl_lookup.values())
 
-    special_lookup: Dict[Optional[Mode], HLgroup] = {
+    mode_lookup_pre: Dict[Mode, HLgroup] = {
         k: v
-        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_TABLE.items())
+        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_PRE_TABLE.items())
+        if v
+    }
+
+    mode_lookup_post: Dict[Optional[Mode], HLgroup] = {
+        k: v
+        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_POST_TABLE.items())
         if v
     }
 
     fn_keys = tuple(key for key in hl_lookup if key.startswith("*"))
-    fn_lookup: Dict[str, HLgroup] = {key: hl_lookup.pop(key) for key in fn_keys}
+    name_lookup: Dict[str, HLgroup] = {key: hl_lookup.pop(key) for key in fn_keys}
 
-    def special_search(modes: Set[Mode]) -> Optional[HLgroup]:
-        for mode in sorted(modes):
-            hl = special_lookup.get(mode)
-            if hl:
-                return hl
-        return special_lookup.get(None)
+    context = HLcontext(
+        groups=groups,
+        mode_lookup_pre=mode_lookup_pre,
+        mode_lookup_post=mode_lookup_post,
+        name_lookup=name_lookup,
+    )
+    return context
 
-    def fn_search(filename: str) -> Optional[HLgroup]:
-        for pattern, group in fn_lookup.items():
-            if fnmatch(filename, pattern):
-                return group
-        return None
+
+def search(node: Node, context: HLcontext) -> Optional[HLgroup]:
+    s_modes = sorted(node.mode)
+
+    for mode in s_modes:
+        hl = context.mode_lookup_pre.get(mode)
+        if hl:
+            return hl
+    for pattern, group in context.name_lookup.items():
+        if fnmatch(node.name, pattern):
+            return group
+    for mode in s_modes:
+        hl = context.mode_lookup_post.get(mode)
+        if hl:
+            return hl
+    return context.mode_lookup_post.get(None)
