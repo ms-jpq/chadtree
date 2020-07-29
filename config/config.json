@@ -24,7 +24,7 @@
   "session": true,
   "show_hidden": false,
   "update_time": {
-    "max": 3,
+    "max": 2,
     "min": 1
   },
   "use_icons": true,

@@ -1,18 +1,7 @@
 from asyncio import Future, Task, create_task, sleep
-from dataclasses import dataclass
-from itertools import repeat
 from os import linesep
 from traceback import format_exc
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Iterable,
-    Iterator,
-    Sequence,
-    Tuple,
-    TypeVar,
-)
+from typing import Any, Awaitable, Callable, Iterable, Sequence, Tuple, TypeVar
 from uuid import uuid4
 
 from pynvim import Nvim
@@ -99,8 +88,8 @@ async def autocmd(
     group_end = "augroup END"
 
     def cont() -> None:
-        commands = zip(repeat("command"), ((group,), (cls,), (cmd,), (group_end,)))
-        atomic(nvim, *commands)
+        commands = linesep.join((group, cls, cmd, group_end))
+        nvim.api.exec(commands, False)
 
     await call(nvim, cont)
 
@@ -130,12 +119,3 @@ class HoldWindowPosition:
 
     def __exit__(self, *_: Any) -> None:
         self.nvim.api.set_current_win(self.window)
-
-
-@dataclass(frozen=True)
-class HLgroup:
-    pass
-
-
-async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
-    pass
