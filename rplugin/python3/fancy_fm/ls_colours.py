@@ -67,6 +67,8 @@ SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
     "so": Mode.socket,
     "st": Mode.sticky_dir,
     "tw": Mode.sticky_writable,
+    "sg": Mode.set_gid,
+    "su": Mode.set_uid,
 }
 
 
