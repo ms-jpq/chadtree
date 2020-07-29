@@ -9,9 +9,23 @@ Selection = Set[str]
 
 
 class Mode(Enum):
+    block_device = auto()
+    char_device = auto()
+    door = auto()
+    executable = auto()
     file = auto()
+    file_w_capacity = auto()
     folder = auto()
     link = auto()
+    multi_hardlink = auto()
+    orphan_link = auto()
+    other_writable = auto()
+    pipe = auto()
+    socket = auto()
+    sticky_dir = auto()
+    sticky_writable = auto()
+    set_gid = auto()
+    set_uid = auto()
 
 
 @dataclass(frozen=True)

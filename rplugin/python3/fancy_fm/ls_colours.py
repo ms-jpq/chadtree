@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
 from itertools import chain, repeat
 from os import environ
-from pprint import pprint
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
 
 
@@ -141,50 +140,46 @@ def parse_ls_colours() -> None:
         )
     }
 
-    reset = lookup.pop("rs", None)
-    normal = lookup.pop("no", None)
-    file = lookup.pop("fi", None)
-    directory = lookup.pop("di", None)
-    link = lookup.pop("ln", None)
-    pipe = lookup.pop("pi", None)
     block_device = lookup.pop("bd", None)
     char_device = lookup.pop("cd", None)
-    orphan_link = lookup.pop("or", None)
-    socket = lookup.pop("so", None)
-    executable = lookup.pop("ex", None)
-    sticky_dir = lookup.pop("st", None)
     door = lookup.pop("do", None)
-    sticky_writable = lookup.pop("tw", None)
-    other_writable = lookup.pop("ow", None)
-    set_uid = lookup.pop("su", None)
-    multi_hardlink = lookup.pop("mh", None)
+    executable = lookup.pop("ex", None)
+    file = lookup.pop("fi", None)
     file_w_capacity = lookup.pop("ca", None)
+    folder = lookup.pop("di", None)
+    link = lookup.pop("ln", None)
+    multi_hardlink = lookup.pop("mh", None)
+    normal = lookup.pop("no", None)
+    orphan_link = lookup.pop("or", None)
+    other_writable = lookup.pop("ow", None)
+    pipe = lookup.pop("pi", None)
+    reset = lookup.pop("rs", None)
     set_gid = lookup.pop("sg", None)
+    set_uid = lookup.pop("su", None)
+    socket = lookup.pop("so", None)
+    sticky_dir = lookup.pop("st", None)
+    sticky_writable = lookup.pop("tw", None)
 
     special = (
-        normal,
-        file,
-        multi_hardlink,
-        directory,
-        file_w_capacity,
-        sticky_writable,
-        other_writable,
-        link,
-        pipe,
         block_device,
-        set_gid,
         char_device,
-        set_uid,
-        orphan_link,
-        socket,
-        executable,
-        sticky_dir,
         door,
+        executable,
+        file,
+        file_w_capacity,
+        folder,
+        link,
+        multi_hardlink,
+        normal,
+        orphan_link,
+        other_writable,
+        pipe,
         reset,
+        set_gid,
+        set_uid,
+        socket,
+        sticky_dir,
+        sticky_writable,
     )
     exts = tuple(key for key in lookup if key.startswith("*"))
     ext_lookup = {key: lookup.pop(key) for key in exts}
-    pprint(ext_lookup)
-
-
-pprint(STYLE_TABLE)
