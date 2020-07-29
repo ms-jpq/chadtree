@@ -8,14 +8,15 @@ from .types import Mode
 
 
 class Style(IntEnum):
-    bold = 1
-    dimmed = 2
-    italic = 3
-    underline = 4
-    blink = 5
-    reverse = 7
-    hidden = 8
-    strikethrough = 9
+    bold = auto()
+    dimmed = auto()
+    italic = auto()
+    underline = auto()
+    blink = auto()
+    blink_fast = auto()
+    reverse = auto()
+    hidden = auto()
+    strikethrough = auto()
 
 
 class Ground(Enum):
@@ -24,23 +25,23 @@ class Ground(Enum):
 
 
 class AnsiColour(IntEnum):
-    black = 0
-    red = 1
-    green = 2
-    yellow = 3
-    blue = 4
-    purple = 5
-    cyan = 6
-    white = 7
+    black = auto()
+    red = auto()
+    green = auto()
+    yellow = auto()
+    blue = auto()
+    purple = auto()
+    cyan = auto()
+    white = auto()
 
-    black_bright = 10
-    red_bright = 11
-    green_bright = 12
-    yellow_bright = 13
-    blue_bright = 14
-    purple_bright = 15
-    cyan_bright = 16
-    white_bright = 17
+    black_bright = auto()
+    red_bright = auto()
+    green_bright = auto()
+    yellow_bright = auto()
+    blue_bright = auto()
+    purple_bright = auto()
+    cyan_bright = auto()
+    white_bright = auto()
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,7 @@ SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
 }
 
 
+ANSI_RANGE = range(256)
 RGB_RANGE = range(256)
 
 STYLE_TABLE: Dict[str, Style] = {str(code + 0): code for code in Style}
@@ -87,7 +89,8 @@ GROUND_TABLE: Dict[str, Ground] = {
 COLOUR_TABLE: Dict[str, AnsiColour] = {
     str(code): colour
     for code, colour in chain(
-        ((c + 30, c) for c in AnsiColour), ((c + 90, c) for c in AnsiColour)
+        ((c + 29 if c <= 8 else c + 31, c) for c in AnsiColour),
+        ((c + 89 if c <= 8 else c + 91, c) for c in AnsiColour),
     )
 }
 
@@ -96,11 +99,11 @@ RGB_TABLE: Set[str] = {"38", "48"}
 
 def parse_8(codes: Iterator[str]) -> Optional[Colour]:
     try:
-        rgb = int(next(codes, ""))
+        ansi_code = int(next(codes, ""))
     except ValueError:
         return None
     else:
-        if 0 <= rgb <= 255:
+        if ansi_code in ANSI_RANGE:
             return Colour(r=0, g=0, b=0)
         else:
             return None
