@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
+from fnmatch import fnmatch
 from itertools import chain, repeat
 from os import environ
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
 
+from .highlight import HLgroup
 from .types import Mode
 
 
@@ -56,28 +58,6 @@ class Styling:
     styles: Set[Style]
     foreground: Union[AnsiColour, Colour, None]
     background: Union[AnsiColour, Colour, None]
-
-
-SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
-    "bd": Mode.block_device,
-    "cd": Mode.char_device,
-    "do": Mode.door,
-    "ex": Mode.executable,
-    "fi": Mode.file,
-    "ca": Mode.file_w_capacity,
-    "di": Mode.folder,
-    "ln": Mode.link,
-    "mh": Mode.multi_hardlink,
-    "no": None,
-    "or": Mode.orphan_link,
-    "ow": Mode.other_writable,
-    "pi": Mode.pipe,
-    "so": Mode.socket,
-    "st": Mode.sticky_dir,
-    "tw": Mode.sticky_writable,
-    "sg": Mode.set_gid,
-    "su": Mode.set_uid,
-}
 
 
 ANSI_RANGE = range(256)
@@ -147,8 +127,43 @@ def parse_24(codes: Iterator[str]) -> Optional[Colour]:
 
 
 PARSE_TABLE: Dict[str, Callable[[Iterator[str]], Union[AnsiColour, Colour, None]]] = {
-    "2": parse_8,
-    "5": parse_24,
+    "5": parse_8,
+    "2": parse_24,
+}
+
+
+SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
+    "bd": Mode.block_device,
+    "cd": Mode.char_device,
+    "do": Mode.door,
+    "ex": Mode.executable,
+    "fi": Mode.file,
+    "ca": Mode.file_w_capacity,
+    "di": Mode.folder,
+    "ln": Mode.link,
+    "mh": Mode.multi_hardlink,
+    "no": None,
+    "or": Mode.orphan_link,
+    "ow": Mode.other_writable,
+    "pi": Mode.pipe,
+    "so": Mode.socket,
+    "st": Mode.sticky_dir,
+    "tw": Mode.sticky_writable,
+    "sg": Mode.set_gid,
+    "su": Mode.set_uid,
+}
+
+
+HL_STYLE_TABLE: Dict[Style, Optional[str]] = {
+    Style.bold: "bold",
+    Style.dimmed: None,
+    Style.italic: "italic",
+    Style.underline: "underline",
+    Style.blink: None,
+    Style.blink_fast: None,
+    Style.reverse: "reverse",
+    Style.hidden: None,
+    Style.strikethrough: "strikethrough",
 }
 
 
@@ -197,14 +212,55 @@ def parse_styling(codes: str) -> Styling:
     return styling
 
 
+def parseHLGroup(name: str, styling: Styling) -> HLgroup:
+    fg, bg = styling.foreground, styling.background
+    cterm = {
+        style
+        for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
+        if style
+    }
+    ctermfg = str(cast(AnsiColour, fg).value) if type(fg) is AnsiColour else None
+    ctermbg = str(cast(AnsiColour, bg).value) if type(fg) is AnsiColour else None
+    guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else None
+    guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else None
+    group = HLgroup(
+        name=name,
+        cterm=cterm,
+        ctermfg=ctermfg,
+        ctermbg=ctermbg,
+        guifg=guifg,
+        guibg=guibg,
+    )
+    return group
+
+
 def parse_ls_colours() -> None:
     colours = environ.get("LS_COLORS", "")
-    lookup = {
-        k: v
+    hl_lookup: Dict[str, HLgroup] = {
+        k: parseHLGroup(k, parse_styling(v))
         for k, _, v in (
             segment.partition("=") for segment in colours.strip(":").split(":")
         )
     }
 
-    exts = tuple(key for key in lookup if key.startswith("*"))
-    ext_lookup = {key: lookup.pop(key) for key in exts}
+    special_lookup: Dict[Optional[Mode], HLgroup] = {
+        k: v
+        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_TABLE.items())
+        if v
+    }
+
+    fn_keys = tuple(key for key in hl_lookup if key.startswith("*"))
+    fn_lookup: Dict[str, HLgroup] = {key: hl_lookup.pop(key) for key in fn_keys}
+
+    def special_search(modes: Set[Mode]) -> Optional[HLgroup]:
+        for mode in sorted(modes):
+            hl = special_lookup.get(mode)
+            if hl:
+                return hl
+        return special_lookup.get(None)
+
+    def fn_search(filename: str) -> Optional[HLgroup]:
+        for pattern, group in fn_lookup.items():
+            if fnmatch(filename, pattern):
+                return group
+        return None
