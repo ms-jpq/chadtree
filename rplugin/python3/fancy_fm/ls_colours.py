@@ -122,11 +122,12 @@ def parse_8(codes: Iterator[str]) -> Optional[Colour]:
             grey = E_GREY_TABLE.get(ansi_code)
             if grey:
                 return grey
+            ratio = 255 / 5
             code = ansi_code - 16
             r = code // 36
-            g = (code - r) // 6
-            b = code - r - g
-            return Colour(r=r, g=g, b=b)
+            g = code % 36 // 6
+            b = code % 36 % 6
+            return Colour(r=r * ratio, g=g * ratio, b=b * ratio)
         else:
             return None
 
