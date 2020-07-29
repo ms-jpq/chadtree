@@ -1,7 +1,7 @@
 from asyncio import get_running_loop
 from os import makedirs
 from os import remove as rm
-from os.path import dirname, isdir, sep
+from os.path import dirname, exists, isdir, sep
 from pathlib import Path
 from shutil import copy2, copytree
 from shutil import move as mv
@@ -28,6 +28,12 @@ def unify_ancestors(paths: Set[str]) -> Iterator[str]:
     for path in paths:
         if not any(a in paths for a in ancestors(path)):
             yield path
+
+
+async def fs_exists(path: str) -> bool:
+    loop = get_running_loop()
+
+    return await loop.run_in_executor(None, exists, path)
 
 
 def _new(dest: str) -> None:

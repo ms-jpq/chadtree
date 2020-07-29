@@ -10,7 +10,17 @@ from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 
 from .cartographer import new as new_root
-from .fs import ancestors, copy, cut, is_parent, new, remove, rename, unify_ancestors
+from .fs import (
+    ancestors,
+    copy,
+    cut,
+    fs_exists,
+    is_parent,
+    new,
+    remove,
+    rename,
+    unify_ancestors,
+)
 from .git import status
 from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
 from .opener import OpenError, open_gui
@@ -310,7 +320,7 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[State]
 
     if child:
         name = join(parent, child)
-        if exists(name):
+        if await fs_exists(name):
             msg = f"⚠️  Exists: {name}"
             await print(nvim, msg, error=True)
             return state
@@ -346,7 +356,7 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         if child:
             new_name = join(parent, child)
             new_parent = dirname(new_name)
-            if exists(new_name):
+            if await fs_exists(new_name):
                 msg = f"⚠️  Exists: {new_name}"
                 await print(nvim, msg, error=True)
                 return state

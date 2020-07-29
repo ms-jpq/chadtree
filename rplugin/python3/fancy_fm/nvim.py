@@ -3,7 +3,16 @@ from dataclasses import dataclass
 from itertools import repeat
 from os import linesep
 from traceback import format_exc
-from typing import Any, Awaitable, Callable, Iterable, Sequence, Tuple, TypeVar
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Iterable,
+    Iterator,
+    Sequence,
+    Tuple,
+    TypeVar,
+)
 from uuid import uuid4
 
 from pynvim import Nvim
@@ -128,5 +137,5 @@ class HLgroup:
     pass
 
 
-def add_hl_group() -> None:
+async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
     pass
