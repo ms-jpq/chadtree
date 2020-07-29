@@ -109,7 +109,7 @@ def paint(
                     (v for k, v in icons.filename.items() if fnmatch(node.name, k)),
                     " ",
                 )
-            ) if use_icons else " "
+            ) if use_icons else ""
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
