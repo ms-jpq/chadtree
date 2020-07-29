@@ -183,7 +183,7 @@ async def _click(
 ) -> Optional[State]:
     node = await _index(nvim, state=state)
     if node:
-        if Mode.FOLDER in node.mode:
+        if Mode.folder in node.mode:
             paths = {node.path}
             index = state.index ^ paths
             new_state = await forward(
@@ -217,7 +217,7 @@ async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> Optional[
 
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     node = await _index(nvim, state=state)
-    if node and Mode.FOLDER in node.mode:
+    if node and Mode.folder in node.mode:
         paths = {
             i
             for i in state.index

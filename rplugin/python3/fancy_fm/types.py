@@ -9,9 +9,9 @@ Selection = Set[str]
 
 
 class Mode(Flag):
-    FILE = auto()
-    FOLDER = auto()
-    LINK = auto()
+    file = auto()
+    folder = auto()
+    link = auto()
 
 
 @dataclass(frozen=True)

@@ -147,4 +147,4 @@ def index(state: State, row: int) -> Optional[Node]:
 
 
 def is_dir(node: Node) -> bool:
-    return Mode.FOLDER in node.mode
+    return Mode.folder in node.mode

@@ -25,7 +25,7 @@ class CompVals(IntEnum):
 
 
 def comp(node: Node) -> Tuple[int, str, str]:
-    node_type = CompVals.FOLDER if Mode.FOLDER in node.mode else CompVals.FILE
+    node_type = CompVals.FOLDER if Mode.folder in node.mode else CompVals.FILE
     return (
         node_type,
         strxfrm(node.ext or ""),
@@ -81,7 +81,7 @@ def paint(
     def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
         yield gen_status(node.path)
         yield " "
-        if Mode.FOLDER in node.mode:
+        if Mode.folder in node.mode:
             yield sym_folder_open if node.path in index else sym_folder_closed
         else:
             yield (
@@ -94,9 +94,9 @@ def paint(
         yield " "
 
     def gen_decor_post(node: Node) -> Iterator[str]:
-        if not use_icons and Mode.FOLDER in node.mode:
+        if not use_icons and Mode.folder in node.mode:
             yield sep
-        if Mode.LINK in node.mode:
+        if Mode.link in node.mode:
             yield " "
             yield sym_link
 

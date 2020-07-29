@@ -11,17 +11,17 @@ def fs_stat(path: str) -> Mode:
     info = stat(path, follow_symlinks=False)
     if S_ISLNK(info.st_mode):
         link_info = stat(path, follow_symlinks=True)
-        mode = Mode.FOLDER if S_ISDIR(link_info.st_mode) else Mode.FILE
-        return mode | Mode.LINK
+        mode = Mode.folder if S_ISDIR(link_info.st_mode) else Mode.file
+        return mode | Mode.link
     else:
-        mode = Mode.FOLDER if S_ISDIR(info.st_mode) else Mode.FILE
+        mode = Mode.folder if S_ISDIR(info.st_mode) else Mode.file
         return mode
 
 
 def _new(root: str, index: Index) -> Node:
     mode = fs_stat(root)
     name = basename(root)
-    if Mode.FOLDER not in mode:
+    if Mode.folder not in mode:
         _, ext = splitext(name)
         return Node(path=root, mode=mode, name=name, ext=ext)
 

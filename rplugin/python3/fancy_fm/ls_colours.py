@@ -1,4 +1,9 @@
 from os import environ
+from typing import Iterator
+
+
+def parse_colour() -> Iterator[None]:
+    pass
 
 
 def parse_ls_colours() -> None:
