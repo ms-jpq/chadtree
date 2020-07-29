@@ -59,6 +59,7 @@ def paint(
     sym_active = icons.active if use_icons else ">"
     sym_select = icons.selected if use_icons else "*"
     sym_link = icons.link if use_icons else "->"
+    sym_link_broken = icons.link_broken if use_icons else "-/->"
     sym_folder_open = icons.folder_open if use_icons else "-"
     sym_folder_closed = icons.folder_closed if use_icons else "+"
 
@@ -100,8 +101,11 @@ def paint(
             yield sep
 
     def gen_decor_post(node: Node) -> Iterator[str]:
-        if Mode.link in node.mode:
-            yield " "
+        mode = node.mode
+        yield " "
+        if Mode.orphan_link in mode:
+            yield sym_link_broken
+        elif Mode.link in mode:
             yield sym_link
 
     def show(node: Node, depth: int) -> Render:

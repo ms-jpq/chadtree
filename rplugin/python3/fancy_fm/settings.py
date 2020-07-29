@@ -16,6 +16,7 @@ def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
         folder_open=folder_ic["open"],
         folder_closed=folder_ic["closed"],
         link=icon_c["link"],
+        link_broken=icon_c["link_broken"],
         filetype=icon_c["filetype"],
         filename=icon_c["filename"],
         active=icon_c["active"],

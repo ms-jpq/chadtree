@@ -182,7 +182,7 @@ async def _click(
     nvim: Nvim, state: State, settings: Settings, hold_window: bool
 ) -> Optional[State]:
     node = await _index(nvim, state=state)
-    if node:
+    if node and Mode.orphan_link not in node.mode:
         if Mode.folder in node.mode:
             paths = {node.path}
             index = state.index ^ paths

@@ -47,6 +47,7 @@ class IconSet:
     folder_open: str
     folder_closed: str
     link: str
+    link_broken: str
     filetype: Dict[str, str]
     filename: Dict[str, str]
     selected: str

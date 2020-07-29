@@ -4,6 +4,8 @@ from itertools import chain, repeat
 from os import environ
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
 
+from .types import Mode
+
 
 class Style(IntEnum):
     bold = 1
@@ -46,6 +48,26 @@ class Colour:
     r: int
     g: int
     b: int
+
+
+SPECIAL_TABLE: Dict[str, Optional[Mode]] = {
+    "bd": Mode.block_device,
+    "cd": Mode.char_device,
+    "do": Mode.door,
+    "ex": Mode.executable,
+    "fi": Mode.file,
+    "ca": Mode.file_w_capacity,
+    "di": Mode.folder,
+    "ln": Mode.link,
+    "mh": Mode.multi_hardlink,
+    "no": None,
+    "or": Mode.orphan_link,
+    "ow": Mode.other_writable,
+    "pi": Mode.pipe,
+    "so": Mode.socket,
+    "st": Mode.sticky_dir,
+    "tw": Mode.sticky_writable,
+}
 
 
 RGB_RANGE = range(256)
@@ -140,46 +162,5 @@ def parse_ls_colours() -> None:
         )
     }
 
-    block_device = lookup.pop("bd", None)
-    char_device = lookup.pop("cd", None)
-    door = lookup.pop("do", None)
-    executable = lookup.pop("ex", None)
-    file = lookup.pop("fi", None)
-    file_w_capacity = lookup.pop("ca", None)
-    folder = lookup.pop("di", None)
-    link = lookup.pop("ln", None)
-    multi_hardlink = lookup.pop("mh", None)
-    normal = lookup.pop("no", None)
-    orphan_link = lookup.pop("or", None)
-    other_writable = lookup.pop("ow", None)
-    pipe = lookup.pop("pi", None)
-    reset = lookup.pop("rs", None)
-    set_gid = lookup.pop("sg", None)
-    set_uid = lookup.pop("su", None)
-    socket = lookup.pop("so", None)
-    sticky_dir = lookup.pop("st", None)
-    sticky_writable = lookup.pop("tw", None)
-
-    special = (
-        block_device,
-        char_device,
-        door,
-        executable,
-        file,
-        file_w_capacity,
-        folder,
-        link,
-        multi_hardlink,
-        normal,
-        orphan_link,
-        other_writable,
-        pipe,
-        reset,
-        set_gid,
-        set_uid,
-        socket,
-        sticky_dir,
-        sticky_writable,
-    )
     exts = tuple(key for key in lookup if key.startswith("*"))
     ext_lookup = {key: lookup.pop(key) for key in exts}

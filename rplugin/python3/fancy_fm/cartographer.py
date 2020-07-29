@@ -1,13 +1,14 @@
 from asyncio import get_running_loop
 from os import listdir, stat
 from os.path import basename, join, splitext
-from stat import S_ISDIR, S_ISFIFO, S_ISLNK, S_ISREG, S_ISSOCK
+from stat import S_IEXEC, S_IFMT, S_ISDIR, S_ISFIFO, S_ISLNK, S_ISREG, S_ISSOCK
 from typing import Dict, Iterator, Set, cast
 
 from .types import Index, Mode, Node
 
 
 def fs_modes(stat: int) -> Iterator[Mode]:
+    tat = S_IFMT(stat)
     if S_ISDIR(stat):
         yield Mode.folder
     if S_ISREG(stat):
@@ -16,17 +17,27 @@ def fs_modes(stat: int) -> Iterator[Mode]:
         yield Mode.pipe
     if S_ISSOCK(stat):
         yield Mode.socket
+    if tat == S_IEXEC:
+        yield Mode.executable
 
 
 def fs_stat(path: str) -> Set[Mode]:
-    info = stat(path, follow_symlinks=False)
-    if S_ISLNK(info.st_mode):
-        link_info = stat(path, follow_symlinks=True)
-        mode = {*fs_modes(link_info.st_mode)}
-        return mode | {Mode.link}
+    try:
+        info = stat(path, follow_symlinks=False)
+    except FileNotFoundError:
+        return {Mode.orphan_link}
     else:
-        mode = {*fs_modes(info.st_mode)}
-        return mode
+        if S_ISLNK(info.st_mode):
+            try:
+                link_info = stat(path, follow_symlinks=True)
+            except FileNotFoundError:
+                return {Mode.orphan_link}
+            else:
+                mode = {*fs_modes(link_info.st_mode)}
+                return mode | {Mode.link}
+        else:
+            mode = {*fs_modes(info.st_mode)}
+            return mode
 
 
 def _new(root: str, index: Index) -> Node:
