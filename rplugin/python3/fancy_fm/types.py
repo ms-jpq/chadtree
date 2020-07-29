@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Flag, auto
+from enum import Enum, auto
 from typing import Dict, Optional, Sequence, Set
 
 Index = Set[str]
 Selection = Set[str]
 
 
-class Mode(Flag):
+class Mode(Enum):
     file = auto()
     folder = auto()
     link = auto()
@@ -17,7 +17,7 @@ class Mode(Flag):
 @dataclass(frozen=True)
 class Node:
     path: str
-    mode: Mode
+    mode: Set[Mode]
     name: str
     children: Optional[Dict[str, Node]] = None
     ext: Optional[str] = None
