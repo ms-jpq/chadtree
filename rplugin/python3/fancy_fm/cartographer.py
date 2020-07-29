@@ -2,20 +2,27 @@ from asyncio import get_running_loop
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import S_ISDIR, S_ISLNK
-from typing import Dict, Set, cast
+from typing import Dict, Iterator, Set, cast
 
 from .types import Index, Mode, Node
+
+
+def fs_modes(stat: int) -> Iterator[Mode]:
+    if S_ISDIR(stat):
+        yield Mode.folder
+    else:
+        yield Mode.file
 
 
 def fs_stat(path: str) -> Set[Mode]:
     info = stat(path, follow_symlinks=False)
     if S_ISLNK(info.st_mode):
         link_info = stat(path, follow_symlinks=True)
-        mode = Mode.folder if S_ISDIR(link_info.st_mode) else Mode.file
-        return {mode} | {Mode.link}
+        mode = {*fs_modes(link_info.st_mode)}
+        return mode | {Mode.link}
     else:
-        mode = Mode.folder if S_ISDIR(info.st_mode) else Mode.file
-        return {mode}
+        mode = {*fs_modes(info.st_mode)}
+        return mode
 
 
 def _new(root: str, index: Index) -> Node:
