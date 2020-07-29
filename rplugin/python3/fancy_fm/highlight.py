@@ -21,6 +21,7 @@ LEGAL_CTERM_COLOURS = range(8)
 
 @dataclass(frozen=True)
 class HLgroup:
+    name: str
     cterm: Set[str] = field(default_factory=set)
     ctermfg: Optional[str] = None
     ctermbg: Optional[str] = None
@@ -32,6 +33,7 @@ async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
     def parse() -> Iterator[str]:
         for group in groups:
             assert group.cterm <= LEGAL_CTERM
+            name = group.name
             _cterm = ",".join(group.cterm)
             cterm = f"cterm={_cterm}"
             ctermfg = f"ctermfg={group.ctermfg}" if group.ctermfg else ""
@@ -39,7 +41,7 @@ async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
             guifg = f"guifg={group.guifg}" if group.guifg else ""
             guibg = f"guibg={group.guibg}" if group.guibg else ""
 
-            yield f"Highlight {cterm} {ctermfg} {ctermbg} {guifg} {guibg}"
+            yield f"highlight {name} {cterm} {ctermfg} {ctermbg} {guifg} {guibg}"
 
     def cont() -> None:
         commands = linesep.join(parse())

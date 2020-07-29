@@ -97,6 +97,11 @@ COLOUR_TABLE: Dict[str, AnsiColour] = {
 RGB_TABLE: Set[str] = {"38", "48"}
 
 
+def to_hex(colour: Colour) -> str:
+    r, g, b = format(colour.r, "02x"), format(colour.g, "02x"), format(colour.b, "02x")
+    return f"#{r}{g}{b}"
+
+
 def parse_8(codes: Iterator[str]) -> Optional[Colour]:
     try:
         ansi_code = int(next(codes, ""))
