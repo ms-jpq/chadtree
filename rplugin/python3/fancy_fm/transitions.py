@@ -182,27 +182,32 @@ async def _click(
     nvim: Nvim, state: State, settings: Settings, hold_window: bool
 ) -> Optional[State]:
     node = await _index(nvim, state=state)
-    if node and Mode.orphan_link not in node.mode:
-        if Mode.folder in node.mode:
-            paths = {node.path}
-            index = state.index ^ paths
-            new_state = await forward(
-                state, settings=settings, index=index, paths=paths
-            )
-            return new_state
+    if node:
+        if Mode.orphan_link in node.mode:
+            name = node.name
+            await print(nvim, f"⚠️  cannot open dead link: {name}", error=True)
+            return None
         else:
-            new_state = await forward(state, settings=settings, current=node.path)
+            if Mode.folder in node.mode:
+                paths = {node.path}
+                index = state.index ^ paths
+                new_state = await forward(
+                    state, settings=settings, index=index, paths=paths
+                )
+                return new_state
+            else:
+                new_state = await forward(state, settings=settings, current=node.path)
 
-            def cont() -> None:
-                if hold_window:
-                    with HoldWindowPosition(nvim):
+                def cont() -> None:
+                    if hold_window:
+                        with HoldWindowPosition(nvim):
+                            show_file(nvim, state=new_state, settings=settings)
+                    else:
                         show_file(nvim, state=new_state, settings=settings)
-                else:
-                    show_file(nvim, state=new_state, settings=settings)
 
-            await call(nvim, cont)
+                await call(nvim, cont)
 
-            return new_state
+                return new_state
     else:
         return None
 
