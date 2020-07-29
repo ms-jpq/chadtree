@@ -5,9 +5,11 @@ from stat import (
     S_IEXEC,
     S_ISDIR,
     S_ISFIFO,
+    S_ISGID,
     S_ISLNK,
     S_ISREG,
     S_ISSOCK,
+    S_ISUID,
     S_ISVTX,
     S_IWOTH,
 )
@@ -19,6 +21,8 @@ FILE_MODES: Dict[int, Mode] = {
     S_IEXEC: Mode.executable,
     S_IWOTH: Mode.other_writable,
     S_ISVTX: Mode.sticky_dir,
+    S_ISGID: Mode.set_gid,
+    S_ISUID: Mode.set_uid,
 }
 
 
