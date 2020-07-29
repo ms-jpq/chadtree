@@ -1,5 +1,5 @@
 from os import linesep
-from typing import Iterator, Set
+from typing import Iterator, Sequence, Set
 
 from pynvim import Nvim
 
@@ -19,7 +19,7 @@ LEGAL_CTERM: Set[str] = {
 LEGAL_CTERM_COLOURS = range(8)
 
 
-async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
+async def add_hl_groups(nvim: Nvim, groups: Sequence[HLgroup]) -> None:
     def parse() -> Iterator[str]:
         for group in groups:
             name = group.name

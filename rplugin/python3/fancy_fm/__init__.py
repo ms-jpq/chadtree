@@ -7,6 +7,7 @@ from typing import Any, Awaitable, Callable, Optional, Sequence
 
 from pynvim import Nvim, command, function, plugin
 
+from .highlight import add_hl_groups
 from .nvim import autocmd, run_forever
 from .scheduler import schedule
 from .settings import initial as initial_settings
@@ -108,6 +109,8 @@ class Main:
             await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
 
             await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_FMquickfix")
+
+            await add_hl_groups(self.nvim, groups=self.settings.hl_context.groups)
 
         if self._initialized:
             return

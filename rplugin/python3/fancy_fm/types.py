@@ -85,18 +85,19 @@ class HLcontext:
 
 @dataclass(frozen=True)
 class Settings:
-    show_hidden: bool
     follow: bool
-    open_left: bool
-    width: int
+    hl_context: HLcontext
+    icons: IconSet
     keymap: Dict[str, Sequence[str]]
     name_ignore: Sequence[str]
+    open_left: bool
     path_ignore: Sequence[str]
-    use_icons: bool
-    icons: IconSet
-    update: UpdateTime
-    version_ctl: VersionControlOptions
     session: bool
+    show_hidden: bool
+    update: UpdateTime
+    use_icons: bool
+    version_ctl: VersionControlOptions
+    width: int
 
 
 @dataclass(frozen=True)

@@ -17,6 +17,7 @@ ignore_json = join(__config__, "ignore.json")
 
 fm_filetype = "fancy_fm"
 fm_namespace = "fancy_fm_ns"
+fm_hl_prefix = "fancy_fm_"
 
 folder_mode = 0o755
 file_mode = 0o644

@@ -8,6 +8,8 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 from .da import constantly
 from .types import (
     Badge,
+    HLcontext,
+    HLgroup,
     Index,
     Mode,
     Node,
@@ -45,6 +47,23 @@ def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     return drop
 
 
+def search(node: Node, context: HLcontext) -> Optional[HLgroup]:
+    s_modes = sorted(node.mode)
+
+    for mode in s_modes:
+        hl = context.mode_lookup_pre.get(mode)
+        if hl:
+            return hl
+    for pattern, group in context.name_lookup.items():
+        if fnmatch(node.name, pattern):
+            return group
+    for mode in s_modes:
+        hl = context.mode_lookup_post.get(mode)
+        if hl:
+            return hl
+    return context.mode_lookup_post.get(None)
+
+
 def paint(
     settings: Settings,
     index: Index,
@@ -70,14 +89,6 @@ def paint(
         selected = sym_select if path in selection else " "
         active = sym_active if path == current else " "
         return f"{selected}{active}"
-
-    def gen_badges(path: str) -> Iterator[Badge]:
-        qf_count = qf.locations[path]
-        stat = vc.status.get(path)
-        if qf_count:
-            yield Badge(text=f"({qf_count})", group="Label")
-        if stat:
-            yield Badge(text=f"[{stat}]", group="Comment")
 
     def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
         yield gen_spacer(depth)
@@ -107,6 +118,14 @@ def paint(
             yield sym_link_broken
         elif Mode.link in mode:
             yield sym_link
+
+    def gen_badges(path: str) -> Iterator[Badge]:
+        qf_count = qf.locations[path]
+        stat = vc.status.get(path)
+        if qf_count:
+            yield Badge(text=f"({qf_count})", group="Label")
+        if stat:
+            yield Badge(text=f"[{stat}]", group="Comment")
 
     def show(node: Node, depth: int) -> Render:
         pre = "".join(gen_decor_pre(node, depth=depth))

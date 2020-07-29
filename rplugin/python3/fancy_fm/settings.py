@@ -2,6 +2,7 @@ from typing import Any
 
 from .consts import config_json, icons_json, ignore_json
 from .da import load_json, merge
+from .ls_colours import parse_ls_colours
 from .types import IconSet, Settings, UpdateTime, VersionControlOptions
 
 
@@ -28,20 +29,22 @@ def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
     )
 
     version_ctl = VersionControlOptions(defer=config["version_control"]["defer"])
+    hl_context = parse_ls_colours()
 
     settings = Settings(
-        width=config["width"],
-        open_left=config["open_left"],
-        keymap=config["keymap"],
-        show_hidden=config["show_hidden"],
         follow=config["follow"],
-        name_ignore=ignore["name"],
-        path_ignore=ignore["path"],
-        use_icons=config["use_icons"],
         icons=icons,
-        update=update,
+        hl_context=hl_context,
+        keymap=config["keymap"],
+        name_ignore=ignore["name"],
+        open_left=config["open_left"],
+        path_ignore=ignore["path"],
         session=config["session"],
+        show_hidden=config["show_hidden"],
+        update=update,
+        use_icons=config["use_icons"],
         version_ctl=version_ctl,
+        width=config["width"],
     )
 
     return settings

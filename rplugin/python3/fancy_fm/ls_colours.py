@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
-from fnmatch import fnmatch
 from itertools import chain, repeat
 from os import environ
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
+from uuid import uuid4
 
-from .types import HLcontext, HLgroup, Mode, Node
+from .consts import fm_hl_prefix
+from .types import HLcontext, HLgroup, Mode
 
 
 class Style(IntEnum):
@@ -215,15 +216,16 @@ def parse_styling(codes: str) -> Styling:
     return styling
 
 
-def parseHLGroup(name: str, styling: Styling) -> HLgroup:
+def parseHLGroup(styling: Styling) -> HLgroup:
     fg, bg = styling.foreground, styling.background
+    name = f"{fm_hl_prefix}{uuid4().hex}"
     cterm = {
         style
         for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ctermfg = str(cast(AnsiColour, fg).value) if type(fg) is AnsiColour else None
-    ctermbg = str(cast(AnsiColour, bg).value) if type(fg) is AnsiColour else None
+    ctermfg = str(cast(AnsiColour, fg).value - 1) if type(fg) is AnsiColour else None
+    ctermbg = str(cast(AnsiColour, bg).value - 1) if type(fg) is AnsiColour else None
     guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else None
     guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else None
     group = HLgroup(
@@ -240,7 +242,7 @@ def parseHLGroup(name: str, styling: Styling) -> HLgroup:
 def parse_ls_colours() -> HLcontext:
     colours = environ.get("LS_COLORS", "")
     hl_lookup: Dict[str, HLgroup] = {
-        k: parseHLGroup(k, parse_styling(v))
+        k: parseHLGroup(parse_styling(v))
         for k, _, v in (
             segment.partition("=") for segment in colours.strip(":").split(":")
         )
@@ -269,20 +271,3 @@ def parse_ls_colours() -> HLcontext:
         name_lookup=name_lookup,
     )
     return context
-
-
-def search(node: Node, context: HLcontext) -> Optional[HLgroup]:
-    s_modes = sorted(node.mode)
-
-    for mode in s_modes:
-        hl = context.mode_lookup_pre.get(mode)
-        if hl:
-            return hl
-    for pattern, group in context.name_lookup.items():
-        if fnmatch(node.name, pattern):
-            return group
-    for mode in s_modes:
-        hl = context.mode_lookup_post.get(mode)
-        if hl:
-            return hl
-    return context.mode_lookup_post.get(None)
