@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum, auto
+from enum import IntEnum, auto
 from typing import Dict, Optional, Sequence, Set
 
 Index = Set[str]
 Selection = Set[str]
 
 
-class Mode(Enum):
+class Mode(IntEnum):
     orphan_link = auto()
     link = auto()
     sticky_writable = auto()

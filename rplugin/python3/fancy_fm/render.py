@@ -8,7 +8,7 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 from .da import constantly
 from .types import (
     Badge,
-    HLcontext,
+    Highlight,
     HLgroup,
     Index,
     Mode,
@@ -47,23 +47,6 @@ def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     return drop
 
 
-def search(node: Node, context: HLcontext) -> Optional[HLgroup]:
-    s_modes = sorted(node.mode)
-
-    for mode in s_modes:
-        hl = context.mode_lookup_pre.get(mode)
-        if hl:
-            return hl
-    for pattern, group in context.name_lookup.items():
-        if fnmatch(node.name, pattern):
-            return group
-    for mode in s_modes:
-        hl = context.mode_lookup_post.get(mode)
-        if hl:
-            return hl
-    return context.mode_lookup_post.get(None)
-
-
 def paint(
     settings: Settings,
     index: Index,
@@ -72,6 +55,12 @@ def paint(
     vc: VCStatus,
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
+    context = settings.hl_context
+    mode_lookup_pre, mode_lookup_post, name_lookup = (
+        context.mode_lookup_pre,
+        context.mode_lookup_post,
+        context.name_lookup,
+    )
     icons = settings.icons
     use_icons = settings.use_icons
 
@@ -81,6 +70,23 @@ def paint(
     sym_link_broken = icons.link_broken if use_icons else "-/->"
     sym_folder_open = icons.folder_open if use_icons else "-"
     sym_folder_closed = icons.folder_closed if use_icons else "+"
+
+    def search_hl(node: Node) -> Optional[HLgroup]:
+        s_modes = sorted(node.mode)
+
+        for mode in s_modes:
+            hl = mode_lookup_pre.get(mode)
+            if hl:
+                return hl
+        for pattern, group in name_lookup.items():
+            if fnmatch(node.name, pattern):
+                return group
+        for mode in s_modes:
+            hl = mode_lookup_post.get(mode)
+            if hl:
+                return hl
+
+        return mode_lookup_post.get(None)
 
     def gen_spacer(depth: int) -> str:
         return (depth * 2 - 1) * " "
@@ -127,6 +133,14 @@ def paint(
         if stat:
             yield Badge(text=f"[{stat}]", group="Comment")
 
+    def gen_highlights(node: Node, pre: str, name: str) -> Iterator[Highlight]:
+        group = search_hl(node)
+        if group:
+            begin = len(pre.encode())
+            end = len(name.encode()) + begin
+            hl = Highlight(group=group.name, begin=begin, end=end)
+            yield hl
+
     def show(node: Node, depth: int) -> Render:
         pre = "".join(gen_decor_pre(node, depth=depth))
         name = "".join(gen_name(node))
@@ -134,7 +148,8 @@ def paint(
 
         line = f"{pre}{name}{post}"
         badges = tuple(gen_badges(node.path))
-        render = Render(line=line, badges=badges, highlights=())
+        highlights = tuple(gen_highlights(node, pre=pre, name=name))
+        render = Render(line=line, badges=badges, highlights=highlights)
         return render
 
     return show
