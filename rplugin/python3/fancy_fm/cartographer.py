@@ -1,14 +1,28 @@
 from asyncio import get_running_loop
 from os import listdir, stat
 from os.path import basename, join, splitext
-from stat import S_IEXEC, S_IFMT, S_ISDIR, S_ISFIFO, S_ISLNK, S_ISREG, S_ISSOCK
+from stat import (
+    S_IEXEC,
+    S_ISDIR,
+    S_ISFIFO,
+    S_ISLNK,
+    S_ISREG,
+    S_ISSOCK,
+    S_ISVTX,
+    S_IWOTH,
+)
 from typing import Dict, Iterator, Set, cast
 
 from .types import Index, Mode, Node
 
+FILE_MODES: Dict[int, Mode] = {
+    S_IEXEC: Mode.executable,
+    S_IWOTH: Mode.other_writable,
+    S_ISVTX: Mode.sticky_dir,
+}
+
 
 def fs_modes(stat: int) -> Iterator[Mode]:
-    tat = S_IFMT(stat)
     if S_ISDIR(stat):
         yield Mode.folder
     if S_ISREG(stat):
@@ -17,8 +31,9 @@ def fs_modes(stat: int) -> Iterator[Mode]:
         yield Mode.pipe
     if S_ISSOCK(stat):
         yield Mode.socket
-    if tat == S_IEXEC:
-        yield Mode.executable
+    for bit, mode in FILE_MODES.items():
+        if stat & bit == bit:
+            yield mode
 
 
 def fs_stat(path: str) -> Set[Mode]:

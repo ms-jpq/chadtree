@@ -1,7 +1,7 @@
 from asyncio import gather
 from hashlib import sha1
 from os.path import exists, join
-from typing import Optional, Sequence
+from typing import Optional
 
 from pynvim import Nvim
 
