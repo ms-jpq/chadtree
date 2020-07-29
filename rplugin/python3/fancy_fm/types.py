@@ -35,6 +35,8 @@ class IconSet:
     link: str
     filetype: Dict[str, str]
     filename: Dict[str, str]
+    selected: str
+    active: str
 
 
 @dataclass(frozen=True)

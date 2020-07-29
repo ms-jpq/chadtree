@@ -10,6 +10,14 @@ from pynvim.api.buffer import Buffer
 T = TypeVar("T")
 
 
+def atomic(nvim: Nvim, *instructions: Tuple[str, Sequence[str]]) -> Sequence[Any]:
+    inst = tuple((f"nvim_{instruction}", args) for instruction, args in instructions)
+    out, err = nvim.api.call_atomic(inst)
+    if err:
+        raise Exception(err)
+    return out
+
+
 def call(nvim: Nvim, fn: Callable[[], T]) -> Awaitable[T]:
     fut: Future = Future()
 
@@ -23,12 +31,6 @@ def call(nvim: Nvim, fn: Callable[[], T]) -> Awaitable[T]:
 
     nvim.async_call(cont)
     return fut
-
-
-def atomic(nvim: Nvim, *instructions: Tuple[str, Sequence[str]]) -> Tuple[Any, Any]:
-    inst = tuple((f"nvim_{instruction}", args) for instruction, args in instructions)
-    out, err = nvim.api.call_atomic(inst)
-    return out, err
 
 
 async def print(

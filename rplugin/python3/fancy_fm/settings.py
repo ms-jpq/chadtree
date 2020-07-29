@@ -18,6 +18,8 @@ def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
         link=icon_c["link"],
         filetype=icon_c["filetype"],
         filename=icon_c["filename"],
+        active=icon_c["active"],
+        selected=icon_c["selected"],
     )
 
     update = UpdateTime(

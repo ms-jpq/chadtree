@@ -198,7 +198,7 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
         it1 = (("buf_clear_namespace", (buffer, ns, 0, -1)),)
         it2 = buf_setlines(nvim, buffer=buffer, lines=cast(Sequence[str], lines))
         it3 = buf_set_virtualtext(
-            nvim, buffer=buffer, ns=ns, vtext=cast(Sequence[Badge], badges),
+            nvim, buffer=buffer, ns=ns, vtext=cast(Sequence[Sequence[Badge]], badges),
         )
         # it4 = buf_set_highlights(nvim, buffer=buffer, ns=ns)
         atomic(nvim, *it1, *it2, *it3)

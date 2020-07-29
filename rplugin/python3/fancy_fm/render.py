@@ -54,8 +54,23 @@ def paint(
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
     icons = settings.icons
+    use_icons = settings.use_icons
 
-    def parse_badges(path: str) -> Iterator[Badge]:
+    sym_active = icons.active if use_icons else ">"
+    sym_select = icons.selected if use_icons else "*"
+    sym_link = icons.link if use_icons else "->"
+    sym_folder_open = icons.folder_open if use_icons else "-"
+    sym_folder_closed = icons.folder_closed if use_icons else "+"
+
+    def gen_spacer(depth: int) -> str:
+        return (depth * 2 - 1) * " "
+
+    def gen_status(path: str) -> str:
+        selected = sym_select if path in selection else " "
+        active = sym_active if path == current else " "
+        return f"{selected}{active}"
+
+    def gen_badges(path: str) -> Iterator[Badge]:
         qf_count = qf.locations[path]
         stat = vc.status.get(path)
         if qf_count:
@@ -63,55 +78,39 @@ def paint(
         if stat:
             yield Badge(text=f"[{stat}]", group="Comment")
 
-    def show_ascii(node: Node, depth: int) -> Render:
-        path = node.path
-
-        spaces = (depth * 2 - 1) * " "
-        curr = ">" if path == current else " "
-        select = "*" if path in selection else " "
-        name = node.name.replace(linesep, r"\n")
-
+    def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
+        yield gen_status(node.path)
+        yield " "
         if Mode.FOLDER in node.mode:
-            decor = "-" if path in index else "+"
-            name = f"{decor} {name}{sep}"
-        if Mode.LINK in node.mode:
-            name = f"  {name} ->"
-
-        line = f"{spaces}{select}{curr} {name}"
-        badges = tuple(parse_badges(path))
-        render = Render(line=line, badges=badges, highlights=())
-        return render
-
-    def show_icons(node: Node, depth: int) -> Render:
-        path = node.path
-
-        spaces = (depth * 2 - 1) * " "
-        curr = "▶" if path == current else " "
-        select = "✸" if path in selection else " "
-        name = node.name.replace(linesep, r"\n")
-
-        if Mode.FOLDER in node.mode:
-            decor: Optional[
-                str
-            ] = icons.folder_open if path in index else icons.folder_closed
-            name = f"{decor} {name}"
+            yield sym_folder_open if node.path in index else sym_folder_closed
         else:
-            decor = icons.filetype.get(node.ext or "") or next(
-                (v for k, v in icons.filename.items() if fnmatch(node.name, k)), None
-            )
-            if decor:
-                name = f"{decor} {name}"
-            else:
-                name = f"  {name}"
-        if Mode.LINK in node.mode:
-            name = f"{name} {icons.link}"
+            yield (
+                icons.filetype.get(node.ext or "", "")
+                or next(
+                    (v for k, v in icons.filename.items() if fnmatch(node.name, k)),
+                    " ",
+                )
+            ) if use_icons else " "
+        yield " "
 
-        line = f"{spaces}{select}{curr} {name}"
-        badges = tuple(parse_badges(path))
+    def gen_decor_post(node: Node) -> Iterator[str]:
+        if not use_icons and Mode.FOLDER in node.mode:
+            yield sep
+        if Mode.LINK in node.mode:
+            yield sym_link
+
+    def show(node: Node, depth: int) -> Render:
+        spaces = gen_spacer(depth)
+
+        pre = "".join(gen_decor_pre(node, depth=depth))
+        name = node.name.replace(linesep, r"\n")
+        post = "".join(gen_decor_post(node))
+
+        line = f"{spaces}{pre}{name}{post}"
+        badges = tuple(gen_badges(node.path))
         render = Render(line=line, badges=badges, highlights=())
         return render
 
-    show = show_icons if settings.use_icons else show_ascii
     return show
 
 
