@@ -93,9 +93,12 @@ def paint(
             ) if use_icons else " "
         yield " "
 
-    def gen_decor_post(node: Node) -> Iterator[str]:
+    def gen_name(node: Node) -> Iterator[str]:
+        yield node.name.replace(linesep, r"\n")
         if not use_icons and Mode.folder in node.mode:
             yield sep
+
+    def gen_decor_post(node: Node) -> Iterator[str]:
         if Mode.link in node.mode:
             yield " "
             yield sym_link
@@ -104,7 +107,7 @@ def paint(
         spaces = gen_spacer(depth)
 
         pre = "".join(gen_decor_pre(node, depth=depth))
-        name = node.name.replace(linesep, r"\n")
+        name = "".join(gen_name(node))
         post = "".join(gen_decor_post(node))
 
         line = f"{spaces}{pre}{name}{post}"
