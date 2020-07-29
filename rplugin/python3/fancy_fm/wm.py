@@ -8,7 +8,7 @@ from pynvim.api.window import Window
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
 from .nvim import atomic
-from .types import Badge, Render, Settings, State
+from .types import Badge, Highlight, Render, Settings, State
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
@@ -183,9 +183,11 @@ def buf_set_virtualtext(
 
 
 def buf_set_highlights(
-    nvim: Nvim, buffer: Buffer, ns: int
+    nvim: Nvim, buffer: Buffer, ns: int, highlights: Sequence[Sequence[Highlight]]
 ) -> Iterator[Tuple[str, Sequence[Any]]]:
-    pass
+    for idx, hl in enumerate(highlights):
+        for h in hl:
+            yield "buf_add_highlight", (buffer, ns, h.group, idx, h.begin, h.end)
 
 
 def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
@@ -200,5 +202,10 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
         it3 = buf_set_virtualtext(
             nvim, buffer=buffer, ns=ns, vtext=cast(Sequence[Sequence[Badge]], badges),
         )
-        # it4 = buf_set_highlights(nvim, buffer=buffer, ns=ns)
-        atomic(nvim, *cast(Sequence[Tuple[str, Sequence[Any]]], it1), *it2, *it3)
+        it4 = buf_set_highlights(
+            nvim,
+            buffer=buffer,
+            ns=ns,
+            highlights=cast(Sequence[Sequence[Highlight]], highlights),
+        )
+        atomic(nvim, *cast(Sequence[Tuple[str, Sequence[Any]]], it1), *it2, *it3, *it4)
