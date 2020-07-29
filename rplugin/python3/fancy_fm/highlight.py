@@ -23,7 +23,7 @@ async def add_hl_groups(nvim: Nvim, groups: Sequence[HLgroup]) -> None:
     def parse() -> Iterator[str]:
         for group in groups:
             name = group.name
-            _cterm = ",".join(group.cterm)
+            _cterm = ",".join(group.cterm) or "NONE"
             cterm = f"cterm={_cterm}"
             ctermfg = f"ctermfg={group.ctermfg}" if group.ctermfg else ""
             ctermbg = f"ctermbg={group.ctermbg}" if group.ctermbg else ""
