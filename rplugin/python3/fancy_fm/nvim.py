@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
+from pynvim.api.common import NvimError
 
 T = TypeVar("T")
 
@@ -14,7 +15,7 @@ def atomic(nvim: Nvim, *instructions: Tuple[str, Sequence[str]]) -> Sequence[Any
     inst = tuple((f"nvim_{instruction}", args) for instruction, args in instructions)
     out, err = nvim.api.call_atomic(inst)
     if err:
-        raise Exception(err)
+        raise NvimError(err)
     return out
 
 

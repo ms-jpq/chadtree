@@ -97,6 +97,7 @@ def paint(
         if not use_icons and Mode.FOLDER in node.mode:
             yield sep
         if Mode.LINK in node.mode:
+            yield " "
             yield sym_link
 
     def show(node: Node, depth: int) -> Render:

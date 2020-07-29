@@ -201,4 +201,4 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
             nvim, buffer=buffer, ns=ns, vtext=cast(Sequence[Sequence[Badge]], badges),
         )
         # it4 = buf_set_highlights(nvim, buffer=buffer, ns=ns)
-        atomic(nvim, *it1, *it2, *it3)
+        atomic(nvim, *cast(Sequence[Tuple[str, Sequence[Any]]], it1), *it2, *it3)
