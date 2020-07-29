@@ -1,4 +1,5 @@
 from asyncio import Future, Task, create_task, sleep
+from dataclasses import dataclass
 from itertools import repeat
 from os import linesep
 from traceback import format_exc
@@ -41,9 +42,8 @@ async def print(
     write = nvim.api.err_write if error else nvim.api.out_write
 
     def cont() -> None:
-        write(str(message))
-        if flush:
-            write(linesep)
+        msg = str(message) + (linesep if flush else "")
+        write(msg)
 
     await call(nvim, cont)
 
@@ -121,3 +121,12 @@ class HoldWindowPosition:
 
     def __exit__(self, *_: Any) -> None:
         self.nvim.api.set_current_win(self.window)
+
+
+@dataclass(frozen=True)
+class HLgroup:
+    pass
+
+
+def add_hl_group() -> None:
+    pass
