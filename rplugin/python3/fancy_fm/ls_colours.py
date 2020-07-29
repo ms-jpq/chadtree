@@ -96,6 +96,13 @@ COLOUR_TABLE: Dict[str, AnsiColour] = {
 
 RGB_TABLE: Set[str] = {"38", "48"}
 
+E_BASIC_TABLE: Dict[int, AnsiColour] = {i: c for i, c in enumerate(AnsiColour)}
+
+E_GREY_TABLE: Dict[int, Colour] = {
+    i: Colour(r=s, g=s, b=s)
+    for i, s in enumerate((step / 23 * 255 for step in range(24)), 232)
+}
+
 
 def to_hex(colour: Colour) -> str:
     r, g, b = format(colour.r, "02x"), format(colour.g, "02x"), format(colour.b, "02x")
@@ -109,7 +116,17 @@ def parse_8(codes: Iterator[str]) -> Optional[Colour]:
         return None
     else:
         if ansi_code in ANSI_RANGE:
-            return Colour(r=0, g=0, b=0)
+            basic = E_BASIC_TABLE.get(ansi_code)
+            if basic:
+                return basic
+            grey = E_GREY_TABLE.get(ansi_code)
+            if grey:
+                return grey
+            code = ansi_code - 16
+            r = code // 36
+            g = (code - r) // 6
+            b = code - r - g
+            return Colour(r=r, g=g, b=b)
         else:
             return None
 
