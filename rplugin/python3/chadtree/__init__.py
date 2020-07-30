@@ -96,22 +96,22 @@ class Main:
     def _initialize(self) -> None:
         async def setup() -> None:
             await autocmd(
-                self.nvim, events=("DirChanged",), fn="_FMchange_dir",
+                self.nvim, events=("DirChanged",), fn="_CHADchange_dir",
             )
 
             await autocmd(
-                self.nvim, events=("BufEnter",), fn="_FMfollow",
+                self.nvim, events=("BufEnter",), fn="_CHADfollow",
             )
 
             await autocmd(
                 self.nvim,
                 events=("BufWritePost", "FocusGained"),
-                fn="FMschedule_update",
+                fn="CHADschedule_update",
             )
 
-            await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_FMsession")
+            await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_CHADsession")
 
-            await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_FMquickfix")
+            await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_CHADquickfix")
 
             groups = chain(
                 self.settings.hl_context.groups,
@@ -136,7 +136,7 @@ class Main:
             self.state = new_state
             await redraw(self.nvim, state=new_state)
 
-    @command("FMopen")
+    @command("CHADopen")
     def fm_open(self, *args: Any, **kwargs: Any) -> None:
         """
         Toggle sidebar
@@ -145,7 +145,7 @@ class Main:
         self._initialize()
         self._run(c_open)
 
-    @function("FMschedule_update")
+    @function("CHADschedule_update")
     def schedule_udpate(self, args: Sequence[Any]) -> None:
         """
         Follow directory
@@ -153,7 +153,7 @@ class Main:
 
         self.ch.set()
 
-    @function("_FMchange_dir")
+    @function("_CHADchange_dir")
     def on_changedir(self, args: Sequence[Any]) -> None:
         """
         Follow files
@@ -161,7 +161,7 @@ class Main:
 
         self._run(a_changedir)
 
-    @function("_FMfollow")
+    @function("_CHADfollow")
     def on_bufenter(self, args: Sequence[Any]) -> None:
         """
         Follow buffer
@@ -169,7 +169,7 @@ class Main:
 
         self._run(a_follow)
 
-    @function("_FMsession")
+    @function("_CHADsession")
     def on_leave(self, args: Sequence[Any]) -> None:
         """
         Follow buffer
@@ -177,7 +177,7 @@ class Main:
 
         self._run(a_session)
 
-    @function("_FMquickfix")
+    @function("_CHADquickfix")
     def on_quickfix(self, args: Sequence[Any]) -> None:
         """
         Update quickfix list
@@ -185,7 +185,7 @@ class Main:
 
         self._run(a_quickfix)
 
-    @function("FMquit")
+    @function("CHADquit")
     def fm_quit(self, args: Sequence[Any]) -> None:
         """
         Close sidebar
@@ -193,7 +193,7 @@ class Main:
 
         self._run(c_quit)
 
-    @function("FMprimary")
+    @function("CHADprimary")
     def primary(self, args: Sequence[Any]) -> None:
         """
         Folders -> toggle
@@ -202,7 +202,7 @@ class Main:
 
         self._run(c_primary)
 
-    @function("FMsecondary")
+    @function("CHADsecondary")
     def secondary(self, args: Sequence[Any]) -> None:
         """
         Folders -> toggle
@@ -211,7 +211,7 @@ class Main:
 
         self._run(c_secondary)
 
-    @function("FMbigger")
+    @function("CHADbigger")
     def bigger(self, args: Sequence[Any]) -> None:
         """
         Bigger sidebar
@@ -219,7 +219,7 @@ class Main:
 
         self._run(c_resize, direction=add)
 
-    @function("FMsmaller")
+    @function("CHADsmaller")
     def smaller(self, args: Sequence[Any]) -> None:
         """
         Smaller sidebar
@@ -227,7 +227,7 @@ class Main:
 
         self._run(c_resize, direction=sub)
 
-    @function("FMrefresh")
+    @function("CHADrefresh")
     def refresh(self, args: Sequence[Any]) -> None:
         """
         Redraw buffers
@@ -235,7 +235,7 @@ class Main:
 
         self._run(c_refresh)
 
-    @function("FMcollapse")
+    @function("CHADcollapse")
     def collapse(self, args: Sequence[Any]) -> None:
         """
         Collapse folder
@@ -243,7 +243,7 @@ class Main:
 
         self._run(c_collapse)
 
-    @function("FMhidden")
+    @function("CHADhidden")
     def hidden(self, args: Sequence[Any]) -> None:
         """
         Toggle hidden
@@ -251,7 +251,7 @@ class Main:
 
         self._run(c_hidden)
 
-    @function("FMfollow")
+    @function("CHADfollow")
     def follow(self, args: Sequence[Any]) -> None:
         """
         Toggle follow
@@ -259,7 +259,7 @@ class Main:
 
         self._run(c_follow)
 
-    @function("FMcopy_name")
+    @function("CHADcopy_name")
     def copy_name(self, args: Sequence[Any]) -> None:
         """
         Copy dirname / filename
@@ -268,7 +268,7 @@ class Main:
 
         self._run(c_copy_name, is_visual=is_visual)
 
-    @function("FMnew")
+    @function("CHADnew")
     def new(self, args: Sequence[Any]) -> None:
         """
         new file / folder
@@ -276,7 +276,7 @@ class Main:
 
         self._run(c_new)
 
-    @function("FMrename")
+    @function("CHADrename")
     def rename(self, args: Sequence[Any]) -> None:
         """
         rename file / folder
@@ -284,7 +284,7 @@ class Main:
 
         self._run(c_rename)
 
-    @function("FMclear")
+    @function("CHADclear")
     def clear(self, args: Sequence[Any]) -> None:
         """
         Clear selected
@@ -292,7 +292,7 @@ class Main:
 
         self._run(c_clear)
 
-    @function("FMselect")
+    @function("CHADselect")
     def select(self, args: Sequence[Any]) -> None:
         """
         Folder / File -> select
@@ -301,7 +301,7 @@ class Main:
 
         self._run(c_select, is_visual=is_visual)
 
-    @function("FMdelete")
+    @function("CHADdelete")
     def delete(self, args: Sequence[Any]) -> None:
         """
         Delete selected
@@ -310,7 +310,7 @@ class Main:
 
         self._run(c_delete, is_visual=is_visual)
 
-    @function("FMcut")
+    @function("CHADcut")
     def cut(self, args: Sequence[Any]) -> None:
         """
         Cut selected
@@ -318,7 +318,7 @@ class Main:
 
         self._run(c_cut)
 
-    @function("FMcopy")
+    @function("CHADcopy")
     def copy(self, args: Sequence[Any]) -> None:
         """
         Copy selected
@@ -326,7 +326,7 @@ class Main:
 
         self._run(c_copy)
 
-    @function("FMopen_sys")
+    @function("CHADopen_sys")
     def open_sys(self, args: Sequence[Any]) -> None:
         """
         Open using finder / dolphin, etc
