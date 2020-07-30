@@ -4,7 +4,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 **WORK IN PROGRESS**
 
-## Feature Highlight
+## Highlight
 
 - Async everything & Incremental scan
 
@@ -16,7 +16,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Github colours & `LS_COLOR` support
 
-## Preview
+## Features
 
 ### I like speed
 
