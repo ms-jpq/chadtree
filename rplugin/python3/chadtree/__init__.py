@@ -255,7 +255,7 @@ class Main:
 
         self._run(c_hidden)
 
-    @function("CHADfollow")
+    @function("CHADtoggle_follow")
     def follow(self, args: Sequence[Any]) -> None:
         """
         Toggle follow

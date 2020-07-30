@@ -7,9 +7,7 @@ from .ls_colours import parse_ls_colours
 from .types import Settings, UpdateTime, VersionControlOptions, ViewOptions
 
 
-def initial(
-    user_config: Any, user_view: Any, user_ignores: Any
-) -> Settings:
+def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     config = merge(load_json(config_json), user_config)
     view = merge(load_json(view_json), user_view)
     icon_c = load_json(icons_json)
@@ -43,11 +41,13 @@ def initial(
     version_ctl = VersionControlOptions(defer=config["version_control"]["defer"])
     hl_context = parse_ls_colours()
 
+    keymap = {f"CHAD{k}": v for k, v in config["keymap"].items()}
+
     settings = Settings(
         follow=config["follow"],
         icons=icons,
         hl_context=hl_context,
-        keymap=config["keymap"],
+        keymap=keymap,
         name_ignore=ignore["name"],
         open_left=config["open_left"],
         path_ignore=ignore["path"],
