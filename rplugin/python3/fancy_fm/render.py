@@ -100,7 +100,7 @@ def paint(
                 icons.filetype.get(node.ext or "", "")
                 or next(
                     (v for k, v in icons.filename.items() if fnmatch(node.name, k)),
-                    " ",
+                    icons.default_icon,
                 )
             ) if use_icons else ""
         yield " "
