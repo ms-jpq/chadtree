@@ -468,8 +468,14 @@ async def _operation(
     selection = state.selection
     unified = tuple(unify_ancestors(selection))
     if unified and node:
+        loop = get_running_loop()
         operations = {src: _find_dest(src, node) for src in unified}
-        pre_existing = {s: d for s, d in operations.items() if exists(d)}
+
+        def p_pre() -> Dict[str, str]:
+            pe = {s: d for s, d in operations.items() if exists(d)}
+            return pe
+
+        pre_existing = await loop.run_in_executor(None, p_pre)
         if pre_existing:
             msg = ", ".join(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
