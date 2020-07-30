@@ -6,7 +6,13 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ### I like colours
 
-![github_colours.png]()
+Full `LS_COLOR` support!
+
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
+
+[Github coloured](https://github.com/github/linguist) icons
+
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
 
 ### Fast & asynchronous where it counts, (and doesn't), either way, it's async all the time
 
