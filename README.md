@@ -2,6 +2,8 @@
 
 Async File Manager for Neovim, Better than NERDTree.
 
+**WORK IN PROGRESS**
+
 ## Features
 
 ### I like speed
@@ -24,15 +26,11 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quickfix.gif)
 
-### I like colours
+### I like 21st century
 
-- Full `$LS_COLOR` support! (shows same colours as unix `ls` & `tree` commands)
+- Follow mode
 
-![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
-
-- [Github coloured](https://github.com/github/linguist) icons
-
-![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
+- Session support
 
 ### I like version control
 
@@ -44,17 +42,17 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Full support for globbing ignored files
 
-### I like 21st century
+![git_hide.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git_hide.gif)
 
-- Follow mode
+### I like colours
 
-- Session support
+- Full `$LS_COLOR` support! (shows same colours as unix `ls` & `tree` commands)
 
-- Full globbing support
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
 
-- Ubiquitous locale-aware sorting
+- [Github coloured](https://github.com/github/linguist) icons
 
-## Preview
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
 
 ## Install
 
