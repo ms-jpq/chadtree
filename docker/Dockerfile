@@ -13,3 +13,6 @@ RUN mkdir -p autoload && \
 
 
 COPY root /
+
+
+RUN nvim --headless +PlugInstall +quitall
