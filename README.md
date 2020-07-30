@@ -38,7 +38,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Asynchronous parse git status (untracked, modified, staged)
 
-![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.png)
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
 
 - Full support for git ignore, toggle show / hide
 
