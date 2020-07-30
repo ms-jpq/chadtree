@@ -64,13 +64,6 @@ def paint(
     icons = settings.icons
     use_icons = settings.use_icons
 
-    sym_active = icons.active if use_icons else ">"
-    sym_select = icons.selected if use_icons else "*"
-    sym_link = icons.link if use_icons else "->"
-    sym_link_broken = icons.link_broken if use_icons else "-/->"
-    sym_folder_open = icons.folder_open if use_icons else "-"
-    sym_folder_closed = icons.folder_closed if use_icons else "+"
-
     def search_hl(node: Node) -> Optional[HLgroup]:
         s_modes = sorted(node.mode)
 
@@ -92,8 +85,8 @@ def paint(
         return (depth * 2 - 1) * " "
 
     def gen_status(path: str) -> str:
-        selected = sym_select if path in selection else " "
-        active = sym_active if path == current else " "
+        selected = icons.selected if path in selection else " "
+        active = icons.active if path == current else " "
         return f"{selected}{active}"
 
     def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
@@ -101,7 +94,7 @@ def paint(
         yield gen_status(node.path)
         yield " "
         if Mode.folder in node.mode:
-            yield sym_folder_open if node.path in index else sym_folder_closed
+            yield icons.folder_open if node.path in index else icons.folder_closed
         else:
             yield (
                 icons.filetype.get(node.ext or "", "")
@@ -119,19 +112,20 @@ def paint(
 
     def gen_decor_post(node: Node) -> Iterator[str]:
         mode = node.mode
-        yield " "
         if Mode.orphan_link in mode:
-            yield sym_link_broken
+            yield " "
+            yield icons.link_broken
         elif Mode.link in mode:
-            yield sym_link
+            yield " "
+            yield icons.link
 
     def gen_badges(path: str) -> Iterator[Badge]:
         qf_count = qf.locations[path]
         stat = vc.status.get(path)
         if qf_count:
-            yield Badge(text=f"({qf_count})", group="Label")
+            yield Badge(text=f"({qf_count})", group=icons.quickfix_hl)
         if stat:
-            yield Badge(text=f"[{stat}]", group="Comment")
+            yield Badge(text=f"[{stat}]", group=icons.version_ctl_hl)
 
     def gen_highlights(node: Node, pre: str, name: str) -> Iterator[Highlight]:
         group = search_hl(node)

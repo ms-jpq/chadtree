@@ -44,14 +44,16 @@ class Session:
 
 @dataclass(frozen=True)
 class IconSet:
+    active: str
+    selected: str
     folder_open: str
     folder_closed: str
     link: str
     link_broken: str
     filetype: Dict[str, str]
     filename: Dict[str, str]
-    selected: str
-    active: str
+    quickfix_hl: str
+    version_ctl_hl: str
 
 
 @dataclass(frozen=True)

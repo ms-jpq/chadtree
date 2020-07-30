@@ -1,6 +1,6 @@
 from typing import Any
 
-from .consts import config_json, icons_json, ignore_json
+from .consts import config_json, ignore_json, view_json
 from .da import load_json, merge
 from .ls_colours import parse_ls_colours
 from .types import IconSet, Settings, UpdateTime, VersionControlOptions
@@ -8,20 +8,23 @@ from .types import IconSet, Settings, UpdateTime, VersionControlOptions
 
 def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
     config = merge(load_json(config_json), user_config)
-    icon_c = merge(load_json(icons_json), user_icons)
+    icon_c = merge(load_json(view_json), user_icons)
     ignore = merge(load_json(ignore_json), user_ignores)
 
-    folder_ic = icon_c["folder"]
+    use_icons = config["use_icons"]
+    icon_cs = icon_c["unicode"] if use_icons else icon_c["ascii"]
 
     icons = IconSet(
-        folder_open=folder_ic["open"],
-        folder_closed=folder_ic["closed"],
-        link=icon_c["link"],
-        link_broken=icon_c["link_broken"],
-        filetype=icon_c["filetype"],
-        filename=icon_c["filename"],
-        active=icon_c["active"],
-        selected=icon_c["selected"],
+        active=icon_cs["status"]["active"],
+        selected=icon_cs["status"]["selected"],
+        folder_open=icon_cs["folder"]["open"],
+        folder_closed=icon_cs["folder"]["closed"],
+        link=icon_cs["link"]["normal"],
+        link_broken=icon_cs["link"]["broken"],
+        filetype=icon_c["files"]["type"],
+        filename=icon_c["files"]["name"],
+        quickfix_hl=icon_c["highlights"]["quickfix"],
+        version_ctl_hl=icon_c["highlights"]["version_control"],
     )
 
     update = UpdateTime(
@@ -42,7 +45,7 @@ def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
         session=config["session"],
         show_hidden=config["show_hidden"],
         update=update,
-        use_icons=config["use_icons"],
+        use_icons=use_icons,
         version_ctl=version_ctl,
         width=config["width"],
     )
