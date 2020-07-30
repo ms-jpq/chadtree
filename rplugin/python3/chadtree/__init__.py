@@ -7,6 +7,7 @@ from traceback import format_exc
 from typing import Any, Awaitable, Callable, Optional, Sequence
 
 from pynvim import Nvim, command, function, plugin
+from pynvim.api.common import NvimError
 
 from .highlight import add_hl_groups
 from .nvim import autocmd, run_forever
@@ -48,9 +49,7 @@ class Main:
         user_view = nvim.vars.get("chadtree_view", {})
         user_ignores = nvim.vars.get("chadtree_ignores", {})
         self.settings = initial_settings(
-            user_config=user_config,
-            user_view=user_view,
-            user_ignores=user_ignores,
+            user_config=user_config, user_view=user_view, user_ignores=user_ignores,
         )
         self.state: Optional[State] = None
 
@@ -134,7 +133,10 @@ class Main:
             state = await self._curr_state()
             new_state = await c_refresh(self.nvim, state=state, settings=self.settings)
             self.state = new_state
-            await redraw(self.nvim, state=new_state)
+            try:
+                await redraw(self.nvim, state=new_state)
+            except NvimError:
+                pass
 
     @command("CHADopen")
     def fm_open(self, *args: Any, **kwargs: Any) -> None:
