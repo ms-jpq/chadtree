@@ -2,7 +2,7 @@ local init = function ()
 
   local extensions = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols
   local exact      = vim.g.WebDevIconsUnicodeDecorateFileNodesExactSymbols
-  local glob       = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols
+  local glob       = vim.g.WebDevIconsUnicodeDecorateFileNodesPatternSymbols
 
   local data = {
     extensions = extensions,
