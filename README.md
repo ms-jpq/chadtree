@@ -18,7 +18,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Visual mode selections
 
-- Copy, Paste, Delete, Rename, gotta do them all
+- Create, Copy, Paste, Delete, Rename, gotta do them all
 
 ![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
 
@@ -29,6 +29,8 @@ Async File Manager for Neovim, Better than NERDTree.
 ### I like 21st century
 
 - Follow mode
+
+![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
 
 - Session support
 
