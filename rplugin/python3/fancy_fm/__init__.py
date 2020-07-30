@@ -44,10 +44,14 @@ from .types import State
 class Main:
     def __init__(self, nvim: Nvim):
         user_config = nvim.vars.get("fancy_fm_settings", {})
+        user_view = nvim.vars.get("fancy_fm_view", {})
         user_icons = nvim.vars.get("fancy_fm_icons", {})
         user_ignores = nvim.vars.get("fancy_fm_ignores", {})
         self.settings = initial_settings(
-            user_config=user_config, user_icons=user_icons, user_ignores=user_ignores
+            user_config=user_config,
+            user_view=user_view,
+            user_icons=user_icons,
+            user_ignores=user_ignores,
         )
         self.state: Optional[State] = None
 
