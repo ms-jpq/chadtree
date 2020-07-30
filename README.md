@@ -16,7 +16,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Github colours & `LS_COLOR` support
 
-## Features
+## Features Illustrated
 
 ### I like speed
 
@@ -32,9 +32,9 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Create, Copy, Paste, Delete, Rename, gotta do them all
 
-![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
-
 - Quickfix integration
+
+![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
 
 ![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quickfix.gif)
 
@@ -42,9 +42,9 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Follow mode
 
-![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
-
 - Session support (save open folders to disk, pick up where you left off)
+
+![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
 
 ![session.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/session.gif)
 
@@ -52,11 +52,11 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Asynchronous parse git status (untracked, modified, staged)
 
+* Full support for git ignore, toggle show / hide
+
+* Full support for globbing ignored files
+
 ![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
-
-- Full support for git ignore, toggle show / hide
-
-- Full support for globbing ignored files
 
 ![git_hide.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git_hide.gif)
 
@@ -64,9 +64,9 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Full `$LS_COLOR` support! (shows same colours as unix `ls` & `tree` commands)
 
-![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
+* [Github coloured](https://github.com/github/linguist) icons
 
-- [Github coloured](https://github.com/github/linguist) icons
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
 
 ![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
 
