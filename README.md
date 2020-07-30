@@ -1,4 +1,4 @@
-# Fancy FM (100% async)
+# CHADTree
 
 Work in progress
 
@@ -57,7 +57,7 @@ pip3 install pynvim
 Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
 
 ```VimL
-Plug 'ms-jpq/fancy-fm', {'branch': 'nvim', 'do': ':UpdateRemotePlugins'}
+Plug 'ms-jpq/chadtree', {'do': ':UpdateRemotePlugins'}
 ```
 
 ## Documentation
