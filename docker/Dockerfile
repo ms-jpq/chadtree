@@ -12,7 +12,8 @@ RUN mkdir -p autoload && \
     wget https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 
-COPY root /
+COPY docker/root /
+COPY . /root/.config/nvim/plugged/chadtree/
 
 
-RUN nvim --headless +PlugInstall +quitall
+RUN nvim --headless +UpdateRemotePlugins +quitall
