@@ -1,5 +1,13 @@
 {
   "name": {
+    ".*angular.*.js": "",
+    ".*backbone.*.js": "",
+    ".*jquery.*.js": "",
+    ".*materialize.*.css": "",
+    ".*materialize.*.js": "",
+    ".*mootools.*.js": "",
+    ".*require.*.js": "",
+    ".*vimrc.*": "",
     ".bashprofile": "",
     ".bashrc": "",
     ".ds_store": "",
@@ -9,6 +17,7 @@
     ".gvimrc": "",
     ".vimrc": "",
     ".zshrc": "",
+    "Vagrantfile": "",
     "_gvimrc": "",
     "_vimrc": "",
     "cmakelists.txt": "",
