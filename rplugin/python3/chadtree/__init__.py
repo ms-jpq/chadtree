@@ -131,9 +131,11 @@ class Main:
             self.ch, min_time=update.min_time, max_time=update.max_time,
         ):
             state = await self._curr_state()
-            new_state = await c_refresh(self.nvim, state=state, settings=self.settings)
-            self.state = new_state
             try:
+                new_state = await c_refresh(
+                    self.nvim, state=state, settings=self.settings
+                )
+                self.state = new_state
                 await redraw(self.nvim, state=new_state)
             except NvimError:
                 pass
