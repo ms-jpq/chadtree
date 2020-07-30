@@ -14,13 +14,14 @@ session_dir = join(
 
 config_json = join(__config__, "config.json")
 view_json = join(__config__, "view.json")
-icons_json = join(__config__, "icons.json")
-colours_json = join(__artifacts__, "github_colours.json")
 ignore_json = join(__config__, "ignore.json")
+
+icons_json = join(__artifacts__, "icons.json")
+colours_json = join(__artifacts__, "github_colours.json")
 
 fm_filetype = "fancy_fm"
 fm_namespace = "fancy_fm_ns"
-fm_hl_prefix = "fancy_fm_"
+fm_hl_prefix = "fancy_fm"
 
 folder_mode = 0o755
 file_mode = 0o644
