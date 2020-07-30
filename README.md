@@ -3,19 +3,6 @@
 Async File Manager for Neovim, Better than NERDTree.
 
 **WORK IN PROGRESS**
-
-## Highlight
-
-- Async everything & Incremental scan
-
-- Batch Operations via visual mode
-
-- Follow mode & Session support
-
-- Git support & toggle show / hide
-
-- Github colours & `LS_COLOR` support
-
 ## Features Illustrated
 
 ### I like speed
@@ -36,8 +23,6 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
 
-![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quickfix.gif)
-
 ### I like 21st century
 
 - Follow mode
@@ -45,8 +30,6 @@ Async File Manager for Neovim, Better than NERDTree.
 - Session support (save open folders to disk, pick up where you left off)
 
 ![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
-
-![session.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/session.gif)
 
 ### I like version control
 
@@ -57,8 +40,6 @@ Async File Manager for Neovim, Better than NERDTree.
 * Full support for globbing ignored files
 
 ![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
-
-![git_hide.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git_hide.gif)
 
 ### I like colours
 
