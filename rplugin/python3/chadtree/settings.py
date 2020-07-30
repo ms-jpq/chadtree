@@ -31,7 +31,8 @@ def initial(
         quickfix_hl=view["highlights"]["quickfix"],
         version_ctl_hl=view["highlights"]["version_control"],
         ext_colours=ext_colours,
-        filename=icon_c["name"],
+        filename_exact=icon_c["name_exact"],
+        filename_glob=icon_c["name_glob"],
         filetype=icon_c["type"],
     )
 

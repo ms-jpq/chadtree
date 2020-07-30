@@ -104,9 +104,14 @@ def paint(
             yield icons.folder_open if node.path in index else icons.folder_closed
         else:
             yield (
-                icons.filetype.get(node.ext or "", "")
+                icons.filename_exact.get(node.name, "")
+                or icons.filetype.get(node.ext or "", "")
                 or next(
-                    (v for k, v in icons.filename.items() if fnmatch(node.name, k)),
+                    (
+                        v
+                        for k, v in icons.filename_glob.items()
+                        if fnmatch(node.name, k)
+                    ),
                     icons.default_icon,
                 )
             ) if use_icons else icons.default_icon

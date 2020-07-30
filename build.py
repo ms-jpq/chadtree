@@ -55,9 +55,11 @@ def spit_json(path: str, json: Any) -> None:
 
 def process_json(json: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
     new = {}
-    globbed = {k.rstrip("$").replace(r"\.", "."): v for k, v in json["glob"].items()}
     new["type"] = {f".{k}": v for k, v in json["extensions"].items()}
-    new["name"] = {**json["exact"], **globbed}
+    new["name_exact"] = json["exact"]
+    new["name_glob"] = {
+        k.rstrip("$").replace(r"\.", "."): v for k, v in json["glob"].items()
+    }
     return new
 
 
