@@ -36,8 +36,6 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
 
-![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quickfix.gif)
-
 ### I like 21st century
 
 - Follow mode
@@ -55,8 +53,6 @@ Async File Manager for Neovim, Better than NERDTree.
 * Full support for globbing ignored files
 
 ![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
-
-![git_hide.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git_hide.gif)
 
 ### I like colours
 
