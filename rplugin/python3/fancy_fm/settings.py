@@ -1,7 +1,8 @@
 from typing import Any
 
-from .consts import config_json, icons_json, ignore_json, view_json
+from .consts import colours_json, config_json, icons_json, ignore_json, view_json
 from .da import load_json, merge
+from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
 from .types import Settings, UpdateTime, VersionControlOptions, ViewOptions
 
@@ -13,6 +14,7 @@ def initial(
     view = merge(load_json(view_json), user_view)
     icon_c = merge(load_json(icons_json), user_icons)
     ignore = merge(load_json(ignore_json), user_ignores)
+    colours = load_json(colours_json)
 
     use_icons = config["use_icons"]
     view_c = view["unicode"] if use_icons else view["ascii"]
@@ -20,8 +22,6 @@ def initial(
     icons = ViewOptions(
         active=view_c["status"]["active"],
         default_icon=icon_c["default"],
-        filename=icon_c["name"],
-        filetype=icon_c["type"],
         folder_closed=view_c["folder"]["closed"],
         folder_open=view_c["folder"]["open"],
         link=view_c["link"]["normal"],
@@ -29,6 +29,9 @@ def initial(
         selected=view_c["status"]["selected"],
         quickfix_hl=view["highlights"]["quickfix"],
         version_ctl_hl=view["highlights"]["version_control"],
+        colours=gen_hl("github", mapping=colours),
+        filename=icon_c["name"],
+        filetype=icon_c["type"],
     )
 
     update = UpdateTime(

@@ -217,7 +217,7 @@ def parse_styling(codes: str) -> Styling:
 
 def parseHLGroup(name: str, styling: Styling) -> HLgroup:
     fg, bg = styling.foreground, styling.background
-    name = f"{fm_hl_prefix}{name}"
+    name = f"{fm_hl_prefix}_ls_{name}"
     cterm = {
         style
         for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)

@@ -4,6 +4,7 @@ from pathlib import Path
 
 __base__ = dirname(dirname(dirname(dirname(realpath(__file__)))))
 __config__ = join(__base__, "config")
+__artifacts__ = join(__base__, "artifacts")
 
 session_dir = join(
     environ.get("XDG_DATA_HOME", join(Path.home(), ".local", "share")),
@@ -14,6 +15,7 @@ session_dir = join(
 config_json = join(__config__, "config.json")
 view_json = join(__config__, "view.json")
 icons_json = join(__config__, "icons.json")
+colours_json = join(__artifacts__, "github_colours.json")
 ignore_json = join(__config__, "ignore.json")
 
 fm_filetype = "fancy_fm"

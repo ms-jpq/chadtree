@@ -43,11 +43,19 @@ class Session:
 
 
 @dataclass(frozen=True)
+class HLgroup:
+    name: str
+    cterm: Set[str] = field(default_factory=set)
+    ctermfg: Optional[str] = None
+    ctermbg: Optional[str] = None
+    guifg: Optional[str] = None
+    guibg: Optional[str] = None
+
+
+@dataclass(frozen=True)
 class ViewOptions:
     active: str
     default_icon: str
-    filename: Dict[str, str]
-    filetype: Dict[str, str]
     folder_closed: str
     folder_open: str
     link: str
@@ -55,6 +63,9 @@ class ViewOptions:
     selected: str
     quickfix_hl: str
     version_ctl_hl: str
+    colours: Dict[str, HLgroup]
+    filename: Dict[str, str]
+    filetype: Dict[str, str]
 
 
 @dataclass(frozen=True)
@@ -66,16 +77,6 @@ class UpdateTime:
 @dataclass(frozen=True)
 class VersionControlOptions:
     defer: bool
-
-
-@dataclass(frozen=True)
-class HLgroup:
-    name: str
-    cterm: Set[str] = field(default_factory=set)
-    ctermfg: Optional[str] = None
-    ctermbg: Optional[str] = None
-    guifg: Optional[str] = None
-    guibg: Optional[str] = None
 
 
 @dataclass(frozen=True)

@@ -1,8 +1,9 @@
 from os import linesep
-from typing import Iterator, Sequence, Set
+from typing import Dict, Iterator, Sequence, Set, Tuple
 
 from pynvim import Nvim
 
+from .consts import fm_hl_prefix
 from .nvim import call
 from .types import HLgroup
 
@@ -17,6 +18,15 @@ LEGAL_CTERM: Set[str] = {
 }
 
 LEGAL_CTERM_COLOURS = range(8)
+
+
+def gen_hl(name_prefix: str, mapping: Dict[str, str]) -> Dict[str, HLgroup]:
+    def cont() -> Iterator[Tuple[str, HLgroup]]:
+        for key, val in mapping.items():
+            name = f"{fm_hl_prefix}_{name_prefix}_{key}"
+            yield key, HLgroup(name=name, guifg=val)
+
+    return {k: v for k, v in cont()}
 
 
 async def add_hl_groups(nvim: Nvim, groups: Sequence[HLgroup]) -> None:
