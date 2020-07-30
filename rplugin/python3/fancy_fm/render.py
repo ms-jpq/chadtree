@@ -56,7 +56,7 @@ def paint(
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
     context = settings.hl_context
-    icon_lookup = settings.icons.colours
+    icon_lookup = settings.icons.ext_colours
     mode_lookup_pre, mode_lookup_post, ext_lookup, name_lookup = (
         context.mode_lookup_pre,
         context.mode_lookup_post,
@@ -144,7 +144,7 @@ def paint(
             hl = Highlight(group=group.name, begin=begin, end=end)
         group = search_hl(node)
         if group:
-            begin = end + 1
+            begin = end
             end = len(name.encode()) + begin
             hl = Highlight(group=group.name, begin=begin, end=end)
             yield hl
@@ -155,7 +155,7 @@ def paint(
         name = "".join(gen_name(node))
         post = "".join(gen_decor_post(node))
 
-        line = f"{pre}{name}{post}"
+        line = f"{pre}{icon}{name}{post}"
         badges = tuple(gen_badges(node.path))
         highlights = tuple(gen_highlights(node, pre=pre, icon=icon, name=name))
         render = Render(line=line, badges=badges, highlights=highlights)

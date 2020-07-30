@@ -19,6 +19,7 @@ def initial(
     use_icons = config["use_icons"]
     view_c = view["unicode"] if use_icons else view["ascii"]
 
+    ext_colours = gen_hl("github", mapping=colours)
     icons = ViewOptions(
         active=view_c["status"]["active"],
         default_icon=icon_c["default"],
@@ -29,7 +30,7 @@ def initial(
         selected=view_c["status"]["selected"],
         quickfix_hl=view["highlights"]["quickfix"],
         version_ctl_hl=view["highlights"]["version_control"],
-        colours=gen_hl("github", mapping=colours),
+        ext_colours=ext_colours,
         filename=icon_c["name"],
         filetype=icon_c["type"],
     )

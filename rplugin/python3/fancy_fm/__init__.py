@@ -1,5 +1,6 @@
 from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
+from itertools import chain
 from operator import add, sub
 from os import linesep
 from traceback import format_exc
@@ -114,7 +115,10 @@ class Main:
 
             await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_FMquickfix")
 
-            await add_hl_groups(self.nvim, groups=self.settings.hl_context.groups)
+            groups = chain(
+                self.settings.hl_context.groups, self.settings.icons.ext_colours
+            )
+            await add_hl_groups(self.nvim, groups=groups)
 
         if self._initialized:
             return

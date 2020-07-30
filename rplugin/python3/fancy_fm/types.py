@@ -63,7 +63,7 @@ class ViewOptions:
     selected: str
     quickfix_hl: str
     version_ctl_hl: str
-    colours: Dict[str, HLgroup]
+    ext_colours: Dict[str, HLgroup]
     filename: Dict[str, str]
     filetype: Dict[str, str]
 
