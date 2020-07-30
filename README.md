@@ -34,23 +34,15 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
 
-### Integrated quickfix support
-
-- Asynchronous refresh of quickfix status
-
-### I like git
+### I like version control
 
 - Asynchronous parse git status (untracked, modified, staged)
 
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.png)
+
 - Full support for git ignore, toggle show / hide
 
-### Attention to detail
-
-- Visual mode multi select
-
-- Always reuse-buffers, open files in correct windows, auto kill stale buffers
-
-- Shows symlinks
+- Full support for globbing ignored files
 
 ### I like 21st century
 
