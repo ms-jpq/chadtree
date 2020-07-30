@@ -8,7 +8,7 @@ cd "$(dirname "$0")" || exit 1
 
 FILES=(
   *.py
-  rplugin/python3/chad_tree/*.py
+  rplugin/python3/chadtree/*.py
   )
 
 mypy --ignore-missing-imports -- "${FILES[@]}"
