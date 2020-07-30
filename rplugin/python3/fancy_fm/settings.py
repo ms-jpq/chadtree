@@ -1,30 +1,32 @@
 from typing import Any
 
-from .consts import config_json, ignore_json, view_json
+from .consts import config_json, icons_json, ignore_json, view_json
 from .da import load_json, merge
 from .ls_colours import parse_ls_colours
-from .types import IconSet, Settings, UpdateTime, VersionControlOptions
+from .types import ViewOptions, Settings, UpdateTime, VersionControlOptions
 
 
 def initial(user_config: Any, user_icons: Any, user_ignores: Any) -> Settings:
     config = merge(load_json(config_json), user_config)
-    icon_c = merge(load_json(view_json), user_icons)
+    view = merge(load_json(view_json), user_icons)
+    icon_c = merge(load_json(icons_json), user_icons)
     ignore = merge(load_json(ignore_json), user_ignores)
 
     use_icons = config["use_icons"]
-    icon_cs = icon_c["unicode"] if use_icons else icon_c["ascii"]
+    view_c = view["unicode"] if use_icons else view["ascii"]
 
-    icons = IconSet(
-        active=icon_cs["status"]["active"],
-        selected=icon_cs["status"]["selected"],
-        folder_open=icon_cs["folder"]["open"],
-        folder_closed=icon_cs["folder"]["closed"],
-        link=icon_cs["link"]["normal"],
-        link_broken=icon_cs["link"]["broken"],
-        filetype=icon_c["files"]["type"],
-        filename=icon_c["files"]["name"],
-        quickfix_hl=icon_c["highlights"]["quickfix"],
-        version_ctl_hl=icon_c["highlights"]["version_control"],
+    icons = ViewOptions(
+        active=view_c["status"]["active"],
+        default_icon=icon_c["default"],
+        filename=icon_c["name"],
+        filetype=icon_c["type"],
+        folder_closed=view_c["folder"]["closed"],
+        folder_open=view_c["folder"]["open"],
+        link=view_c["link"]["normal"],
+        link_broken=view_c["link"]["broken"],
+        selected=view_c["status"]["selected"],
+        quickfix_hl=view["highlights"]["quickfix"],
+        version_ctl_hl=view["highlights"]["version_control"],
     )
 
     update = UpdateTime(

@@ -43,15 +43,16 @@ class Session:
 
 
 @dataclass(frozen=True)
-class IconSet:
+class ViewOptions:
     active: str
-    selected: str
-    folder_open: str
+    default_icon: str
+    filename: Dict[str, str]
+    filetype: Dict[str, str]
     folder_closed: str
+    folder_open: str
     link: str
     link_broken: str
-    filetype: Dict[str, str]
-    filename: Dict[str, str]
+    selected: str
     quickfix_hl: str
     version_ctl_hl: str
 
@@ -89,7 +90,7 @@ class HLcontext:
 class Settings:
     follow: bool
     hl_context: HLcontext
-    icons: IconSet
+    icons: ViewOptions
     keymap: Dict[str, Sequence[str]]
     name_ignore: Sequence[str]
     open_left: bool
