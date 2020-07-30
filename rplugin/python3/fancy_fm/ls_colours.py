@@ -215,7 +215,7 @@ def parse_styling(codes: str) -> Styling:
     return styling
 
 
-def parseHLGroup(name, styling: Styling) -> HLgroup:
+def parseHLGroup(name: str, styling: Styling) -> HLgroup:
     fg, bg = styling.foreground, styling.background
     name = f"{fm_hl_prefix}{name}"
     cterm = {

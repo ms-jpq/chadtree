@@ -6,4 +6,9 @@ set -o pipefail
 
 cd "$(dirname "$0")" || exit 1
 
-mypy --ignore-missing-imports -- rplugin/python3/fancy_fm/*.py
+FILES=(
+  *.py
+  rplugin/python3/fancy_fm/*.py
+  )
+
+mypy --ignore-missing-imports -- "${FILES[@]}"
