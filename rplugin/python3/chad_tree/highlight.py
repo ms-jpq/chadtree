@@ -1,5 +1,5 @@
 from os import linesep
-from typing import Dict, Iterator, Sequence, Set, Tuple
+from typing import Dict, Iterator, Set, Tuple
 
 from pynvim import Nvim
 
@@ -29,7 +29,7 @@ def gen_hl(name_prefix: str, mapping: Dict[str, str]) -> Dict[str, HLgroup]:
     return {k: v for k, v in cont()}
 
 
-async def add_hl_groups(nvim: Nvim, groups: Sequence[HLgroup]) -> None:
+async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
     def parse() -> Iterator[str]:
         for group in groups:
             name = group.name
