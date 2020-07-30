@@ -46,8 +46,6 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
 
-![session.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/session.gif)
-
 ### I like version control
 
 - Asynchronous parse git status (untracked, modified, staged)
