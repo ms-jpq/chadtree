@@ -1,12 +1,12 @@
 # CHADTree
 
-Work in progress
-
-The **BEST** file manager for Neovim
-
-Fast and Unique features not found in other FMs
+Async File Manager for Neovim, Better than NERDTree.
 
 ## Features
+
+### I like colours
+
+![github_colours.png]()
 
 ### Fast & asynchronous where it counts, (and doesn't), either way, it's async all the time
 
