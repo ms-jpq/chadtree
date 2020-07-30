@@ -261,13 +261,16 @@ def parse_ls_colours() -> HLcontext:
         if v
     }
 
-    fn_keys = tuple(key for key in hl_lookup if key.startswith("*"))
-    name_lookup: Dict[str, HLgroup] = {key: hl_lookup.pop(key) for key in fn_keys}
+    ext_keys = tuple(
+        key for key in hl_lookup if key.startswith("*.") and key.count(".") == 1
+    )
+    ext_lookup: Dict[str, HLgroup] = {key[1:]: hl_lookup.pop(key) for key in ext_keys}
 
     context = HLcontext(
         groups=groups,
         mode_lookup_pre=mode_lookup_pre,
         mode_lookup_post=mode_lookup_post,
-        name_lookup=name_lookup,
+        ext_lookup=ext_lookup,
+        name_lookup=hl_lookup,
     )
     return context

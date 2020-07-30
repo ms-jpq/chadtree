@@ -56,9 +56,10 @@ def paint(
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
     context = settings.hl_context
-    mode_lookup_pre, mode_lookup_post, name_lookup = (
+    mode_lookup_pre, mode_lookup_post, ext_lookup, name_lookup = (
         context.mode_lookup_pre,
         context.mode_lookup_post,
+        context.ext_lookup,
         context.name_lookup,
     )
     icons = settings.icons
@@ -71,6 +72,9 @@ def paint(
             hl = mode_lookup_pre.get(mode)
             if hl:
                 return hl
+        hl = ext_lookup.get(node.ext or "")
+        if hl:
+            return hl
         for pattern, group in name_lookup.items():
             if fnmatch(node.name, pattern):
                 return group

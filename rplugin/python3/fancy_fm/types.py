@@ -83,6 +83,7 @@ class HLcontext:
     groups: Sequence[HLgroup]
     mode_lookup_pre: Dict[Mode, HLgroup]
     mode_lookup_post: Dict[Optional[Mode], HLgroup]
+    ext_lookup: Dict[str, HLgroup]
     name_lookup: Dict[str, HLgroup]
 
 
