@@ -4,29 +4,35 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ## Features
 
-### I like colours
-
-Full `LS_COLOR` support!
-
-![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
-
-[Github coloured](https://github.com/github/linguist) icons
-
-![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
-
-### Fast & asynchronous where it counts, (and doesn't), either way, it's async all the time
+### I like speed
 
 - Incremental file system scan
 
-- Literally every API call is async.
+- No blocking
 
 - Literally every FS call is async.
+
+### I like power
+
+- Visual mode selections
+
+![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
+
+### I like colours
+
+- Full `$LS_COLOR` support! (shows same colours as unix `ls` & `tree` commands)
+
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
+
+- [Github coloured](https://github.com/github/linguist) icons
+
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
 
 ### Integrated quickfix support
 
 - Asynchronous refresh of quickfix status
 
-### Integrated git support
+### I like git
 
 - Asynchronous parse git status (untracked, modified, staged)
 
@@ -40,7 +46,7 @@ Full `LS_COLOR` support!
 
 - Shows symlinks
 
-### Unique features
+### I like 21st century
 
 - Follow mode
 
@@ -63,7 +69,7 @@ pip3 install pynvim
 Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
 
 ```VimL
-Plug 'ms-jpq/chadtree', {'do': ':UpdateRemotePlugins'}
+Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
 ```
 
 ## Documentation
