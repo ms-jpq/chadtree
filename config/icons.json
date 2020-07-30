@@ -1,5 +1,4 @@
 {
-  "default": "",
   "name": {
     ".*angular.*.js": "",
     ".*backbone.*.js": "",

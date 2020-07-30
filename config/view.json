@@ -1,5 +1,6 @@
 {
   "ascii": {
+    "default_icon": "●",
     "folder": {
       "closed": "+",
       "open": "-"
@@ -18,6 +19,7 @@
     "version_control": "Comment"
   },
   "unicode": {
+    "default_icon": "",
     "folder": {
       "closed": "",
       "open": ""

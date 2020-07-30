@@ -22,7 +22,7 @@ def initial(
     ext_colours = gen_hl("github", mapping=colours)
     icons = ViewOptions(
         active=view_c["status"]["active"],
-        default_icon=icon_c["default"],
+        default_icon=view_c["default_icon"],
         folder_closed=view_c["folder"]["closed"],
         folder_open=view_c["folder"]["open"],
         link=view_c["link"]["normal"],

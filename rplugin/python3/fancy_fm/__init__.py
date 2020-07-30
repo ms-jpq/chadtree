@@ -116,7 +116,8 @@ class Main:
             await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_FMquickfix")
 
             groups = chain(
-                self.settings.hl_context.groups, self.settings.icons.ext_colours
+                self.settings.hl_context.groups,
+                self.settings.icons.ext_colours.values(),
             )
             await add_hl_groups(self.nvim, groups=groups)
 

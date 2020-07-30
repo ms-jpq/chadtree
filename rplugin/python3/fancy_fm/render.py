@@ -109,7 +109,7 @@ def paint(
                     (v for k, v in icons.filename.items() if fnmatch(node.name, k)),
                     icons.default_icon,
                 )
-            ) if use_icons else ""
+            ) if use_icons else icons.default_icon
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
@@ -142,6 +142,7 @@ def paint(
         group = icon_lookup.get(node.ext or "")
         if group:
             hl = Highlight(group=group.name, begin=begin, end=end)
+            yield hl
         group = search_hl(node)
         if group:
             begin = end
