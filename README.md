@@ -8,7 +8,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Incremental file system scan
 
-- No blocking
+- None blocking
 
 - Literally every FS call is async.
 
@@ -16,7 +16,13 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Visual mode selections
 
+- Copy, Paste, Delete, Rename, gotta do them all
+
 ![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
+
+- Quickfix integration
+
+![quick_fix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quick_fix.gif)
 
 ### I like colours
 
