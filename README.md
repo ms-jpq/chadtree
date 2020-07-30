@@ -32,7 +32,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
 
-- Session support (pick up where you left off)
+- Session support (save open folders to disk, pick up where you left off)
 
 ![session.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/session.gif)
 
