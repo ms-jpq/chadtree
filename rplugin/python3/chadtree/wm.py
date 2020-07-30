@@ -2,6 +2,7 @@ from typing import Any, Dict, Iterable, Iterator, Optional, Sequence, Tuple, cas
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
+from pynvim.api.common import NvimError
 from pynvim.api.tabpage import Tabpage
 from pynvim.api.window import Window
 
@@ -208,4 +209,9 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
             ns=ns,
             highlights=cast(Sequence[Sequence[Highlight]], highlights),
         )
-        atomic(nvim, *cast(Sequence[Tuple[str, Sequence[Any]]], it1), *it2, *it3, *it4)
+        try:
+            atomic(
+                nvim, *cast(Sequence[Tuple[str, Sequence[Any]]], it1), *it2, *it3, *it4
+            )
+        except NvimError:
+            pass
