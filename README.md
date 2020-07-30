@@ -22,7 +22,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Quickfix integration
 
-![quick_fix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quick_fix.gif)
+![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quickfix.gif)
 
 ### I like colours
 
