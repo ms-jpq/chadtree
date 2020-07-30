@@ -98,7 +98,7 @@ def paint(
         yield gen_spacer(depth)
         yield gen_status(node.path)
 
-    def gen_icons(node: Node) -> Iterator[str]:
+    def gen_icon(node: Node) -> Iterator[str]:
         yield " "
         if Mode.folder in node.mode:
             yield icons.folder_open if node.path in index else icons.folder_closed
@@ -135,10 +135,10 @@ def paint(
             yield Badge(text=f"[{stat}]", group=icons.version_ctl_hl)
 
     def gen_highlights(
-        node: Node, pre: str, icons: str, name: str
+        node: Node, pre: str, icon: str, name: str
     ) -> Iterator[Highlight]:
         begin = len(pre.encode())
-        end = begin + len(icons.encode())
+        end = begin + len(icon.encode())
         group = icon_lookup.get(node.ext or "")
         if group:
             hl = Highlight(group=group.name, begin=begin, end=end)
@@ -151,13 +151,13 @@ def paint(
 
     def show(node: Node, depth: int) -> Render:
         pre = "".join(gen_decor_pre(node, depth=depth))
-        icons = "".join(gen_icons(node))
+        icon = "".join(gen_icon(node))
         name = "".join(gen_name(node))
         post = "".join(gen_decor_post(node))
 
         line = f"{pre}{name}{post}"
         badges = tuple(gen_badges(node.path))
-        highlights = tuple(gen_highlights(node, pre=pre, icons=icons, name=name))
+        highlights = tuple(gen_highlights(node, pre=pre, icon=icon, name=name))
         render = Render(line=line, badges=badges, highlights=highlights)
         return render
 
