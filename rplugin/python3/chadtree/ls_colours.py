@@ -3,6 +3,7 @@ from enum import Enum, IntEnum, auto
 from itertools import chain, repeat
 from os import environ
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
+from uuid import uuid4
 
 from .consts import fm_hl_prefix
 from .types import HLcontext, HLgroup, Mode
@@ -215,9 +216,9 @@ def parse_styling(codes: str) -> Styling:
     return styling
 
 
-def parseHLGroup(name: str, styling: Styling) -> HLgroup:
+def parseHLGroup(styling: Styling) -> HLgroup:
     fg, bg = styling.foreground, styling.background
-    name = f"{fm_hl_prefix}_ls_{name}"
+    name = f"{fm_hl_prefix}_ls_{uuid4().hex}"
     cterm = {
         style
         for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
@@ -241,7 +242,7 @@ def parseHLGroup(name: str, styling: Styling) -> HLgroup:
 def parse_ls_colours() -> HLcontext:
     colours = environ.get("LS_COLORS", "")
     hl_lookup: Dict[str, HLgroup] = {
-        k: parseHLGroup(k, parse_styling(v))
+        k: parseHLGroup(parse_styling(v))
         for k, _, v in (
             segment.partition("=") for segment in colours.strip(":").split(":")
         )

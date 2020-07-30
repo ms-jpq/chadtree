@@ -1,4 +1,5 @@
 from asyncio import Future, Task, create_task, sleep
+from itertools import repeat
 from os import linesep
 from traceback import format_exc
 from typing import Any, Awaitable, Callable, Iterable, Sequence, Tuple, TypeVar
@@ -88,8 +89,8 @@ async def autocmd(
     group_end = "augroup END"
 
     def cont() -> None:
-        commands = linesep.join((group, cls, cmd, group_end))
-        nvim.api.exec(commands, False)
+        commands = zip(repeat("command"), ((group,), (cls,), (cmd,), (group_end,)))
+        atomic(nvim, *commands)
 
     await call(nvim, cont)
 
