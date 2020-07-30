@@ -4,7 +4,7 @@ set -eu
 set -o pipefail
 
 
-cd "$(dirname "$0")/.." || exit 1
+cd "$(dirname "$0")" || exit 1
 
 IMAGE='chad'
-docker build -f 'docker/Dockerfile' -t "$IMAGE" .
+docker build -f 'Dockerfile' -t "$IMAGE" .
