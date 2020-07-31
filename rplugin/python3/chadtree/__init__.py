@@ -142,7 +142,7 @@ class Main:
                 self.state = new_state
                 await redraw(self.nvim, state=new_state)
             except NvimError:
-                pass
+                self.ch.set()
 
     @command("CHADopen")
     def fm_open(self, *args: Any, **kwargs: Any) -> None:
