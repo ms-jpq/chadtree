@@ -192,12 +192,19 @@ class Main:
         self._run(a_quickfix)
 
     @function("CHADquit")
-    def fm_quit(self, args: Sequence[Any]) -> None:
+    def quit(self, args: Sequence[Any]) -> None:
         """
         Close sidebar
         """
 
         self._run(c_quit)
+
+    @function("CHADchange_focus")
+    def refocus(self, args: Sequence[Any]) -> None:
+        """
+        Refocus root directory
+        """
+        pass
 
     @function("CHADprimary")
     def primary(self, args: Sequence[Any]) -> None:

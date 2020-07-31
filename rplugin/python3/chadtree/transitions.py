@@ -132,12 +132,18 @@ async def _current(
         return None
 
 
-async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
-    cwd = await getcwd(nvim)
-    index = state.index | {cwd}
-    root = await new_root(cwd, index=index)
+async def _change_dir(
+    nvim: Nvim, state: State, settings: Settings, new_base: str
+) -> State:
+    index = state.index | {new_base}
+    root = await new_root(new_base, index=index)
     new_state = await forward(state, settings=settings, root=root, index=index)
     return new_state
+
+
+async def a_changedir(nvim: Nvim, state: State, settings: Settings) -> State:
+    cwd = await getcwd(nvim)
+    return await _change_dir(nvim, state=state, settings=settings, new_base=cwd)
 
 
 async def a_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
