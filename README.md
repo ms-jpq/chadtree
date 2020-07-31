@@ -66,6 +66,8 @@ Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vun
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
 ```
 
+Minimum version: `python`: 3.7, `nvim`: `0.4.3`
+
 ## Documentation
 
 To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
