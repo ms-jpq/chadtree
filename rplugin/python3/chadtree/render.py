@@ -190,20 +190,18 @@ def render(
     def render(
         node: Node, *, depth: int, cleared: bool
     ) -> Iterator[Tuple[Node, Render]]:
-        clear = (
-            cleared
-            or not filter_pattern
-            or node.path in index
-            or fnmatch(node.name, filter_pattern)
-        )
+        clear = cleared or not filter_pattern or fnmatch(node.name, filter_pattern)
         rend = show(node, depth)
-        children = (
-            child for child in (node.children or {}).values() if not drop(child)
-        )
-        if clear:
+
+        def gen_children() -> Iterator[Tuple[Node, Render]]:
+            gen = (child for child in (node.children or {}).values() if not drop(child))
+            for child in sorted(gen, key=comp):
+                yield from render(child, depth=depth + 1, cleared=clear)
+
+        children = tuple(gen_children())
+        if clear or children:
             yield node, rend
-        for child in sorted(children, key=comp):
-            yield from render(child, depth=depth + 1, cleared=clear)
+        yield from iter(children)
 
     lookup, rendered = zip(*render(node, depth=0, cleared=False))
     return cast(Sequence[Node], lookup), cast(Sequence[Render], rendered)
