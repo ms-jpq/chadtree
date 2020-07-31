@@ -19,7 +19,8 @@ from .transitions import (
     a_follow,
     a_quickfix,
     a_session,
-    c_clear,
+    c_clear_filter,
+    c_clear_selection,
     c_collapse,
     c_copy,
     c_copy_name,
@@ -265,7 +266,7 @@ class Main:
         self._run(c_follow)
 
     @function("CHADfilter")
-    def filtering(self, args: Sequence[Any]) -> None:
+    def filter_pattern(self, args: Sequence[Any]) -> None:
         """
         Update filter
         """
@@ -297,13 +298,21 @@ class Main:
 
         self._run(c_rename)
 
-    @function("CHADclear")
-    def clear(self, args: Sequence[Any]) -> None:
+    @function("CHADclear_selection")
+    def clear_selection(self, args: Sequence[Any]) -> None:
         """
         Clear selected
         """
 
-        self._run(c_clear)
+        self._run(c_clear_selection)
+
+    @function("CHADclear_filter")
+    def clear_filter(self, args: Sequence[Any]) -> None:
+        """
+        Clear selected
+        """
+
+        self._run(c_clear_filter)
 
     @function("CHADselect")
     def select(self, args: Sequence[Any]) -> None:

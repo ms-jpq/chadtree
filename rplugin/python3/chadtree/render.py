@@ -35,7 +35,7 @@ def comp(node: Node) -> Tuple[int, str, str]:
     )
 
 
-def ignore(settings: Settings, vc: VCStatus, filtering: str) -> Callable[[Node], bool]:
+def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     def drop(node: Node) -> bool:
         ignore = (
             node.path in vc.ignored
@@ -176,29 +176,34 @@ def render(
     settings: Settings,
     index: Index,
     selection: Selection,
-    filtering: str,
+    filter_pattern: str,
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[str],
 ) -> Tuple[Sequence[Node], Sequence[Render]]:
-    drop = (
-        constantly(False)
-        if show_hidden
-        else ignore(settings, vc=vc, filtering=filtering)
-    )
+    drop = constantly(False) if show_hidden else ignore(settings, vc=vc)
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
 
-    def render(node: Node, *, depth: int) -> Iterator[Tuple[Node, Render]]:
+    def render(
+        node: Node, *, depth: int, cleared: bool
+    ) -> Iterator[Tuple[Node, Render]]:
+        clear = (
+            cleared
+            or not filter_pattern
+            or node.path in index
+            or fnmatch(node.name, filter_pattern)
+        )
         rend = show(node, depth)
         children = (
             child for child in (node.children or {}).values() if not drop(child)
         )
-        yield node, rend
+        if clear:
+            yield node, rend
         for child in sorted(children, key=comp):
-            yield from render(child, depth=depth + 1)
+            yield from render(child, depth=depth + 1, cleared=clear)
 
-    lookup, rendered = zip(*render(node, depth=0))
+    lookup, rendered = zip(*render(node, depth=0, cleared=False))
     return cast(Sequence[Node], lookup), cast(Sequence[Render], rendered)

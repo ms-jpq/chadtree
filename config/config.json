@@ -2,7 +2,8 @@
   "follow": true,
   "keymap": {
     "bigger": ["+", "="],
-    "clear": ["c"],
+    "clear_filter": ["F"],
+    "clear_selection": ["S"],
     "collapse": ["<s-tab>", "`"],
     "copy": ["p"],
     "copy_name": ["y"],
@@ -14,11 +15,11 @@
     "primary": ["<enter>"],
     "quit": ["q"],
     "refresh": ["<c-r>"],
-    "rename": ["r", "R"],
+    "rename": ["r"],
     "secondary": ["<tab>", "<2-leftmouse>"],
     "select": ["s"],
     "smaller": ["-", "_"],
-    "toggle_follow": ["F"],
+    "toggle_follow": [],
     "toggle_hidden": ["."]
   },
   "open_left": true,

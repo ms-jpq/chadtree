@@ -60,13 +60,13 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
     vc = VCStatus() if settings.version_ctl.defer else await status()
     current = None
-    filtering = ""
+    filter_pattern = ""
     lookup, rendered = render(
         node,
         settings=settings,
         index=index,
         selection=selection,
-        filtering=filtering,
+        filter_pattern=filter_pattern,
         qf=qf,
         vc=vc,
         show_hidden=settings.show_hidden,
@@ -76,7 +76,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     state = State(
         index=index,
         selection=selection,
-        filtering="",
+        filter_pattern="",
         show_hidden=settings.show_hidden,
         follow=settings.follow,
         width=settings.width,
@@ -97,7 +97,7 @@ async def forward(
     root: Optional[Node] = None,
     index: Optional[Index] = None,
     selection: Optional[Selection] = None,
-    filtering: Optional[str] = None,
+    filter_pattern: Optional[str] = None,
     show_hidden: Optional[bool] = None,
     follow: Optional[bool] = None,
     width: Optional[int] = None,
@@ -108,7 +108,7 @@ async def forward(
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
-    new_filtering = or_else(filtering, state.filtering)
+    new_filter_pattern = or_else(filter_pattern, state.filter_pattern)
     new_current = or_else(current, state.current)
     new_root = root or (
         await update(state.root, index=new_index, paths=paths) if paths else state.root
@@ -121,7 +121,7 @@ async def forward(
         settings=settings,
         index=new_index,
         selection=new_selection,
-        filtering=new_filtering,
+        filter_pattern=new_filter_pattern,
         qf=new_qf,
         vc=new_vc,
         show_hidden=new_hidden,
@@ -131,7 +131,7 @@ async def forward(
     new_state = State(
         index=new_index,
         selection=new_selection,
-        filtering=new_filtering,
+        filter_pattern=new_filter_pattern,
         show_hidden=new_hidden,
         follow=or_else(follow, state.follow),
         width=or_else(width, state.width),

@@ -303,11 +303,11 @@ async def c_follow(nvim: Nvim, state: State, settings: Settings) -> State:
 
 async def c_filter(nvim: Nvim, state: State, settings: Settings) -> State:
     def ask() -> Optional[str]:
-        resp = nvim.funcs.input("New filter:", state.filtering)
+        resp = nvim.funcs.input("New filter:", state.filter_pattern)
         return resp
 
-    filtering = await call(nvim, ask) or ""
-    new_state = await forward(state, settings=settings, filtering=filtering)
+    filter_pattern = await call(nvim, ask) or ""
+    new_state = await forward(state, settings=settings, filter_pattern=filter_pattern)
     return new_state
 
 
@@ -413,8 +413,13 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         return None
 
 
-async def c_clear(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_clear_selection(nvim: Nvim, state: State, settings: Settings) -> State:
     new_state = await forward(state, settings=settings, selection=set())
+    return new_state
+
+
+async def c_clear_filter(nvim: Nvim, state: State, settings: Settings) -> State:
+    new_state = await forward(state, settings=settings, filter_pattern="")
     return new_state
 
 
