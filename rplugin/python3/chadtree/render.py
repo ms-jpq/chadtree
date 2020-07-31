@@ -35,7 +35,7 @@ def comp(node: Node) -> Tuple[int, str, str]:
     )
 
 
-def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
+def ignore(settings: Settings, vc: VCStatus, filtering: str) -> Callable[[Node], bool]:
     def drop(node: Node) -> bool:
         ignore = (
             node.path in vc.ignored
@@ -176,12 +176,17 @@ def render(
     settings: Settings,
     index: Index,
     selection: Selection,
+    filtering: str,
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[str],
 ) -> Tuple[Sequence[Node], Sequence[Render]]:
-    drop = constantly(False) if show_hidden else ignore(settings, vc)
+    drop = (
+        constantly(False)
+        if show_hidden
+        else ignore(settings, vc=vc, filtering=filtering)
+    )
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )

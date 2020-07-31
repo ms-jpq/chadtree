@@ -60,11 +60,13 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
     vc = VCStatus() if settings.version_ctl.defer else await status()
     current = None
+    filtering = ""
     lookup, rendered = render(
         node,
         settings=settings,
         index=index,
         selection=selection,
+        filtering=filtering,
         qf=qf,
         vc=vc,
         show_hidden=settings.show_hidden,
@@ -119,6 +121,7 @@ async def forward(
         settings=settings,
         index=new_index,
         selection=new_selection,
+        filtering=new_filtering,
         qf=new_qf,
         vc=new_vc,
         show_hidden=new_hidden,
