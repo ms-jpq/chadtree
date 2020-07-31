@@ -247,7 +247,7 @@ class Main:
 
         self._run(c_collapse)
 
-    @function("CHADhidden")
+    @function("CHADtoggle_hidden")
     def hidden(self, args: Sequence[Any]) -> None:
         """
         Toggle hidden

@@ -3,6 +3,7 @@
 Async File Manager for Neovim, Better than NERDTree.
 
 **WORK IN PROGRESS**
+
 ## Features Illustrated
 
 ### I like speed
@@ -66,3 +67,30 @@ Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
 ```
 
 ## Documentation
+
+Check out [config.json](https://github.com/ms-jpq/chadtree/blob/chad/config/config.json) before you proceed for an overview of options.
+
+| functions     | usage                                                               | default key     |
+| ------------- | ------------------------------------------------------------------- | --------------- |
+| quit          | close chad window                                                   | `q`             |
+| refresh       | trigger refresh                                                     | `<c-r>`         |
+| primary       | open / close folders & open file                                    | `<enter>`       |
+| secondary     | open / close folders & preview file                                 | `<tab>`         |
+| open_sys      | open file using `open` / `xdg-open`                                 | `o`             |
+| toggle_hidden | toggle showing hidden items                                         | `.`             |
+| collapse      | collapse all sub folders                                            | `<s-tab>`, `\\` |
+| copy_name     | copy file path of items under cursor / visual selection / selection | `y`             |
+| select        | select item under cursor / visual selection                         | `s`             |
+| clear         | clear selection                                                     | `c`             |
+| new           | create new file at location under cursor                            | `a`             |
+| rename        | rename file under cursor                                            | `r`             |
+| delete        | delete item under cursor / visual selection / selection             | `d`             |
+| copy          | copy selected items to location under cursor                        | `p`             |
+| cut           | move selected items to location under cursor                        | `x`             |
+| toggle_follow | toggle follow mode on / off                                         | `F`             |
+| bigger        | increase chad size                                                  | `+`, `=`        |
+| smaller       | decrease chad size                                                  | `-`, `_`        |
+
+## Special Thanks
+
+All the Icons are imported from the [vim-devicon]() project

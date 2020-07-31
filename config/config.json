@@ -8,8 +8,6 @@
     "copy_name": ["y"],
     "cut": ["x"],
     "delete": ["d"],
-    "toggle_follow": ["F"],
-    "hidden": ["."],
     "new": ["a"],
     "open_sys": ["o"],
     "primary": ["<enter>"],
@@ -18,7 +16,9 @@
     "rename": ["r", "R"],
     "secondary": ["<tab>", "<2-leftmouse>"],
     "select": ["s"],
-    "smaller": ["-", "_"]
+    "smaller": ["-", "_"],
+    "toggle_follow": ["F"],
+    "toggle_hidden": ["."]
   },
   "open_left": true,
   "session": true,

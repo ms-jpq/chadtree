@@ -3,7 +3,17 @@ from itertools import chain
 from locale import strxfrm
 from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
-from typing import Awaitable, Callable, Dict, Iterator, Optional, Sequence, Set, Tuple
+from typing import (
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Dict,
+    Iterator,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+)
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -294,8 +304,17 @@ async def c_follow(nvim: Nvim, state: State, settings: Settings) -> State:
 async def c_copy_name(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> None:
-    nodes = await _indices(nvim, state=state, is_visual=is_visual)
-    paths = tuple(n.path for n in nodes)
+    async def cont() -> AsyncIterator[str]:
+        selection = state.selection
+        if is_visual or not selection:
+            nodes = await _indices(nvim, state=state, is_visual=is_visual)
+            for node in nodes:
+                yield node.path
+        else:
+            for selected in sorted(selection, key=strxfrm):
+                yield selected
+
+    paths = [path async for path in cont()]
 
     clip = linesep.join(paths)
     clap = ", ".join(paths)
