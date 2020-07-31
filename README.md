@@ -133,7 +133,7 @@ Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overw
 Add a hotkey to clear quickfix list:
 
 ```vimL
-nnoremap <leader>l call setqflist([])
+nnoremap <leader>l <cmd>call setqflist([])<cr>
 ```
 
 ## Special Thanks
