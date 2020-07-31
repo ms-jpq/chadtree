@@ -86,9 +86,12 @@ def github_colours() -> None:
     yaml = safe_load(raw)
     lookup = {
         ext: colour
-        for val in yaml.values()
-        for ext in val.get("extensions", ())
-        if (colour := val.get("color"))
+        for ext, colour in (
+            (ext, val.get("color"))
+            for val in yaml.values()
+            for ext in val.get("extensions", ())
+        )
+        if colour
     }
 
     spit_json(LANG_COLOURS_JSON, lookup)

@@ -1,9 +1,11 @@
-from asyncio import create_subprocess_exec
+from asyncio import create_subprocess_exec, get_running_loop
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
 from json import dump, load
 from os import makedirs
 from os.path import dirname
+from subprocess import CompletedProcess, run
+from sys import version
 from typing import Any, Callable, Optional, TypeVar, cast
 
 from .consts import folder_mode
@@ -49,11 +51,27 @@ class ProcReturn:
     err: str
 
 
-async def call(prog: str, *args: str) -> ProcReturn:
-    proc = await create_subprocess_exec(prog, *args, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = await proc.communicate()
-    code = cast(int, proc.returncode)
-    return ProcReturn(code=code, out=stdout.decode(), err=stderr.decode())
+if version.startswith("3.7"):
+
+    async def call(prog: str, *args: str) -> ProcReturn:
+        loop = get_running_loop()
+
+        def cont() -> CompletedProcess:
+            return run((prog, *args), capture_output=True)
+
+        ret = await loop.run_in_executor(None, cont)
+        out, err = ret.stdout.decode(), ret.stderr.decode()
+        code = ret.returncode
+        return ProcReturn(code=code, out=out, err=err)
+
+
+else:
+
+    async def call(prog: str, *args: str) -> ProcReturn:
+        proc = await create_subprocess_exec(prog, *args, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = await proc.communicate()
+        code = cast(int, proc.returncode)
+        return ProcReturn(code=code, out=stdout.decode(), err=stderr.decode())
 
 
 def load_json(path: str) -> Any:
