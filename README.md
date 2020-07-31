@@ -80,6 +80,8 @@ Check out [config.json](https://github.com/ms-jpq/chadtree/blob/chad/config/conf
 
 Set a dictionary with same keys to `g:chadtree_settings` to overwrite any options. You dont need to provide every key, just the ones you want to overwrite.
 
+### Keybindings
+
 `functions` only work under the CHADTree buffer
 
 | functions     | usage                                                               | default key     |
@@ -103,7 +105,14 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | bigger        | increase chad size                                                  | `+`, `=`        |
 | smaller       | decrease chad size                                                  | `-`, `_`        |
 
-Like wise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/chad/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/chad/config/ignore.json) accordingly.
+### View & Ignore
+
+Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/chad/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/chad/config/ignore.json) accordingly.
+
+| option | usage                       |
+| ------ | --------------------------- |
+| name   | globs of name to ignore     |
+| path   | glob of full path to ignore |
 
 ## Special Thanks
 
