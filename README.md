@@ -38,9 +38,9 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Asynchronous parse git status (untracked, modified, staged)
 
-* Full support for git ignore, toggle show / hide
+- Full support for git ignore, toggle show / hide
 
-* Full support for globbing ignored files
+- Full support for globbing ignored files
 
 ![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
 
@@ -48,7 +48,9 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Full `$LS_COLOR` support! (shows same colours as unix `ls` & `tree` commands)
 
-* [Github coloured](https://github.com/github/linguist) icons (over 600 colours!)
+- [Github coloured](https://github.com/github/linguist) icons (over 600 colours!)
+
+- Full icon support from importing [vim-devicon](https://github.com/ryanoasis/vim-devicons)
 
 ![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
 
@@ -120,4 +122,4 @@ Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overw
 
 ## Special Thanks
 
-All the Icons are imported from the [vim-devicon]() project
+All the icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
