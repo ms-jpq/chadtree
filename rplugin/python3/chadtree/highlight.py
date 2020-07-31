@@ -31,7 +31,7 @@ def gen_hl(name_prefix: str, mapping: Dict[str, str]) -> Dict[str, HLgroup]:
 
 
 async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
-    def parse() -> Iterator[str]:
+    def parse() -> Iterator[Tuple[str]]:
         for group in groups:
             name = group.name
             _cterm = ",".join(group.cterm) or "NONE"

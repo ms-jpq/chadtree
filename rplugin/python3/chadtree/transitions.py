@@ -304,7 +304,7 @@ async def c_follow(nvim: Nvim, state: State, settings: Settings) -> State:
 async def c_copy_name(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> None:
-    async def cont() -> AsyncIterator[str]:
+    async def gen_paths() -> AsyncIterator[str]:
         selection = state.selection
         if is_visual or not selection:
             nodes = await _indices(nvim, state=state, is_visual=is_visual)
@@ -314,7 +314,7 @@ async def c_copy_name(
             for selected in sorted(selection, key=strxfrm):
                 yield selected
 
-    paths = [path async for path in cont()]
+    paths = [path async for path in gen_paths()]
 
     clip = linesep.join(paths)
     clap = ", ".join(paths)
