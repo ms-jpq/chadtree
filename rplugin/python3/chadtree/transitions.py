@@ -246,8 +246,8 @@ async def c_change_focus(
     nvim: Nvim, state: State, settings: Settings
 ) -> Optional[State]:
     node = await _index(nvim, state=state)
-    if node and Mode.folder in node.mode:
-        new_base = node.path
+    if node:
+        new_base = node.path if Mode.folder in node.mode else dirname(node.path)
         return await _change_dir(
             nvim, state=state, settings=settings, new_base=new_base
         )
