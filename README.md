@@ -72,9 +72,7 @@ Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vun
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
 ```
 
-**Minimum version**: `python`: 3.8, `nvim`: `0.4.3`
-
-I am working on getting it working with 3.7
+**Minimum version**: `python`: 3.7, `nvim`: `0.4.3`
 
 ## Documentation
 
