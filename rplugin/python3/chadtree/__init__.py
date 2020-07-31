@@ -20,6 +20,7 @@ from .transitions import (
     a_quickfix,
     a_session,
     c_change_focus,
+    c_change_focus_up,
     c_clear_filter,
     c_clear_selection,
     c_collapse,
@@ -205,7 +206,24 @@ class Main:
         """
         Refocus root directory
         """
+
         self._run(c_change_focus)
+
+    @function("CHADchange_focus_up")
+    def change_focus_up(self, args: Sequence[Any]) -> None:
+        """
+        Refocus root directory up
+        """
+
+        self._run(c_change_focus_up)
+
+    @function("CHADrefocus")
+    def refocus(self, args: Sequence[Any]) -> None:
+        """
+        Refocus root directory to cwd
+        """
+
+        self._run(a_changedir)
 
     @function("CHADprimary")
     def primary(self, args: Sequence[Any]) -> None:

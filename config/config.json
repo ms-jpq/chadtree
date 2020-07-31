@@ -3,6 +3,7 @@
   "keymap": {
     "bigger": ["+", "="],
     "change_focus": ["c"],
+    "change_focus_up": ["C"],
     "clear_filter": ["F"],
     "clear_selection": ["S"],
     "collapse": ["<s-tab>", "`"],
@@ -15,6 +16,7 @@
     "open_sys": ["o"],
     "primary": ["<enter>"],
     "quit": ["q"],
+    "refocus": ["~"],
     "refresh": ["<c-r>"],
     "rename": ["r"],
     "secondary": ["<tab>", "<2-leftmouse>"],

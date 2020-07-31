@@ -255,6 +255,17 @@ async def c_change_focus(
         return None
 
 
+async def c_change_focus_up(
+    nvim: Nvim, state: State, settings: Settings
+) -> Optional[State]:
+    c_root = state.root.path
+    parent = dirname(c_root)
+    if parent and parent != c_root:
+        return await _change_dir(nvim, state=state, settings=settings, new_base=parent)
+    else:
+        return None
+
+
 async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     return await _click(nvim, state=state, settings=settings, hold_window=False)
 
@@ -279,12 +290,14 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[S
 
 
 async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
+    loop = get_running_loop()
+
     def co() -> str:
         current = find_current_buffer_name(nvim)
         return current
 
-    loop = get_running_loop()
-    cwd, current = await gather(getcwd(nvim), call(nvim, co))
+    current = await call(nvim, co)
+    cwd = state.root.path
     paths = {cwd}
     new_current = current if is_parent(parent=cwd, child=current) else None
 
