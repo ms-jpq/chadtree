@@ -209,12 +209,16 @@ async def _click(
             return None
         else:
             if Mode.folder in node.mode:
-                paths = {node.path}
-                index = state.index ^ paths
-                new_state = await forward(
-                    state, settings=settings, index=index, paths=paths
-                )
-                return new_state
+                if state.filter_pattern:
+                    await print(nvim, "⚠️  cannot click on folders while filtering")
+                    return None
+                else:
+                    paths = {node.path}
+                    index = state.index ^ paths
+                    new_state = await forward(
+                        state, settings=settings, index=index, paths=paths
+                    )
+                    return new_state
             else:
                 new_state = await forward(state, settings=settings, current=node.path)
 
