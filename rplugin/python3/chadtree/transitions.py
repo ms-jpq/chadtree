@@ -242,6 +242,19 @@ async def _click(
         return None
 
 
+async def c_change_focus(
+    nvim: Nvim, state: State, settings: Settings
+) -> Optional[State]:
+    node = await _index(nvim, state=state)
+    if node and Mode.folder in node.mode:
+        new_base = node.path
+        return await _change_dir(
+            nvim, state=state, settings=settings, new_base=new_base
+        )
+    else:
+        return None
+
+
 async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     return await _click(nvim, state=state, settings=settings, hold_window=False)
 

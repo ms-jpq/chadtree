@@ -2,6 +2,7 @@
   "follow": true,
   "keymap": {
     "bigger": ["+", "="],
+    "change_focus": ["c"],
     "clear_filter": ["F"],
     "clear_selection": ["S"],
     "collapse": ["<s-tab>", "`"],
