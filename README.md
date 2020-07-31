@@ -96,14 +96,16 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | toggle_hidden | toggle showing hidden items                                         | `.`             |
 | collapse      | collapse all sub folders                                            | `<s-tab>`, `\\` |
 | copy_name     | copy file path of items under cursor / visual selection / selection | `y`             |
+| filter        | set glob filter for visible items                                   | `f`             |
+| clear_filter  | clear filtering                                                     | `F`             |
 | select        | select item under cursor / visual selection                         | `s`             |
-| clear         | clear selection                                                     | `c`             |
+| clear_select  | clear selection                                                     | `c`             |
 | new           | create new file at location under cursor                            | `a`             |
 | rename        | rename file under cursor                                            | `r`             |
 | delete        | delete item under cursor / visual selection / selection             | `d`             |
 | copy          | copy selected items to location under cursor                        | `p`             |
 | cut           | move selected items to location under cursor                        | `x`             |
-| toggle_follow | toggle follow mode on / off                                         | `F`             |
+| toggle_follow | toggle follow mode on / off                                         |                 |
 | bigger        | increase chad size                                                  | `+`, `=`        |
 | smaller       | decrease chad size                                                  | `-`, `_`        |
 
