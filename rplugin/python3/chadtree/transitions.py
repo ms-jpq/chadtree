@@ -311,7 +311,9 @@ async def c_filter(nvim: Nvim, state: State, settings: Settings) -> State:
         return resp
 
     filter_pattern = await call(nvim, ask) or ""
-    new_state = await forward(state, settings=settings, filter_pattern=filter_pattern)
+    new_state = await forward(
+        state, settings=settings, selection=set(), filter_pattern=filter_pattern
+    )
     return new_state
 
 
