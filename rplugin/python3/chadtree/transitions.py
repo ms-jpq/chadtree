@@ -8,6 +8,7 @@ from typing import (
     Awaitable,
     Callable,
     Dict,
+    Iterable,
     Iterator,
     Optional,
     Sequence,
@@ -33,11 +34,11 @@ from .fs import (
 )
 from .git import status
 from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
-from .opener import OpenError, open_gui
 from .quickfix import quickfix
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
+from .system import SystemIntegrationError, open_gui, trash
 from .types import Index, Mode, Node, Selection, Settings, State
 from .wm import (
     find_current_buffer_name,
@@ -481,8 +482,12 @@ async def c_select(
             return None
 
 
-async def c_delete(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _delete(
+    nvim: Nvim,
+    state: State,
+    settings: Settings,
+    is_visual: bool,
+    yeet: Callable[[Iterable[str]], Awaitable[None]],
 ) -> Optional[State]:
     selection = state.selection or {
         node.path for node in await _indices(nvim, state=state, is_visual=is_visual)
@@ -502,7 +507,7 @@ async def c_delete(
         ans = await call(nvim, ask)
         if ans == 1:
             try:
-                await remove(unified)
+                await yeet(unified)
             except Exception as e:
                 await print(nvim, e, error=True)
                 return await c_refresh(nvim, state=state, settings=settings)
@@ -521,6 +526,22 @@ async def c_delete(
             return None
     else:
         return None
+
+
+async def c_delete(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[State]:
+    return await _delete(
+        nvim, state=state, settings=settings, is_visual=is_visual, yeet=remove
+    )
+
+
+async def c_trash(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[State]:
+    return await _delete(
+        nvim, state=state, settings=settings, is_visual=is_visual, yeet=trash
+    )
 
 
 def _find_dest(src: str, node: Node) -> str:
@@ -622,5 +643,5 @@ async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> None:
     if node:
         try:
             await open_gui(node.path)
-        except OpenError as e:
+        except SystemIntegrationError as e:
             await print(nvim, e)

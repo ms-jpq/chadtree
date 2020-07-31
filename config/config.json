@@ -23,7 +23,8 @@
     "select": ["s"],
     "smaller": ["-", "_"],
     "toggle_follow": [],
-    "toggle_hidden": ["."]
+    "toggle_hidden": ["."],
+    "trash": ["t"]
   },
   "open_left": true,
   "session": true,

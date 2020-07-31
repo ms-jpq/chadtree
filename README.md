@@ -32,6 +32,8 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Session support (save open folders to disk, pick up where you left off)
 
+- Trash support (requires [`trash`](https://formulae.brew.sh/formula/trash) or [`trash-cli`](https://github.com/andreafrancia/trash-cli))
+
 ![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/filtering.gif)
 
 ### I like version control
@@ -86,6 +88,8 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 
 ### Keybindings
 
+**important:** if you get a missing function error, it means I added a feature and you need to run `:UpdateRemotePlugins` to see the new function.
+
 `functions` only work under the CHADTree buffer
 
 | functions       | usage                                                               | default key |
@@ -108,6 +112,7 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | new             | create new file at location under cursor                            | `a`         |
 | rename          | rename file under cursor                                            | `r`         |
 | delete          | delete item under cursor / visual selection / selection             | `d`         |
+| trash           | trash item under cursor / visual selection / selection              | `t`         |
 | copy            | copy selected items to location under cursor                        | `p`         |
 | cut             | move selected items to location under cursor                        | `x`         |
 | toggle_follow   | toggle follow mode on / off                                         |             |

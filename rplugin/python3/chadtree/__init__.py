@@ -41,6 +41,7 @@ from .transitions import (
     c_resize,
     c_secondary,
     c_select,
+    c_trash,
     redraw,
 )
 from .types import State
@@ -357,6 +358,15 @@ class Main:
         is_visual, *_ = args
 
         self._run(c_delete, is_visual=is_visual)
+
+    @function("CHADtrash")
+    def trash(self, args: Sequence[Any]) -> None:
+        """
+        Delete selected
+        """
+        is_visual, *_ = args
+
+        self._run(c_trash, is_visual=is_visual)
 
     @function("CHADcut")
     def cut(self, args: Sequence[Any]) -> None:
