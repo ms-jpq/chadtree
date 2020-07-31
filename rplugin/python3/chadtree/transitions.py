@@ -271,7 +271,9 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
 
     def cont() -> Tuple[Index, Selection]:
         index = {i for i in state.index if exists(i)} | paths
-        selection = {s for s in state.selection if exists(s)}
+        selection = (
+            set() if state.filter_pattern else {s for s in state.selection if exists(s)}
+        )
         return index, selection
 
     index, selection = await loop.run_in_executor(None, cont)
