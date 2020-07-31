@@ -1,0 +1,37 @@
+# Full list of Features
+
+## Filtering
+
+![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/filtering.gif)
+
+## Follow Mode
+
+![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
+
+## Git Integrations
+
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
+
+## Git & Toggle show / hide
+
+![git_hide.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git_hide.gif)
+
+## Quickfix
+
+![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quickfix.gif)
+
+## Sessions
+
+![session.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/session.gif)
+
+## Visual Select
+
+![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
+
+## Github Colours
+
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
+
+## LS_COLORS
+
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
