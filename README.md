@@ -2,9 +2,9 @@
 
 Async File Manager for Neovim, Better than NERDTree.
 
-**WORK IN PROGRESS**
-
 ## Features Illustrated
+
+**See full list of screen capatures [here](https://github.com/ms-jpq/chadtree/tree/chad/preview)**
 
 ### I like speed
 
