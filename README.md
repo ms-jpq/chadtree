@@ -99,7 +99,7 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | filter        | set glob filter for visible items                                   | `f`             |
 | clear_filter  | clear filtering                                                     | `F`             |
 | select        | select item under cursor / visual selection                         | `s`             |
-| clear_select  | clear selection                                                     | `c`             |
+| clear_select  | clear selection                                                     | `S`             |
 | new           | create new file at location under cursor                            | `a`             |
 | rename        | rename file under cursor                                            | `r`             |
 | delete        | delete item under cursor / visual selection / selection             | `d`             |
