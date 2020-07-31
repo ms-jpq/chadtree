@@ -301,6 +301,16 @@ async def c_follow(nvim: Nvim, state: State, settings: Settings) -> State:
     return new_state
 
 
+async def c_filter(nvim: Nvim, state: State, settings: Settings) -> State:
+    def ask() -> Optional[str]:
+        resp = nvim.funcs.input("New filter:", state.filtering)
+        return resp
+
+    filtering = await call(nvim, ask) or ""
+    new_state = await forward(state, settings=settings, filtering=filtering)
+    return new_state
+
+
 async def c_copy_name(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> None:

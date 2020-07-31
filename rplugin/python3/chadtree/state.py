@@ -74,6 +74,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     state = State(
         index=index,
         selection=selection,
+        filtering="",
         show_hidden=settings.show_hidden,
         follow=settings.follow,
         width=settings.width,
@@ -94,6 +95,7 @@ async def forward(
     root: Optional[Node] = None,
     index: Optional[Index] = None,
     selection: Optional[Selection] = None,
+    filtering: Optional[str] = None,
     show_hidden: Optional[bool] = None,
     follow: Optional[bool] = None,
     width: Optional[int] = None,
@@ -104,6 +106,7 @@ async def forward(
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
+    new_filtering = or_else(filtering, state.filtering)
     new_current = or_else(current, state.current)
     new_root = root or (
         await update(state.root, index=new_index, paths=paths) if paths else state.root
@@ -125,6 +128,7 @@ async def forward(
     new_state = State(
         index=new_index,
         selection=new_selection,
+        filtering=new_filtering,
         show_hidden=new_hidden,
         follow=or_else(follow, state.follow),
         width=or_else(width, state.width),

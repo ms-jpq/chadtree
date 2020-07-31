@@ -141,6 +141,7 @@ class Render:
 class State:
     index: Index
     selection: Selection
+    filtering: str
     show_hidden: bool
     follow: bool
     width: int

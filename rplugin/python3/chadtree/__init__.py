@@ -25,6 +25,7 @@ from .transitions import (
     c_copy_name,
     c_cut,
     c_delete,
+    c_filter,
     c_follow,
     c_hidden,
     c_new,
@@ -262,6 +263,14 @@ class Main:
         """
 
         self._run(c_follow)
+
+    @function("CHADfilter")
+    def filtering(self, args: Sequence[Any]) -> None:
+        """
+        Update filter
+        """
+
+        self._run(c_filter)
 
     @function("CHADcopy_name")
     def copy_name(self, args: Sequence[Any]) -> None:

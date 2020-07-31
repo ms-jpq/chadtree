@@ -8,6 +8,7 @@
     "copy_name": ["y"],
     "cut": ["x"],
     "delete": ["d"],
+    "filter": ["f"],
     "new": ["a"],
     "open_sys": ["o"],
     "primary": ["<enter>"],
