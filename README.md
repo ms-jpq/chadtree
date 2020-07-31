@@ -26,11 +26,13 @@ Async File Manager for Neovim, Better than NERDTree.
 
 ### I like 21st century
 
+- Filtering by glob
+
 - Follow mode
 
 - Session support (save open folders to disk, pick up where you left off)
 
-![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
+![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/filtering.gif)
 
 ### I like version control
 
