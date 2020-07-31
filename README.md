@@ -48,7 +48,7 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Full `$LS_COLOR` support! (shows same colours as unix `ls` & `tree` commands)
 
-* [Github coloured](https://github.com/github/linguist) icons
+* [Github coloured](https://github.com/github/linguist) icons (over 600 colours!)
 
 ![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
 
