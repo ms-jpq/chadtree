@@ -34,6 +34,8 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Trash support (requires [`trash`](https://formulae.brew.sh/formula/trash) or [`trash-cli`](https://github.com/andreafrancia/trash-cli))
 
+- `ls -l` info
+
 ![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/filtering.gif)
 
 ### I like version control
