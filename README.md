@@ -141,6 +141,14 @@ Add a hotkey to clear quickfix list:
 nnoremap <leader>l <cmd>call setqflist([])<cr>
 ```
 
+## If you like this...
+
+Also check out
+
+- [`sad`](https://github.com/ms-jpq/sad), its a modern `sed` that does previews with syntax highlighting, and lets you pick and choose which chunks to edit.
+
+- [isomorphic-copy](https://github.com/ms-jpq/isomorphic-copy), it's a cross platform clipboard that is daemonless, and does not require third party support.
+
 ## Special Thanks
 
 All the icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
