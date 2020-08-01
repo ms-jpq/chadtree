@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import IntEnum, auto
+from enum import Enum, IntEnum, auto
 from typing import Dict, Optional, Sequence, Set
 
 Index = Set[str]
@@ -160,3 +160,11 @@ class State:
     current: Optional[str]
     lookup: Sequence[Node]
     rendered: Sequence[Render]
+
+
+class ClickType(Enum):
+    primary = auto()
+    secondary = auto()
+    tertiary = auto()
+    h_split = auto()
+    v_split = auto()

@@ -1,5 +1,4 @@
 from asyncio import gather, get_running_loop
-from enum import Enum, auto
 from itertools import chain
 from locale import strxfrm
 from mimetypes import guess_type
@@ -38,13 +37,13 @@ from .fs import (
     unify_ancestors,
 )
 from .git import status
-from .nvim import HoldWindowPosition, call, getcwd, print
+from .nvim import call, getcwd, print
 from .quickfix import quickfix
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
 from .system import SystemIntegrationError, open_gui, trash
-from .types import Index, Mode, Node, Selection, Settings, State, VCStatus
+from .types import ClickType, Index, Mode, Node, Selection, Settings, State, VCStatus
 from .wm import (
     find_current_buffer_name,
     is_fm_buffer,
@@ -204,16 +203,11 @@ async def c_resize(
     return new_state
 
 
-class ClickType(Enum):
-    primary = auto()
-    secondary = auto()
-    tertiary = auto()
-
-
-async def _click(
+async def c_click(
     nvim: Nvim, state: State, settings: Settings, click_type: ClickType
 ) -> Optional[State]:
     node = await _index(nvim, state=state)
+
     if node:
         if Mode.orphan_link in node.mode:
             name = node.name
@@ -253,16 +247,12 @@ async def _click(
                     )
 
                     def cont() -> None:
-                        if click_type == ClickType.primary:
-                            show_file(nvim, state=new_state, settings=settings)
-                        elif click_type == ClickType.secondary:
-                            with HoldWindowPosition(nvim):
-                                show_file(nvim, state=new_state, settings=settings)
-                        elif click_type == ClickType.tertiary:
-                            nvim.api.command("tabnew")
-                            show_file(nvim, state=new_state, settings=settings)
-                        else:
-                            raise ValueError("unknown click type")
+                        show_file(
+                            nvim,
+                            state=new_state,
+                            settings=settings,
+                            click_type=click_type,
+                        )
 
                     await call(nvim, cont)
                     return new_state
@@ -294,24 +284,6 @@ async def c_change_focus_up(
         return await _change_dir(nvim, state=state, settings=settings, new_base=parent)
     else:
         return None
-
-
-async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
-    return await _click(
-        nvim, state=state, settings=settings, click_type=ClickType.primary
-    )
-
-
-async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
-    return await _click(
-        nvim, state=state, settings=settings, click_type=ClickType.secondary
-    )
-
-
-async def c_tertiary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
-    return await _click(
-        nvim, state=state, settings=settings, click_type=ClickType.tertiary
-    )
 
 
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:

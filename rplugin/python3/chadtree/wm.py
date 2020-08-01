@@ -8,7 +8,21 @@ from pynvim.api.window import Window
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
 from .nvim import atomic
-from .types import Badge, Highlight, Render, Settings, State
+from .types import Badge, ClickType, Highlight, Render, Settings, State
+
+
+class HoldWindowPosition:
+    def __init__(self, nvim: Nvim, hold: bool):
+        self.nvim = nvim
+        self.hold = hold
+
+    def __enter__(self) -> None:
+        if self.hold:
+            self.window = self.nvim.api.get_current_win()
+
+    def __exit__(self, *_: Any) -> None:
+        if self.hold:
+            self.nvim.api.set_current_win(self.window)
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
@@ -97,18 +111,15 @@ def new_fm_buffer(nvim: Nvim, keymap: Dict[str, Sequence[str]]) -> Buffer:
 
 
 def new_window(nvim: Nvim, *, open_left: bool) -> Window:
-    split_b = nvim.api.get_option("splitbelow")
     split_r = nvim.api.get_option("splitright")
 
     windows: Sequence[Window] = tuple(w for w in find_windows_in_tab(nvim))
     focus_win = windows[0] if open_left else windows[-1]
     direction = False if open_left else True
 
-    nvim.api.set_option("splitbelow", True)
     nvim.api.set_option("splitright", direction)
     nvim.api.set_current_win(focus_win)
     nvim.command("vnew")
-    nvim.api.set_option("splitbelow", split_b)
     nvim.api.set_option("splitright", split_r)
 
     window: Window = nvim.api.get_current_win()
@@ -143,23 +154,37 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
         resize_fm_windows(nvim, state.width)
 
 
-def show_file(nvim: Nvim, *, state: State, settings: Settings) -> None:
+def show_file(
+    nvim: Nvim, *, state: State, settings: Settings, click_type: ClickType
+) -> None:
     path = state.current
+    hold = click_type == ClickType.secondary
+    if click_type == ClickType.tertiary:
+        nvim.api.command("tabnew")
     if path:
-        buffer: Optional[Buffer] = next(find_buffer_with_file(nvim, file=path), None)
-        window: Window = next(
-            find_window_with_file_in_tab(nvim, file=path), None
-        ) or next(find_non_fm_windows_in_tab(nvim), None) or new_window(
-            nvim, open_left=not settings.open_left
-        )
+        with HoldWindowPosition(nvim, hold=hold):
+            buffer: Optional[Buffer] = next(
+                find_buffer_with_file(nvim, file=path), None
+            )
+            window: Window = next(
+                find_window_with_file_in_tab(nvim, file=path), None
+            ) or next(find_non_fm_windows_in_tab(nvim), None) or new_window(
+                nvim, open_left=not settings.open_left
+            )
 
-        nvim.api.set_current_win(window)
-        if buffer is None:
-            nvim.command(f"edit {path}")
-        else:
-            nvim.api.win_set_buf(window, buffer)
-        resize_fm_windows(nvim, width=state.width)
-        nvim.api.command("filetype detect")
+            nvim.api.set_current_win(window)
+            if click_type == ClickType.h_split:
+                nvim.api.command("new")
+            elif click_type == ClickType.v_split:
+                nvim.api.command("vnew")
+            window = nvim.api.get_current_win()
+
+            if buffer is None:
+                nvim.command(f"edit {path}")
+            else:
+                nvim.api.win_set_buf(window, buffer)
+            resize_fm_windows(nvim, width=state.width)
+            nvim.api.command("filetype detect")
 
 
 def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:

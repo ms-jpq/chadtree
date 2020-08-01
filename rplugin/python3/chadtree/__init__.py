@@ -23,6 +23,7 @@ from .transitions import (
     c_change_focus_up,
     c_clear_filter,
     c_clear_selection,
+    c_click,
     c_collapse,
     c_copy,
     c_copy_name,
@@ -34,19 +35,16 @@ from .transitions import (
     c_new,
     c_open,
     c_open_system,
-    c_primary,
     c_quit,
     c_refresh,
     c_rename,
     c_resize,
-    c_secondary,
     c_select,
     c_stat,
-    c_tertiary,
     c_trash,
     redraw,
 )
-from .types import Settings, State
+from .types import ClickType, Settings, State
 
 
 @plugin
@@ -233,7 +231,7 @@ class Main:
         File -> open
         """
 
-        self._run(c_primary)
+        self._run(c_click, click_type=ClickType.primary)
 
     @function("CHADsecondary")
     def secondary(self, args: Sequence[Any]) -> None:
@@ -242,7 +240,7 @@ class Main:
         File -> preview
         """
 
-        self._run(c_secondary)
+        self._run(c_click, click_type=ClickType.secondary)
 
     @function("CHADtertiary")
     def tertiary(self, args: Sequence[Any]) -> None:
@@ -251,7 +249,25 @@ class Main:
         File -> open in new tab
         """
 
-        self._run(c_tertiary)
+        self._run(c_click, click_type=ClickType.tertiary)
+
+    @function("CHADh_split")
+    def h_split(self, args: Sequence[Any]) -> None:
+        """
+        Folders -> toggle
+        File -> open in horizontal split
+        """
+
+        self._run(c_click, click_type=ClickType.h_split)
+
+    @function("CHADv_split")
+    def v_split(self, args: Sequence[Any]) -> None:
+        """
+        Folders -> toggle
+        File -> open in vertical split
+        """
+
+        self._run(c_click, click_type=ClickType.v_split)
 
     @function("CHADbigger")
     def bigger(self, args: Sequence[Any]) -> None:

@@ -92,14 +92,3 @@ async def autocmd(
         atomic(nvim, *commands)
 
     await call(nvim, cont)
-
-
-class HoldWindowPosition:
-    def __init__(self, nvim: Nvim):
-        self.nvim = nvim
-
-    def __enter__(self) -> None:
-        self.window = self.nvim.api.get_current_win()
-
-    def __exit__(self, *_: Any) -> None:
-        self.nvim.api.set_current_win(self.window)

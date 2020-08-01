@@ -12,6 +12,7 @@
     "cut": ["x"],
     "delete": ["d"],
     "filter": ["f"],
+    "h_split": [],
     "new": ["a"],
     "open_sys": ["o"],
     "primary": ["<enter>"],
@@ -26,7 +27,8 @@
     "tertiary": ["<m-enter>", "<middlemouse>"],
     "toggle_follow": [],
     "toggle_hidden": ["."],
-    "trash": ["t"]
+    "trash": ["t"],
+    "v_split": []
   },
   "mimetypes": {
     "ignore_exts": [".ts"],
