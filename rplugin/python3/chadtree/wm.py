@@ -220,10 +220,5 @@ def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
         )
         it5 = "win_set_cursor", (window, (new_row, col))
         atomic(
-            nvim,
-            cast(Tuple[str, Sequence[str]], it1),
-            *it2,
-            *it3,
-            *it4,
-            cast(Tuple[str, Sequence[str]], it5),
+            nvim, it1, *it2, *it3, *it4, it5,
         )
