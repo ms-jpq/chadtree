@@ -1,10 +1,13 @@
 from asyncio import get_running_loop
 from dataclasses import dataclass
+from datetime import datetime
+from grp import getgrgid
 from os import makedirs
 from os import remove as rm
 from os import stat
 from os.path import dirname, exists, isdir, sep
 from pathlib import Path
+from pwd import getpwuid
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
@@ -46,13 +49,37 @@ async def fs_exists(path: str) -> bool:
 
 @dataclass(frozen=True)
 class FSstat:
-    mode_line: str
+    permissions: str
+    user: str
+    group: str
+    date_mod: datetime
+    size: int
+
+
+def get_username(uid: int) -> str:
+    try:
+        return getpwuid(uid).pw_name
+    except KeyError:
+        return str(uid)
+
+
+def get_groupname(gid: int) -> str:
+    try:
+        return getgrgid(gid).gr_name
+    except KeyError:
+        return str(gid)
 
 
 def _fs_stat(path: str) -> FSstat:
     stats = stat(path, follow_symlinks=True)
-    mode_line = filemode(stats.st_mode)
-    fs_stat = FSstat(mode_line=mode_line)
+    permissions = filemode(stats.st_mode)
+    user = get_username(stats.st_uid)
+    group = get_groupname(stats.st_gid)
+    date_mod = datetime.fromtimestamp(stats.st_mtime)
+    size = stats.st_size
+    fs_stat = FSstat(
+        permissions=permissions, user=user, group=group, date_mod=date_mod, size=size
+    )
     return fs_stat
 
 

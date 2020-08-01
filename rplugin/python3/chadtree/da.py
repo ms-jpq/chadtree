@@ -1,12 +1,15 @@
 from asyncio import create_subprocess_exec, get_running_loop
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
+from functools import partial
+from itertools import count
 from json import dump, load
+from operator import pow
 from os import makedirs
 from os.path import dirname
 from subprocess import CompletedProcess, run
 from sys import version_info
-from typing import Any, Callable, Optional, TypeVar, cast
+from typing import Any, Callable, Optional, Tuple, TypeVar, cast
 
 from .consts import folder_mode
 
@@ -42,6 +45,19 @@ def constantly(val: T) -> Callable[[Any], T]:
         return val
 
     return ret
+
+
+def human_readable_size(size: int, truncate: int = 3) -> str:
+    units = ("", "K", "M", "G", "T", "P", "E", "Z", "Y")
+    step = partial(pow, 10)
+    steps = zip(map(step, count(step=3)), units)
+    for factor, unit in steps:
+        divided = size / factor
+        if abs(divided) < 1000:
+            fmt = format(divided, f".{truncate}f").rstrip("0").rstrip(".")
+            return f"{fmt}{unit}"
+
+    raise ValueError(f"unit over flow: {size}")
 
 
 @dataclass(frozen=True)

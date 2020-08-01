@@ -21,8 +21,8 @@ from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 
 from .cartographer import new as new_root
+from .da import human_readable_size
 from .fs import (
-    FSstat,
     ancestors,
     copy,
     cut,
@@ -389,8 +389,19 @@ async def c_copy_name(
 async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
     node = await _index(nvim, state=state)
     if node:
-        stat = await fs_stat(node.path)
-        await print(nvim, stat)
+        try:
+            stat = await fs_stat(node.path)
+        except Exception as e:
+            await print(nvim, e, error=True)
+        else:
+            permissions = stat.permissions
+            size = human_readable_size(stat.size, truncate=2)
+            user = stat.user
+            group = stat.group
+            mtime = stat.date_mod.strftime("%Y-%m-%d %H:%M")
+            name = node.name + sep if Mode.folder in node.mode else node.name
+            mode_line = f"{permissions} {size} {user} {group} {mtime} {name}"
+            await print(nvim, mode_line)
 
 
 async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
