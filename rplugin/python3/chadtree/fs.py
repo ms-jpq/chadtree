@@ -5,7 +5,7 @@ from grp import getgrgid
 from os import makedirs, readlink
 from os import remove as rm
 from os import stat
-from os.path import dirname, exists, isdir, sep
+from os.path import dirname, exists, sep
 from pathlib import Path
 from pwd import getpwuid
 from shutil import copy2, copytree
@@ -165,7 +165,8 @@ async def cut(operations: Dict[str, str]) -> None:
 
 
 def _copy(src: str, dest: str) -> None:
-    if isdir(src):
+    stats = stat(src, follow_symlinks=False)
+    if S_ISDIR(stats.st_mode):
         copytree(src, dest)
     else:
         copy2(src, dest)
