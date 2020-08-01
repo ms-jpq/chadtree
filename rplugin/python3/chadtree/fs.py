@@ -11,7 +11,7 @@ from pwd import getpwuid
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
-from stat import S_ISLNK, filemode
+from stat import S_ISDIR, S_ISLNK, filemode
 from typing import Dict, Iterable, Iterator, Optional, Set
 
 from .consts import file_mode, folder_mode
@@ -133,7 +133,8 @@ async def rename(src: str, dest: str) -> None:
 
 
 def _remove(src: str) -> None:
-    if isdir(src):
+    stats = stat(src, follow_symlinks=False)
+    if S_ISDIR(stats.st_mode):
         rmtree(src)
     else:
         rm(src)
