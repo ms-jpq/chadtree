@@ -1,4 +1,4 @@
-from asyncio import AbstractEventLoop, Event, run_coroutine_threadsafe
+from asyncio import AbstractEventLoop, Event, create_task, run_coroutine_threadsafe
 from concurrent.futures import ThreadPoolExecutor
 from itertools import chain
 from operator import add, sub
@@ -64,7 +64,8 @@ class Main:
         self.ch = Event()
         self.nvim = nvim
 
-        self._initialized = False
+        self._init = create_task(self._initialize())
+        run_forever(self.nvim, self._ooda_loop)
 
     def _submit(self, co: Awaitable[None]) -> None:
         loop: AbstractEventLoop = self.nvim.loop
@@ -89,6 +90,7 @@ class Main:
         self, fn: Callable[..., Awaitable[Optional[State]]], *args: Any, **kwargs: Any
     ) -> None:
         async def run() -> None:
+            await self._init
             state = await self._curr_state()
             new_state = await fn(
                 self.nvim, state=state, settings=self.settings, *args, **kwargs
@@ -99,38 +101,27 @@ class Main:
 
         self._submit(run())
 
-    def _initialize(self) -> None:
-        async def setup() -> None:
-            await autocmd(
-                self.nvim, events=("DirChanged",), fn="_CHADchange_dir",
-            )
+    async def _initialize(self) -> None:
+        await autocmd(
+            self.nvim, events=("DirChanged",), fn="_CHADchange_dir",
+        )
 
-            await autocmd(
-                self.nvim, events=("BufEnter",), fn="_CHADfollow",
-            )
+        await autocmd(
+            self.nvim, events=("BufEnter",), fn="_CHADfollow",
+        )
 
-            await autocmd(
-                self.nvim,
-                events=("BufWritePost", "FocusGained"),
-                fn="CHADschedule_update",
-            )
+        await autocmd(
+            self.nvim, events=("BufWritePost", "FocusGained"), fn="CHADschedule_update",
+        )
 
-            await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_CHADsession")
+        await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_CHADsession")
 
-            await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_CHADquickfix")
+        await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_CHADquickfix")
 
-            groups = chain(
-                self.settings.hl_context.groups,
-                self.settings.icons.ext_colours.values(),
-            )
-            await add_hl_groups(self.nvim, groups=groups)
-
-        if self._initialized:
-            return
-        else:
-            self._initialized = True
-            self._submit(setup())
-            run_forever(self.nvim, self._ooda_loop)
+        groups = chain(
+            self.settings.hl_context.groups, self.settings.icons.ext_colours.values(),
+        )
+        await add_hl_groups(self.nvim, groups=groups)
 
     async def _ooda_loop(self) -> None:
         update = self.settings.update
@@ -153,7 +144,6 @@ class Main:
         Toggle sidebar
         """
 
-        self._initialize()
         self._run(c_open)
 
     @function("CHADschedule_update")
