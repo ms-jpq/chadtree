@@ -108,6 +108,8 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | primary         | open / close folders & open file                                                                     | `<enter>`                    |
 | secondary       | open / close folders & preview file                                                                  | `<tab>`, `<doubleclick>`     |
 | tertiary        | open / close folders & open file in new tab                                                          | `<m-enter>`, `<middlemouse>` |
+| v_split         | open / close folders & open file in vertical split                                                   | `w`                          |
+| h_split         | open / close folders & open file in horizontal split                                                 | `W`                          |
 | open_sys        | open file using `open` / `xdg-open`                                                                  | `o`                          |
 | toggle_hidden   | toggle showing hidden items _(you need to set your own ignore list)_                                 | `.`                          |
 | collapse        | collapse all sub folders                                                                             | `<s-tab>`                    |
