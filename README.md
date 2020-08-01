@@ -1,6 +1,6 @@
 # CHADTree
 
-Async File Manager for Neovim, Better than NERDTree.
+File Manager for Neovim, Better than NERDTree.
 
 ## Features Illustrated
 
