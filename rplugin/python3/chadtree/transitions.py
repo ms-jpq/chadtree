@@ -260,7 +260,8 @@ async def _click(
                             with HoldWindowPosition(nvim):
                                 show_file(nvim, state=new_state, settings=settings)
                         elif click_type == ClickType.tertiary:
-                            pass
+                            nvim.api.command("tabnew")
+                            show_file(nvim, state=new_state, settings=settings)
                         else:
                             raise ValueError("unknown click type")
 
