@@ -38,6 +38,8 @@ Async File Manager for Neovim, Better than NERDTree.
 
 - Correct! handling of symlinks
 
+- Mimetype warning (so you don't accidently open an image)
+
 ![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/filtering.gif)
 
 ### I like version control

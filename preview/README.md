@@ -36,6 +36,10 @@
 
 ![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
 
-## LS -l info
+## LS -l statistics
 
 ![ls_l.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_l.png)
+
+## Mimetype warning
+
+![mimetype.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/mimetype.png)

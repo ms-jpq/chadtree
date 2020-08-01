@@ -15,6 +15,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    cast,
 )
 
 from pynvim import Nvim
@@ -234,7 +235,8 @@ async def _click(
                 m_type, _, _ = (mime or "").partition("/")
 
                 def ask() -> bool:
-                    question = f"{node.name} have possible mimetype {mime}, continue?"
+                    n = cast(Node, node)
+                    question = f"{n.name} have possible mimetype {mime}, continue?"
                     resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
                     return resp == 1
 
