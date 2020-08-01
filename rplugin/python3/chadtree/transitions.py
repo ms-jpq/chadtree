@@ -39,7 +39,7 @@ from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
 from .system import SystemIntegrationError, open_gui, trash
-from .types import Index, Mode, Node, Selection, Settings, State
+from .types import Index, Mode, Node, Selection, Settings, State, VCStatus
 from .wm import (
     find_current_buffer_name,
     is_fm_buffer,
@@ -313,7 +313,13 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
     current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
     new_index = index if new_current is None else index | current_paths
 
-    qf, vc = await gather(quickfix(nvim), status())
+    async def vc_stat() -> VCStatus:
+        if settings.version_ctl.disable:
+            return VCStatus()
+        else:
+            return await status()
+
+    qf, vc = await gather(quickfix(nvim), vc_stat())
     new_state = await forward(
         state,
         settings=settings,

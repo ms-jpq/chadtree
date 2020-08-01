@@ -38,7 +38,10 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
         min_time=config["update_time"]["min"], max_time=config["update_time"]["max"]
     )
 
-    version_ctl = VersionControlOptions(defer=config["version_control"]["defer"])
+    version_ctl = VersionControlOptions(
+        defer=config["version_control"]["defer"],
+        disable=config["version_control"]["disable"],
+    )
     hl_context = parse_ls_colours()
 
     keymap = {f"CHAD{k}": v for k, v in config["keymap"].items()}

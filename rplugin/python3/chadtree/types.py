@@ -78,6 +78,7 @@ class UpdateTime:
 @dataclass(frozen=True)
 class VersionControlOptions:
     defer: bool
+    disable: bool
 
 
 @dataclass(frozen=True)

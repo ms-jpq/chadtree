@@ -35,7 +35,8 @@
   },
   "use_icons": true,
   "version_control": {
-    "defer": false
+    "defer": false,
+    "disable": false
   },
   "width": 40
 }

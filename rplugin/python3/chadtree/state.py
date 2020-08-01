@@ -54,11 +54,12 @@ def dump_session(state: State) -> None:
 
 
 async def initial(nvim: Nvim, settings: Settings) -> State:
+    version_ctl = settings.version_ctl
     cwd = await getcwd(nvim)
     index = load_session(cwd) if settings.session else {cwd}
     selection: Selection = set()
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
-    vc = VCStatus() if settings.version_ctl.defer else await status()
+    vc = VCStatus() if version_ctl.disable or version_ctl.defer else await status()
     current = None
     filter_pattern = ""
     lookup, rendered = render(
