@@ -96,24 +96,6 @@ async def autocmd(
     await call(nvim, cont)
 
 
-class HoldPosition:
-    def __init__(self, nvim: Nvim, windows: Sequence[Window]):
-        self.nvim = nvim
-        self.windows = windows
-
-    def __enter__(self) -> None:
-        self.elephant = tuple(
-            (window, self.nvim.api.win_get_cursor(window)) for window in self.windows
-        )
-
-    def __exit__(self, *_: Any) -> None:
-        for window, (row, col) in self.elephant:
-            buffer: Buffer = self.nvim.api.win_get_buf(window)
-            max_rows = self.nvim.api.buf_line_count(buffer)
-            r = min(row, max_rows)
-            self.nvim.api.win_set_cursor(window, (r, col))
-
-
 class HoldWindowPosition:
     def __init__(self, nvim: Nvim):
         self.nvim = nvim

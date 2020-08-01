@@ -7,7 +7,7 @@ from pynvim.api.window import Window
 
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
-from .nvim import HoldPosition, atomic
+from .nvim import atomic
 from .types import Badge, Highlight, Render, Settings, State
 
 
@@ -29,11 +29,11 @@ def find_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
             yield window
 
 
-def find_fm_windows(nvim: Nvim) -> Iterator[Window]:
+def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
     for window in nvim.api.list_wins():
         buffer: Buffer = nvim.api.win_get_buf(window)
         if is_fm_buffer(nvim, buffer=buffer):
-            yield window
+            yield window, buffer
 
 
 def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
@@ -198,33 +198,32 @@ def buf_set_highlights(
 
 
 def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
-    windows = tuple(find_fm_windows(nvim))
-    with HoldPosition(nvim, windows=windows):
-        lines, badges, highlights = tuple(
-            zip(
-                *(
-                    (render.line, render.badges, render.highlights)
-                    for render in rendering
-                )
-            )
-        )
-        ns = nvim.api.create_namespace(fm_namespace)
+    lines, badges, highlights = tuple(
+        zip(*((render.line, render.badges, render.highlights) for render in rendering))
+    )
+    ns = nvim.api.create_namespace(fm_namespace)
 
-        for buffer in find_fm_buffers(nvim):
-            it1 = (("buf_clear_namespace", (buffer, ns, 0, -1)),)
-            it2 = buf_setlines(nvim, buffer=buffer, lines=cast(Sequence[str], lines))
-            it3 = buf_set_virtualtext(
-                nvim,
-                buffer=buffer,
-                ns=ns,
-                vtext=cast(Sequence[Sequence[Badge]], badges),
-            )
-            it4 = buf_set_highlights(
-                nvim,
-                buffer=buffer,
-                ns=ns,
-                highlights=cast(Sequence[Sequence[Highlight]], highlights),
-            )
-            atomic(
-                nvim, *cast(Sequence[Tuple[str, Sequence[Any]]], it1), *it2, *it3, *it4
-            )
+    for window, buffer in find_fm_windows(nvim):
+        row, col = nvim.api.win_get_cursor(window)
+        lines = cast(Sequence[str], lines)
+        new_row = min(row, len(lines))
+        it1 = "buf_clear_namespace", (buffer, ns, 0, -1)
+        it2 = buf_setlines(nvim, buffer=buffer, lines=lines)
+        it3 = buf_set_virtualtext(
+            nvim, buffer=buffer, ns=ns, vtext=cast(Sequence[Sequence[Badge]], badges),
+        )
+        it4 = buf_set_highlights(
+            nvim,
+            buffer=buffer,
+            ns=ns,
+            highlights=cast(Sequence[Sequence[Highlight]], highlights),
+        )
+        it5 = "win_set_cursor", (window, (new_row, col))
+        atomic(
+            nvim,
+            cast(Tuple[str, Sequence[str]], it1),
+            *it2,
+            *it3,
+            *it4,
+            cast(Tuple[str, Sequence[str]], it5),
+        )
