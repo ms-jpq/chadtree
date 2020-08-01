@@ -136,6 +136,12 @@ Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overw
 | name   | globs of name to ignore     |
 | path   | glob of full path to ignore |
 
+Note: **if you want to ignore dotfiles, you will need to set it up like so**
+
+```vimL
+lua vim.api.nvim_set_var("chadtree_ignores", { name = {".*", ".git"} })
+```
+
 ### Recommendations
 
 Add a hotkey to clear quickfix list:
