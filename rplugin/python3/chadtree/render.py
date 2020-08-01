@@ -186,6 +186,7 @@ def render(
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
+    keep_open = {node.path}
 
     def render(
         node: Node, *, depth: int, cleared: bool
@@ -199,7 +200,7 @@ def render(
                 yield from render(child, depth=depth + 1, cleared=clear)
 
         children = tuple(gen_children())
-        if clear or children:
+        if clear or children or node.path in keep_open:
             yield node, rend
         yield from iter(children)
 
