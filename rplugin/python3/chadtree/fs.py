@@ -2,7 +2,7 @@ from asyncio import get_running_loop
 from dataclasses import dataclass
 from datetime import datetime
 from grp import getgrgid
-from os import makedirs
+from os import makedirs, readlink
 from os import remove as rm
 from os import stat
 from os.path import dirname, exists, isdir, sep
@@ -11,8 +11,8 @@ from pwd import getpwuid
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
-from stat import filemode
-from typing import Dict, Iterable, Iterator, Set
+from stat import S_ISLNK, filemode
+from typing import Dict, Iterable, Iterator, Optional, Set
 
 from .consts import file_mode, folder_mode
 
@@ -54,6 +54,7 @@ class FSstat:
     group: str
     date_mod: datetime
     size: int
+    link: Optional[str]
 
 
 def get_username(uid: int) -> str:
@@ -71,14 +72,20 @@ def get_groupname(gid: int) -> str:
 
 
 def _fs_stat(path: str) -> FSstat:
-    stats = stat(path, follow_symlinks=True)
+    stats = stat(path, follow_symlinks=False)
     permissions = filemode(stats.st_mode)
     user = get_username(stats.st_uid)
     group = get_groupname(stats.st_gid)
     date_mod = datetime.fromtimestamp(stats.st_mtime)
     size = stats.st_size
+    link = readlink(path) if S_ISLNK(stats.st_mode) else None
     fs_stat = FSstat(
-        permissions=permissions, user=user, group=group, date_mod=date_mod, size=size
+        permissions=permissions,
+        user=user,
+        group=group,
+        date_mod=date_mod,
+        size=size,
+        link=link,
     )
     return fs_stat
 
