@@ -109,7 +109,7 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | secondary       | open / close folders & preview file                                                                  | `<tab>`, `<doubleclick>`     |
 | tertiary        | open / close folders & open file in new tab                                                          | `<m-enter>`, `<middlemouse>` |
 | open_sys        | open file using `open` / `xdg-open`                                                                  | `o`                          |
-| toggle_hidden   | toggle showing hidden items                                                                          | `.`                          |
+| toggle_hidden   | toggle showing hidden items _(you need to set your own ignore list)_                                 | `.`                          |
 | collapse        | collapse all sub folders                                                                             | `<s-tab>`                    |
 | copy_name       | copy file path of items under cursor / visual selection / selection                                  | `y`                          |
 | filter          | set glob filter for visible items                                                                    | `f`                          |
