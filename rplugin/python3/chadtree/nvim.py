@@ -8,6 +8,7 @@ from uuid import uuid4
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.common import NvimError
+from pynvim.api.window import Window
 
 T = TypeVar("T")
 
@@ -96,19 +97,21 @@ async def autocmd(
 
 
 class HoldPosition:
-    def __init__(self, nvim: Nvim):
+    def __init__(self, nvim: Nvim, windows: Sequence[Window]):
         self.nvim = nvim
+        self.windows = windows
 
     def __enter__(self) -> None:
-        self.window = self.nvim.api.get_current_win()
-        self.pos = self.nvim.api.win_get_cursor(self.window)
+        self.elephant = tuple(
+            (window, self.nvim.api.win_get_cursor(window)) for window in self.windows
+        )
 
     def __exit__(self, *_: Any) -> None:
-        row, col = self.pos
-        buffer: Buffer = self.nvim.api.win_get_buf(self.window)
-        max_rows = self.nvim.api.buf_line_count(buffer)
-        r = min(row, max_rows)
-        self.nvim.api.win_set_cursor(self.window, (r, col))
+        for window, (row, col) in self.elephant:
+            buffer: Buffer = self.nvim.api.win_get_buf(window)
+            max_rows = self.nvim.api.buf_line_count(buffer)
+            r = min(row, max_rows)
+            self.nvim.api.win_set_cursor(window, (r, col))
 
 
 class HoldWindowPosition:

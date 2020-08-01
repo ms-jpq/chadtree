@@ -38,7 +38,7 @@ from .fs import (
     unify_ancestors,
 )
 from .git import status
-from .nvim import HoldPosition, HoldWindowPosition, call, getcwd, print
+from .nvim import HoldWindowPosition, call, getcwd, print
 from .quickfix import quickfix
 from .state import dump_session, forward
 from .state import index as state_index
@@ -105,13 +105,7 @@ async def _indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
 
 async def redraw(nvim: Nvim, state: State) -> None:
     def cont() -> None:
-        window: Window = nvim.api.get_current_win()
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        if is_fm_buffer(nvim, buffer=buffer):
-            with HoldPosition(nvim):
-                update_buffers(nvim, rendering=state.rendered)
-        else:
-            update_buffers(nvim, rendering=state.rendered)
+        update_buffers(nvim, rendering=state.rendered)
 
     await call(nvim, cont)
 
