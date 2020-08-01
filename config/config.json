@@ -23,6 +23,7 @@
     "select": ["s"],
     "smaller": ["-", "_"],
     "stat": ["K"],
+    "tertiary": ["<middlemouse>"],
     "toggle_follow": [],
     "toggle_hidden": ["."],
     "trash": ["t"]

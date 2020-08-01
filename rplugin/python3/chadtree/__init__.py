@@ -42,6 +42,7 @@ from .transitions import (
     c_secondary,
     c_select,
     c_stat,
+    c_tertiary,
     c_trash,
     redraw,
 )
@@ -252,6 +253,15 @@ class Main:
         """
 
         self._run(c_secondary)
+
+    @function("CHADtertiary")
+    def tertiary(self, args: Sequence[Any]) -> None:
+        """
+        Folders -> toggle
+        File -> open in new tab
+        """
+
+        self._run(c_tertiary)
 
     @function("CHADbigger")
     def bigger(self, args: Sequence[Any]) -> None:

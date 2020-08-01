@@ -1,4 +1,5 @@
 from asyncio import gather, get_running_loop
+from enum import Enum, auto
 from itertools import chain
 from locale import strxfrm
 from mimetypes import guess_type
@@ -209,8 +210,14 @@ async def c_resize(
     return new_state
 
 
+class ClickType(Enum):
+    primary = auto()
+    secondary = auto()
+    tertiary = auto()
+
+
 async def _click(
-    nvim: Nvim, state: State, settings: Settings, hold_window: bool
+    nvim: Nvim, state: State, settings: Settings, click_type: ClickType
 ) -> Optional[State]:
     node = await _index(nvim, state=state)
     if node:
@@ -247,11 +254,15 @@ async def _click(
                     )
 
                     def cont() -> None:
-                        if hold_window:
+                        if click_type == ClickType.primary:
+                            show_file(nvim, state=new_state, settings=settings)
+                        elif click_type == ClickType.secondary:
                             with HoldWindowPosition(nvim):
                                 show_file(nvim, state=new_state, settings=settings)
+                        elif click_type == ClickType.tertiary:
+                            pass
                         else:
-                            show_file(nvim, state=new_state, settings=settings)
+                            raise ValueError("unknown click type")
 
                     await call(nvim, cont)
                     return new_state
@@ -286,11 +297,21 @@ async def c_change_focus_up(
 
 
 async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
-    return await _click(nvim, state=state, settings=settings, hold_window=False)
+    return await _click(
+        nvim, state=state, settings=settings, click_type=ClickType.primary
+    )
 
 
 async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
-    return await _click(nvim, state=state, settings=settings, hold_window=True)
+    return await _click(
+        nvim, state=state, settings=settings, click_type=ClickType.secondary
+    )
+
+
+async def c_tertiary(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
+    return await _click(
+        nvim, state=state, settings=settings, click_type=ClickType.tertiary
+    )
 
 
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:

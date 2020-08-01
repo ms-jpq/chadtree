@@ -8,10 +8,10 @@ from .types import Settings, UpdateTime, VersionControlOptions, ViewOptions
 
 
 def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
-    config = merge(load_json(config_json), user_config)
-    view = merge(load_json(view_json), user_view)
+    config = merge(load_json(config_json), user_config, replace=True)
+    view = merge(load_json(view_json), user_view, replace=True)
     icon_c = load_json(icons_json)
-    ignore = merge(load_json(ignore_json), user_ignores)
+    ignore = merge(load_json(ignore_json), user_ignores, replace=True)
     colours = load_json(colours_json)
 
     use_icons = config["use_icons"]
