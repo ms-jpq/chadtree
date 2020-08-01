@@ -234,11 +234,11 @@ async def _click(
                 m_type, _, _ = (mime or "").partition("/")
 
                 def ask() -> bool:
-                    question = "{node.name} have possible mimetype {mime}, continue?"
+                    question = f"{node.name} have possible mimetype {mime}, continue?"
                     resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
                     return resp == 1
 
-                ans = await call(nvim, ask)
+                ans = (await call(nvim, ask)) if m_type in settings.warn_mimes else True
                 if ans:
                     new_state = await forward(
                         state, settings=settings, current=node.path
