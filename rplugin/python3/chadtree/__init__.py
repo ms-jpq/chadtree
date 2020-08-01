@@ -1,4 +1,10 @@
-from asyncio import AbstractEventLoop, Event, create_task, run_coroutine_threadsafe
+from asyncio import (
+    AbstractEventLoop,
+    Event,
+    Lock,
+    create_task,
+    run_coroutine_threadsafe,
+)
 from concurrent.futures import ThreadPoolExecutor
 from itertools import chain
 from operator import add, sub
@@ -60,6 +66,7 @@ class Main:
 
         self.chan = ThreadPoolExecutor(max_workers=1)
         self.ch = Event()
+        self.lock = Lock()
         self.nvim = nvim
 
         self._init = create_task(self._initialize())
@@ -88,14 +95,15 @@ class Main:
         self, fn: Callable[..., Awaitable[Optional[State]]], *args: Any, **kwargs: Any
     ) -> None:
         async def run() -> None:
-            await self._init
-            state = await self._curr_state()
-            new_state = await fn(
-                self.nvim, state=state, settings=self.settings, *args, **kwargs
-            )
-            if new_state:
-                self.state = new_state
-                await redraw(self.nvim, state=new_state)
+            async with self.lock:
+                await self._init
+                state = await self._curr_state()
+                new_state = await fn(
+                    self.nvim, state=state, settings=self.settings, *args, **kwargs
+                )
+                if new_state:
+                    self.state = new_state
+                    await redraw(self.nvim, state=new_state)
 
         self._submit(run())
 
@@ -126,15 +134,16 @@ class Main:
         async for elapsed in schedule(
             self.ch, min_time=update.min_time, max_time=update.max_time,
         ):
-            state = await self._curr_state()
-            try:
-                new_state = await c_refresh(
-                    self.nvim, state=state, settings=self.settings
-                )
-                self.state = new_state
-                await redraw(self.nvim, state=new_state)
-            except NvimError:
-                self.ch.set()
+            async with self.lock:
+                state = await self._curr_state()
+                try:
+                    new_state = await c_refresh(
+                        self.nvim, state=state, settings=self.settings
+                    )
+                    self.state = new_state
+                    await redraw(self.nvim, state=new_state)
+                except NvimError:
+                    self.ch.set()
 
     @command("CHADopen")
     def fm_open(self, *args: Any, **kwargs: Any) -> None:
