@@ -115,6 +115,7 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | trash           | trash item under cursor / visual selection / selection                                               | `t`         |
 | copy            | copy selected items to location under cursor                                                         | `p`         |
 | cut             | move selected items to location under cursor                                                         | `x`         |
+| stat            | print `ls -l` stat to status line                                                                    | `K`         |
 | toggle_follow   | toggle follow mode on / off                                                                          |             |
 | bigger          | increase chad size                                                                                   | `+`, `=`    |
 | smaller         | decrease chad size                                                                                   | `-`, `_`    |
