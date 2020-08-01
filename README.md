@@ -92,32 +92,32 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 
 `functions` only work under the CHADTree buffer
 
-| functions       | usage                                                               | default key |
-| --------------- | ------------------------------------------------------------------- | ----------- |
-| quit            | close chad window                                                   | `q`         |
-| refresh         | trigger refresh                                                     | `<c-r>`     |
-| change_focus    | re-center root at folder                                            | `c`         |
-| change_focus_up | re-center root at root's parent                                     | `C`         |
-| refocus         | refocus root at vim cwd                                             | `~`         |
-| primary         | open / close folders & open file                                    | `<enter>`   |
-| secondary       | open / close folders & preview file                                 | `<tab>`     |
-| open_sys        | open file using `open` / `xdg-open`                                 | `o`         |
-| toggle_hidden   | toggle showing hidden items                                         | `.`         |
-| collapse        | collapse all sub folders                                            | `<s-tab>`   |
-| copy_name       | copy file path of items under cursor / visual selection / selection | `y`         |
-| filter          | set glob filter for visible items                                   | `f`         |
-| clear_filter    | clear filtering                                                     | `F`         |
-| select          | select item under cursor / visual selection                         | `s`         |
-| clear_select    | clear selection                                                     | `S`         |
-| new             | create new file at location under cursor                            | `a`         |
-| rename          | rename file under cursor                                            | `r`         |
-| delete          | delete item under cursor / visual selection / selection             | `d`         |
-| trash           | trash item under cursor / visual selection / selection              | `t`         |
-| copy            | copy selected items to location under cursor                        | `p`         |
-| cut             | move selected items to location under cursor                        | `x`         |
-| toggle_follow   | toggle follow mode on / off                                         |             |
-| bigger          | increase chad size                                                  | `+`, `=`    |
-| smaller         | decrease chad size                                                  | `-`, `_`    |
+| functions       | usage                                                                                                | default key |
+| --------------- | ---------------------------------------------------------------------------------------------------- | ----------- |
+| quit            | close chad window                                                                                    | `q`         |
+| refresh         | trigger refresh                                                                                      | `<c-r>`     |
+| change_focus    | re-center root at folder                                                                             | `c`         |
+| change_focus_up | re-center root at root's parent                                                                      | `C`         |
+| refocus         | refocus root at vim cwd                                                                              | `~`         |
+| primary         | open / close folders & open file                                                                     | `<enter>`   |
+| secondary       | open / close folders & preview file                                                                  | `<tab>`     |
+| open_sys        | open file using `open` / `xdg-open`                                                                  | `o`         |
+| toggle_hidden   | toggle showing hidden items                                                                          | `.`         |
+| collapse        | collapse all sub folders                                                                             | `<s-tab>`   |
+| copy_name       | copy file path of items under cursor / visual selection / selection                                  | `y`         |
+| filter          | set glob filter for visible items                                                                    | `f`         |
+| clear_filter    | clear filtering                                                                                      | `F`         |
+| select          | select item under cursor / visual selection                                                          | `s`         |
+| clear_select    | clear selection                                                                                      | `S`         |
+| new             | create new folder / file at location under cursor (name ending with os specific `/` will be folders) | `a`         |
+| rename          | rename file under cursor                                                                             | `r`         |
+| delete          | delete item under cursor / visual selection / selection                                              | `d`         |
+| trash           | trash item under cursor / visual selection / selection                                               | `t`         |
+| copy            | copy selected items to location under cursor                                                         | `p`         |
+| cut             | move selected items to location under cursor                                                         | `x`         |
+| toggle_follow   | toggle follow mode on / off                                                                          |             |
+| bigger          | increase chad size                                                                                   | `+`, `=`    |
+| smaller         | decrease chad size                                                                                   | `-`, `_`    |
 
 ### View & Ignore
 
