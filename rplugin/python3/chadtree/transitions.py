@@ -22,10 +22,12 @@ from pynvim.api.window import Window
 
 from .cartographer import new as new_root
 from .fs import (
+    FSstat,
     ancestors,
     copy,
     cut,
     fs_exists,
+    fs_stat,
     is_parent,
     new,
     remove,
@@ -382,6 +384,13 @@ async def c_copy_name(
 
     await call(nvim, cont)
     await print(nvim, f"📎 {clap}")
+
+
+async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
+    node = await _index(nvim, state=state)
+    if node:
+        stat = await fs_stat(node.path)
+        await print(nvim, stat)
 
 
 async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:

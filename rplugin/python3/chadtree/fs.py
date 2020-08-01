@@ -1,11 +1,14 @@
 from asyncio import get_running_loop
+from dataclasses import dataclass
 from os import makedirs
 from os import remove as rm
+from os import stat
 from os.path import dirname, exists, isdir, sep
 from pathlib import Path
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
+from stat import filemode
 from typing import Dict, Iterable, Iterator, Set
 
 from .consts import file_mode, folder_mode
@@ -35,7 +38,31 @@ def unify_ancestors(paths: Set[str]) -> Iterator[str]:
 async def fs_exists(path: str) -> bool:
     loop = get_running_loop()
 
-    return await loop.run_in_executor(None, exists, path)
+    def cont() -> bool:
+        return exists(path)
+
+    return await loop.run_in_executor(None, cont)
+
+
+@dataclass(frozen=True)
+class FSstat:
+    mode_line: str
+
+
+def _fs_stat(path: str) -> FSstat:
+    stats = stat(path, follow_symlinks=True)
+    mode_line = filemode(stats.st_mode)
+    fs_stat = FSstat(mode_line=mode_line)
+    return fs_stat
+
+
+async def fs_stat(path: str) -> FSstat:
+    loop = get_running_loop()
+
+    def cont() -> FSstat:
+        return _fs_stat(path)
+
+    return await loop.run_in_executor(None, cont)
 
 
 def _new(dest: str) -> None:

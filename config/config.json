@@ -22,6 +22,7 @@
     "secondary": ["<tab>", "<2-leftmouse>"],
     "select": ["s"],
     "smaller": ["-", "_"],
+    "stat": ["K"],
     "toggle_follow": [],
     "toggle_hidden": ["."],
     "trash": ["t"]

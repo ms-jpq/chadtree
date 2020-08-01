@@ -1,4 +1,3 @@
-import sys
 from asyncio import create_subprocess_exec, get_running_loop
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
@@ -6,7 +5,7 @@ from json import dump, load
 from os import makedirs
 from os.path import dirname
 from subprocess import CompletedProcess, run
-from sys import version
+from sys import version_info
 from typing import Any, Callable, Optional, TypeVar, cast
 
 from .consts import folder_mode
@@ -52,7 +51,7 @@ class ProcReturn:
     err: str
 
 
-if version.startswith("3.7"):
+if (version_info.major, version_info.minor) == (3, 7):
 
     async def call(prog: str, *args: str) -> ProcReturn:
         loop = get_running_loop()

@@ -41,6 +41,7 @@ from .transitions import (
     c_resize,
     c_secondary,
     c_select,
+    c_stat,
     c_trash,
     redraw,
 )
@@ -225,6 +226,14 @@ class Main:
         """
 
         self._run(a_changedir)
+
+    @function("CHADstat")
+    def stat(self, args: Sequence[Any]) -> None:
+        """
+        Print file stat to cmdline
+        """
+
+        self._run(c_stat)
 
     @function("CHADprimary")
     def primary(self, args: Sequence[Any]) -> None:
