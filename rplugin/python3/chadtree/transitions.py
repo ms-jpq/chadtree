@@ -232,7 +232,7 @@ async def _click(
                     )
                     return new_state
             else:
-                mime, _ = guess_type(node.name)
+                mime, _ = guess_type(node.name, strict=False)
                 m_type, _, _ = (mime or "").partition("/")
 
                 def ask() -> bool:
