@@ -241,7 +241,12 @@ async def _click(
                     resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
                     return resp == 1
 
-                ans = (await call(nvim, ask)) if m_type in settings.warn_mimes else True
+                ans = (
+                    (await call(nvim, ask))
+                    if m_type in settings.mime.warn
+                    and node.ext not in settings.mime.ignore_exts
+                    else True
+                )
                 if ans:
                     new_state = await forward(
                         state, settings=settings, current=node.path

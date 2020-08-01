@@ -83,6 +83,12 @@ class VersionControlOptions:
 
 
 @dataclass(frozen=True)
+class MimetypeOptions:
+    warn: Set[str]
+    ignore_exts: Set[str]
+
+
+@dataclass(frozen=True)
 class HLcontext:
     groups: Sequence[HLgroup]
     mode_lookup_pre: Dict[Mode, HLgroup]
@@ -105,7 +111,7 @@ class Settings:
     update: UpdateTime
     use_icons: bool
     version_ctl: VersionControlOptions
-    warn_mimes: Set[str]
+    mime: MimetypeOptions
     width: int
 
 

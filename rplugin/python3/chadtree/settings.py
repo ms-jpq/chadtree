@@ -4,7 +4,13 @@ from .consts import colours_json, config_json, icons_json, ignore_json, view_jso
 from .da import load_json, merge
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
-from .types import Settings, UpdateTime, VersionControlOptions, ViewOptions
+from .types import (
+    MimetypeOptions,
+    Settings,
+    UpdateTime,
+    VersionControlOptions,
+    ViewOptions,
+)
 
 
 def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
@@ -46,7 +52,10 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     hl_context = parse_ls_colours()
 
     keymap = {f"CHAD{k}": v for k, v in config["keymap"].items()}
-    warn_mimes = {*config["warn_mimes"]}
+    mime = MimetypeOptions(
+        warn={*config["mimetypes"]["warn"]},
+        ignore_exts={*config["mimetypes"]["ignore_exts"]},
+    )
 
     settings = Settings(
         follow=config["follow"],
@@ -61,7 +70,7 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
         update=update,
         use_icons=use_icons,
         version_ctl=version_ctl,
-        warn_mimes=warn_mimes,
+        mime=mime,
         width=config["width"],
     )
 

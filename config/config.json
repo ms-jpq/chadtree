@@ -28,6 +28,10 @@
     "toggle_hidden": ["."],
     "trash": ["t"]
   },
+  "mimetypes": {
+    "ignore_exts": [".ts"],
+    "warn": ["audio", "font", "image", "video"]
+  },
   "open_left": true,
   "session": true,
   "show_hidden": false,
@@ -40,6 +44,5 @@
     "defer": false,
     "disable": false
   },
-  "warn_mimes": ["audio", "font", "image", "video"],
   "width": 40
 }
