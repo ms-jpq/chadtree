@@ -12,7 +12,7 @@
     "cut": ["x"],
     "delete": ["d"],
     "filter": ["f"],
-    "h_split": [],
+    "h_split": ["W"],
     "new": ["a"],
     "open_sys": ["o"],
     "primary": ["<enter>"],
@@ -28,7 +28,7 @@
     "toggle_follow": [],
     "toggle_hidden": ["."],
     "trash": ["t"],
-    "v_split": []
+    "v_split": ["w"]
   },
   "mimetypes": {
     "ignore_exts": [".ts"],

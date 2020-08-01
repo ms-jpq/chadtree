@@ -166,5 +166,5 @@ class ClickType(Enum):
     primary = auto()
     secondary = auto()
     tertiary = auto()
-    h_split = auto()
     v_split = auto()
+    h_split = auto()

@@ -251,15 +251,6 @@ class Main:
 
         self._run(c_click, click_type=ClickType.tertiary)
 
-    @function("CHADh_split")
-    def h_split(self, args: Sequence[Any]) -> None:
-        """
-        Folders -> toggle
-        File -> open in horizontal split
-        """
-
-        self._run(c_click, click_type=ClickType.h_split)
-
     @function("CHADv_split")
     def v_split(self, args: Sequence[Any]) -> None:
         """
@@ -268,6 +259,15 @@ class Main:
         """
 
         self._run(c_click, click_type=ClickType.v_split)
+
+    @function("CHADh_split")
+    def h_split(self, args: Sequence[Any]) -> None:
+        """
+        Folders -> toggle
+        File -> open in horizontal split
+        """
+
+        self._run(c_click, click_type=ClickType.h_split)
 
     @function("CHADbigger")
     def bigger(self, args: Sequence[Any]) -> None:

@@ -173,10 +173,10 @@ def show_file(
             )
 
             nvim.api.set_current_win(window)
-            if click_type == ClickType.h_split:
-                nvim.api.command("new")
-            elif click_type == ClickType.v_split:
+            if click_type == ClickType.v_split:
                 nvim.api.command("vnew")
+            elif click_type == ClickType.h_split:
+                nvim.api.command("new")
             window = nvim.api.get_current_win()
 
             if buffer is None:
