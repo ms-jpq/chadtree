@@ -18,6 +18,7 @@
     "quickfix": "Label",
     "version_control": "Comment"
   },
+  "time_format": "%Y-%m-%d %H:%M",
   "unicode": {
     "default_icon": "",
     "folder": {

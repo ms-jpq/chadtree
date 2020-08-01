@@ -54,6 +54,7 @@ class HLgroup:
 
 @dataclass(frozen=True)
 class ViewOptions:
+    time_fmt: str
     active: str
     default_icon: str
     folder_closed: str

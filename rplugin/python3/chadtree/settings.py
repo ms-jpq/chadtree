@@ -19,6 +19,7 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
 
     ext_colours = gen_hl("github", mapping=colours)
     icons = ViewOptions(
+        time_fmt=view["time_format"],
         active=view_c["status"]["active"],
         default_icon=view_c["default_icon"],
         folder_closed=view_c["folder"]["closed"],
