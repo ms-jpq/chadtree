@@ -28,15 +28,12 @@ async def stat() -> Dict[str, str]:
     else:
 
         def items() -> Iterator[Tuple[str, str]]:
-            rename = False
-            for line in ret.out.split("\0"):
-                if rename:
-                    rename = False
-                else:
-                    prefix, file = line[:2], line[3:]
-                    if "R" in prefix:
-                        rename = True
-                    yield prefix, file.rstrip(sep)
+            it = iter(ret.out.split("\0"))
+            for line in it:
+                prefix, file = line[:2], line[3:]
+                yield prefix, file.rstrip(sep)
+                if "R" in prefix:
+                    next(it, None)
 
         entries = {file: prefix for prefix, file in items()}
         return entries
