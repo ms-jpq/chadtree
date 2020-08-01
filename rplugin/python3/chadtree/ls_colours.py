@@ -225,7 +225,7 @@ def parseHLGroup(styling: Styling) -> HLgroup:
         if style
     }
     ctermfg = str(cast(AnsiColour, fg).value - 1) if type(fg) is AnsiColour else None
-    ctermbg = str(cast(AnsiColour, bg).value - 1) if type(fg) is AnsiColour else None
+    ctermbg = str(cast(AnsiColour, bg).value - 1) if type(bg) is AnsiColour else None
     guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else None
     guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else None
     group = HLgroup(
