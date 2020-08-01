@@ -1,3 +1,4 @@
+import sys
 from asyncio import create_subprocess_exec, get_running_loop
 from asyncio.subprocess import PIPE
 from dataclasses import dataclass
@@ -75,7 +76,7 @@ else:
 
 
 def load_json(path: str) -> Any:
-    with open(path) as fd:
+    with open(path, encoding="utf8") as fd:
         return load(fd)
 
 

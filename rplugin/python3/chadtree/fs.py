@@ -12,10 +12,12 @@ from .consts import file_mode, folder_mode
 
 
 def ancestors(path: str) -> Iterator[str]:
-    if not path or path == sep:
+    if not path:
+        return
+    parent = dirname(path)
+    if path == parent:
         return
     else:
-        parent = dirname(path)
         yield from ancestors(parent)
         yield parent
 
