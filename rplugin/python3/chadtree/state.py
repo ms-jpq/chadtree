@@ -59,7 +59,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     index = load_session(cwd) if settings.session else {cwd}
     selection: Selection = set()
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
-    vc = VCStatus() if version_ctl.disable or version_ctl.defer else await status()
+    vc = VCStatus() if not version_ctl.enable or version_ctl.defer else await status()
     current = None
     filter_pattern = ""
     lookup, rendered = render(
@@ -80,6 +80,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         filter_pattern="",
         show_hidden=settings.show_hidden,
         follow=settings.follow,
+        enable_vc=settings.version_ctl.enable,
         width=settings.width,
         root=node,
         qf=qf,
@@ -101,6 +102,7 @@ async def forward(
     filter_pattern: Optional[str] = None,
     show_hidden: Optional[bool] = None,
     follow: Optional[bool] = None,
+    enable_vc: Optional[bool] = None,
     width: Optional[int] = None,
     qf: Optional[QuickFix] = None,
     vc: Optional[VCStatus] = None,
@@ -135,6 +137,7 @@ async def forward(
         filter_pattern=new_filter_pattern,
         show_hidden=new_hidden,
         follow=or_else(follow, state.follow),
+        enable_vc=or_else(enable_vc, state.enable_vc),
         width=or_else(width, state.width),
         root=new_root,
         qf=new_qf,

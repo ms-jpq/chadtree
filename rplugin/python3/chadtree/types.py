@@ -79,7 +79,7 @@ class UpdateTime:
 @dataclass(frozen=True)
 class VersionControlOptions:
     defer: bool
-    disable: bool
+    enable: bool
 
 
 @dataclass(frozen=True)
@@ -153,6 +153,7 @@ class State:
     filter_pattern: str
     show_hidden: bool
     follow: bool
+    enable_vc: bool
     width: int
     root: Node
     qf: QuickFix

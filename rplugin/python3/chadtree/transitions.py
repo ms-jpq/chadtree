@@ -301,6 +301,13 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[S
         return None
 
 
+async def _vc_stat(enable: bool) -> VCStatus:
+    if enable:
+        return await status()
+    else:
+        return VCStatus()
+
+
 async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
     loop = get_running_loop()
 
@@ -324,13 +331,7 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
     current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
     new_index = index if new_current is None else index | current_paths
 
-    async def vc_stat() -> VCStatus:
-        if settings.version_ctl.disable:
-            return VCStatus()
-        else:
-            return await status()
-
-    qf, vc = await gather(quickfix(nvim), vc_stat())
+    qf, vc = await gather(quickfix(nvim), _vc_stat(state.enable_vc))
     new_state = await forward(
         state,
         settings=settings,
@@ -351,13 +352,21 @@ async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
     return new_state
 
 
-async def c_follow(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_toggle_follow(nvim: Nvim, state: State, settings: Settings) -> State:
     new_state = await forward(state, settings=settings, follow=not state.follow)
     await print(nvim, f"🐶 follow mode: {new_state.follow}")
     return new_state
 
 
-async def c_filter(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> State:
+    enable_vc = not state.enable_vc
+    vc = await _vc_stat(enable_vc)
+    new_state = await forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
+    await print(nvim, f"🐶 enable version control: {new_state.enable_vc}")
+    return new_state
+
+
+async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> State:
     def ask() -> Optional[str]:
         resp = nvim.funcs.input("New filter:", state.filter_pattern)
         return resp

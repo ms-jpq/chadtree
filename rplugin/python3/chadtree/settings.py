@@ -47,7 +47,7 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
 
     version_ctl = VersionControlOptions(
         defer=config["version_control"]["defer"],
-        disable=config["version_control"]["disable"],
+        enable=config["version_control"]["enable"],
     )
     hl_context = parse_ls_colours()
 

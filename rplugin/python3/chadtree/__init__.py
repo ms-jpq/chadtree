@@ -35,8 +35,8 @@ from .transitions import (
     c_copy_name,
     c_cut,
     c_delete,
-    c_filter,
-    c_follow,
+    c_new_filter,
+    c_toggle_follow,
     c_hidden,
     c_new,
     c_open,
@@ -47,6 +47,7 @@ from .transitions import (
     c_resize,
     c_select,
     c_stat,
+    c_toggle_vc,
     c_trash,
     redraw,
 )
@@ -324,12 +325,20 @@ class Main:
         self._run(c_hidden)
 
     @function("CHADtoggle_follow")
-    def follow(self, args: Sequence[Any]) -> None:
+    def toggle_follow(self, args: Sequence[Any]) -> None:
         """
         Toggle follow
         """
 
-        self._run(c_follow)
+        self._run(c_toggle_follow)
+
+    @function("CHADtoggle_version_control")
+    def toggle_vc(self, args: Sequence[Any]) -> None:
+        """
+        Toggle version control
+        """
+
+        self._run(c_toggle_vc)
 
     @function("CHADfilter")
     def filter_pattern(self, args: Sequence[Any]) -> None:
@@ -337,7 +346,7 @@ class Main:
         Update filter
         """
 
-        self._run(c_filter)
+        self._run(c_new_filter)
 
     @function("CHADcopy_name")
     def copy_name(self, args: Sequence[Any]) -> None:
