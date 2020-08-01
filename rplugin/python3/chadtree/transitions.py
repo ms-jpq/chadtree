@@ -1,6 +1,7 @@
 from asyncio import gather, get_running_loop
 from itertools import chain
 from locale import strxfrm
+from mimetypes import guess_type
 from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
 from typing import (
@@ -229,18 +230,31 @@ async def _click(
                     )
                     return new_state
             else:
-                new_state = await forward(state, settings=settings, current=node.path)
+                mime, _ = guess_type(node.name)
+                m_type, _, _ = (mime or "").partition("/")
 
-                def cont() -> None:
-                    if hold_window:
-                        with HoldWindowPosition(nvim):
+                def ask() -> bool:
+                    question = "{node.name} have possible mimetype {mime}, continue?"
+                    resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
+                    return resp == 1
+
+                ans = await call(nvim, ask)
+                if ans:
+                    new_state = await forward(
+                        state, settings=settings, current=node.path
+                    )
+
+                    def cont() -> None:
+                        if hold_window:
+                            with HoldWindowPosition(nvim):
+                                show_file(nvim, state=new_state, settings=settings)
+                        else:
                             show_file(nvim, state=new_state, settings=settings)
-                    else:
-                        show_file(nvim, state=new_state, settings=settings)
 
-                await call(nvim, cont)
-
-                return new_state
+                    await call(nvim, cont)
+                    return new_state
+                else:
+                    return None
     else:
         return None
 
@@ -525,14 +539,13 @@ async def _delete(
             sorted((_display_path(path, state=state) for path in unified), key=strxfrm)
         )
 
-        def ask() -> int:
-            resp = nvim.funcs.confirm(
-                f"🗑{linesep}{display_paths}?", f"&Yes{linesep}&No{linesep}", 2
-            )
-            return resp
+        def ask() -> bool:
+            question = f"🗑{linesep}{display_paths}?"
+            resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
+            return resp == 1
 
         ans = await call(nvim, ask)
-        if ans == 1:
+        if ans:
             try:
                 await yeet(unified)
             except Exception as e:
@@ -614,14 +627,13 @@ async def _operation(
                 for s, d in sorted(operations.items(), key=lambda t: strxfrm(t[0]))
             )
 
-            def ask() -> int:
-                resp = nvim.funcs.confirm(
-                    f"{op_name}{linesep}{msg}?", f"&Yes{linesep}&No{linesep}", 2
-                )
-                return resp
+            def ask() -> bool:
+                question = f"{op_name}{linesep}{msg}?"
+                resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
+                return resp == 1
 
             ans = await call(nvim, ask)
-            if ans == 1:
+            if ans:
                 try:
                     await action(operations)
                 except Exception as e:

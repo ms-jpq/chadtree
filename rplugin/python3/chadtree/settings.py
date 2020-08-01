@@ -19,20 +19,20 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
 
     ext_colours = gen_hl("github", mapping=colours)
     icons = ViewOptions(
-        time_fmt=view["time_format"],
         active=view_c["status"]["active"],
         default_icon=view_c["default_icon"],
-        folder_closed=view_c["folder"]["closed"],
-        folder_open=view_c["folder"]["open"],
-        link=view_c["link"]["normal"],
-        link_broken=view_c["link"]["broken"],
-        selected=view_c["status"]["selected"],
-        quickfix_hl=view["highlights"]["quickfix"],
-        version_ctl_hl=view["highlights"]["version_control"],
         ext_colours=ext_colours,
         filename_exact=icon_c["name_exact"],
         filename_glob=icon_c["name_glob"],
         filetype=icon_c["type"],
+        folder_closed=view_c["folder"]["closed"],
+        folder_open=view_c["folder"]["open"],
+        link=view_c["link"]["normal"],
+        link_broken=view_c["link"]["broken"],
+        quickfix_hl=view["highlights"]["quickfix"],
+        selected=view_c["status"]["selected"],
+        time_fmt=view["time_format"],
+        version_ctl_hl=view["highlights"]["version_control"],
     )
 
     update = UpdateTime(
@@ -46,11 +46,12 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     hl_context = parse_ls_colours()
 
     keymap = {f"CHAD{k}": v for k, v in config["keymap"].items()}
+    warn_mimes = {*config["warn_mimes"]}
 
     settings = Settings(
         follow=config["follow"],
-        icons=icons,
         hl_context=hl_context,
+        icons=icons,
         keymap=keymap,
         name_ignore=ignore["name"],
         open_left=config["open_left"],
@@ -60,6 +61,7 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
         update=update,
         use_icons=use_icons,
         version_ctl=version_ctl,
+        warn_mimes=warn_mimes,
         width=config["width"],
     )
 

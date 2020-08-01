@@ -39,5 +39,6 @@
     "defer": false,
     "disable": false
   },
+  "warn_mimes": ["audio", "font", "image", "video"],
   "width": 40
 }

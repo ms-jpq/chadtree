@@ -9,7 +9,7 @@ from os import makedirs
 from os.path import dirname
 from subprocess import CompletedProcess, run
 from sys import version_info
-from typing import Any, Callable, Optional, Tuple, TypeVar, cast
+from typing import Any, Callable, Optional, TypeVar, cast
 
 from .consts import folder_mode
 

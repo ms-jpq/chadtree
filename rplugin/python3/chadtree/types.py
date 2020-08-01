@@ -105,6 +105,7 @@ class Settings:
     update: UpdateTime
     use_icons: bool
     version_ctl: VersionControlOptions
+    warn_mimes: Set[str]
     width: int
 
 
