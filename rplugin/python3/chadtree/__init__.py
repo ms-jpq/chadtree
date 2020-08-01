@@ -10,7 +10,7 @@ from pynvim import Nvim, command, function, plugin
 from pynvim.api.common import NvimError
 
 from .highlight import add_hl_groups
-from .nvim import autocmd, run_forever
+from .nvim import autocmd, print, run_forever
 from .scheduler import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -46,7 +46,7 @@ from .transitions import (
     c_trash,
     redraw,
 )
-from .types import State
+from .types import Settings, State
 
 
 @plugin
@@ -285,7 +285,12 @@ class Main:
         Redraw buffers
         """
 
-        self._run(c_refresh)
+        async def cont(nvim: Nvim, state: State, settings: Settings) -> None:
+            await print(nvim, "⏳...⌛️")
+            await c_refresh(nvim, state=state, settings=settings)
+            await print(nvim, "✅")
+
+        self._run(cont)
 
     @function("CHADcollapse")
     def collapse(self, args: Sequence[Any]) -> None:
