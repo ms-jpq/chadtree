@@ -308,7 +308,12 @@ async def _vc_stat(enable: bool) -> VCStatus:
         return VCStatus()
 
 
-async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
+async def c_refresh(
+    nvim: Nvim, state: State, settings: Settings, write: bool = False
+) -> State:
+    if write:
+        await print(nvim, "⏳...⌛️")
+
     loop = get_running_loop()
 
     def co() -> str:
@@ -342,6 +347,10 @@ async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> State:
         paths=paths,
         current=new_current,
     )
+
+    if write:
+        await print(nvim, "✅")
+
     return new_state
 
 

@@ -35,10 +35,9 @@ from .transitions import (
     c_copy_name,
     c_cut,
     c_delete,
-    c_new_filter,
-    c_toggle_follow,
     c_hidden,
     c_new,
+    c_new_filter,
     c_open,
     c_open_system,
     c_quit,
@@ -47,6 +46,7 @@ from .transitions import (
     c_resize,
     c_select,
     c_stat,
+    c_toggle_follow,
     c_toggle_vc,
     c_trash,
     redraw,
@@ -301,12 +301,7 @@ class Main:
         Redraw buffers
         """
 
-        async def cont(nvim: Nvim, state: State, settings: Settings) -> None:
-            await print(nvim, "⏳...⌛️")
-            await c_refresh(nvim, state=state, settings=settings)
-            await print(nvim, "✅")
-
-        self._run(cont)
+        self._run(c_refresh, write=True)
 
     @function("CHADcollapse")
     def collapse(self, args: Sequence[Any]) -> None:
