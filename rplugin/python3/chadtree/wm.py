@@ -162,19 +162,21 @@ def show_file(
         nvim.api.command("tabnew")
     if path:
         with HoldWindowPosition(nvim, hold=hold):
+            non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
             buffer: Optional[Buffer] = next(
                 find_buffer_with_file(nvim, file=path), None
             )
             window: Window = next(
                 find_window_with_file_in_tab(nvim, file=path), None
-            ) or next(find_non_fm_windows_in_tab(nvim), None) or new_window(
+            ) or next(iter(non_fm_windows), None) or new_window(
                 nvim, open_left=not settings.open_left, width=state.width
             )
 
             nvim.api.set_current_win(window)
-            if click_type == ClickType.v_split:
+            non_fm_count = len(non_fm_windows)
+            if click_type == ClickType.v_split and non_fm_count:
                 nvim.api.command("vnew")
-            elif click_type == ClickType.h_split:
+            elif click_type == ClickType.h_split and non_fm_count:
                 nvim.api.command("new")
             window = nvim.api.get_current_win()
 
