@@ -119,7 +119,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
 
     nvim.api.set_option("splitright", direction)
     nvim.api.set_current_win(focus_win)
-    nvim.command(F"{width}vnew")
+    nvim.command(f"{width}vnew")
     nvim.api.set_option("splitright", split_r)
 
     window: Window = nvim.api.get_current_win()

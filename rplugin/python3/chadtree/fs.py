@@ -1,13 +1,13 @@
 from asyncio import get_running_loop
 from dataclasses import dataclass
 from datetime import datetime
-from grp import getgrgid
-from os import makedirs, readlink
+from os import makedirs
+from os import name as os_name
+from os import readlink
 from os import remove as rm
 from os import stat
 from os.path import dirname, exists, sep
 from pathlib import Path
-from pwd import getpwuid
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
@@ -57,18 +57,30 @@ class FSstat:
     link: Optional[str]
 
 
-def get_username(uid: int) -> str:
-    try:
-        return getpwuid(uid).pw_name
-    except KeyError:
+if os_name == "nt":
+
+    def get_username(uid: int) -> str:
         return str(uid)
 
-
-def get_groupname(gid: int) -> str:
-    try:
-        return getgrgid(gid).gr_name
-    except KeyError:
+    def get_groupname(gid: int) -> str:
         return str(gid)
+
+
+else:
+    from grp import getgrgid
+    from pwd import getpwuid
+
+    def get_username(uid: int) -> str:
+        try:
+            return getpwuid(uid).pw_name
+        except KeyError:
+            return str(uid)
+
+    def get_groupname(gid: int) -> str:
+        try:
+            return getgrgid(gid).gr_name
+        except KeyError:
+            return str(gid)
 
 
 def _fs_stat(path: str) -> FSstat:
