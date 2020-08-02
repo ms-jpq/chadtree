@@ -160,6 +160,7 @@ class State:
     vc: VCStatus
     current: Optional[str]
     lookup: Sequence[Node]
+    paths_lookup: Dict[str, int]
     rendered: Sequence[Render]
 
 

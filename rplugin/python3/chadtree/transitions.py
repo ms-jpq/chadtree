@@ -354,6 +354,10 @@ async def c_refresh(
     return new_state
 
 
+async def c_jump_to_current(nvim: Nvim, state: State, settings: Settings) -> None:
+    pass
+
+
 async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
     new_state = await forward(
         state, settings=settings, show_hidden=not state.show_hidden

@@ -13,6 +13,7 @@
     "delete": ["d"],
     "filter": ["f"],
     "h_split": ["W"],
+    "jump_to_current": ["J"],
     "new": ["a"],
     "open_sys": ["o"],
     "primary": ["<enter>"],

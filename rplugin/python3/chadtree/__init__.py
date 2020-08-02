@@ -36,6 +36,7 @@ from .transitions import (
     c_cut,
     c_delete,
     c_hidden,
+    c_jump_to_current,
     c_new,
     c_new_filter,
     c_open,
@@ -233,6 +234,14 @@ class Main:
         """
 
         self._run(c_stat)
+
+    @function("CHADjump_to_current")
+    def jump_to_current(self, args: Sequence[Any]) -> None:
+        """
+        Jump to active file
+        """
+
+        self._run(c_jump_to_current)
 
     @function("CHADprimary")
     def primary(self, args: Sequence[Any]) -> None:

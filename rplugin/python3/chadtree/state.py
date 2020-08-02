@@ -73,6 +73,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         show_hidden=settings.show_hidden,
         current=current,
     )
+    paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
 
     state = State(
         index=index,
@@ -87,6 +88,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         vc=vc,
         current=current,
         lookup=lookup,
+        paths_lookup=paths_lookup,
         rendered=rendered,
     )
     return state
@@ -130,6 +132,7 @@ async def forward(
         show_hidden=new_hidden,
         current=new_current,
     )
+    paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
 
     new_state = State(
         index=new_index,
@@ -144,6 +147,7 @@ async def forward(
         vc=new_vc,
         current=new_current,
         lookup=lookup,
+        paths_lookup=paths_lookup,
         rendered=rendered,
     )
 
