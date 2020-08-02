@@ -105,6 +105,7 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 | change_focus           | re-center root at folder                                                                             | `c`                          |
 | change_focus_up        | re-center root at root's parent                                                                      | `C`                          |
 | refocus                | refocus root at vim cwd                                                                              | `~`                          |
+| jump_to_current        | set cursor row to currently active file                                                              | `J`                          |
 | primary                | open / close folders & open file                                                                     | `<enter>`                    |
 | secondary              | open / close folders & preview file                                                                  | `<tab>`, `<doubleclick>`     |
 | tertiary               | open / close folders & open file in new tab                                                          | `<m-enter>`, `<middlemouse>` |
