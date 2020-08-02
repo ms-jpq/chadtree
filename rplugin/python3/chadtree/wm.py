@@ -182,6 +182,7 @@ def show_file(
                 nvim.command(f"edit {path}")
             else:
                 nvim.api.win_set_buf(window, buffer)
+            resize_fm_windows(nvim, state.width)
             nvim.api.command("filetype detect")
 
 
