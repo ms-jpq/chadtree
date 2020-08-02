@@ -187,6 +187,11 @@ def show_file(
             nvim.api.command("filetype detect")
 
 
+def jump_to_row(nvim: Nvim, *, row: int) -> None:
+    for window, _ in find_fm_windows(nvim):
+        nvim.api.win_set_cursor(window, (row + 1, 0))
+
+
 def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:

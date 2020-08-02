@@ -47,6 +47,7 @@ from .types import ClickType, Index, Mode, Node, Selection, Settings, State, VCS
 from .wm import (
     find_current_buffer_name,
     is_fm_buffer,
+    jump_to_row,
     kill_buffers,
     kill_fm_windows,
     resize_fm_windows,
@@ -355,7 +356,14 @@ async def c_refresh(
 
 
 async def c_jump_to_current(nvim: Nvim, state: State, settings: Settings) -> None:
-    pass
+    current = state.current
+    row = state.paths_lookup.get(current or "")
+    if row:
+
+        def cont() -> None:
+            jump_to_row(nvim, row=cast(int, row))
+
+        await call(nvim, cont)
 
 
 async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> State:
