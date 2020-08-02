@@ -110,7 +110,7 @@ def new_fm_buffer(nvim: Nvim, keymap: Dict[str, Sequence[str]]) -> Buffer:
     return buffer
 
 
-def new_window(nvim: Nvim, *, open_left: bool) -> Window:
+def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
     split_r = nvim.api.get_option("splitright")
 
     windows: Sequence[Window] = tuple(w for w in find_windows_in_tab(nvim))
@@ -119,7 +119,7 @@ def new_window(nvim: Nvim, *, open_left: bool) -> Window:
 
     nvim.api.set_option("splitright", direction)
     nvim.api.set_current_win(focus_win)
-    nvim.command("vnew")
+    nvim.command(F"{width}vnew")
     nvim.api.set_option("splitright", split_r)
 
     window: Window = nvim.api.get_current_win()
@@ -144,14 +144,13 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
         buffer: Buffer = next(find_fm_buffers(nvim), None)
         if buffer is None:
             buffer = new_fm_buffer(nvim, keymap=settings.keymap)
-        window = new_window(nvim, open_left=settings.open_left)
+        window = new_window(nvim, open_left=settings.open_left, width=state.width)
         nvim.api.win_set_buf(window, buffer)
         nvim.api.command("setlocal nonumber")
         nvim.api.command("setlocal nowrap")
         nvim.api.command("setlocal signcolumn=no")
         nvim.api.command("setlocal cursorline")
         nvim.api.command("setlocal winfixwidth")
-        resize_fm_windows(nvim, state.width)
 
 
 def show_file(
@@ -169,7 +168,7 @@ def show_file(
             window: Window = next(
                 find_window_with_file_in_tab(nvim, file=path), None
             ) or next(find_non_fm_windows_in_tab(nvim), None) or new_window(
-                nvim, open_left=not settings.open_left
+                nvim, open_left=not settings.open_left, width=state.width
             )
 
             nvim.api.set_current_win(window)
@@ -183,7 +182,6 @@ def show_file(
                 nvim.command(f"edit {path}")
             else:
                 nvim.api.win_set_buf(window, buffer)
-            resize_fm_windows(nvim, width=state.width)
             nvim.api.command("filetype detect")
 
 
