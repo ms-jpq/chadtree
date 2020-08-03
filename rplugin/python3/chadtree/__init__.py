@@ -15,6 +15,7 @@ from typing import Any, Awaitable, Callable, Optional, Sequence
 from pynvim import Nvim, command, function, plugin
 from pynvim.api.common import NvimError
 
+from .consts import ignores_var, settings_var, view_var
 from .highlight import add_hl_groups
 from .nvim import autocmd, run_forever
 from .scheduler import schedule
@@ -58,9 +59,9 @@ from .types import ClickType, State
 @plugin
 class Main:
     def __init__(self, nvim: Nvim):
-        user_config = nvim.vars.get("chadtree_settings", {})
-        user_view = nvim.vars.get("chadtree_view", {})
-        user_ignores = nvim.vars.get("chadtree_ignores", {})
+        user_config = nvim.vars.get(settings_var, {})
+        user_view = nvim.vars.get(view_var, {})
+        user_ignores = nvim.vars.get(ignores_var, {})
         self.settings = initial_settings(
             user_config=user_config, user_view=user_view, user_ignores=user_ignores,
         )

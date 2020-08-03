@@ -6,7 +6,7 @@ from itertools import count
 from json import dump, load
 from operator import pow
 from os import makedirs
-from os.path import dirname
+from os.path import dirname, exists
 from subprocess import CompletedProcess, run
 from sys import version_info
 from typing import Any, Callable, Optional, TypeVar, cast
@@ -90,9 +90,12 @@ else:
         return ProcReturn(code=code, out=stdout.decode(), err=stderr.decode())
 
 
-def load_json(path: str) -> Any:
-    with open(path, encoding="utf8") as fd:
-        return load(fd)
+def load_json(path: str) -> Optional[Any]:
+    if exists(path):
+        with open(path, encoding="utf8") as fd:
+            return load(fd)
+    else:
+        return None
 
 
 def dump_json(path: str, json: Any) -> None:
