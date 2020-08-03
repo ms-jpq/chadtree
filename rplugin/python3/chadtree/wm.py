@@ -147,6 +147,7 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
         window = new_window(nvim, open_left=settings.open_left, width=state.width)
         nvim.api.win_set_buf(window, buffer)
         nvim.api.command("setlocal nonumber")
+        nvim.api.command("setlocal norelativenumber")
         nvim.api.command("setlocal nowrap")
         nvim.api.command("setlocal signcolumn=no")
         nvim.api.command("setlocal cursorline")
