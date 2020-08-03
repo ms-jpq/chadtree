@@ -164,4 +164,4 @@ Also check out
 
 ## Special Thanks
 
-All the icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
+All the icons are [imported](https://github.com/ms-jpq/chadtree/blob/chad/build.py) from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
