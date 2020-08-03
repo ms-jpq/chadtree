@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, cast
 
 from .consts import colours_json, config_json, icons_json, ignore_json, view_json
 from .da import load_json, merge
@@ -16,9 +16,9 @@ from .types import (
 def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     config = merge(load_json(config_json), user_config, replace=True)
     view = merge(load_json(view_json), user_view, replace=True)
-    icon_c = load_json(icons_json)
+    icon_c = cast(Any, load_json(icons_json))
     ignore = merge(load_json(ignore_json), user_ignores, replace=True)
-    colours = load_json(colours_json)
+    colours = cast(Dict[str, str], load_json(colours_json))
 
     use_icons = config["use_icons"]
     view_c = view["unicode"] if use_icons else view["ascii"]

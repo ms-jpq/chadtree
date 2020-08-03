@@ -1,6 +1,6 @@
 from asyncio import gather
 from hashlib import sha1
-from os.path import exists, join
+from os.path import join
 from typing import Optional
 
 from pynvim import Nvim
@@ -34,14 +34,13 @@ def session_path(cwd: str) -> str:
 
 def load_session(cwd: str) -> Index:
     load_path = session_path(cwd)
-    if exists(load_path):
+    json = load_json(load_path)
+    if json:
         try:
-            json = load_json(load_path)
-        except Exception:
-            return {cwd}
-        else:
             session = Session(index=json["index"])
             return {*session.index}
+        except Exception:
+            return {cwd}
     else:
         return {cwd}
 
