@@ -135,6 +135,12 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 
 Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/chad/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/chad/config/ignore.json) accordingly.
 
+To use emoji icons do:
+
+```
+lua vim.api.nvim_set_var("chadtree_settings", { icon_set = "emoji" })
+```
+
 | option | usage                       |
 | ------ | --------------------------- |
 | name   | globs of name to ignore     |
