@@ -7,7 +7,7 @@ set -o pipefail
 cd "$(dirname "$0")" || exit 1
 
 FILES=(
-  *.py
+  ci/*.py
   rplugin/python3/chadtree/*.py
   )
 
