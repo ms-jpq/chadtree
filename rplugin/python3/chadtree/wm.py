@@ -140,6 +140,20 @@ def kill_fm_windows(nvim: Nvim, *, settings: Settings) -> None:
             nvim.api.win_close(window, True)
 
 
+def ensure_side_window(
+    nvim: Nvim, *, window: Window, state: State, settings: Settings
+) -> None:
+    open_left = settings.open_left
+    windows = tuple(find_windows_in_tab(nvim))
+    target = windows[0] if open_left else windows[-1]
+    if window.number != target:
+        if open_left:
+            nvim.api.command("wincmd H")
+        else:
+            nvim.api.command("wincmd L")
+        resize_fm_windows(nvim, state.width)
+
+
 def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
     window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
     if window:
@@ -160,6 +174,7 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
         nvim.api.command("setlocal signcolumn=no")
         nvim.api.command("setlocal cursorline")
         nvim.api.command("setlocal winfixwidth")
+        ensure_side_window(nvim, window=window, state=state, settings=settings)
 
 
 def show_file(
