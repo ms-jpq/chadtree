@@ -8,7 +8,7 @@ from pynvim.api.window import Window
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
 from .nvim import atomic
-from .types import Badge, ClickType, Highlight, Render, Settings, State
+from .types import Badge, ClickType, Highlight, Settings, State
 
 
 class HoldWindowPosition:
@@ -132,14 +132,36 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
 
 
 def kill_fm_windows(nvim: Nvim, *, settings: Settings) -> None:
-    for window in find_fm_windows_in_tab(nvim):
-        nvim.api.win_close(window, True)
+    windows: Sequence[Window] = nvim.api.list_wins()
+    if len(windows) <= 1:
+        nvim.api.command("quit")
+    else:
+        for window in find_fm_windows_in_tab(nvim):
+            nvim.api.win_close(window, True)
+
+
+def ensure_side_window(
+    nvim: Nvim, *, window: Window, state: State, settings: Settings
+) -> None:
+    open_left = settings.open_left
+    windows = tuple(find_windows_in_tab(nvim))
+    target = windows[0] if open_left else windows[-1]
+    if window.number != target:
+        if open_left:
+            nvim.api.command("wincmd H")
+        else:
+            nvim.api.command("wincmd L")
+        resize_fm_windows(nvim, state.width)
 
 
 def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
     window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
     if window:
-        nvim.api.win_close(window, True)
+        windows: Sequence[Window] = nvim.api.list_wins()
+        if len(windows) <= 1:
+            pass
+        else:
+            nvim.api.win_close(window, True)
     else:
         buffer: Buffer = next(find_fm_buffers(nvim), None)
         if buffer is None:
@@ -152,6 +174,7 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
         nvim.api.command("setlocal signcolumn=no")
         nvim.api.command("setlocal cursorline")
         nvim.api.command("setlocal winfixwidth")
+        ensure_side_window(nvim, window=window, state=state, settings=settings)
 
 
 def show_file(
