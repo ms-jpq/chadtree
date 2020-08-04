@@ -1,6 +1,6 @@
 from typing import Any, Dict, cast
 
-from .consts import colours_json, config_json, icons_json, ignore_json, view_json
+from .consts import colours_json, config_json, icon_lookup, ignore_json, view_json
 from .da import load_json, merge
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
@@ -16,6 +16,7 @@ from .types import (
 def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     config = merge(load_json(config_json), user_config, replace=True)
     view = merge(load_json(view_json), user_view, replace=True)
+    icons_json = icon_lookup[config["icon_set"]]
     icon_c = cast(Any, load_json(icons_json))
     ignore = merge(load_json(ignore_json), user_ignores, replace=True)
     colours = cast(Dict[str, str], load_json(colours_json))
