@@ -23,7 +23,8 @@ https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.
 
 LANG_COLOURS_JSON = join(ARTIFACTS, "github_colours.json")
 TEMP_JSON = join(TEMP, "icons.json")
-ICONS_JSON = join(ARTIFACTS, "icons.json")
+
+SRC_ICONS = ("base_icons.json", "emoji_icons.json")
 
 
 def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
@@ -72,13 +73,15 @@ def devicons() -> None:
     makedirs(TEMP, exist_ok=True)
     call("docker", "build", "-t", image, "-f", "Dockerfile", ".", cwd=DOCKER_PATH)
     call("docker", "create", "--name", container, image)
-    call("docker", "cp", src, TEMP_JSON)
+    for icon in SRC_ICONS:
+        src = f"{container}:/root/{icon}"
+        call("docker", "cp", src, TEMP_JSON)
+        with open(TEMP_JSON) as fd:
+            json = load(fd)
+            parsed = process_json(json)
+            dest = join(ARTIFACTS, icon)
+            spit_json(dest, parsed)
     call("docker", "rm", container)
-
-    with open(TEMP_JSON) as fd:
-        json = load(fd)
-        parsed = process_json(json)
-        spit_json(ICONS_JSON, parsed)
 
 
 def github_colours() -> None:
