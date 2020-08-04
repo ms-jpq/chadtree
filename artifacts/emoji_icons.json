@@ -1,4 +1,13 @@
 {
+  "default_icon": "📄",
+  "folder": {
+    "closed": "📂",
+    "open": "📁"
+  },
+  "link": {
+    "broken": "",
+    "normal": ""
+  },
   "name_exact": {
     ".bashprofile": "🐚",
     ".bashrc": "🐚",
@@ -80,6 +89,10 @@
     ".*require.*.js": "🔶",
     ".*vcxproj.filters": "💢",
     ".*vimrc.*": "🍃"
+  },
+  "status": {
+    "active": "▶",
+    "selected": "✸"
   },
   "type": {
     ".3ds": "🦖",

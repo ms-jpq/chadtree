@@ -1,5 +1,9 @@
 local export = function (export_name)
 
+  local default_sym = vim.g.WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
+  local folder_open = vim.g.WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
+  local folder_close = vim.g.DevIconsDefaultFolderOpenSymbol
+
   local extensions = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols
   local exact      = vim.g.WebDevIconsUnicodeDecorateFileNodesExactSymbols
   local glob       = vim.g.WebDevIconsUnicodeDecorateFileNodesPatternSymbols
@@ -8,6 +12,11 @@ local export = function (export_name)
     extensions = extensions,
     exact      = exact,
     glob       = glob,
+    default    = default_sym,
+    folder     = {
+      open   = folder_open,
+      closed = folder_close
+    }
   }
   local json = vim.fn.json_encode(data)
   vim.fn.writefile({json}, export_name)
@@ -46,7 +55,7 @@ local init = function ()
   }
 
   load_viml(v1)
-  export("base_icons.json")
+  export("unicode_icons.json")
 
   load_rtp(rtp2)
   load_viml(v2)

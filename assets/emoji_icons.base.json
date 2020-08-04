@@ -1,0 +1,10 @@
+{
+  "link": {
+    "broken": "",
+    "normal": ""
+  },
+  "status": {
+    "active": "▶",
+    "selected": "✸"
+  }
+}

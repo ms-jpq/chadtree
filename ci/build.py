@@ -13,6 +13,7 @@ from yaml import safe_load
 
 __dir__ = dirname(dirname(realpath(__file__)))
 TEMP = join(__dir__, "temp")
+ASSETS = join(__dir__, "assets")
 ARTIFACTS = join(__dir__, "artifacts")
 DOCKER_PATH = join(__dir__, "ci", "docker")
 
@@ -24,7 +25,20 @@ https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.
 LANG_COLOURS_JSON = join(ARTIFACTS, "github_colours.json")
 TEMP_JSON = join(TEMP, "icons.json")
 
-SRC_ICONS = ("base_icons.json", "emoji_icons.json")
+SRC_ICONS = ("unicode_icons", "emoji_icons")
+
+
+def merge(ds1: Any, ds2: Any, replace: bool = False) -> Any:
+    if type(ds1) is dict and type(ds2) is dict:
+        append = {k: merge(ds1.get(k), v, replace) for k, v in ds2.items()}
+        return {**ds1, **append}
+    if type(ds1) is list and type(ds2) is list:
+        if replace:
+            return ds2
+        else:
+            return [*ds1, *ds2]
+    else:
+        return ds2
 
 
 def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
@@ -48,6 +62,11 @@ def recur_sort(data: Any) -> Any:
         return data
 
 
+def slurp_json(path: str) -> Any:
+    with open(path) as fd:
+        return load(fd)
+
+
 def spit_json(path: str, json: Any) -> None:
     sorted_json = recur_sort(json)
     with open(path, "w") as fd:
@@ -61,6 +80,8 @@ def process_json(json: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
     new["name_glob"] = {
         k.rstrip("$").replace(r"\.", "."): v for k, v in json["glob"].items()
     }
+    new["default_icon"] = json["default"]
+    new["folder"] = json["folder"]
     return new
 
 
@@ -74,13 +95,14 @@ def devicons() -> None:
     call("docker", "build", "-t", image, "-f", "Dockerfile", ".", cwd=DOCKER_PATH)
     call("docker", "create", "--name", container, image)
     for icon in SRC_ICONS:
-        src = f"{container}:/root/{icon}"
+        src = f"{container}:/root/{icon}.json"
         call("docker", "cp", src, TEMP_JSON)
-        with open(TEMP_JSON) as fd:
-            json = load(fd)
-            parsed = process_json(json)
-            dest = join(ARTIFACTS, icon)
-            spit_json(dest, parsed)
+        json = slurp_json(TEMP_JSON)
+        basic = slurp_json(join(ASSETS, f"{icon}.base.json"))
+        parsed = process_json(json)
+        merged = merge(parsed, basic)
+        dest = join(ARTIFACTS, f"{icon}.json")
+        spit_json(dest, merged)
     call("docker", "rm", container)
 
 

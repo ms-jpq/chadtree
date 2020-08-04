@@ -1,6 +1,5 @@
 {
   "follow": true,
-  "icon_set": "devicons",
   "keymap": {
     "bigger": ["+", "="],
     "change_focus": ["c"],

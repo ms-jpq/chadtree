@@ -16,28 +16,27 @@ from .types import (
 def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     config = merge(load_json(config_json), user_config, replace=True)
     view = merge(load_json(view_json), user_view, replace=True)
-    icons_json = icon_lookup[config["icon_set"]]
+    icons_json = icon_lookup[config["use_icons"]]
     icon_c = cast(Any, load_json(icons_json))
     ignore = merge(load_json(ignore_json), user_ignores, replace=True)
     colours = cast(Dict[str, str], load_json(colours_json))
 
     use_icons = config["use_icons"]
-    view_c = view["unicode"] if use_icons else view["ascii"]
 
     ext_colours = gen_hl("github", mapping=colours)
     icons = ViewOptions(
-        active=view_c["status"]["active"],
-        default_icon=view_c["default_icon"],
+        active=icon_c["status"]["active"],
+        default_icon=icon_c["default_icon"],
         ext_colours=ext_colours,
         filename_exact=icon_c["name_exact"],
         filename_glob=icon_c["name_glob"],
         filetype=icon_c["type"],
-        folder_closed=view_c["folder"]["closed"],
-        folder_open=view_c["folder"]["open"],
-        link=view_c["link"]["normal"],
-        link_broken=view_c["link"]["broken"],
+        folder_closed=icon_c["folder"]["closed"],
+        folder_open=icon_c["folder"]["open"],
+        link=icon_c["link"]["normal"],
+        link_broken=icon_c["link"]["broken"],
         quickfix_hl=view["highlights"]["quickfix"],
-        selected=view_c["status"]["selected"],
+        selected=icon_c["status"]["selected"],
         time_fmt=view["time_format"],
         version_ctl_hl=view["highlights"]["version_control"],
     )
