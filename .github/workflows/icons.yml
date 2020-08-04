@@ -3,6 +3,9 @@ name: Icons
 
 on:
   push:
+    branch:
+      - "chad"
+      - "dev"
   schedule:
     - cron: "0 0 * * *" # daily
 
