@@ -8,7 +8,7 @@ from pynvim.api.window import Window
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
 from .nvim import atomic
-from .types import Badge, ClickType, Highlight, Render, Settings, State
+from .types import Badge, ClickType, Highlight, Settings, State
 
 
 class HoldWindowPosition:
@@ -132,14 +132,22 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
 
 
 def kill_fm_windows(nvim: Nvim, *, settings: Settings) -> None:
-    for window in find_fm_windows_in_tab(nvim):
-        nvim.api.win_close(window, True)
+    windows: Sequence[Window] = nvim.api.list_wins()
+    if len(windows) <= 1:
+        nvim.api.command("quit")
+    else:
+        for window in find_fm_windows_in_tab(nvim):
+            nvim.api.win_close(window, True)
 
 
 def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
     window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
     if window:
-        nvim.api.win_close(window, True)
+        windows: Sequence[Window] = nvim.api.list_wins()
+        if len(windows) <= 1:
+            pass
+        else:
+            nvim.api.win_close(window, True)
     else:
         buffer: Buffer = next(find_fm_buffers(nvim), None)
         if buffer is None:
