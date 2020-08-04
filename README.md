@@ -1,4 +1,4 @@
-# CHADTree
+# [CHADTree](https://ms-jpq.github.io/chadtree)
 
 File Manager for Neovim, Better than NERDTree.
 
