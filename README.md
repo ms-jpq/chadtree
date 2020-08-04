@@ -164,4 +164,6 @@ Also check out
 
 ## Special Thanks
 
-All the icons are [imported](https://github.com/ms-jpq/chadtree/blob/chad/build.py) from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
+The base icons are [imported](https://github.com/ms-jpq/chadtree/blob/chad/build.py) from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
+
+All emoji icons are [imported] from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme) project by [adelarsq](https://github.com/adelarsq)

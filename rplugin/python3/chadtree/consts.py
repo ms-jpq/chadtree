@@ -20,7 +20,7 @@ config_json = join(__config__, "config.json")
 view_json = join(__config__, "view.json")
 ignore_json = join(__config__, "ignore.json")
 
-icons_json = join(__artifacts__, "icons.json")
+icons_json = join(__artifacts__, "base_icons.json")
 colours_json = join(__artifacts__, "github_colours.json")
 
 fm_filetype = "chadtree"
