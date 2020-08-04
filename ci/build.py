@@ -66,7 +66,7 @@ def process_json(json: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
 
 def devicons() -> None:
     image = "chad-icons"
-    time = datetime.now().strftime("%H-%M-%S")
+    time = format(datetime.now(), "%H-%M-%S")
     container = f"{image}-{time}"
     src = f"{container}:/root/icons.json"
 
@@ -103,6 +103,7 @@ def github_colours() -> None:
 def main() -> None:
     devicons()
     github_colours()
+    call("git", "diff", "--exit-code")
 
 
 main()
