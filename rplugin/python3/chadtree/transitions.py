@@ -105,7 +105,7 @@ async def _indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
 
 async def redraw(nvim: Nvim, state: State) -> None:
     def cont() -> None:
-        update_buffers(nvim, rendering=state.rendered)
+        update_buffers(nvim, state=state)
 
     await call(nvim, cont)
 

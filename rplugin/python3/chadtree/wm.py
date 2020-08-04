@@ -232,16 +232,28 @@ def buf_set_highlights(
             yield "buf_add_highlight", (buffer, ns, h.group, idx, h.begin, h.end)
 
 
-def update_buffers(nvim: Nvim, rendering: Sequence[Render]) -> None:
+def update_buffers(nvim: Nvim, state: State) -> None:
+    current = state.current
+    current_row = state.paths_lookup.get(current or "")
     lines, badges, highlights = tuple(
-        zip(*((render.line, render.badges, render.highlights) for render in rendering))
+        zip(
+            *(
+                (render.line, render.badges, render.highlights)
+                for render in state.rendered
+            )
+        )
     )
+    cwin = nvim.api.get_current_win()
     ns = nvim.api.create_namespace(fm_namespace)
 
     for window, buffer in find_fm_windows(nvim):
         row, col = nvim.api.win_get_cursor(window)
         lines = cast(Sequence[str], lines)
-        new_row = min(row, len(lines))
+        new_row = (
+            current_row + 1
+            if window.number != cwin.number and current_row is not None
+            else min(row, len(lines))
+        )
         it1 = "buf_clear_namespace", (buffer, ns, 0, -1)
         it2 = buf_setlines(nvim, buffer=buffer, lines=lines)
         it3 = buf_set_virtualtext(
