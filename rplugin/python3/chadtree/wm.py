@@ -119,7 +119,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
 
     nvim.api.set_option("splitright", direction)
     nvim.api.set_current_win(focus_win)
-    nvim.command(f"{width}vnew")
+    nvim.command(f"{width}vsplit")
     nvim.api.set_option("splitright", split_r)
 
     window: Window = nvim.api.get_current_win()
@@ -176,9 +176,9 @@ def show_file(
             nvim.api.set_current_win(window)
             non_fm_count = len(non_fm_windows)
             if click_type == ClickType.v_split and non_fm_count:
-                nvim.api.command("vnew")
+                nvim.api.command("vsplit")
             elif click_type == ClickType.h_split and non_fm_count:
-                nvim.api.command("new")
+                nvim.api.command("split")
             window = nvim.api.get_current_win()
 
             if buffer is None:
