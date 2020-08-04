@@ -9,6 +9,7 @@ RUN apt update && \
 WORKDIR /root
 
 RUN git clone --depth=1 https://github.com/ryanoasis/vim-devicons.git
+RUN git clone --depth=1 https://github.com/adelarsq/vim-emoji-icon-theme.git
 
 COPY . /
 

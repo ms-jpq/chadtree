@@ -11,10 +11,10 @@ from urllib.request import urlopen
 
 from yaml import safe_load
 
-__dir__ = dirname(realpath(__file__))
+__dir__ = dirname(dirname(realpath(__file__)))
 TEMP = join(__dir__, "temp")
 ARTIFACTS = join(__dir__, "artifacts")
-DOCKER_PATH = join(__dir__, "docker", "icons")
+DOCKER_PATH = join(__dir__, "ci", "docker")
 
 
 LANG_COLOURS = """
