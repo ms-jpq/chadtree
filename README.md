@@ -133,6 +133,8 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 
 ### View & Ignore
 
+**important:** if you are not seeing Icons, you are probably missing the [correct font](https://github.com/ryanoasis/nerd-fonts).
+
 Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/chad/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/chad/config/ignore.json) accordingly.
 
 | option | usage                       |
