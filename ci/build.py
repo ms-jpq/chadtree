@@ -102,10 +102,10 @@ def devicons() -> None:
         merged = merge(parsed, basic)
         dest = join(ARTIFACTS, icon)
         spit_json(dest, merged)
-    call("docker", "rm", container)
     ascii_json = "ascii_icons"
     json = slurp_json(join(ASSETS, f"{ascii_json}.base"))
     spit_json(join(ARTIFACTS, ascii_json), json)
+    call("docker", "rm", container)
 
 
 def github_colours() -> None:
