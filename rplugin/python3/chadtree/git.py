@@ -9,7 +9,7 @@ from .da import call
 from .fs import ancestors
 from .types import VCStatus
 
-GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain", "-z")
+GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain")
 GIT_SUBMODULE_MARKER = "Entering "
 GIT_ENV = {"LC_ALL": "C"}
 
@@ -27,7 +27,7 @@ async def root() -> str:
 
 
 async def stat_main() -> Dict[str, str]:
-    ret = await call("git", "status", "--ignored", "--renames", "--porcelain", "-z")
+    ret = await call(*GIT_LIST_CMD, "-z")
     if ret.code != 0:
         raise GitError(ret.err)
     else:
@@ -56,7 +56,7 @@ async def stat_sub_modules() -> Dict[str, str]:
     if ret.code != 0:
         raise GitError(ret.err)
     else:
-        it = iter(ret.out.split("\0"))
+        it = iter(ret.out.split(linesep))
 
         def cont() -> Iterator[Tuple[str, str]]:
             root = ""
@@ -100,7 +100,7 @@ async def status() -> VCStatus:
         try:
             r, s_main, s_sub = await gather(root(), stat_main(), stat_sub_modules())
             stats = {**s_sub, **s_main}
-            return parse(r, stats)
+            return parse(r, s_sub)
         except GitError:
             return VCStatus()
     else:
