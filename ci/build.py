@@ -125,8 +125,8 @@ def github_colours() -> None:
 
 
 def git_alert() -> None:
-    code = run(("git", "diff", "--exit-code")).returncode
-    if code:
+    proc = run(("git", "diff", "--exit-code"))
+    if proc.returncode:
         time = format(datetime.now(), "%H-%M-%S")
         brname = f"update-icons--{time}"
         call("git", "branch", brname)
@@ -139,6 +139,7 @@ def git_alert() -> None:
 def main() -> None:
     devicons()
     github_colours()
+    git_alert()
 
 
 main()
