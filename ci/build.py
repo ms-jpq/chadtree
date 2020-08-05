@@ -136,7 +136,9 @@ def git_alert() -> None:
             if name.startswith(prefix):
                 yield name
 
-    call("git", "push", "--delete", *cont())
+    refs = tuple(cont())
+    if refs:
+        call("git", "push", "--delete", *refs)
 
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
