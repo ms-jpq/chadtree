@@ -1,12 +1,12 @@
 local export = function (export_name)
 
-  local default_sym = vim.g.WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
-  local folder_open = vim.g.WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
-  local folder_close = vim.g.DevIconsDefaultFolderOpenSymbol
+  local default_sym  = vim.g.WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
+  local folder_open  = vim.g.DevIconsDefaultFolderOpenSymbol
+  local folder_close = vim.g.WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
 
-  local extensions = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols
-  local exact      = vim.g.WebDevIconsUnicodeDecorateFileNodesExactSymbols
-  local glob       = vim.g.WebDevIconsUnicodeDecorateFileNodesPatternSymbols
+  local extensions   = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols
+  local exact        = vim.g.WebDevIconsUnicodeDecorateFileNodesExactSymbols
+  local glob         = vim.g.WebDevIconsUnicodeDecorateFileNodesPatternSymbols
 
   local data = {
     extensions = extensions,

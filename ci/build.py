@@ -126,19 +126,25 @@ def github_colours() -> None:
 
 def git_alert() -> None:
     prefix = "update-icons"
-    proc = run(("git", "branch", "-r"), stdout=PIPE)
+    proc = run(("git", "branch", "--remotes"), stdout=PIPE)
     assert proc.returncode == 0
     remote_brs = proc.stdout.decode()
 
+    print("DEBUG")
+    print([remote_brs])
+
     def cont() -> Iterator[str]:
-        for br in remote_brs:
-            _, _, name = br.partition("/")
-            if name.startswith(prefix):
-                yield name
+        for br in remote_brs.splitlines():
+            b = br.strip()
+            if b and "->" not in b:
+                _, _, name = b.partition("/")
+                if name.startswith(prefix):
+                    yield name
 
     refs = tuple(cont())
+    print(refs)
     if refs:
-        call("git", "push", "--delete", *refs)
+        call("git", "push", "--delete", "origin", *refs)
 
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
