@@ -1,8 +1,8 @@
 {
   "default_icon": "📄",
   "folder": {
-    "closed": "📂",
-    "open": "📁"
+    "closed": "📁",
+    "open": "📂"
   },
   "link": {
     "broken": "",
@@ -25,6 +25,7 @@
     ".idea": "🔨",
     ".merlin": "🧙",
     ".svn": "🐢",
+    ".tool-versions": "🔨",
     ".vimspector.json": "🐞",
     ".vscode": "🆚",
     ".zshrc": "🐚",
@@ -69,7 +70,8 @@
     "routes": "🔨",
     "tags": "📌",
     "test": "🧪",
-    "todo.md": "🚧"
+    "todo.md": "🚧",
+    "yarn.lock": "🐈"
   },
   "name_glob": {
     "*.db-journal": "🎲",
@@ -230,13 +232,13 @@
     ".log": "🦎",
     ".lua": "🌕",
     ".mak": "🔨",
-    ".markdown": "⬇️",
-    ".marko": "⬇️",
-    ".md": "⬇️",
+    ".markdown": "⬇️ ",
+    ".marko": "⬇️ ",
+    ".md": "⬇️ ",
     ".mdj": "🔀",
     ".mdl": "🦖",
     ".mk": "🔨",
-    ".mkd": "⬇️",
+    ".mkd": "⬇️ ",
     ".ml": "🐫",
     ".mli": "🧩",
     ".mlt": "🎞 ",
