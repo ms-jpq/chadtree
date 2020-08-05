@@ -125,8 +125,10 @@ def github_colours() -> None:
 
 
 def git_alert() -> None:
+    print("WHY U NO RUN?")
     proc = run(("git", "diff", "--exit-code"))
-    if True:
+    exit(1)
+    if proc.returncode:
         time = format(datetime.now(), "%Y-%m-%d")
         brname = f"update-icons--{time}"
         call("git", "branch", brname)
