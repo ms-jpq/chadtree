@@ -22,8 +22,8 @@ LANG_COLOURS = """
 https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
 """
 
-LANG_COLOURS_JSON = join(ARTIFACTS, "github_colours.json")
-TEMP_JSON = join(TEMP, "icons.json")
+LANG_COLOURS_JSON = join(ARTIFACTS, "github_colours")
+TEMP_JSON = join(TEMP, "icons")
 
 SRC_ICONS = ("unicode_icons", "emoji_icons")
 
@@ -63,13 +63,13 @@ def recur_sort(data: Any) -> Any:
 
 
 def slurp_json(path: str) -> Any:
-    with open(path) as fd:
+    with open(f"{path}.json") as fd:
         return load(fd)
 
 
 def spit_json(path: str, json: Any) -> None:
     sorted_json = recur_sort(json)
-    with open(path, "w") as fd:
+    with open(f"{path}.json", "w") as fd:
         dump(sorted_json, fd, ensure_ascii=False, check_circular=False, indent=2)
 
 
@@ -89,21 +89,23 @@ def devicons() -> None:
     image = "chad-icons"
     time = format(datetime.now(), "%H-%M-%S")
     container = f"{image}-{time}"
-    src = f"{container}:/root/icons.json"
 
     makedirs(TEMP, exist_ok=True)
     call("docker", "build", "-t", image, "-f", "Dockerfile", ".", cwd=DOCKER_PATH)
     call("docker", "create", "--name", container, image)
     for icon in SRC_ICONS:
         src = f"{container}:/root/{icon}.json"
-        call("docker", "cp", src, TEMP_JSON)
+        call("docker", "cp", src, f"{TEMP_JSON}.json")
         json = slurp_json(TEMP_JSON)
-        basic = slurp_json(join(ASSETS, f"{icon}.base.json"))
+        basic = slurp_json(join(ASSETS, f"{icon}.base"))
         parsed = process_json(json)
         merged = merge(parsed, basic)
-        dest = join(ARTIFACTS, f"{icon}.json")
+        dest = join(ARTIFACTS, icon)
         spit_json(dest, merged)
     call("docker", "rm", container)
+    ascii_json = "ascii_icons"
+    json = slurp_json(join(ASSETS, f"{ascii_json}.base"))
+    spit_json(join(ARTIFACTS, ascii_json), json)
 
 
 def github_colours() -> None:
