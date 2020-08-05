@@ -126,7 +126,7 @@ def github_colours() -> None:
 
 def git_alert() -> None:
     code = run(("git", "diff", "--exit-code")).returncode
-    if code:
+    if True:
         time = format(datetime.now(), "%H-%M-%S")
         brname = f"update-icons--{time}"
         call("git", "branch", brname)
