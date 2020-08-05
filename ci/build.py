@@ -143,6 +143,7 @@ def git_alert() -> None:
                     yield name
 
     refs = tuple(cont())
+    print(refs)
     if refs:
         call("git", "push", "--delete", *refs)
 
