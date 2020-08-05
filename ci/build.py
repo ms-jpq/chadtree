@@ -133,7 +133,7 @@ def git_alert() -> None:
         call("git", "checkout", brname)
         call("git", "add", ".")
         call("git", "commit", "-m", f"update_icons: {time}")
-        call("git", "push", "origin", brname)
+        call("git", "push", "--set-upstream", "origin", brname)
 
 
 def main() -> None:
