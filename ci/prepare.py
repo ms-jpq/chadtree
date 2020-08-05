@@ -29,3 +29,6 @@ def build() -> None:
 def main() -> None:
     git_clone("temp")
     build()
+
+
+main()
