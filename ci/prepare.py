@@ -23,7 +23,7 @@ def git_clone(name: str) -> None:
         email = "ci@ci.ci"
         username = "ci-bot"
         branch = get_branch()
-        call("git", "clone", "--single-branch", "--branch", branch, uri, name)
+        call("git", "clone", "--branch", branch, uri, name)
         call("git", "config", "user.email", email, cwd=name)
         call("git", "config", "user.name", username, cwd=name)
 

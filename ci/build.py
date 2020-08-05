@@ -131,7 +131,7 @@ def git_alert() -> None:
     remote_brs = proc.stdout.decode()
 
     print("DEBUG")
-    print(remote_brs)
+    print([remote_brs])
 
     def cont() -> Iterator[str]:
         for br in remote_brs.splitlines():
