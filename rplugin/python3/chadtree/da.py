@@ -5,11 +5,11 @@ from functools import partial
 from itertools import count
 from json import dump, load
 from operator import pow
-from os import makedirs
+from os import environ, makedirs
 from os.path import dirname, exists
 from subprocess import CompletedProcess, run
 from sys import version_info
-from typing import Any, Callable, Optional, TypeVar, Union, cast
+from typing import Any, Callable, Dict, Optional, TypeVar, Union, cast
 
 from .consts import folder_mode
 
@@ -80,11 +80,12 @@ class ProcReturn:
 
 if (version_info.major, version_info.minor) == (3, 7):
 
-    async def call(prog: str, *args: str) -> ProcReturn:
+    async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
         loop = get_running_loop()
 
         def cont() -> CompletedProcess:
-            return run((prog, *args), capture_output=True)
+            envi = {**environ, **env}
+            return run((prog, *args), capture_output=True, env=envi)
 
         ret = await loop.run_in_executor(None, cont)
         out, err = ret.stdout.decode(), ret.stderr.decode()
@@ -94,8 +95,11 @@ if (version_info.major, version_info.minor) == (3, 7):
 
 else:
 
-    async def call(prog: str, *args: str) -> ProcReturn:
-        proc = await create_subprocess_exec(prog, *args, stdout=PIPE, stderr=PIPE)
+    async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
+        envi = {**environ, **env}
+        proc = await create_subprocess_exec(
+            prog, *args, stdout=PIPE, stderr=PIPE, env=envi
+        )
         stdout, stderr = await proc.communicate()
         code = cast(int, proc.returncode)
         return ProcReturn(code=code, out=stdout.decode(), err=stderr.decode())

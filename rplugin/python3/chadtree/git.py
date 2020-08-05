@@ -1,5 +1,6 @@
 from asyncio import gather
 from locale import strxfrm
+from os import linesep
 from os.path import join, sep
 from shutil import which
 from typing import Dict, Iterator, Set, Tuple
@@ -10,6 +11,7 @@ from .types import VCStatus
 
 GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain", "-z")
 GIT_SUBMODULE_MARKER = "Entering "
+GIT_ENV = {"LC_ALL": "C"}
 
 
 class GitError(Exception):
@@ -44,7 +46,12 @@ async def stat_main() -> Dict[str, str]:
 
 async def stat_sub_modules() -> Dict[str, str]:
     ret = await call(
-        "git", "submodule", "foreach", "--recursive", " ".join(GIT_LIST_CMD)
+        "git",
+        "submodule",
+        "foreach",
+        "--recursive",
+        " ".join(GIT_LIST_CMD),
+        env=GIT_ENV,
     )
     if ret.code != 0:
         raise GitError(ret.err)
@@ -55,7 +62,7 @@ async def stat_sub_modules() -> Dict[str, str]:
             root = ""
             for line in it:
                 if line.startswith(GIT_SUBMODULE_MARKER):
-                    root = line[len(GIT_SUBMODULE_MARKER) + 1 : -1]
+                    root = line[len(GIT_SUBMODULE_MARKER) + 1 : -1].rstrip(linesep)
                 else:
                     prefix, file = line[:2], line[3:]
                     yield prefix, join(root, file.rstrip(sep))
