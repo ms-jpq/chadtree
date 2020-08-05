@@ -1,25 +1,25 @@
 from asyncio import gather
 from hashlib import sha1
 from os.path import join
-from typing import Optional
+from typing import Optional, Set, Union, cast
 
 from pynvim import Nvim
 
 from .cartographer import new, update
 from .consts import session_dir
-from .da import dump_json, load_json, or_else
+from .da import Void, dump_json, load_json, or_else
 from .git import status
 from .nvim import getcwd
 from .quickfix import quickfix
 from .render import render
 from .types import (
+    FilterPattern,
     Index,
     Mode,
     Node,
     QuickFix,
     Selection,
     Session,
-    Set,
     Settings,
     State,
     VCStatus,
@@ -60,7 +60,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
     vc = VCStatus() if not version_ctl.enable or version_ctl.defer else await status()
     current = None
-    filter_pattern = ""
+    filter_pattern = None
     lookup, rendered = render(
         node,
         settings=settings,
@@ -77,7 +77,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     state = State(
         index=index,
         selection=selection,
-        filter_pattern="",
+        filter_pattern=filter_pattern,
         show_hidden=settings.show_hidden,
         follow=settings.follow,
         enable_vc=settings.version_ctl.enable,
@@ -97,25 +97,31 @@ async def forward(
     state: State,
     *,
     settings: Settings,
-    root: Optional[Node] = None,
-    index: Optional[Index] = None,
-    selection: Optional[Selection] = None,
-    filter_pattern: Optional[str] = None,
-    show_hidden: Optional[bool] = None,
-    follow: Optional[bool] = None,
-    enable_vc: Optional[bool] = None,
-    width: Optional[int] = None,
-    qf: Optional[QuickFix] = None,
-    vc: Optional[VCStatus] = None,
-    current: Optional[str] = None,
-    paths: Optional[Set[str]] = None,
+    root: Union[Node, Void] = Void(),
+    index: Union[Index, Void] = Void(),
+    selection: Union[Selection, Void] = Void(),
+    filter_pattern: Union[Optional[FilterPattern], Void] = Void(),
+    show_hidden: Union[bool, Void] = Void(),
+    follow: Union[bool, Void] = Void(),
+    enable_vc: Union[bool, Void] = Void(),
+    width: Union[int, Void] = Void(),
+    qf: Union[QuickFix, Void] = Void(),
+    vc: Union[VCStatus, Void] = Void(),
+    current: Union[str, Void] = Void(),
+    paths: Union[Set[str], Void] = Void(),
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
     new_filter_pattern = or_else(filter_pattern, state.filter_pattern)
     new_current = or_else(current, state.current)
-    new_root = root or (
-        await update(state.root, index=new_index, paths=paths) if paths else state.root
+    new_root = cast(
+        Node,
+        root
+        or (
+            await update(state.root, index=new_index, paths=cast(Set[str], paths))
+            if paths
+            else state.root
+        ),
     )
     new_qf = or_else(qf, state.qf)
     new_vc = or_else(vc, state.vc)

@@ -9,11 +9,26 @@ from os import makedirs
 from os.path import dirname, exists
 from subprocess import CompletedProcess, run
 from sys import version_info
-from typing import Any, Callable, Optional, TypeVar, cast
+from typing import Any, Callable, Optional, TypeVar, Union, cast
 
 from .consts import folder_mode
 
 T = TypeVar("T")
+
+
+class Void:
+    def __bool__(self) -> bool:
+        return False
+
+    def __eq__(self, o: Any) -> bool:
+        return type(o) is Void
+
+    def __str__(self) -> str:
+        return type(self).__name__
+
+
+def or_else(thing: Union[T, Void], default: T) -> T:
+    return default if thing == Void() else cast(T, thing)
 
 
 def merge(ds1: Any, ds2: Any, replace: bool = False) -> Any:
@@ -34,10 +49,6 @@ def merge_all(ds1: Any, *dss: Any, replace: bool = False) -> Any:
     for ds2 in dss:
         res = merge(res, ds2, replace=replace)
     return res
-
-
-def or_else(thing: Optional[T], default: T) -> T:
-    return default if thing is None else thing
 
 
 def constantly(val: T) -> Callable[[Any], T]:
