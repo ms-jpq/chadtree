@@ -131,10 +131,11 @@ def git_alert() -> None:
     remote_brs = proc.stdout.decode()
 
     def cont() -> Iterator[str]:
-        for br in remote_brs:
-            _, _, name = br.partition("/")
-            if name.startswith(prefix):
-                yield name
+        for br in remote_brs.splitlines():
+            if br:
+                _, _, name = br.partition("/")
+                if name.startswith(prefix):
+                    yield name
 
     refs = tuple(cont())
     if refs:
