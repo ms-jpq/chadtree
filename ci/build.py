@@ -137,14 +137,14 @@ def git_alert() -> None:
         for br in remote_brs.splitlines():
             b = br.strip()
             if b and "->" not in b:
-                remote, _, name = b.partition("/")
+                _, _, name = b.partition("/")
                 if name.startswith(prefix):
-                    yield b
+                    yield name
 
     refs = tuple(cont())
     print(refs)
     if refs:
-        call("git", "push", "--delete", *refs)
+        call("git", "push", "--delete", "origin", *refs)
 
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
