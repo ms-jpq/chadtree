@@ -24,4 +24,6 @@ jobs:
         run: pip install -U pyyaml
 
       - name: Build
-        run: ./ci/build.py
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: ./ci/prepare.py
