@@ -5,7 +5,7 @@ from json import dump, load
 from locale import strxfrm
 from os import getcwd, makedirs
 from os.path import dirname, join, realpath
-from subprocess import run
+from subprocess import PIPE, run
 from typing import Any, Dict, Iterator
 from urllib.request import urlopen
 
@@ -41,12 +41,10 @@ def merge(ds1: Any, ds2: Any, replace: bool = False) -> Any:
         return ds2
 
 
-def call(prog: str, *args: str, cwd: str = getcwd()) -> str:
+def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
     ret = run((prog, *args), cwd=cwd)
     if ret.returncode != 0:
         exit(ret.returncode)
-    else:
-        return ret.stdout.decode()
 
 
 def fetch(uri: str) -> str:
@@ -128,7 +126,9 @@ def github_colours() -> None:
 
 def git_alert() -> None:
     prefix = "update-icons"
-    remote_brs = call("git", "branch", "-r")
+    proc = run(("git", "branch", "-r"), stdout=PIPE)
+    assert proc.returncode == 0
+    remote_brs = proc.stdout.decode()
 
     def cont() -> Iterator[str]:
         for br in remote_brs:
