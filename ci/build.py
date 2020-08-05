@@ -134,13 +134,12 @@ def git_alert() -> None:
     print([remote_brs])
 
     def cont() -> Iterator[str]:
-        it = iter(remote_brs.splitlines())
-        next(it, None)
-        for br in it:
-            if br:
-                _, _, name = br.strip().partition("/")
+        for br in remote_brs.splitlines():
+            b = br.strip()
+            if b and "->" not in b:
+                remote, _, name = b.partition("/")
                 if name.startswith(prefix):
-                    yield name
+                    yield b
 
     refs = tuple(cont())
     print(refs)
