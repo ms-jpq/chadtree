@@ -414,6 +414,20 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> State:
     return new_state
 
 
+async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> State:
+    def ask() -> Optional[str]:
+        pattern = state.filter_pattern.pattern if state.filter_pattern else ""
+        resp = nvim.funcs.input("New search:", pattern)
+        return resp
+
+    pattern = await call(nvim, ask)
+    filter_pattern = FilterPattern(pattern=pattern) if pattern else None
+    new_state = await forward(
+        state, settings=settings, selection=set(), filter_pattern=filter_pattern
+    )
+    return new_state
+
+
 async def c_copy_name(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> None:

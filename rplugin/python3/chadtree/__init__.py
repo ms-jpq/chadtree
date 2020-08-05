@@ -40,6 +40,7 @@ from .transitions import (
     c_jump_to_current,
     c_new,
     c_new_filter,
+    c_new_search,
     c_open,
     c_open_system,
     c_quit,
@@ -352,6 +353,14 @@ class Main:
         """
 
         self._run(c_new_filter)
+
+    @function("CHADsearch")
+    def search_pattern(self, args: Sequence[Any]) -> None:
+        """
+        Update search
+        """
+
+        self._run(c_new_search)
 
     @function("CHADcopy_name")
     def copy_name(self, args: Sequence[Any]) -> None:
