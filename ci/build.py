@@ -42,7 +42,7 @@ def merge(ds1: Any, ds2: Any, replace: bool = False) -> Any:
 
 
 def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
-    ret = run([prog, *args], cwd=cwd)
+    ret = run((prog, *args), cwd=cwd)
     if ret.returncode != 0:
         exit(ret.returncode)
 
@@ -124,10 +124,18 @@ def github_colours() -> None:
     spit_json(LANG_COLOURS_JSON, lookup)
 
 
+def git_alert() -> None:
+    code = run(("git", "diff", "--exit-code")).returncode
+    if code:
+        time = format(datetime.now(), "%H-%M-%S")
+        brname = f"update-icons--{time}"
+        call("git", "branch", brname)
+        call("git", "push", "origin", brname)
+
+
 def main() -> None:
     devicons()
     github_colours()
-    call("git", "diff", "--exit-code")
 
 
 main()
