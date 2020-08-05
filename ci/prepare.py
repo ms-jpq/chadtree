@@ -18,8 +18,8 @@ def git_clone(name: str) -> None:
         email = "ci@ci.ci"
         username = "ci-bot"
         call("git", "clone", uri, name)
-        call("git", "config", "user.email", email, cwd=name)
-        call("git", "config", "user.name", username, cwd=name)
+        call("git", "config", "--global", "user.email", email, cwd=name)
+        call("git", "config", "--global", "user.name", username, cwd=name)
 
 
 def build() -> None:
