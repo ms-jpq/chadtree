@@ -134,7 +134,9 @@ def git_alert() -> None:
     print([remote_brs])
 
     def cont() -> Iterator[str]:
-        for br in remote_brs.splitlines():
+        it = iter(remote_brs.splitlines())
+        next(it, None)
+        for br in it:
             if br:
                 _, _, name = br.strip().partition("/")
                 if name.startswith(prefix):
