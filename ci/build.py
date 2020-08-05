@@ -130,6 +130,9 @@ def git_alert() -> None:
     assert proc.returncode == 0
     remote_brs = proc.stdout.decode()
 
+    print("DEBUG")
+    print(remote_brs)
+
     def cont() -> Iterator[str]:
         for br in remote_brs.splitlines():
             if br:
