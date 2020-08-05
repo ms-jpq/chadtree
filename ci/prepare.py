@@ -28,13 +28,14 @@ def git_clone(name: str) -> None:
         call("git", "config", "user.name", username, cwd=name)
 
 
-def build() -> None:
-    call("./temp/ci/build.py")
+def build(cwd: str) -> None:
+    call("./temp/ci/build.py", cwd=cwd)
 
 
 def main() -> None:
-    git_clone("temp")
-    build()
+    cwd = "temp"
+    git_clone(cwd)
+    build(cwd)
 
 
 main()
