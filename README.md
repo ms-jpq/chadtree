@@ -148,6 +148,12 @@ Note: **if you want to ignore dotfiles, you will need to set it up like so**
 lua vim.api.nvim_set_var("chadtree_ignores", { name = {".*", ".git"} })
 ```
 
+To use [emoji theme](https://github.com/adelarsq/vim-emoji-icon-theme)
+
+```vimL
+lua vim.api.nvim_set_var("chadtree_settings", { use_icons = "emoji" })
+```
+
 ### Recommendations
 
 Add a hotkey to clear quickfix list:
