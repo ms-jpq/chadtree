@@ -6,7 +6,7 @@ from locale import strxfrm
 from os import getcwd, makedirs
 from os.path import dirname, join, realpath
 from subprocess import run
-from typing import Any, Dict
+from typing import Any, Dict, Iterator
 from urllib.request import urlopen
 
 from yaml import safe_load
@@ -41,10 +41,12 @@ def merge(ds1: Any, ds2: Any, replace: bool = False) -> Any:
         return ds2
 
 
-def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
+def call(prog: str, *args: str, cwd: str = getcwd()) -> str:
     ret = run((prog, *args), cwd=cwd)
     if ret.returncode != 0:
         exit(ret.returncode)
+    else:
+        return ret.stdout.decode()
 
 
 def fetch(uri: str) -> str:
@@ -125,11 +127,21 @@ def github_colours() -> None:
 
 
 def git_alert() -> None:
+    prefix = "update-icons"
+    remote_brs = call("git", "branch", "-r")
+
+    def cont() -> Iterator[str]:
+        for br in remote_brs:
+            _, _, name = br.partition("/")
+            if name.startswith(prefix):
+                yield name
+
+    call("git", "push", "--delete", *cont())
+
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
         time = format(datetime.now(), "%Y-%m-%d")
-        brname = f"update-icons--{time}"
-        call("git", "branch", brname)
+        brname = f"{prefix}--{time}"
         call("git", "checkout", "-b", brname)
         call("git", "add", ".")
         call("git", "commit", "-m", f"update_icons: {time}")
