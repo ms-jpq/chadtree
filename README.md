@@ -137,12 +137,6 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 
 Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/chad/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/chad/config/ignore.json) accordingly.
 
-To use emoji icons do:
-
-```
-lua vim.api.nvim_set_var("chadtree_settings", { icon_set = "emoji" })
-```
-
 | option | usage                       |
 | ------ | --------------------------- |
 | name   | globs of name to ignore     |
@@ -174,4 +168,4 @@ Also check out
 
 The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
 
-All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme) project by [adelarsq](https://github.com/adelarsq)
+> All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme) project by [adelarsq](https://github.com/adelarsq)
