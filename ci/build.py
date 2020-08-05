@@ -130,7 +130,7 @@ def git_alert() -> None:
         time = format(datetime.now(), "%Y-%m-%d")
         brname = f"update-icons--{time}"
         call("git", "branch", brname)
-        call("git", "checkout", brname)
+        call("git", "checkout", "-b", brname)
         call("git", "add", ".")
         call("git", "commit", "-m", f"update_icons: {time}")
         call("git", "push", "--set-upstream", "origin", brname)
