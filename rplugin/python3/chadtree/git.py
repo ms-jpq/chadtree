@@ -100,7 +100,7 @@ async def status() -> VCStatus:
         try:
             r, s_main, s_sub = await gather(root(), stat_main(), stat_sub_modules())
             stats = {**s_sub, **s_main}
-            return parse(r, s_sub)
+            return parse(r, stats)
         except GitError:
             return VCStatus()
     else:
