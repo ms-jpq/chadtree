@@ -29,7 +29,7 @@ def git_clone(name: str) -> None:
 
 
 def build(cwd: str) -> None:
-    call("./temp/ci/build.py", cwd=cwd)
+    call("./ci/build.py", cwd=cwd)
 
 
 def main() -> None:
