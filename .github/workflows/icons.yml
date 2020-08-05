@@ -3,7 +3,7 @@ name: Icons
 
 on:
   push:
-    branch:
+    branches:
       - "chad"
       - "dev"
   schedule:
