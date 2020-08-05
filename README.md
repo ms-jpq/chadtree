@@ -166,6 +166,6 @@ Also check out
 
 ## Special Thanks
 
-The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
+> The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
 
 > All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme) project by [adelarsq](https://github.com/adelarsq)
