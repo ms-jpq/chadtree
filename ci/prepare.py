@@ -13,8 +13,7 @@ def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
 
 def get_branch() -> str:
     ref = environ["GITHUB_REF"]
-    print(ref)
-    return ref
+    return ref.repalce("refs/heads/", "")
 
 
 def git_clone(name: str) -> None:
