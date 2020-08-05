@@ -125,8 +125,6 @@ def github_colours() -> None:
 
 
 def git_alert() -> None:
-    print("WHY U NO RUN?")
-    exit(1)
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
         time = format(datetime.now(), "%Y-%m-%d")

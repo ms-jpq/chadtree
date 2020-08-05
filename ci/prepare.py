@@ -11,13 +11,20 @@ def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
         exit(ret.returncode)
 
 
+def get_branch() -> str:
+    ref = environ["GITHUB_REF"]
+    print(ref)
+    return ref
+
+
 def git_clone(name: str) -> None:
     if not isdir(name):
         token = environ["CI_TOKEN"]
         uri = f"https://ms-jpq:{token}@github.com/ms-jpq/chadtree.git"
         email = "ci@ci.ci"
         username = "ci-bot"
-        call("git", "clone", uri, name)
+        branch = get_branch()
+        call("git", "clone", "-b", branch, uri, name)
         call("git", "config", "--global", "user.email", email, cwd=name)
         call("git", "config", "--global", "user.name", username, cwd=name)
 
