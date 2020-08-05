@@ -147,10 +147,15 @@ class Render:
 
 
 @dataclass(frozen=True)
+class FilterPattern:
+    pattern: str
+
+
+@dataclass(frozen=True)
 class State:
     index: Index
     selection: Selection
-    filter_pattern: str
+    filter_pattern: Optional[FilterPattern]
     show_hidden: bool
     follow: bool
     enable_vc: bool

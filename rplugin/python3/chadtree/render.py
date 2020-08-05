@@ -8,6 +8,7 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
 from .da import constantly
 from .types import (
     Badge,
+    FilterPattern,
     Highlight,
     HLgroup,
     Index,
@@ -176,7 +177,7 @@ def render(
     settings: Settings,
     index: Index,
     selection: Selection,
-    filter_pattern: str,
+    filter_pattern: Optional[FilterPattern],
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
@@ -191,7 +192,7 @@ def render(
     def render(
         node: Node, *, depth: int, cleared: bool
     ) -> Iterator[Tuple[Node, Render]]:
-        clear = cleared or not filter_pattern or fnmatch(node.name, filter_pattern)
+        clear = cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
         rend = show(node, depth)
 
         def gen_children() -> Iterator[Tuple[Node, Render]]:

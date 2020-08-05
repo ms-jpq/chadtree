@@ -15,6 +15,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Union,
     cast,
 )
 
@@ -23,7 +24,7 @@ from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 
 from .cartographer import new as new_root
-from .da import human_readable_size
+from .da import Void, human_readable_size
 from .fs import (
     ancestors,
     copy,
@@ -43,7 +44,17 @@ from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
 from .system import SystemIntegrationError, open_gui, trash
-from .types import ClickType, Index, Mode, Node, Selection, Settings, State, VCStatus
+from .types import (
+    ClickType,
+    FilterPattern,
+    Index,
+    Mode,
+    Node,
+    Selection,
+    Settings,
+    State,
+    VCStatus,
+)
 from .wm import (
     find_current_buffer_name,
     is_fm_buffer,
@@ -324,7 +335,9 @@ async def c_refresh(
     current = await call(nvim, co)
     cwd = state.root.path
     paths = {cwd}
-    new_current = current if is_parent(parent=cwd, child=current) else None
+    new_current = cast(
+        Union[str, Void], current if is_parent(parent=cwd, child=current) else Void()
+    )
 
     def cont() -> Tuple[Index, Selection]:
         index = {i for i in state.index if exists(i)} | paths
@@ -335,7 +348,7 @@ async def c_refresh(
 
     index, selection = await loop.run_in_executor(None, cont)
     current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
-    new_index = index if new_current is None else index | current_paths
+    new_index = index if new_current == Void() else index | current_paths
 
     qf, vc = await gather(quickfix(nvim), _vc_stat(state.enable_vc))
     new_state = await forward(
@@ -389,10 +402,12 @@ async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> State:
 
 async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> State:
     def ask() -> Optional[str]:
-        resp = nvim.funcs.input("New filter:", state.filter_pattern)
+        pattern = state.filter_pattern.pattern if state.filter_pattern else ""
+        resp = nvim.funcs.input("New filter:", pattern)
         return resp
 
-    filter_pattern = await call(nvim, ask) or ""
+    pattern = await call(nvim, ask)
+    filter_pattern = FilterPattern(pattern=pattern) if pattern else None
     new_state = await forward(
         state, settings=settings, selection=set(), filter_pattern=filter_pattern
     )
@@ -526,7 +541,7 @@ async def c_clear_selection(nvim: Nvim, state: State, settings: Settings) -> Sta
 
 
 async def c_clear_filter(nvim: Nvim, state: State, settings: Settings) -> State:
-    new_state = await forward(state, settings=settings, filter_pattern="")
+    new_state = await forward(state, settings=settings, filter_pattern=None)
     return new_state
 
 

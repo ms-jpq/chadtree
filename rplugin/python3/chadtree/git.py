@@ -1,5 +1,6 @@
 from asyncio import gather
 from locale import strxfrm
+from os import linesep
 from os.path import join, sep
 from shutil import which
 from typing import Dict, Iterator, Set, Tuple
@@ -7,6 +8,10 @@ from typing import Dict, Iterator, Set, Tuple
 from .da import call
 from .fs import ancestors
 from .types import VCStatus
+
+GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain")
+GIT_SUBMODULE_MARKER = "Entering "
+GIT_ENV = {"LC_ALL": "C"}
 
 
 class GitError(Exception):
@@ -21,21 +26,50 @@ async def root() -> str:
         return ret.out.rstrip()
 
 
-async def stat() -> Dict[str, str]:
-    ret = await call("git", "status", "--ignored", "--renames", "--porcelain", "-z")
+async def stat_main() -> Dict[str, str]:
+    ret = await call(*GIT_LIST_CMD, "-z")
     if ret.code != 0:
         raise GitError(ret.err)
     else:
+        it = iter(ret.out.split("\0"))
 
-        def items() -> Iterator[Tuple[str, str]]:
-            it = iter(ret.out.split("\0"))
+        def cont() -> Iterator[Tuple[str, str]]:
             for line in it:
                 prefix, file = line[:2], line[3:]
                 yield prefix, file.rstrip(sep)
                 if "R" in prefix:
                     next(it, None)
 
-        entries = {file: prefix for prefix, file in items()}
+        entries = {file: prefix for prefix, file in cont()}
+        return entries
+
+
+async def stat_sub_modules() -> Dict[str, str]:
+    ret = await call(
+        "git",
+        "submodule",
+        "foreach",
+        "--recursive",
+        " ".join(GIT_LIST_CMD),
+        env=GIT_ENV,
+    )
+    if ret.code != 0:
+        raise GitError(ret.err)
+    else:
+        it = iter(ret.out.split(linesep))
+
+        def cont() -> Iterator[Tuple[str, str]]:
+            root = ""
+            for line in it:
+                if line.startswith(GIT_SUBMODULE_MARKER):
+                    root = line[len(GIT_SUBMODULE_MARKER) + 1 : -1].rstrip(linesep)
+                else:
+                    prefix, file = line[:2], line[3:]
+                    yield prefix, join(root, file.rstrip(sep))
+                    if "R" in prefix:
+                        next(it, None)
+
+        entries = {file: prefix for prefix, file in cont()}
         return entries
 
 
@@ -64,8 +98,9 @@ def parse(root: str, stats: Dict[str, str]) -> VCStatus:
 async def status() -> VCStatus:
     if which("git"):
         try:
-            r, stats = await gather(root(), stat())
-            return parse(r, stats)
+            r, s_main, s_sub = await gather(root(), stat_main(), stat_sub_modules())
+            stats = {**s_sub, **s_main}
+            return parse(r, s_sub)
         except GitError:
             return VCStatus()
     else:
