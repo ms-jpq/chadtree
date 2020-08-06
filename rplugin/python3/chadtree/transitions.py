@@ -15,7 +15,6 @@ from typing import (
     Sequence,
     Set,
     Tuple,
-    Union,
     cast,
 )
 
@@ -340,9 +339,7 @@ async def c_refresh(
     current = await call(nvim, co)
     cwd = state.root.path
     paths = {cwd}
-    new_current = cast(
-        Union[str, Void], current if is_parent(parent=cwd, child=current) else Void()
-    )
+    new_current = current if is_parent(parent=cwd, child=current) else None
 
     def cont() -> Tuple[Index, Selection]:
         index = {i for i in state.index if exists(i)} | paths
@@ -353,7 +350,7 @@ async def c_refresh(
 
     index, selection = await loop.run_in_executor(None, cont)
     current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
-    new_index = index if new_current == Void() else index | current_paths
+    new_index = index if new_current else index | current_paths
 
     qf, vc = await gather(quickfix(nvim), _vc_stat(state.enable_vc))
     new_state = await forward(
@@ -364,7 +361,7 @@ async def c_refresh(
         qf=qf,
         vc=vc,
         paths=paths,
-        current=new_current,
+        current=new_current or Void(),
     )
 
     if write:
