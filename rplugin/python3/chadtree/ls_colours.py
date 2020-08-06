@@ -27,23 +27,23 @@ class Ground(Enum):
 
 
 class AnsiColour(IntEnum):
-    black = auto()
-    red = auto()
-    green = auto()
-    yellow = auto()
-    blue = auto()
-    purple = auto()
-    cyan = auto()
-    white = auto()
+    Black = auto()
+    Red = auto()
+    Green = auto()
+    Yellow = auto()
+    Blue = auto()
+    Magenta = auto()
+    Cyan = auto()
+    LightGrey = auto()
 
-    black_bright = auto()
-    red_bright = auto()
-    green_bright = auto()
-    yellow_bright = auto()
-    blue_bright = auto()
-    purple_bright = auto()
-    cyan_bright = auto()
-    white_bright = auto()
+    Grey = auto()
+    LightRed = auto()
+    LightGreen = auto()
+    LightYellow = auto()
+    LightBlue = auto()
+    LightMagenta = auto()
+    LightCyan = auto()
+    White = auto()
 
 
 @dataclass(frozen=True)
@@ -224,8 +224,8 @@ def parseHLGroup(styling: Styling) -> HLgroup:
         for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ctermfg = str(cast(AnsiColour, fg).value - 1) if type(fg) is AnsiColour else None
-    ctermbg = str(cast(AnsiColour, bg).value - 1) if type(bg) is AnsiColour else None
+    ctermfg = cast(AnsiColour, fg).name if type(fg) is AnsiColour else None
+    ctermbg = cast(AnsiColour, bg).name if type(bg) is AnsiColour else None
     guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else None
     guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else None
     group = HLgroup(
