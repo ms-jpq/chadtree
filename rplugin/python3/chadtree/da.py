@@ -1,5 +1,5 @@
 from asyncio import create_subprocess_exec, get_running_loop
-from asyncio.subprocess import PIPE
+from asyncio.subprocess import DEVNULL, PIPE
 from dataclasses import dataclass
 from functools import partial
 from itertools import count
@@ -98,7 +98,7 @@ else:
     async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
         envi = {**environ, **env}
         proc = await create_subprocess_exec(
-            prog, *args, stdout=PIPE, stderr=PIPE, env=envi
+            prog, *args, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, env=envi
         )
         stdout, stderr = await proc.communicate()
         code = cast(int, proc.returncode)

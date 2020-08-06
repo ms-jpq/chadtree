@@ -40,6 +40,7 @@ from .fs import (
 from .git import status
 from .nvim import call, getcwd, print
 from .quickfix import quickfix
+from .search import search
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
@@ -416,16 +417,13 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> State:
 
 async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> State:
     def ask() -> Optional[str]:
-        pattern = state.filter_pattern.pattern if state.filter_pattern else ""
+        pattern = ""
         resp = nvim.funcs.input("New search:", pattern)
         return resp
 
     pattern = await call(nvim, ask)
-    filter_pattern = FilterPattern(pattern=pattern) if pattern else None
-    new_state = await forward(
-        state, settings=settings, selection=set(), filter_pattern=filter_pattern
-    )
-    return new_state
+    results = await search(pattern or "")
+    await print(nvim, results)
 
 
 async def c_copy_name(
