@@ -28,12 +28,12 @@ class Ground(Enum):
 
 class AnsiColour(IntEnum):
     Black = auto()
-    Red = auto()
-    Green = auto()
-    Yellow = auto()
-    Blue = auto()
-    Magenta = auto()
-    Cyan = auto()
+    DarkRed = auto()
+    DarkGreen = auto()
+    DarkYellow = auto()
+    DarkBlue = auto()
+    DarkMagenta = auto()
+    DarkCyan = auto()
     LightGrey = auto()
 
     Grey = auto()
@@ -226,8 +226,8 @@ def parseHLGroup(styling: Styling) -> HLgroup:
     }
     ctermfg = cast(AnsiColour, fg).name if type(fg) is AnsiColour else None
     ctermbg = cast(AnsiColour, bg).name if type(bg) is AnsiColour else None
-    guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else None
-    guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else None
+    guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else ctermfg
+    guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else ctermbg
     group = HLgroup(
         name=name,
         cterm=cterm,
