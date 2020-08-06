@@ -301,15 +301,19 @@ async def c_change_focus_up(
 
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[State]:
     node = await _index(nvim, state=state)
-    if node and Mode.folder in node.mode:
-        paths = {
-            i
-            for i in state.index
-            if i == node.path or is_parent(parent=node.path, child=i)
-        }
-        index = state.index - paths
-        new_state = await forward(state, settings=settings, index=index, paths=paths)
-        return new_state
+    if node:
+        path = node.path if Mode.folder in node.mode else dirname(node.path)
+        if path != state.root.path:
+            paths = {
+                i for i in state.index if i == path or is_parent(parent=path, child=i)
+            }
+            index = state.index - paths
+            new_state = await forward(
+                state, settings=settings, index=index, paths=paths
+            )
+            return new_state
+        else:
+            return None
     else:
         return None
 
