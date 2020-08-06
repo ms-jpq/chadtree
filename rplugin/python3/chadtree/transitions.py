@@ -421,9 +421,12 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> State:
         resp = nvim.funcs.input("New search:", pattern)
         return resp
 
+    cwd = state.root.path
     pattern = await call(nvim, ask)
-    results = await search(pattern or "")
+    results = await search(pattern or "", cwd=cwd)
     await print(nvim, results)
+
+    return state
 
 
 async def c_copy_name(
