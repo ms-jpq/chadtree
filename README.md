@@ -154,6 +154,14 @@ To use [emoji theme](https://github.com/adelarsq/vim-emoji-icon-theme)
 lua vim.api.nvim_set_var("chadtree_settings", { use_icons = "emoji" })
 ```
 
+### Colours
+
+Where to get `LS_COLORS`? Lots of places,such as [here](https://github.com/seebi/dircolors-solarized) or [here](colours_var).
+
+Set `g:colours_var` to customize colour mappings for 8 bit `LS_COLORS`
+
+Vaild values for `hl24` include hexcodes such as `#FFFFF`
+
 ### Recommendations
 
 Add a hotkey to clear quickfix list:
