@@ -8,8 +8,6 @@ from asyncio import (
 from concurrent.futures import ThreadPoolExecutor
 from itertools import chain
 from operator import add, sub
-from os import linesep
-from traceback import format_exc
 from typing import Any, Awaitable, Callable, Optional, Sequence
 
 from pynvim import Nvim, command, function, plugin
@@ -88,8 +86,7 @@ class Main:
             try:
                 fut.result()
             except Exception as e:
-                stack = format_exc()
-                nvim.async_call(nvim.err_write, f"{stack}{e}{linesep}")
+                log.exception("%s", str(e))
 
         self.chan.submit(run, self.nvim)
 
