@@ -16,11 +16,11 @@ from typing import Dict
 
 from pynvim import Nvim
 
-from .consts import __log_file__
+from .consts import __log_file__, fm_filetype
 
-LOGGER_NAME = "CHADTree"
+LOGGER_NAME = fm_filetype
 
-LOG_FMT = """\
+LOG_FMT = """
 --  {name}    {levelname}    {asctime}
 module:   {module}
 line:     {lineno}

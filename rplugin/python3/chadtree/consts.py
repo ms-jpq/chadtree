@@ -32,7 +32,7 @@ icon_lookup = {
 
 colours_json = join(__artifacts__, "github_colours.json")
 
-fm_filetype = "chadtree"
+fm_filetype = "CHADTree"
 fm_namespace = "chadtree_ns"
 fm_hl_prefix = "chadtree"
 
