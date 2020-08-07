@@ -72,6 +72,7 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
         version_ctl=version_ctl,
         mime=mime,
         width=config["width"],
+        win_local_opts=view["window_options"]
     )
 
     return settings

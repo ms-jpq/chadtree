@@ -3,5 +3,13 @@
     "quickfix": "Label",
     "version_control": "Comment"
   },
-  "time_format": "%Y-%m-%d %H:%M"
+  "time_format": "%Y-%m-%d %H:%M",
+  "window_options": [
+    "nonumber",
+    "norelativenumber",
+    "nowrap",
+    "signcolumn=no",
+    "cursorline",
+    "winfixwidth"
+  ]
 }

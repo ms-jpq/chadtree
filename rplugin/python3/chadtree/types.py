@@ -113,6 +113,7 @@ class Settings:
     version_ctl: VersionControlOptions
     mime: MimetypeOptions
     width: int
+    win_local_opts: Sequence[str]
 
 
 @dataclass(frozen=True)
