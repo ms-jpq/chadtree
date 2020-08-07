@@ -1,12 +1,13 @@
 from asyncio import Future, Task, create_task, sleep
 from itertools import repeat
 from os import linesep
-from traceback import format_exc
 from typing import Any, Awaitable, Callable, Iterable, Sequence, Tuple, TypeVar
 from uuid import uuid4
 
 from pynvim import Nvim
 from pynvim.api.common import NvimError
+
+from .logging import log
 
 T = TypeVar("T")
 
@@ -57,9 +58,7 @@ def run_forever(
             try:
                 await thing()
             except Exception as e:
-                stack = format_exc()
-                await print(nvim, f"{stack}{e}", error=True)
-                await sleep(timeout)
+                log.exception("%s", str(e))
 
     return create_task(loop())
 

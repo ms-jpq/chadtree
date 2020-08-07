@@ -12,7 +12,6 @@ from logging import (
     getLevelName,
     getLogger,
 )
-from os import linesep
 from typing import Dict
 
 from pynvim import Nvim
@@ -22,7 +21,7 @@ from .consts import __log_file__
 LOGGER_NAME = "CHADTree"
 
 LOG_FMT = """\
---  {name}\t{levelname}\t{asctime}
+--  {name}    {levelname}    {asctime}
 module:   {module}
 line:     {lineno}
 function: {funcName}
