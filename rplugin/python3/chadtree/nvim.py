@@ -59,6 +59,7 @@ def run_forever(
                 await thing()
             except Exception as e:
                 log.exception("%s", str(e))
+                sleep(timeout)
 
     return create_task(loop())
 
