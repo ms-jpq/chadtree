@@ -158,7 +158,7 @@ lua vim.api.nvim_set_var("chadtree_settings", { use_icons = "emoji" })
 
 Where to get `LS_COLORS`? Lots of places,such as [here](https://github.com/seebi/dircolors-solarized) or [here](colours_var).
 
-Set `g:colours_var` to customize colour mappings for 8 bit `LS_COLORS`
+Set `g:chadtree_colours` to customize colour mappings for 8 bit `LS_COLORS`
 
 Vaild values for `hl24` include hexcodes such as `#FFFFF`
 

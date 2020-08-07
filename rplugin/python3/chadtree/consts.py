@@ -15,7 +15,7 @@ session_dir = join(
 
 settings_var = "chadtree_settings"
 view_var = "chadtree_view"
-colours_var = "chadtree_colors"
+colours_var = "chadtree_colours"
 ignores_var = "chadtree_ignores"
 
 config_json = join(__config__, "config.json")
