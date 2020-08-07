@@ -310,7 +310,7 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[S
             new_state = await forward(
                 state, settings=settings, index=index, paths=paths
             )
-            row = new_state.paths_lookup.get(path)
+            row = new_state.paths_lookup.get(path, 0)
             if row:
 
                 def cont() -> None:
