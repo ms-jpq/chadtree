@@ -1,46 +1,45 @@
-from logging import DEBUG, ERROR, FATAL, INFO, WARN, getLogger
-from typing import Any, Dict
+from logging import (
+    DEBUG,
+    ERROR,
+    FATAL,
+    INFO,
+    WARN,
+    Formatter,
+    StreamHandler,
+    getLevelName,
+    getLogger,
+)
+from typing import Dict
 
 from pynvim import Nvim
 
 from .consts import __log_file__
 
 LOGGER_NAME = "CHADTree"
+
+LOG_FMT = """\
+--  {name}\t{levelname}\t{asctime}
+module:   {module}
+line:     {lineno}
+function: {funcName}
+message:  |-
+{message}
+"""
+
 DATE_FMT = "%Y-%m-%d %H:%M:%S"
 
 LEVELS: Dict[str, int] = {
-    "DEBUG": DEBUG,
-    "INFO": INFO,
-    "WARN": WARN,
-    "ERROR": ERROR,
-    "FATAL": FATAL,
+    getLevelName(lv): lv for lv in (DEBUG, INFO, WARN, ERROR, FATAL)
 }
 
 
 def setup(nvim: Nvim, level: str) -> None:
-    pass
-
-
-def debug(msg: Any, *args: Any, **kwargs: Any) -> None:
     logger = getLogger(LOGGER_NAME)
-    logger.debug(msg, *args, **kwargs)
+    logger.setLevel(LEVELS.get(level, DEBUG))
+    formatter = Formatter(fmt=LOG_FMT, datefmt=DATE_FMT, style="{")
+    handler = StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 
-def info(msg: Any, *args: Any, **kwargs: Any) -> None:
-    logger = getLogger(LOGGER_NAME)
-    logger.info(msg, *args, **kwargs)
-
-
-def warn(msg: Any, *args: Any, **kwargs: Any) -> None:
-    logger = getLogger(LOGGER_NAME)
-    logger.warn(msg, *args, **kwargs)
-
-
-def error(msg: Any, *args: Any, **kwargs: Any) -> None:
-    logger = getLogger(LOGGER_NAME)
-    logger.error(msg, *args, **kwargs)
-
-
-def fatal(msg: Any, *args: Any, **kwargs: Any) -> None:
-    logger = getLogger(LOGGER_NAME)
-    logger.fatal(msg, *args, **kwargs)
+log = getLogger(LOGGER_NAME)
