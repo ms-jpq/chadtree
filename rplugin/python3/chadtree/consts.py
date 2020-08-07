@@ -31,6 +31,7 @@ icon_lookup = {
 }
 
 colours_json = join(__artifacts__, "github_colours.json")
+custom_colours_json = join(__config__, "colours.json")
 
 fm_filetype = "CHADTree"
 fm_namespace = "chadtree_ns"

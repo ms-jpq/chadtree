@@ -7,7 +7,7 @@ class SearchError(Exception):
     pass
 
 
-async def search(args: str, cwd: str) -> Set[str]:
+async def search(args: str, cwd: str, sep: str) -> Set[str]:
     proc = await create_subprocess_shell(
         args, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd
     )
@@ -16,4 +16,4 @@ async def search(args: str, cwd: str) -> Set[str]:
     if err:
         raise SearchError(err)
     else:
-        return {*out.splitlines()}
+        return {*out.split(sep)}

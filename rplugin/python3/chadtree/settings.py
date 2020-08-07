@@ -1,10 +1,18 @@
 from typing import Any, Dict, cast
 
-from .consts import colours_json, config_json, icon_lookup, ignore_json, view_json
+from .consts import (
+    colours_json,
+    config_json,
+    custom_colours_json,
+    icon_lookup,
+    ignore_json,
+    view_json,
+)
 from .da import load_json, merge
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
 from .types import (
+    Colours,
     MimetypeOptions,
     Settings,
     UpdateTime,
@@ -20,14 +28,16 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     icon_c = cast(Any, load_json(icons_json))
     ignore = merge(load_json(ignore_json), user_ignores, replace=True)
     colours = cast(Dict[str, str], load_json(colours_json))
+    colours_c = cast(Any, load_json(custom_colours_json))
 
     use_icons = config["use_icons"]
 
     ext_colours = gen_hl("github", mapping=colours)
+    colours = Colours(bit8_mapping=colours_c["8_bit"], ext_colours=ext_colours)
     icons = ViewOptions(
         active=icon_c["status"]["active"],
         default_icon=icon_c["default_icon"],
-        ext_colours=ext_colours,
+        colours=colours,
         filename_exact=icon_c["name_exact"],
         filename_glob=icon_c["name_glob"],
         filetype=icon_c["type"],
@@ -49,7 +59,7 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
         defer=config["version_control"]["defer"],
         enable=config["version_control"]["enable"],
     )
-    hl_context = parse_ls_colours()
+    hl_context = parse_ls_colours(colours)
 
     keymap = {f"CHAD{k}": v for k, v in config["keymap"].items()}
     mime = MimetypeOptions(

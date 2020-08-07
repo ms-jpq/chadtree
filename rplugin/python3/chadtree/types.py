@@ -53,6 +53,12 @@ class HLgroup:
 
 
 @dataclass(frozen=True)
+class Colours:
+    bit8_mapping: Dict[str, str]
+    ext_colours: Dict[str, HLgroup]
+
+
+@dataclass(frozen=True)
 class ViewOptions:
     time_fmt: str
     active: str
@@ -64,10 +70,10 @@ class ViewOptions:
     selected: str
     quickfix_hl: str
     version_ctl_hl: str
-    ext_colours: Dict[str, HLgroup]
     filename_exact: Dict[str, str]
     filename_glob: Dict[str, str]
     filetype: Dict[str, str]
+    colours: Colours
 
 
 @dataclass(frozen=True)

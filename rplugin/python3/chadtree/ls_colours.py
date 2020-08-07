@@ -6,7 +6,7 @@ from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
 from uuid import uuid4
 
 from .consts import fm_hl_prefix
-from .types import HLcontext, HLgroup, Mode
+from .types import Colours, HLcontext, HLgroup, Mode
 
 
 class Style(IntEnum):
@@ -28,22 +28,22 @@ class Ground(Enum):
 
 class AnsiColour(IntEnum):
     Black = auto()
-    DarkRed = auto()
-    DarkGreen = auto()
-    DarkYellow = auto()
-    DarkBlue = auto()
-    DarkMagenta = auto()
-    DarkCyan = auto()
-    LightGrey = auto()
-
+    Red = auto()
+    Green = auto()
+    Yellow = auto()
+    Blue = auto()
+    Magenta = auto()
+    Cyan = auto()
     Grey = auto()
-    LightRed = auto()
-    LightGreen = auto()
-    LightYellow = auto()
-    LightBlue = auto()
-    LightMagenta = auto()
-    LightCyan = auto()
-    White = auto()
+
+    BrightBlack = auto()
+    BrightRed = auto()
+    BrightGreen = auto()
+    BrightYellow = auto()
+    BrightBlue = auto()
+    BrightMagenta = auto()
+    BrightCyan = auto()
+    BrightWhite = auto()
 
 
 @dataclass(frozen=True)
@@ -216,7 +216,7 @@ def parse_styling(codes: str) -> Styling:
     return styling
 
 
-def parseHLGroup(styling: Styling) -> HLgroup:
+def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
     fg, bg = styling.foreground, styling.background
     name = f"{fm_hl_prefix}_ls_{uuid4().hex}"
     cterm = {
@@ -224,8 +224,12 @@ def parseHLGroup(styling: Styling) -> HLgroup:
         for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ctermfg = cast(AnsiColour, fg).name if type(fg) is AnsiColour else None
-    ctermbg = cast(AnsiColour, bg).name if type(bg) is AnsiColour else None
+    ctermfg = (
+        colours.bit8_mapping[(AnsiColour, fg).name] if type(fg) is AnsiColour else None
+    )
+    ctermbg = (
+        colours.bit8_mapping[(AnsiColour, bg).name] if type(bg) is AnsiColour else None
+    )
     guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else ctermfg
     guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else ctermbg
     group = HLgroup(
@@ -239,10 +243,10 @@ def parseHLGroup(styling: Styling) -> HLgroup:
     return group
 
 
-def parse_ls_colours() -> HLcontext:
+def parse_ls_colours(colours: Colours) -> HLcontext:
     colours = environ.get("LS_COLORS", "")
     hl_lookup: Dict[str, HLgroup] = {
-        k: parseHLGroup(parse_styling(v))
+        k: parseHLGroup(parse_styling(v), colours=colours)
         for k, _, v in (
             segment.partition("=") for segment in colours.strip(":").split(":")
         )

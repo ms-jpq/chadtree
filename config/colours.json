@@ -1,0 +1,20 @@
+{
+  "8_bit": {
+    "Black": "Black",
+    "Blue": "DarkBlue",
+    "BrightBlack": "Grey",
+    "BrightBlue": "LightBlue",
+    "BrightCyan": "LightCyan",
+    "BrightGreen": "LightGreen",
+    "BrightMagenta": "LightMagenta",
+    "BrightRed": "LightRed",
+    "BrightWhite": "wWhite",
+    "BrightYellow": "LightYellow",
+    "Cyan": "DarkCyan",
+    "Green": "DarkGreen",
+    "Magenta": "DarkMagenta",
+    "Red": "DarkRed",
+    "White": "LightGray",
+    "Yellow": "DarkYellow"
+  }
+}
