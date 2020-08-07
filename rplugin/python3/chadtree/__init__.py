@@ -7,7 +7,6 @@ from asyncio import (
 )
 from concurrent.futures import ThreadPoolExecutor
 from itertools import chain
-from logging import debug, error
 from operator import add, sub
 from os import linesep
 from traceback import format_exc
@@ -77,8 +76,6 @@ class Main:
         self.nvim = nvim
 
         setup(nvim, settings.logging_level)
-        debug("INIT")
-        error("INIT")
         self._init = create_task(self._initialize())
         run_forever(self.nvim, self._ooda_loop)
 
