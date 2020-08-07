@@ -30,7 +30,7 @@ def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
     return ft == fm_filetype
 
 
-def find_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
+def find_windows_in_tab(nvim: Nvim, exclude: bool) -> Iterator[Window]:
     def key_by(window: Window) -> Tuple[int, int]:
         row, col = nvim.api.win_get_position(window)
         return (col, row)
@@ -39,7 +39,7 @@ def find_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
     windows: Sequence[Window] = nvim.api.tabpage_list_wins(tab)
 
     for window in sorted(windows, key=key_by):
-        if not nvim.api.win_get_option(window, "previewwindow"):
+        if not exclude or not nvim.api.win_get_option(window, "previewwindow"):
             yield window
 
 
@@ -51,21 +51,21 @@ def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
 
 
 def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim):
+    for window in find_windows_in_tab(nvim, exclude=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         if is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
 def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim):
+    for window in find_windows_in_tab(nvim, exclude=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         if not is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
 def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim):
+    for window in find_windows_in_tab(nvim, exclude=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         name = nvim.api.buf_get_name(buffer)
         if name == file:
@@ -113,7 +113,9 @@ def new_fm_buffer(nvim: Nvim, keymap: Dict[str, Sequence[str]]) -> Buffer:
 def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
     split_r = nvim.api.get_option("splitright")
 
-    windows: Sequence[Window] = tuple(w for w in find_windows_in_tab(nvim))
+    windows: Sequence[Window] = tuple(
+        w for w in find_windows_in_tab(nvim, exclude=False)
+    )
     focus_win = windows[0] if open_left else windows[-1]
     direction = False if open_left else True
 
@@ -144,7 +146,7 @@ def ensure_side_window(
     nvim: Nvim, *, window: Window, state: State, settings: Settings
 ) -> None:
     open_left = settings.open_left
-    windows = tuple(find_windows_in_tab(nvim))
+    windows = tuple(find_windows_in_tab(nvim, exclude=False))
     target = windows[0] if open_left else windows[-1]
     if window.number != target:
         if open_left:
