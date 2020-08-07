@@ -17,7 +17,7 @@ from pynvim.api.common import NvimError
 
 from .consts import ignores_var, settings_var, view_var
 from .highlight import add_hl_groups
-from .logging import setup
+from .logging import log, setup
 from .nvim import autocmd, run_forever
 from .scheduler import schedule
 from .settings import initial as initial_settings
@@ -76,6 +76,7 @@ class Main:
         self.nvim = nvim
 
         setup(nvim, settings.logging_level)
+        log.debug("")
         self._init = create_task(self._initialize())
         run_forever(self.nvim, self._ooda_loop)
 
@@ -87,7 +88,6 @@ class Main:
             try:
                 fut.result()
             except Exception as e:
-                error(e)
                 stack = format_exc()
                 nvim.async_call(nvim.err_write, f"{stack}{e}{linesep}")
 
