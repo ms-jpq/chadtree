@@ -310,6 +310,16 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[S
             new_state = await forward(
                 state, settings=settings, index=index, paths=paths
             )
+            row = new_state.paths_lookup.get(path)
+            if row:
+
+                def cont() -> None:
+                    window: Window = nvim.api.get_current_win()
+                    _, col = nvim.api.win_get_cursor(window)
+                    nvim.api.win_set_cursor(window, (row + 1, col))
+
+                await call(nvim, cont)
+
             return new_state
         else:
             return None
