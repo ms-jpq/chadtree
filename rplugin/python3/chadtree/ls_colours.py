@@ -34,7 +34,7 @@ class AnsiColour(IntEnum):
     Blue = auto()
     Magenta = auto()
     Cyan = auto()
-    Grey = auto()
+    White = auto()
 
     BrightBlack = auto()
     BrightRed = auto()
