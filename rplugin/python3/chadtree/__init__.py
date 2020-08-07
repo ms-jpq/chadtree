@@ -7,6 +7,7 @@ from asyncio import (
 )
 from concurrent.futures import ThreadPoolExecutor
 from itertools import chain
+from logging import debug, error
 from operator import add, sub
 from os import linesep
 from traceback import format_exc
@@ -17,6 +18,7 @@ from pynvim.api.common import NvimError
 
 from .consts import ignores_var, settings_var, view_var
 from .highlight import add_hl_groups
+from .logging import setup
 from .nvim import autocmd, run_forever
 from .scheduler import schedule
 from .settings import initial as initial_settings
@@ -63,9 +65,10 @@ class Main:
         user_config = nvim.vars.get(settings_var, {})
         user_view = nvim.vars.get(view_var, {})
         user_ignores = nvim.vars.get(ignores_var, {})
-        self.settings = initial_settings(
+        settings = initial_settings(
             user_config=user_config, user_view=user_view, user_ignores=user_ignores,
         )
+        self.settings = settings
         self.state: Optional[State] = None
 
         self.chan = ThreadPoolExecutor(max_workers=1)
@@ -73,6 +76,9 @@ class Main:
         self.lock = Lock()
         self.nvim = nvim
 
+        setup(nvim, settings.logging_level)
+        debug("INIT")
+        error("INIT")
         self._init = create_task(self._initialize())
         run_forever(self.nvim, self._ooda_loop)
 
@@ -84,6 +90,7 @@ class Main:
             try:
                 fut.result()
             except Exception as e:
+                error(e)
                 stack = format_exc()
                 nvim.async_call(nvim.err_write, f"{stack}{e}{linesep}")
 

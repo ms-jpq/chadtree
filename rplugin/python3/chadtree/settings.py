@@ -62,6 +62,8 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
         hl_context=hl_context,
         icons=icons,
         keymap=keymap,
+        logging_level=config["logging_level"],
+        mime=mime,
         name_ignore=ignore["name"],
         open_left=config["open_left"],
         path_ignore=ignore["path"],
@@ -70,9 +72,8 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
         update=update,
         use_icons=use_icons,
         version_ctl=version_ctl,
-        mime=mime,
         width=config["width"],
-        win_local_opts=view["window_options"]
+        win_local_opts=view["window_options"],
     )
 
     return settings

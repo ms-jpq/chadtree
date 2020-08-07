@@ -33,6 +33,7 @@
     "trash": ["t"],
     "v_split": ["w"]
   },
+  "logging_level": "WARN",
   "mimetypes": {
     "ignore_exts": [".ts"],
     "warn": ["audio", "font", "image", "video"]

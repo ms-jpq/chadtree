@@ -5,6 +5,7 @@ from pathlib import Path
 __base__ = dirname(dirname(dirname(dirname(realpath(__file__)))))
 __config__ = join(__base__, "config")
 __artifacts__ = join(__base__, "artifacts")
+__log_file__ = join(__base__, "logs", "chad.log")
 
 session_dir = join(
     environ.get("XDG_DATA_HOME", join(Path.home(), ".local", "share")),

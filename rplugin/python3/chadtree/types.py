@@ -103,6 +103,8 @@ class Settings:
     hl_context: HLcontext
     icons: ViewOptions
     keymap: Dict[str, Sequence[str]]
+    logging_level: str
+    mime: MimetypeOptions
     name_ignore: Sequence[str]
     open_left: bool
     path_ignore: Sequence[str]
@@ -111,7 +113,6 @@ class Settings:
     update: UpdateTime
     use_icons: bool
     version_ctl: VersionControlOptions
-    mime: MimetypeOptions
     width: int
     win_local_opts: Sequence[str]
 
