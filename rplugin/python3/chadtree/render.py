@@ -57,7 +57,7 @@ def paint(
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
     context = settings.hl_context
-    icon_lookup = settings.icons.ext_colours
+    icon_lookup = settings.icons.colours.exts
     mode_lookup_pre, mode_lookup_post, ext_lookup, name_lookup = (
         context.mode_lookup_pre,
         context.mode_lookup_post,

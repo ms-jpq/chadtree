@@ -27,13 +27,13 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
     icons_json = icon_lookup[config["use_icons"]]
     icon_c = cast(Any, load_json(icons_json))
     ignore = merge(load_json(ignore_json), user_ignores, replace=True)
-    colours = cast(Dict[str, str], load_json(colours_json))
+    github_colours = cast(Dict[str, str], load_json(colours_json))
     colours_c = cast(Any, load_json(custom_colours_json))
 
     use_icons = config["use_icons"]
 
-    ext_colours = gen_hl("github", mapping=colours)
-    colours = Colours(bit8_mapping=colours_c["8_bit"], ext_colours=ext_colours)
+    ext_colours = gen_hl("github", mapping=github_colours)
+    colours = Colours(bit8_mapping=colours_c["8_bit"], exts=ext_colours)
     icons = ViewOptions(
         active=icon_c["status"]["active"],
         default_icon=icon_c["default_icon"],

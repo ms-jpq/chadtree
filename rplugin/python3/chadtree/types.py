@@ -55,7 +55,7 @@ class HLgroup:
 @dataclass(frozen=True)
 class Colours:
     bit8_mapping: Dict[str, str]
-    ext_colours: Dict[str, HLgroup]
+    exts: Dict[str, HLgroup]
 
 
 @dataclass(frozen=True)

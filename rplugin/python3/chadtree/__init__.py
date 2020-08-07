@@ -130,7 +130,8 @@ class Main:
         await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_CHADquickfix")
 
         groups = chain(
-            self.settings.hl_context.groups, self.settings.icons.ext_colours.values(),
+            self.settings.hl_context.groups,
+            self.settings.icons.colours.exts.values(),
         )
         await add_hl_groups(self.nvim, groups=groups)
 

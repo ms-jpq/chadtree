@@ -434,7 +434,7 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> State:
 
     cwd = state.root.path
     pattern = await call(nvim, ask)
-    results = await search(pattern or "", cwd=cwd)
+    results = await search(pattern or "", cwd=cwd, sep=linesep)
     await print(nvim, results)
 
     return state

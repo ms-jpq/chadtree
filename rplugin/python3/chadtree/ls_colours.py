@@ -225,10 +225,14 @@ def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
         if style
     }
     ctermfg = (
-        colours.bit8_mapping[(AnsiColour, fg).name] if type(fg) is AnsiColour else None
+        colours.bit8_mapping[cast(AnsiColour, fg).name]
+        if type(fg) is AnsiColour
+        else None
     )
     ctermbg = (
-        colours.bit8_mapping[(AnsiColour, bg).name] if type(bg) is AnsiColour else None
+        colours.bit8_mapping[cast(AnsiColour, bg).name]
+        if type(bg) is AnsiColour
+        else None
     )
     guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else ctermfg
     guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else ctermbg
@@ -244,11 +248,11 @@ def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
 
 
 def parse_ls_colours(colours: Colours) -> HLcontext:
-    colours = environ.get("LS_COLORS", "")
+    ls_colours = environ.get("LS_COLORS", "")
     hl_lookup: Dict[str, HLgroup] = {
         k: parseHLGroup(parse_styling(v), colours=colours)
         for k, _, v in (
-            segment.partition("=") for segment in colours.strip(":").split(":")
+            segment.partition("=") for segment in ls_colours.strip(":").split(":")
         )
     }
     groups = tuple(hl_lookup.values())
