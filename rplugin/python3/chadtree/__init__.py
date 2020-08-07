@@ -13,7 +13,7 @@ from typing import Any, Awaitable, Callable, Optional, Sequence
 from pynvim import Nvim, command, function, plugin
 from pynvim.api.common import NvimError
 
-from .consts import ignores_var, settings_var, view_var
+from .consts import colours_var, ignores_var, settings_var, view_var
 from .highlight import add_hl_groups
 from .logging import log, setup
 from .nvim import autocmd, run_forever
@@ -62,8 +62,12 @@ class Main:
         user_config = nvim.vars.get(settings_var, {})
         user_view = nvim.vars.get(view_var, {})
         user_ignores = nvim.vars.get(ignores_var, {})
+        user_colours = nvim.vars.get(colours_var, {})
         settings = initial_settings(
-            user_config=user_config, user_view=user_view, user_ignores=user_ignores,
+            user_config=user_config,
+            user_view=user_view,
+            user_ignores=user_ignores,
+            user_colours=user_colours,
         )
         self.settings = settings
         self.state: Optional[State] = None
@@ -130,8 +134,7 @@ class Main:
         await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_CHADquickfix")
 
         groups = chain(
-            self.settings.hl_context.groups,
-            self.settings.icons.colours.exts.values(),
+            self.settings.hl_context.groups, self.settings.icons.colours.exts.values(),
         )
         await add_hl_groups(self.nvim, groups=groups)
 

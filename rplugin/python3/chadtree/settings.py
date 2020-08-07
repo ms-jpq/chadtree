@@ -22,14 +22,16 @@ from .types import (
 )
 
 
-def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
+def initial(
+    user_config: Any, user_view: Any, user_ignores: Any, user_colours: Any
+) -> Settings:
     config = merge(load_json(config_json), user_config, replace=True)
     view = merge(load_json(view_json), user_view, replace=True)
     icons_json = icon_lookup[config["use_icons"]]
     icon_c = cast(Any, load_json(icons_json))
     ignore = merge(load_json(ignore_json), user_ignores, replace=True)
     github_colours = cast(Dict[str, str], load_json(colours_json))
-    colours_c = cast(Any, load_json(custom_colours_json))
+    colours_c = merge(cast(Any, load_json(custom_colours_json)), user_colours)
 
     use_icons = config["use_icons"]
 
