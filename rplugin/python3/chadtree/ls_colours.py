@@ -217,6 +217,7 @@ def parse_styling(codes: str) -> Styling:
 
 
 def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
+    bit8_mapping = colours.bit8_mapping
     fg, bg = styling.foreground, styling.background
     name = f"{fm_hl_prefix}_ls_{uuid4().hex}"
     cterm = {
@@ -224,16 +225,8 @@ def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
         for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ansifg = (
-        colours.bit8_mapping[cast(AnsiColour, fg).name]
-        if type(fg) is AnsiColour
-        else None
-    )
-    ansibg = (
-        colours.bit8_mapping[cast(AnsiColour, bg).name]
-        if type(bg) is AnsiColour
-        else None
-    )
+    ansifg = bit8_mapping[cast(AnsiColour, fg).name] if type(fg) is AnsiColour else None
+    ansibg = bit8_mapping[cast(AnsiColour, bg).name] if type(bg) is AnsiColour else None
     ctermfg = ansifg.hl8 if ansifg else None
     ctermbg = ansibg.hl8 if ansibg else None
     guifg = (
