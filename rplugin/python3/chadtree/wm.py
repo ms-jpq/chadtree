@@ -7,6 +7,7 @@ from pynvim.api.window import Window
 
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
+from .logging import log
 from .nvim import atomic
 from .types import Badge, ClickType, Highlight, Settings, State
 
@@ -129,6 +130,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
 
 
 def resize_fm_windows(nvim: Nvim, width: int) -> None:
+    log.debug("%s", "window resized", stack_info=True)
     for window in find_fm_windows_in_tab(nvim):
         nvim.api.win_set_width(window, width)
 
@@ -148,7 +150,7 @@ def ensure_side_window(
     open_left = settings.open_left
     windows = tuple(find_windows_in_tab(nvim, exclude=False))
     target = windows[0] if open_left else windows[-1]
-    if window.number != target:
+    if window.number != target.number:
         if open_left:
             nvim.api.command("wincmd H")
         else:
