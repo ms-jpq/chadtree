@@ -224,18 +224,28 @@ def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
         for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ctermfg = (
+    ansifg = (
         colours.bit8_mapping[cast(AnsiColour, fg).name]
         if type(fg) is AnsiColour
         else None
     )
-    ctermbg = (
+    ansibg = (
         colours.bit8_mapping[cast(AnsiColour, bg).name]
         if type(bg) is AnsiColour
         else None
     )
-    guifg = to_hex(cast(Colour, fg)) if type(fg) is Colour else ctermfg
-    guibg = to_hex(cast(Colour, bg)) if type(bg) is Colour else ctermbg
+    ctermfg = ansifg.hl8 if ansifg else None
+    ctermbg = ansibg.hl8 if ansibg else None
+    guifg = (
+        to_hex(cast(Colour, fg))
+        if type(fg) is Colour
+        else (ansifg.hl24 if ansifg else None)
+    )
+    guibg = (
+        to_hex(cast(Colour, bg))
+        if type(bg) is Colour
+        else (ansibg.hl24 if ansibg else None)
+    )
     group = HLgroup(
         name=name,
         cterm=cterm,

@@ -12,6 +12,7 @@ from .da import load_json, merge
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
 from .types import (
+    ColourMapping,
     Colours,
     MimetypeOptions,
     Settings,
@@ -32,8 +33,12 @@ def initial(user_config: Any, user_view: Any, user_ignores: Any) -> Settings:
 
     use_icons = config["use_icons"]
 
+    bit8_mapping = {
+        key: ColourMapping(hl8=val["hl8"], hl24=val["hl24"])
+        for key, val in colours_c["8_bit"].items()
+    }
     ext_colours = gen_hl("github", mapping=github_colours)
-    colours = Colours(bit8_mapping=colours_c["8_bit"], exts=ext_colours)
+    colours = Colours(bit8_mapping=bit8_mapping, exts=ext_colours)
     icons = ViewOptions(
         active=icon_c["status"]["active"],
         default_icon=icon_c["default_icon"],
