@@ -4,6 +4,7 @@ from logging import (
     FATAL,
     INFO,
     WARN,
+    FileHandler,
     Formatter,
     StreamHandler,
     getLevelName,
@@ -37,9 +38,10 @@ def setup(nvim: Nvim, level: str) -> None:
     logger = getLogger(LOGGER_NAME)
     logger.setLevel(LEVELS.get(level, DEBUG))
     formatter = Formatter(fmt=LOG_FMT, datefmt=DATE_FMT, style="{")
-    handler = StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    handlers = (StreamHandler(), FileHandler(filename=__log_file__))
+    for handler in handlers:
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
 
 log = getLogger(LOGGER_NAME)
