@@ -125,8 +125,9 @@ def _display_path(path: str, state: State) -> str:
     raw = relpath(path, start=state.root.path)
     name = raw.replace(linesep, r"\n")
     if isdir(path):
-        name = f"{name}{sep}"
-    return name
+        return f"{name}{sep}"
+    else:
+        return name
 
 
 async def _current(
