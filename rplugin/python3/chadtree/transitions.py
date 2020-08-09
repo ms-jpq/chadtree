@@ -116,7 +116,7 @@ async def _indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
 
 async def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     def cont() -> None:
-        update_buffers(nvim, state=state)
+        update_buffers(nvim, state=state, focus=focus)
 
     await call(nvim, cont)
 
@@ -380,9 +380,18 @@ async def c_refresh(
     return Stage(new_state)
 
 
-async def c_jump_to_current(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_jump_to_current(
+    nvim: Nvim, state: State, settings: Settings
+) -> Optional[Stage]:
     current = state.current
-    return Stage(state, focus=current)
+    if current:
+        stage = await _current(nvim, state=state, settings=settings, current=current)
+        if stage:
+            return Stage(state=stage.state, focus=current)
+        else:
+            return None
+    else:
+        return None
 
 
 async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
