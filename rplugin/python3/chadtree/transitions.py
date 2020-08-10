@@ -424,8 +424,10 @@ async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 async def c_toggle_qf_filtering(nvim: Nvim, state: State, settings: Settings) -> Stage:
     locations = await quickfix(nvim)
-    qf = QuickFix(locations=locations, filtering=not state.qf.filtering)
+    filtering = not state.qf.filtering
+    qf = QuickFix(locations=locations, filtering=filtering)
     new_state = await forward(state, settings=settings, qf=qf)
+    await print(nvim, f"🐶 enable quickfix filtering: {new_state.qf.filtering}")
     return Stage(new_state)
 
 
