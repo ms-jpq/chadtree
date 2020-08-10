@@ -444,7 +444,7 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Optional
     try:
         search_set = (await search(pattern, cwd=cwd, sep=linesep)) if pattern else set()
     except SearchError as e:
-        await print(nvim, e)
+        await print(nvim, e, error=True)
         return None
     else:
         filter_pattern = search_forward(state.filter_pattern, search_set=search_set)
