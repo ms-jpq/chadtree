@@ -50,6 +50,7 @@ from .types import (
     Index,
     Mode,
     Node,
+    QuickFix,
     Selection,
     Settings,
     Stage,
@@ -175,7 +176,8 @@ async def a_session(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 async def a_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
-    qf = await quickfix(nvim)
+    locations = await quickfix(nvim)
+    qf = QuickFix(locations=locations)
     new_state = await forward(state, settings=settings, qf=qf)
     return Stage(new_state)
 
@@ -366,7 +368,8 @@ async def c_refresh(
     current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
     new_index = index if new_current else index | current_paths
 
-    qf, vc = await gather(quickfix(nvim), _vc_stat(state.enable_vc))
+    locations, vc = await gather(quickfix(nvim), _vc_stat(state.enable_vc))
+    qf = QuickFix(locations=locations)
     new_state = await forward(
         state,
         settings=settings,

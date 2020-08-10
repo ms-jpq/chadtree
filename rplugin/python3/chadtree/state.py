@@ -57,7 +57,8 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     cwd = await getcwd(nvim)
     index = load_session(cwd) if settings.session else {cwd}
     selection: Selection = set()
-    node, qf = await gather(new(cwd, index=index), quickfix(nvim))
+    node, locations = await gather(new(cwd, index=index), quickfix(nvim))
+    qf = QuickFix(locations=locations)
     vc = VCStatus() if not version_ctl.enable or version_ctl.defer else await status()
     current = None
     filter_pattern = FilterPattern()

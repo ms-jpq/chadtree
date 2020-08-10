@@ -2,16 +2,15 @@ from asyncio import gather
 from collections import Counter, defaultdict
 from itertools import chain
 from os.path import join
-from typing import Iterator, Sequence
+from typing import Iterator, Sequence, Dict
 
 from pynvim import Nvim
 
 from .fs import ancestors
 from .nvim import call, getcwd
-from .types import QuickFix
 
 
-async def quickfix(nvim: Nvim) -> QuickFix:
+async def quickfix(nvim: Nvim) -> Dict[str, int]:
     def cont() -> Sequence[str]:
         ql = nvim.funcs.getqflist()
 
@@ -28,5 +27,4 @@ async def quickfix(nvim: Nvim) -> QuickFix:
     parents = (ancestor for fullname in full_names for ancestor in ancestors(fullname))
     count = Counter(chain(full_names, parents))
     locations = defaultdict(int, count)
-    qf = QuickFix(locations=locations)
-    return qf
+    return locations
