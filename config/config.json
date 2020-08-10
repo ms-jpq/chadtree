@@ -29,6 +29,7 @@
     "tertiary": ["<m-enter>", "<middlemouse>"],
     "toggle_follow": [],
     "toggle_hidden": ["."],
+    "toggle_quickfix_filtering": ["L"],
     "toggle_version_control": [],
     "trash": ["t"],
     "v_split": ["w"]

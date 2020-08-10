@@ -177,7 +177,7 @@ async def a_session(nvim: Nvim, state: State, settings: Settings) -> None:
 
 async def a_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
     locations = await quickfix(nvim)
-    qf = QuickFix(locations=locations)
+    qf = QuickFix(locations=locations, filtering=state.qf.filtering)
     new_state = await forward(state, settings=settings, qf=qf)
     return Stage(new_state)
 
@@ -369,7 +369,7 @@ async def c_refresh(
     new_index = index if new_current else index | current_paths
 
     locations, vc = await gather(quickfix(nvim), _vc_stat(state.enable_vc))
-    qf = QuickFix(locations=locations)
+    qf = QuickFix(locations=locations, filtering=state.qf.filtering)
     new_state = await forward(
         state,
         settings=settings,
@@ -419,6 +419,13 @@ async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
     vc = await _vc_stat(enable_vc)
     new_state = await forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
     await print(nvim, f"🐶 enable version control: {new_state.enable_vc}")
+    return Stage(new_state)
+
+
+async def c_toggle_qf_filtering(nvim: Nvim, state: State, settings: Settings) -> Stage:
+    locations = await quickfix(nvim)
+    qf = QuickFix(locations=locations, filtering=not state.qf.filtering)
+    new_state = await forward(state, settings=settings, qf=qf)
     return Stage(new_state)
 
 

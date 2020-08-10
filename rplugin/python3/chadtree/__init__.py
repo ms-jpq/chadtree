@@ -49,6 +49,7 @@ from .transitions import (
     c_select,
     c_stat,
     c_toggle_follow,
+    c_toggle_qf_filtering,
     c_toggle_vc,
     c_trash,
     redraw,
@@ -350,6 +351,14 @@ class Main:
         """
 
         self._run(c_toggle_vc)
+
+    @function("CHADtoggle_quickfix_filtering")
+    def toggle_quickfix_filtering(self, args: Sequence[Any]) -> None:
+        """
+        Toggle quickfix filtering
+        """
+
+        self._run(c_toggle_qf_filtering)
 
     @function("CHADfilter")
     def filter_pattern(self, args: Sequence[Any]) -> None:

@@ -132,6 +132,7 @@ class Settings:
 @dataclass(frozen=True)
 class QuickFix:
     locations: Dict[str, int]
+    filtering: bool
 
 
 @dataclass(frozen=True)
