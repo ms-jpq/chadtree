@@ -676,7 +676,7 @@ async def _operation(
         loop = get_running_loop()
 
         def pre_op() -> Dict[str, str]:
-            op = {src: _find_dest(src, node) for src in unified}
+            op = {src: _find_dest(src, cast(Node, node)) for src in unified}
             return op
 
         operations = await loop.run_in_executor(None, pre_op)
