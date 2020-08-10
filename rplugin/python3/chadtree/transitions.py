@@ -674,7 +674,12 @@ async def _operation(
     unified = tuple(unify_ancestors(selection))
     if unified and node:
         loop = get_running_loop()
-        operations = {src: _find_dest(src, node) for src in unified}
+
+        def pre_op() -> Dict[str, str]:
+            op = {src: _find_dest(src, node) for src in unified}
+            return op
+
+        operations = await loop.run_in_executor(None, pre_op)
 
         def p_pre() -> Dict[str, str]:
             pe = {s: d for s, d in operations.items() if exists(d)}
