@@ -212,11 +212,6 @@ def show_file(
             nvim.api.command("filetype detect")
 
 
-def jump_to_row(nvim: Nvim, *, row: int) -> None:
-    for window, _ in find_fm_windows(nvim):
-        nvim.api.win_set_cursor(window, (row + 1, 0))
-
-
 def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
@@ -255,7 +250,8 @@ def buf_set_highlights(
             yield "buf_add_highlight", (buffer, ns, h.group, idx, h.begin, h.end)
 
 
-def update_buffers(nvim: Nvim, state: State) -> None:
+def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
+    focus_row = state.paths_lookup.get(focus) if focus else None
     current = state.current
     current_row = state.paths_lookup.get(current or "")
     lines, badges, highlights = tuple(
@@ -273,9 +269,13 @@ def update_buffers(nvim: Nvim, state: State) -> None:
         row, col = nvim.api.win_get_cursor(window)
         lines = cast(Sequence[str], lines)
         new_row = (
-            current_row + 1
-            if window.number != cwin.number and current_row is not None
-            else min(row, len(lines))
+            focus_row + 1
+            if focus_row is not None
+            else (
+                current_row + 1
+                if window.number != cwin.number and current_row is not None
+                else min(row, len(lines))
+            )
         )
         it1 = "buf_clear_namespace", (buffer, ns, 0, -1)
         it2 = buf_setlines(nvim, buffer=buffer, lines=lines)

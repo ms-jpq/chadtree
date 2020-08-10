@@ -53,7 +53,7 @@ from .transitions import (
     c_trash,
     redraw,
 )
-from .types import ClickType, State
+from .types import ClickType, Stage, State
 
 
 @plugin
@@ -101,18 +101,18 @@ class Main:
         return self.state
 
     def _run(
-        self, fn: Callable[..., Awaitable[Optional[State]]], *args: Any, **kwargs: Any
+        self, fn: Callable[..., Awaitable[Optional[Stage]]], *args: Any, **kwargs: Any
     ) -> None:
         async def run() -> None:
             async with self.lock:
                 await self._init
                 state = await self._curr_state()
-                new_state = await fn(
+                stage = await fn(
                     self.nvim, state=state, settings=self.settings, *args, **kwargs
                 )
-                if new_state:
-                    self.state = new_state
-                    await redraw(self.nvim, state=new_state)
+                if stage:
+                    self.state = stage.state
+                    await redraw(self.nvim, state=self.state, focus=stage.focus)
 
         self._submit(run())
 
@@ -140,17 +140,17 @@ class Main:
 
     async def _ooda_loop(self) -> None:
         update = self.settings.update
-        async for elapsed in schedule(
+        async for _ in schedule(
             self.ch, min_time=update.min_time, max_time=update.max_time,
         ):
             async with self.lock:
                 state = await self._curr_state()
                 try:
-                    new_state = await c_refresh(
+                    stage = await c_refresh(
                         self.nvim, state=state, settings=self.settings
                     )
-                    self.state = new_state
-                    await redraw(self.nvim, state=new_state)
+                    self.state = stage.state
+                    await redraw(self.nvim, state=self.state, focus=None)
                 except NvimError:
                     self.ch.set()
 

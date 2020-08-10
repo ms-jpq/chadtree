@@ -183,6 +183,12 @@ class State:
     rendered: Sequence[Render]
 
 
+@dataclass(frozen=True)
+class Stage:
+    state: State
+    focus: Optional[str] = None
+
+
 class ClickType(Enum):
     primary = auto()
     secondary = auto()
