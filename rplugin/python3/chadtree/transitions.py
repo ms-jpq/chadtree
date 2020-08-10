@@ -438,10 +438,11 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
     cwd = state.root.path
     pattern = await call(nvim, ask)
-    results = await search(pattern or "", cwd=cwd, sep=linesep)
-    await print(nvim, results)
-
-    return Stage(state)
+    if pattern:
+        paths = await search(pattern, cwd=cwd, sep=linesep)
+        return Stage(state)
+    else:
+        return None
 
 
 async def c_copy_name(

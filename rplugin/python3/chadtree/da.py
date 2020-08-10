@@ -5,7 +5,7 @@ from functools import partial
 from itertools import count
 from json import dump, load
 from operator import pow
-from os import environ, makedirs
+from os import environ, getcwd, makedirs
 from os.path import dirname, exists
 from subprocess import CompletedProcess, run
 from sys import version_info
@@ -80,12 +80,15 @@ class ProcReturn:
 
 if (version_info.major, version_info.minor) == (3, 7):
 
-    async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
+    async def call(
+        prog: str, *args: str, env: Dict[str, str] = {}, cwd: Optional[str] = None
+    ) -> ProcReturn:
         loop = get_running_loop()
 
         def cont() -> CompletedProcess:
+            _cwd = cwd if cwd else getcwd()
             envi = {**environ, **env}
-            return run((prog, *args), capture_output=True, env=envi)
+            return run((prog, *args), capture_output=True, env=envi, cwd=_cwd)
 
         ret = await loop.run_in_executor(None, cont)
         out, err = ret.stdout.decode(), ret.stderr.decode()
@@ -95,10 +98,13 @@ if (version_info.major, version_info.minor) == (3, 7):
 
 else:
 
-    async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
+    async def call(
+        prog: str, *args: str, env: Dict[str, str] = {}, cwd: Optional[str] = None
+    ) -> ProcReturn:
+        _cwd = cwd if cwd else getcwd()
         envi = {**environ, **env}
         proc = await create_subprocess_exec(
-            prog, *args, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, env=envi
+            prog, *args, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, env=envi, cwd=_cwd
         )
         stdout, stderr = await proc.communicate()
         code = cast(int, proc.returncode)
