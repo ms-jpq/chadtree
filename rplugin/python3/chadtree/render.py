@@ -174,10 +174,12 @@ def paint(
 def filter_node(node: Node, pattern: str, search_set: Set[str]) -> bool:
     if not pattern and not search_set:
         return True
-    elif pattern:
-        return fnmatch(node.name, pattern)
+    elif pattern and search_set:
+        return node.path in search_set and fnmatch(node.name, pattern)
     elif search_set:
         return node.path in search_set
+    elif pattern:
+        return fnmatch(node.name, pattern)
     else:
         assert False
 
