@@ -1,15 +1,10 @@
-from dataclasses import dataclass
+from itertools import chain
 from os import environ
 from os.path import join
 from typing import Set
 
 from .da import call
-
-
-@dataclass(frozen=True)
-class SearchResult:
-    folders: Set[str]
-    files: Set[str]
+from .fs import ancestors
 
 
 class SearchError(Exception):
@@ -23,5 +18,6 @@ async def search(args: str, cwd: str, sep: str) -> Set[str]:
     if ret.err:
         raise SearchError(ret.err)
     else:
-        lines = {join(cwd, line) for line in ret.out.split(sep) if line}
-        return lines
+        lines = (join(cwd, line) for line in ret.out.split(sep) if line)
+        paths = {path for line in lines for path in chain(ancestors(line), (line,))}
+        return paths

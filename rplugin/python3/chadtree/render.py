@@ -3,7 +3,7 @@ from fnmatch import fnmatch
 from locale import strxfrm
 from os import linesep
 from os.path import sep
-from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
+from typing import Callable, Iterator, Optional, Sequence, Set, Tuple, cast
 
 from .da import constantly
 from .types import (
@@ -171,8 +171,19 @@ def paint(
     return show
 
 
+def filter_node(node: Node, pattern: str, search_set: Set[str]) -> bool:
+    if not pattern and not search_set:
+        return True
+    elif pattern:
+        return fnmatch(node.name, pattern)
+    elif search_set:
+        return node.path in search_set
+    else:
+        assert False
+
+
 def render(
-    node: Node,
+    root: Node,
     *,
     settings: Settings,
     index: Index,
@@ -187,15 +198,13 @@ def render(
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
-    keep_open = {node.path}
+    root_path = root.path
 
     def render(
         node: Node, *, depth: int, cleared: bool
     ) -> Iterator[Tuple[Node, Render]]:
-        clear = (
-            cleared
-            or not filter_pattern.pattern
-            or fnmatch(node.name, filter_pattern.pattern)
+        clear = cleared or filter_node(
+            node, pattern=filter_pattern.pattern, search_set=filter_pattern.search_set
         )
         rend = show(node, depth)
 
@@ -205,9 +214,9 @@ def render(
                 yield from render(child, depth=depth + 1, cleared=clear)
 
         children = tuple(gen_children())
-        if clear or children or node.path in keep_open:
+        if clear or children or node.path == root_path:
             yield node, rend
         yield from iter(children)
 
-    lookup, rendered = zip(*render(node, depth=0, cleared=False))
+    lookup, rendered = zip(*render(root, depth=0, cleared=False))
     return cast(Sequence[Node], lookup), cast(Sequence[Render], rendered)

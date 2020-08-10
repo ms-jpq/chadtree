@@ -39,7 +39,7 @@ from .fs import (
 from .git import status
 from .nvim import call, getcwd, print
 from .quickfix import quickfix
-from .search import search
+from .search import SearchError, search
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir, search_forward
@@ -228,8 +228,11 @@ async def c_click(
             return None
         else:
             if Mode.folder in node.mode:
-                if state.filter_pattern:
-                    await print(nvim, "⚠️  cannot click on folders while filtering")
+                filter_pattern = state.filter_pattern
+                if filter_pattern.pattern or filter_pattern.search_set:
+                    await print(
+                        nvim, "⚠️  cannot click on folders while filtering or searching"
+                    )
                     return None
                 else:
                     paths = {node.path}
@@ -430,7 +433,7 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
-async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     def ask() -> Optional[str]:
         pattern = ""
         resp = nvim.funcs.input("New search:", pattern)
@@ -438,10 +441,17 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
     cwd = state.root.path
     pattern = await call(nvim, ask)
-    search_set = (await search(pattern, cwd=cwd, sep=linesep)) if pattern else set()
-    filter_pattern = search_forward(state.filter_pattern, search_set=search_set)
-    new_state = await forward(state, settings=settings, filter_pattern=filter_pattern)
-    return Stage(new_state)
+    try:
+        search_set = (await search(pattern, cwd=cwd, sep=linesep)) if pattern else set()
+    except SearchError as e:
+        await print(nvim, e)
+        return None
+    else:
+        filter_pattern = search_forward(state.filter_pattern, search_set=search_set)
+        new_state = await forward(
+            state, settings=settings, filter_pattern=filter_pattern
+        )
+        return Stage(new_state)
 
 
 async def c_copy_name(
