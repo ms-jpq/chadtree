@@ -4,7 +4,7 @@ from os.path import join
 from typing import Set
 
 from .da import call
-from .fs import ancestors
+from .fs import ancestors, fs_exists
 
 
 class SearchError(Exception):
@@ -18,6 +18,12 @@ async def search(args: str, cwd: str, sep: str) -> Set[str]:
     if ret.err:
         raise SearchError(ret.err)
     else:
-        lines = (join(cwd, line) for line in ret.out.split(sep) if line)
-        paths = {path for line in lines for path in chain(ancestors(line), (line,))}
-        return paths
+        raw_lines = ret.out.split(sep)
+        first_line = next(iter(raw_lines), "")
+        if not await fs_exists(first_line):
+            msg = f"Bad search results from {args}"
+            raise SearchError(msg)
+        else:
+            lines = (join(cwd, line) for line in raw_lines if line)
+            paths = {path for line in lines for path in chain(ancestors(line), (line,))}
+            return paths
