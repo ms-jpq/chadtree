@@ -177,7 +177,7 @@ def render(
     settings: Settings,
     index: Index,
     selection: Selection,
-    filter_pattern: Optional[FilterPattern],
+    filter_pattern: FilterPattern,
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
@@ -192,7 +192,11 @@ def render(
     def render(
         node: Node, *, depth: int, cleared: bool
     ) -> Iterator[Tuple[Node, Render]]:
-        clear = cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
+        clear = (
+            cleared
+            or not filter_pattern.pattern
+            or fnmatch(node.name, filter_pattern.pattern)
+        )
         rend = show(node, depth)
 
         def gen_children() -> Iterator[Tuple[Node, Render]]:

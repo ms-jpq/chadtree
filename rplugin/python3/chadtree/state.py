@@ -60,7 +60,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
     vc = VCStatus() if not version_ctl.enable or version_ctl.defer else await status()
     current = None
-    filter_pattern = None
+    filter_pattern = FilterPattern()
     lookup, rendered = render(
         node,
         settings=settings,
@@ -100,7 +100,7 @@ async def forward(
     root: Union[Node, Void] = Void(),
     index: Union[Index, Void] = Void(),
     selection: Union[Selection, Void] = Void(),
-    filter_pattern: Union[Optional[FilterPattern], Void] = Void(),
+    filter_pattern: Union[FilterPattern, Void] = Void(),
     show_hidden: Union[bool, Void] = Void(),
     follow: Union[bool, Void] = Void(),
     enable_vc: Union[bool, Void] = Void(),
@@ -168,3 +168,16 @@ def index(state: State, row: int) -> Optional[Node]:
 
 def is_dir(node: Node) -> bool:
     return Mode.folder in node.mode
+
+
+def search_forward(
+    state: FilterPattern,
+    *,
+    pattern: Union[str, Void] = Void(),
+    search_set: Union[Set[str], Void] = Void(),
+) -> FilterPattern:
+    new_state = FilterPattern(
+        pattern=or_else(pattern, state.pattern),
+        search_set=or_else(search_set, state.search_set),
+    )
+    return new_state

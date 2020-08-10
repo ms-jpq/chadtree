@@ -42,7 +42,7 @@ from .quickfix import quickfix
 from .search import search
 from .state import dump_session, forward
 from .state import index as state_index
-from .state import is_dir
+from .state import is_dir, search_forward
 from .system import SystemIntegrationError, open_gui, trash
 from .types import (
     ClickType,
@@ -422,8 +422,8 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
         resp = nvim.funcs.input("New filter:", pattern)
         return resp
 
-    pattern = await call(nvim, ask)
-    filter_pattern = FilterPattern(pattern=pattern) if pattern else None
+    pattern = (await call(nvim, ask)) or ""
+    filter_pattern = search_forward(state.filter_pattern, pattern=pattern)
     new_state = await forward(
         state, settings=settings, selection=set(), filter_pattern=filter_pattern
     )
@@ -438,11 +438,10 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
     cwd = state.root.path
     pattern = await call(nvim, ask)
-    if pattern:
-        paths = await search(pattern, cwd=cwd, sep=linesep)
-        return Stage(state)
-    else:
-        return None
+    search_set = (await search(pattern, cwd=cwd, sep=linesep)) if pattern else set()
+    filter_pattern = search_forward(state.filter_pattern, search_set=search_set)
+    new_state = await forward(state, settings=settings, filter_pattern=filter_pattern)
+    return Stage(new_state)
 
 
 async def c_copy_name(
@@ -572,7 +571,7 @@ async def c_clear_selection(nvim: Nvim, state: State, settings: Settings) -> Sta
 
 
 async def c_clear_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
-    new_state = await forward(state, settings=settings, filter_pattern=None)
+    new_state = await forward(state, settings=settings, filter_pattern=FilterPattern())
     return Stage(new_state)
 
 
