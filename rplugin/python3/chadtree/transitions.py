@@ -340,6 +340,10 @@ async def _vc_stat(enable: bool) -> VCStatus:
         return VCStatus()
 
 
+def _is_filtering(filter_pattern: FilterPattern) -> bool:
+    return len(filter_pattern.pattern) > 0 and len(filter_pattern.search_set) > 0
+
+
 async def c_refresh(
     nvim: Nvim, state: State, settings: Settings, write: bool = False
 ) -> Stage:
@@ -360,7 +364,9 @@ async def c_refresh(
     def cont() -> Tuple[Index, Selection]:
         index = {i for i in state.index if exists(i)} | paths
         selection = (
-            set() if state.filter_pattern else {s for s in state.selection if exists(s)}
+            set()
+            if _is_filtering(state.filter_pattern)
+            else {s for s in state.selection if exists(s)}
         )
         return index, selection
 
