@@ -89,7 +89,9 @@ class ProcReturn:
 
 if (version_info.major, version_info.minor) == (3, 7):
 
-    async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
+    async def call(
+        prog: str, *args: str, env: Dict[str, str] = {}, cwd: Optional[str] = None
+    ) -> ProcReturn:
         def cont() -> CompletedProcess:
             _cwd = cwd if cwd else getcwd()
             envi = {**environ, **env}
