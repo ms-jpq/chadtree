@@ -1,5 +1,6 @@
 from asyncio import create_subprocess_exec, get_running_loop
 from asyncio.subprocess import DEVNULL, PIPE
+from concurrent.futures import Executor
 from dataclasses import dataclass
 from functools import partial
 from itertools import count
@@ -25,6 +26,14 @@ class Void:
 
     def __str__(self) -> str:
         return type(self).__name__
+
+
+async def run_in_executor(
+    executor: Optional[Executor], f: Callable[..., T], *args: Any, **kwargs: Any
+) -> T:
+    loop = get_running_loop()
+    cont = partial(f, *args, **kwargs)
+    return await loop.run_in_executor(executor, cont)
 
 
 def or_else(thing: Union[T, Void], default: T) -> T:
@@ -81,13 +90,11 @@ class ProcReturn:
 if (version_info.major, version_info.minor) == (3, 7):
 
     async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
-        loop = get_running_loop()
-
         def cont() -> CompletedProcess:
             envi = {**environ, **env}
             return run((prog, *args), capture_output=True, env=envi)
 
-        ret = await loop.run_in_executor(None, cont)
+        ret = await run_in_executor(None, cont)
         out, err = ret.stdout.decode(), ret.stderr.decode()
         code = ret.returncode
         return ProcReturn(code=code, out=out, err=err)

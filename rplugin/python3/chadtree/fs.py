@@ -1,4 +1,3 @@
-from asyncio import get_running_loop
 from dataclasses import dataclass
 from datetime import datetime
 from os import makedirs
@@ -15,6 +14,7 @@ from stat import S_ISDIR, S_ISLNK, filemode
 from typing import Dict, Iterable, Iterator, Optional, Set
 
 from .consts import file_mode, folder_mode
+from .da import run_in_executor
 
 
 def ancestors(path: str) -> Iterator[str]:
@@ -39,12 +39,10 @@ def unify_ancestors(paths: Set[str]) -> Iterator[str]:
 
 
 async def fs_exists(path: str) -> bool:
-    loop = get_running_loop()
-
     def cont() -> bool:
         return exists(path)
 
-    return await loop.run_in_executor(None, cont)
+    return await run_in_executor(None, cont)
 
 
 @dataclass(frozen=True)
@@ -103,12 +101,10 @@ def _fs_stat(path: str) -> FSstat:
 
 
 async def fs_stat(path: str) -> FSstat:
-    loop = get_running_loop()
-
     def cont() -> FSstat:
         return _fs_stat(path)
 
-    return await loop.run_in_executor(None, cont)
+    return await run_in_executor(None, cont)
 
 
 def _new(dest: str) -> None:
@@ -121,12 +117,10 @@ def _new(dest: str) -> None:
 
 
 async def new(dest: str) -> None:
-    loop = get_running_loop()
-
     def cont() -> None:
         _new(dest)
 
-    await loop.run_in_executor(None, cont)
+    await run_in_executor(None, cont)
 
 
 def _rename(src: str, dest: str) -> None:
@@ -136,12 +130,10 @@ def _rename(src: str, dest: str) -> None:
 
 
 async def rename(src: str, dest: str) -> None:
-    loop = get_running_loop()
-
     def cont() -> None:
         _rename(src, dest)
 
-    await loop.run_in_executor(None, cont)
+    await run_in_executor(None, cont)
 
 
 def _remove(src: str) -> None:
@@ -153,13 +145,11 @@ def _remove(src: str) -> None:
 
 
 async def remove(paths: Iterable[str]) -> None:
-    loop = get_running_loop()
-
     def cont() -> None:
         for path in paths:
             _remove(path)
 
-    await loop.run_in_executor(None, cont)
+    await run_in_executor(None, cont)
 
 
 def _cut(src: str, dest: str) -> None:
@@ -167,13 +157,11 @@ def _cut(src: str, dest: str) -> None:
 
 
 async def cut(operations: Dict[str, str]) -> None:
-    loop = get_running_loop()
-
     def cont() -> None:
         for src, dest in operations.items():
             _cut(src, dest)
 
-    await loop.run_in_executor(None, cont)
+    await run_in_executor(None, cont)
 
 
 def _copy(src: str, dest: str) -> None:
@@ -185,10 +173,8 @@ def _copy(src: str, dest: str) -> None:
 
 
 async def copy(operations: Dict[str, str]) -> None:
-    loop = get_running_loop()
-
     def cont() -> None:
         for src, dest in operations.items():
             _copy(src, dest)
 
-    await loop.run_in_executor(None, cont)
+    await run_in_executor(None, cont)

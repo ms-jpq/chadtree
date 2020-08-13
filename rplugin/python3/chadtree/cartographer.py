@@ -1,4 +1,3 @@
-from asyncio import get_running_loop
 from os import listdir, stat
 from os.path import basename, join, splitext
 from stat import (
@@ -15,6 +14,7 @@ from stat import (
 )
 from typing import Dict, Iterator, Set, cast
 
+from .da import run_in_executor
 from .types import Index, Mode, Node
 
 FILE_MODES: Dict[int, Mode] = {
@@ -77,8 +77,7 @@ def _new(root: str, index: Index) -> Node:
 
 
 async def new(root: str, index: Index) -> Node:
-    loop = get_running_loop()
-    return await loop.run_in_executor(None, _new, root, index)
+    return await run_in_executor(None, _new, root, index)
 
 
 def _update(root: Node, index: Index, paths: Set[str]) -> Node:
@@ -99,8 +98,7 @@ def _update(root: Node, index: Index, paths: Set[str]) -> Node:
 
 
 async def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
-    loop = get_running_loop()
     try:
-        return await loop.run_in_executor(None, _update, root, index, paths)
+        return await run_in_executor(None, _update, root, index, paths)
     except FileNotFoundError:
         return await new(root.path, index=index)
