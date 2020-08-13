@@ -1,4 +1,4 @@
-from asyncio import gather, get_running_loop
+from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from mimetypes import guess_type
@@ -23,7 +23,7 @@ from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 
 from .cartographer import new as new_root
-from .da import Void, human_readable_size
+from .da import Void, human_readable_size, run_in_executor
 from .fs import (
     ancestors,
     copy,
@@ -350,8 +350,6 @@ async def c_refresh(
     if write:
         await print(nvim, "⏳...⌛️")
 
-    loop = get_running_loop()
-
     def co() -> str:
         current = find_current_buffer_name(nvim)
         return current
@@ -370,7 +368,7 @@ async def c_refresh(
         )
         return index, selection
 
-    index, selection = await loop.run_in_executor(None, cont)
+    index, selection = await run_in_executor(None, cont)
     current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
     new_index = index if new_current else index | current_paths
 
@@ -704,19 +702,18 @@ async def _operation(
     selection = state.selection
     unified = tuple(unify_ancestors(selection))
     if unified and node:
-        loop = get_running_loop()
 
         def pre_op() -> Dict[str, str]:
             op = {src: _find_dest(src, cast(Node, node)) for src in unified}
             return op
 
-        operations = await loop.run_in_executor(None, pre_op)
+        operations = await run_in_executor(None, pre_op)
 
         def p_pre() -> Dict[str, str]:
             pe = {s: d for s, d in operations.items() if exists(d)}
             return pe
 
-        pre_existing = await loop.run_in_executor(None, p_pre)
+        pre_existing = await run_in_executor(None, p_pre)
         if pre_existing:
             msg = ", ".join(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
