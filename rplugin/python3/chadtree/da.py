@@ -90,13 +90,11 @@ class ProcReturn:
 if (version_info.major, version_info.minor) == (3, 7):
 
     async def call(prog: str, *args: str, env: Dict[str, str] = {}) -> ProcReturn:
-        loop = get_running_loop()
-
         def cont() -> CompletedProcess:
             envi = {**environ, **env}
             return run((prog, *args), capture_output=True, env=envi)
 
-        ret = await loop.run_in_executor(None, cont)
+        ret = await run_in_executor(None, cont)
         out, err = ret.stdout.decode(), ret.stderr.decode()
         code = ret.returncode
         return ProcReturn(code=code, out=out, err=err)
