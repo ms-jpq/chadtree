@@ -17,6 +17,7 @@ from typing import (
     Tuple,
     cast,
 )
+from operator import sub
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -205,6 +206,9 @@ async def c_open(nvim: Nvim, state: State, settings: Settings) -> Stage:
 async def c_resize(
     nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]
 ) -> Stage:
+    if direction is sub and state.width <= 0:
+        return state
+
     new_state = await forward(
         state, settings=settings, width=direction(state.width, 10)
     )
