@@ -2,6 +2,7 @@ from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from mimetypes import guess_type
+from operator import sub
 from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
 from typing import (
@@ -206,16 +207,19 @@ async def c_open(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 async def c_resize(
     nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]
-) -> Stage:
-    new_state = await forward(
-        state, settings=settings, width=direction(state.width, 10)
-    )
+) -> Optional[Stage]:
+    if direction is sub and state.width <= 0:
+        return None
+    else:
+        new_state = await forward(
+            state, settings=settings, width=direction(state.width, 10)
+        )
 
-    def cont() -> None:
-        resize_fm_windows(nvim, width=new_state.width)
+        def cont() -> None:
+            resize_fm_windows(nvim, width=new_state.width)
 
-    await call(nvim, cont)
-    return Stage(new_state)
+        await call(nvim, cont)
+        return Stage(new_state)
 
 
 async def c_click(
