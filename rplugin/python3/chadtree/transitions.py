@@ -205,19 +205,15 @@ async def c_open(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 async def c_resize(
     nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]
-) -> Optional[Stage]:
-    if direction is sub and state.width <= 0:
-        return None
-    else:
-        new_state = await forward(
-            state, settings=settings, width=direction(state.width, 10)
-        )
+) -> Stage:
+    width = max(direction(state.width, 10), 1)
+    new_state = await forward(state, settings=settings, width=width)
 
-        def cont() -> None:
-            resize_fm_windows(nvim, width=new_state.width)
+    def cont() -> None:
+        resize_fm_windows(nvim, width=new_state.width)
 
-        await call(nvim, cont)
-        return Stage(new_state)
+    await call(nvim, cont)
+    return Stage(new_state)
 
 
 async def c_click(
