@@ -42,7 +42,7 @@ async def fs_exists(path: str) -> bool:
     def cont() -> bool:
         return exists(path)
 
-    return await run_in_executor(None, cont)
+    return await run_in_executor(cont)
 
 
 @dataclass(frozen=True)
@@ -104,7 +104,7 @@ async def fs_stat(path: str) -> FSstat:
     def cont() -> FSstat:
         return _fs_stat(path)
 
-    return await run_in_executor(None, cont)
+    return await run_in_executor(cont)
 
 
 def _new(dest: str) -> None:
@@ -120,7 +120,7 @@ async def new(dest: str) -> None:
     def cont() -> None:
         _new(dest)
 
-    await run_in_executor(None, cont)
+    await run_in_executor(cont)
 
 
 def _rename(src: str, dest: str) -> None:
@@ -133,7 +133,7 @@ async def rename(src: str, dest: str) -> None:
     def cont() -> None:
         _rename(src, dest)
 
-    await run_in_executor(None, cont)
+    await run_in_executor(cont)
 
 
 def _remove(src: str) -> None:
@@ -149,7 +149,7 @@ async def remove(paths: Iterable[str]) -> None:
         for path in paths:
             _remove(path)
 
-    await run_in_executor(None, cont)
+    await run_in_executor(cont)
 
 
 def _cut(src: str, dest: str) -> None:
@@ -161,7 +161,7 @@ async def cut(operations: Dict[str, str]) -> None:
         for src, dest in operations.items():
             _cut(src, dest)
 
-    await run_in_executor(None, cont)
+    await run_in_executor(cont)
 
 
 def _copy(src: str, dest: str) -> None:
@@ -177,4 +177,4 @@ async def copy(operations: Dict[str, str]) -> None:
         for src, dest in operations.items():
             _copy(src, dest)
 
-    await run_in_executor(None, cont)
+    await run_in_executor(cont)
