@@ -77,7 +77,7 @@ def _new(root: str, index: Index) -> Node:
 
 
 async def new(root: str, index: Index) -> Node:
-    return await run_in_executor(None, _new, root, index)
+    return await run_in_executor(_new, root, index)
 
 
 def _update(root: Node, index: Index, paths: Set[str]) -> Node:
@@ -99,6 +99,6 @@ def _update(root: Node, index: Index, paths: Set[str]) -> Node:
 
 async def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
     try:
-        return await run_in_executor(None, _update, root, index, paths)
+        return await run_in_executor(_update, root, index, paths)
     except FileNotFoundError:
         return await new(root.path, index=index)
