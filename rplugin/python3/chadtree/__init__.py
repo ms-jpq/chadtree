@@ -5,7 +5,6 @@ from asyncio import (
     create_task,
     run_coroutine_threadsafe,
 )
-from concurrent.futures import ThreadPoolExecutor
 from itertools import chain
 from operator import add, sub
 from typing import Any, Awaitable, Callable, Optional, Sequence
@@ -14,6 +13,7 @@ from pynvim import Nvim, command, function, plugin
 from pynvim.api.common import NvimError
 
 from .consts import colours_var, ignores_var, settings_var, view_var
+from .executor import Executor
 from .highlight import add_hl_groups
 from .logging import log, setup
 from .nvim import autocmd, run_forever
@@ -72,7 +72,7 @@ class Main:
         self.settings = settings
         self.state: Optional[State] = None
 
-        self.chan = ThreadPoolExecutor(max_workers=1)
+        self.chan = Executor()
         self.ch = Event()
         self.lock = Lock()
         self.nvim = nvim
@@ -92,7 +92,7 @@ class Main:
             except Exception as e:
                 log.exception("%s", str(e))
 
-        self.chan.submit(run, self.nvim)
+        self.chan.run_sync(run, self.nvim)
 
     async def _curr_state(self) -> State:
         if not self.state:
