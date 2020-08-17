@@ -82,19 +82,23 @@ Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
 
 ## Documentation
 
+**important:** if you get a missing function error or see a new feature here but can't use yet, it means I added a feature and you need to run `:UpdateRemotePlugins` to see the new function.
+
+This is a Neovim limitation.
+
 To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
 
 ```vimL
 nnoremap <leader>v <cmd>CHADopen<cr>
 ```
 
+Use `:CHADopen --nofocus` to open but not focus on the sidebar.
+
 Check out [config.json](https://github.com/ms-jpq/chadtree/blob/chad/config/config.json) before you proceed for an overview of options.
 
 Set a dictionary with same keys to `g:chadtree_settings` to overwrite any options. You dont need to provide every key, just the ones you want to overwrite.
 
 ### Keybindings
-
-**important:** if you get a missing function error, it means I added a feature and you need to run `:UpdateRemotePlugins` to see the new function.
 
 `functions` only work under the CHADTree buffer
 
