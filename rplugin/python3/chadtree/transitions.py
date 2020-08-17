@@ -200,7 +200,7 @@ async def c_open(
 
         def cont() -> str:
             name = find_current_buffer_name(nvim)
-            toggle_fm_window(nvim, state=state, settings=settings)
+            toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
             return name
 
         current = await call(nvim, cont)
