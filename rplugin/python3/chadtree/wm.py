@@ -178,7 +178,7 @@ def toggle_fm_window(
         for option in settings.win_local_opts:
             nvim.api.command(f"setlocal {option}")
         ensure_side_window(nvim, window=window, state=state, settings=settings)
-        if opts.focus:
+        if not opts.focus:
             nvim.api.set_current_win(cwin)
 
 
