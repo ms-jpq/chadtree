@@ -37,7 +37,6 @@ from .fs import (
     unify_ancestors,
 )
 from .git import status
-from .logging import log
 from .nvim import call, getcwd, print
 from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
@@ -198,7 +197,6 @@ async def c_open(
         await print(nvim, e, error=True)
         return None
     else:
-        log.warn("%s", opts)
 
         def cont() -> str:
             name = find_current_buffer_name(nvim)

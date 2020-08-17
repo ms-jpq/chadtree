@@ -9,7 +9,7 @@ from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
 from .logging import log
 from .nvim import atomic
-from .types import Badge, ClickType, Highlight, Settings, State
+from .types import Badge, ClickType, Highlight, OpenArgs, Settings, State
 
 
 class HoldWindowPosition:
@@ -158,7 +158,10 @@ def ensure_side_window(
         resize_fm_windows(nvim, state.width)
 
 
-def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
+def toggle_fm_window(
+    nvim: Nvim, *, state: State, settings: Settings, opts: OpenArgs
+) -> None:
+    cwin: Window = nvim.api.get_current_win()
     window: Optional[Window] = next(find_fm_windows_in_tab(nvim), None)
     if window:
         windows: Sequence[Window] = nvim.api.list_wins()
@@ -175,6 +178,8 @@ def toggle_fm_window(nvim: Nvim, *, state: State, settings: Settings) -> None:
         for option in settings.win_local_opts:
             nvim.api.command(f"setlocal {option}")
         ensure_side_window(nvim, window=window, state=state, settings=settings)
+        if opts.focus:
+            nvim.api.set_current_win(cwin)
 
 
 def show_file(
