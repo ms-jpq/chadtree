@@ -8,6 +8,11 @@ Index = Set[str]
 Selection = Set[str]
 
 
+@dataclass(frozen=True)
+class OpenArgs:
+    focus: bool
+
+
 class Mode(IntEnum):
     orphan_link = auto()
     link = auto()

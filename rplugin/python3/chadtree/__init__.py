@@ -155,13 +155,13 @@ class Main:
                 except NvimError:
                     self.ch.set()
 
-    @command("CHADopen")
-    def fm_open(self, *args: Any, **kwargs: Any) -> None:
+    @command("CHADopen", nargs="*")
+    def fm_open(self, c_args: str, *args: Any, **kwargs: Any) -> None:
         """
         Toggle sidebar
         """
 
-        self._run(c_open)
+        self._run(c_open, args=c_args)
 
     @function("CHADschedule_update")
     def schedule_udpate(self, args: Sequence[Any]) -> None:

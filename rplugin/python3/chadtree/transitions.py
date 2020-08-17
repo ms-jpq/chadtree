@@ -2,7 +2,6 @@ from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from mimetypes import guess_type
-from operator import sub
 from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep
 from typing import (
@@ -39,6 +38,7 @@ from .fs import (
 )
 from .git import status
 from .nvim import call, getcwd, print
+from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
 from .search import SearchError, search
 from .state import dump_session, forward
@@ -190,19 +190,28 @@ async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     await call(nvim, cont)
 
 
-async def c_open(nvim: Nvim, state: State, settings: Settings) -> Stage:
-    def cont() -> str:
-        name = find_current_buffer_name(nvim)
-        toggle_fm_window(nvim, state=state, settings=settings)
-        return name
-
-    current = await call(nvim, cont)
-
-    stage = await _current(nvim, state=state, settings=settings, current=current)
-    if stage:
-        return stage
+async def c_open(
+    nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
+) -> Optional[Stage]:
+    try:
+        opts = parse_args(args)
+    except ArgparseError as e:
+        await print(nvim, e, error=True)
+        return None
     else:
-        return Stage(state)
+
+        def cont() -> str:
+            name = find_current_buffer_name(nvim)
+            toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
+            return name
+
+        current = await call(nvim, cont)
+
+        stage = await _current(nvim, state=state, settings=settings, current=current)
+        if stage:
+            return stage
+        else:
+            return Stage(state)
 
 
 async def c_resize(
