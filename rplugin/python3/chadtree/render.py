@@ -27,13 +27,16 @@ class CompVals(IntEnum):
     FILE = auto()
 
 
-def comp(node: Node) -> Tuple[int, str, str]:
-    node_type = CompVals.FOLDER if Mode.folder in node.mode else CompVals.FILE
-    return (
-        node_type,
-        strxfrm(node.ext or ""),
-        strxfrm(node.name),
-    )
+def gen_comp() -> Callable[[Node], Tuple[int, str, str]]:
+    def comp(node: Node) -> Tuple[int, str, str]:
+        node_type = CompVals.FOLDER if Mode.folder in node.mode else CompVals.FILE
+        return (
+            node_type,
+            strxfrm(node.ext or ""),
+            strxfrm(node.name),
+        )
+
+    return comp
 
 
 def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
@@ -187,12 +190,15 @@ def render(
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
+    comp = gen_comp()
     keep_open = {node.path}
 
     def render(
         node: Node, *, depth: int, cleared: bool
     ) -> Iterator[Tuple[Node, Render]]:
-        clear = cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
+        clear = (
+            cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
+        )
         rend = show(node, depth)
 
         def gen_children() -> Iterator[Tuple[Node, Render]]:

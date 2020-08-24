@@ -32,35 +32,45 @@ def session_path(cwd: str) -> str:
     return f"{part}.json"
 
 
-def load_session(cwd: str) -> Index:
+def load_session(cwd: str) -> Session:
     load_path = session_path(cwd)
     json = load_json(load_path)
+    nil_session = Session(index=set(), show_hidden=False)
     if json:
         try:
-            session = Session(index=json["index"])
-            return {*session.index}
+            session = Session(
+                index={*json.get("index", ())},
+                show_hidden=json.get("show_hidden", False),
+            )
         except Exception:
-            return {cwd}
+            return nil_session
+        else:
+            return session
     else:
-        return {cwd}
+        return nil_session
 
 
 def dump_session(state: State) -> None:
     load_path = session_path(state.root.path)
-    session = Session(index=state.index)
-    json = {"index": [*session.index]}
+    json = {"index": [*state.index], "show_hidden": state.show_hidden}
     dump_json(load_path, json)
 
 
 async def initial(nvim: Nvim, settings: Settings) -> State:
     version_ctl = settings.version_ctl
     cwd = await getcwd(nvim)
-    index = load_session(cwd) if settings.session else {cwd}
+
+    session = load_session(cwd)
+    index = session.index if settings.session else {cwd}
+    show_hidden = session.show_hidden if settings.session else settings.show_hidden
+
     selection: Selection = set()
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
     vc = VCStatus() if not version_ctl.enable or version_ctl.defer else await status()
+
     current = None
     filter_pattern = None
+
     lookup, rendered = render(
         node,
         settings=settings,
@@ -69,7 +79,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         filter_pattern=filter_pattern,
         qf=qf,
         vc=vc,
-        show_hidden=settings.show_hidden,
+        show_hidden=show_hidden,
         current=current,
     )
     paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
@@ -78,7 +88,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         index=index,
         selection=selection,
         filter_pattern=filter_pattern,
-        show_hidden=settings.show_hidden,
+        show_hidden=show_hidden,
         follow=settings.follow,
         enable_vc=settings.version_ctl.enable,
         width=settings.width,
