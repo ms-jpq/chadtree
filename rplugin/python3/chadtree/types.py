@@ -115,6 +115,12 @@ class HLcontext:
     name_lookup: Dict[str, HLgroup]
 
 
+class Sortby(Enum):
+    is_folder = auto()
+    ext = auto()
+    fname = auto()
+
+
 @dataclass(frozen=True)
 class Settings:
     follow: bool
@@ -128,6 +134,7 @@ class Settings:
     path_ignore: Sequence[str]
     session: bool
     show_hidden: bool
+    sort_by: Sequence[Sortby]
     update: UpdateTime
     use_icons: bool
     version_ctl: VersionControlOptions
