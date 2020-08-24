@@ -45,6 +45,7 @@ class Node:
 @dataclass(frozen=True)
 class Session:
     index: Index
+    show_hidden: bool
 
 
 @dataclass(frozen=True)
