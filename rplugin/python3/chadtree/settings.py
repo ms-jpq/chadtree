@@ -16,6 +16,7 @@ from .types import (
     Colours,
     MimetypeOptions,
     Settings,
+    Sortby,
     UpdateTime,
     VersionControlOptions,
     ViewOptions,
@@ -74,6 +75,7 @@ def initial(
         ignore_exts={*config["mimetypes"]["ignore_exts"]},
     )
 
+    sortby = tuple(Sortby[sb] for sb in config["sort_by"])
     settings = Settings(
         follow=config["follow"],
         hl_context=hl_context,
@@ -86,6 +88,7 @@ def initial(
         path_ignore=ignore["path"],
         session=config["session"],
         show_hidden=config["show_hidden"],
+        sort_by=sortby,
         update=update,
         use_icons=use_icons,
         version_ctl=version_ctl,

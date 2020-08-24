@@ -3,7 +3,7 @@ from fnmatch import fnmatch
 from locale import strxfrm
 from os import linesep
 from os.path import sep
-from typing import Callable, Iterator, Optional, Sequence, Tuple, cast
+from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from .da import constantly
 from .types import (
@@ -18,6 +18,7 @@ from .types import (
     Render,
     Selection,
     Settings,
+    Sortby,
     VCStatus,
 )
 
@@ -27,14 +28,20 @@ class CompVals(IntEnum):
     FILE = auto()
 
 
-def gen_comp() -> Callable[[Node], Tuple[int, str, str]]:
-    def comp(node: Node) -> Tuple[int, str, str]:
-        node_type = CompVals.FOLDER if Mode.folder in node.mode else CompVals.FILE
-        return (
-            node_type,
-            strxfrm(node.ext or ""),
-            strxfrm(node.name),
-        )
+def gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Sequence[Any]]:
+    def comp(node: Node) -> Sequence[Any]:
+        def cont() -> Iterator[Any]:
+            for sb in sortby:
+                if sb == Sortby.is_folder:
+                    yield CompVals.FOLDER if Mode.folder in node.mode else CompVals.FILE
+                elif sb == Sortby.ext:
+                    yield strxfrm(node.ext or ""),
+                elif sb == Sortby.fname:
+                    yield strxfrm(node.name)
+                else:
+                    raise ValueError(f"Bad sortby - {sb}")
+
+        return tuple(cont())
 
     return comp
 
@@ -190,7 +197,7 @@ def render(
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
-    comp = gen_comp()
+    comp = gen_comp(settings.sort_by)
     keep_open = {node.path}
 
     def render(

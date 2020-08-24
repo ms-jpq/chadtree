@@ -41,7 +41,7 @@
   "open_left": true,
   "session": true,
   "show_hidden": false,
-  "sort_by": ["folder", "ext", "name"],
+  "sort_by": ["is_folder", "ext", "fname"],
   "update_time": {
     "max": 2,
     "min": 1
