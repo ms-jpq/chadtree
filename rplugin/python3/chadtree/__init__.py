@@ -155,7 +155,7 @@ class Main:
                     self.ch.set()
 
     @command("CHADopen", nargs="*")
-    def fm_open(self, c_args = '', *args: Any, **kwargs: Any) -> None:
+    def fm_open(self, c_args: str = "", *args: Any, **kwargs: Any) -> None:
         """
         Toggle sidebar
         """
