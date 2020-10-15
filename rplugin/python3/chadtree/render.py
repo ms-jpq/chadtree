@@ -28,7 +28,7 @@ class CompVals(IntEnum):
     FILE = auto()
 
 
-def gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Sequence[Any]]:
+def gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     def comp(node: Node) -> Sequence[Any]:
         def cont() -> Iterator[Any]:
             for sb in sortby:
