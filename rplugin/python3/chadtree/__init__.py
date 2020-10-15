@@ -78,7 +78,6 @@ class Main:
         self.nvim = nvim
 
         setup(nvim, settings.logging_level)
-        log.debug("")
         self._init = create_task(self._initialize())
         run_forever(self.nvim, self._ooda_loop)
 

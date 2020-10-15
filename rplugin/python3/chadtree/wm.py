@@ -106,7 +106,11 @@ def new_fm_buffer(nvim: Nvim, keymap: Dict[str, Sequence[str]]) -> Buffer:
                 buffer, "n", mapping, f"<cmd>call {function}(v:false)<cr>", options
             )
             nvim.api.buf_set_keymap(
-                buffer, "v", mapping, f"<esc><cmd>call {function}(v:true)<cr>", options,
+                buffer,
+                "v",
+                mapping,
+                f"<esc><cmd>call {function}(v:true)<cr>",
+                options,
             )
     return buffer
 
@@ -195,10 +199,10 @@ def show_file(
             buffer: Optional[Buffer] = next(
                 find_buffer_with_file(nvim, file=path), None
             )
-            window: Window = next(
-                find_window_with_file_in_tab(nvim, file=path), None
-            ) or next(iter(non_fm_windows), None) or new_window(
-                nvim, open_left=not settings.open_left, width=state.width
+            window: Window = (
+                next(find_window_with_file_in_tab(nvim, file=path), None)
+                or next(iter(non_fm_windows), None)
+                or new_window(nvim, open_left=not settings.open_left, width=state.width)
             )
 
             nvim.api.set_current_win(window)
@@ -259,20 +263,14 @@ def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     focus_row = state.paths_lookup.get(focus) if focus else None
     current = state.current
     current_row = state.paths_lookup.get(current or "")
-    lines, badges, highlights = tuple(
-        zip(
-            *(
-                (render.line, render.badges, render.highlights)
-                for render in state.rendered
-            )
-        )
+    lines, badges, highlights = zip(
+        *((render.line, render.badges, render.highlights) for render in state.rendered)
     )
     cwin = nvim.api.get_current_win()
     ns = nvim.api.create_namespace(fm_namespace)
 
     for window, buffer in find_fm_windows(nvim):
         row, col = nvim.api.win_get_cursor(window)
-        lines = cast(Sequence[str], lines)
         new_row = (
             focus_row + 1
             if focus_row is not None
@@ -285,7 +283,10 @@ def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
         it1 = "buf_clear_namespace", (buffer, ns, 0, -1)
         it2 = buf_setlines(nvim, buffer=buffer, lines=lines)
         it3 = buf_set_virtualtext(
-            nvim, buffer=buffer, ns=ns, vtext=cast(Sequence[Sequence[Badge]], badges),
+            nvim,
+            buffer=buffer,
+            ns=ns,
+            vtext=cast(Sequence[Sequence[Badge]], badges),
         )
         it4 = buf_set_highlights(
             nvim,
@@ -295,5 +296,10 @@ def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
         )
         it5 = "win_set_cursor", (window, (new_row, col))
         atomic(
-            nvim, it1, *it2, *it3, *it4, it5,
+            nvim,
+            it1,
+            *it2,
+            *it3,
+            *it4,
+            it5,
         )
