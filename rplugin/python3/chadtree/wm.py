@@ -174,7 +174,7 @@ def toggle_fm_window(
         else:
             nvim.api.win_close(window, True)
     else:
-        buffer: Buffer = next(find_fm_buffers(nvim), None)
+        buffer: Optional[Buffer] = next(find_fm_buffers(nvim), None)
         if buffer is None:
             buffer = new_fm_buffer(nvim, keymap=settings.keymap)
         window = new_window(nvim, open_left=settings.open_left, width=state.width)
@@ -207,10 +207,12 @@ def show_file(
 
             nvim.api.set_current_win(window)
             non_fm_count = len(non_fm_windows)
+
             if click_type == ClickType.v_split and non_fm_count:
-                nvim.api.command("vsplit")
+                nvim.api.command("vnew")
             elif click_type == ClickType.h_split and non_fm_count:
-                nvim.api.command("split")
+                nvim.api.command("new")
+
             window = nvim.api.get_current_win()
 
             if buffer is None:
