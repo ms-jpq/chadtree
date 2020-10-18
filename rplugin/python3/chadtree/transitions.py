@@ -254,7 +254,7 @@ async def c_click(
 
                 def ask() -> bool:
                     n = cast(Node, node)
-                    question = f"{n.name} have possible mimetype {mime}, continue?"
+                    question = LANG("mime_warn", name=n.name, mime=str(mime))
                     resp = nvim.funcs.confirm(
                         question, LANG("ask_yesno", linesep=linesep), 2
                     )
@@ -711,7 +711,9 @@ async def _operation(
 
             def ask() -> bool:
                 question = f"{op_name}{linesep}{msg}?"
-                resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
+                resp = nvim.funcs.confirm(
+                    question, LANG("ask_yesno", linesep=linesep), 2
+                )
                 return resp == 1
 
             ans = await call(nvim, ask)
@@ -749,13 +751,13 @@ async def _operation(
 
 async def c_cut(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     return await _operation(
-        nvim, state=state, settings=settings, op_name="Cut", action=cut
+        nvim, state=state, settings=settings, op_name=LANG("cut"), action=cut
     )
 
 
 async def c_copy(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     return await _operation(
-        nvim, state=state, settings=settings, op_name="Copy", action=copy
+        nvim, state=state, settings=settings, op_name=LANG("copy"), action=copy
     )
 
 
