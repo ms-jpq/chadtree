@@ -127,6 +127,7 @@ class Settings:
     hl_context: HLcontext
     icons: ViewOptions
     keymap: Dict[str, Sequence[str]]
+    lang: Optional[str]
     logging_level: str
     mime: MimetypeOptions
     name_ignore: Sequence[str]

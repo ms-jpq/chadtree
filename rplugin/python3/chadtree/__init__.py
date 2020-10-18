@@ -12,9 +12,17 @@ from typing import Any, Awaitable, Callable, Optional, Sequence
 from pynvim import Nvim, command, function, plugin
 from pynvim.api.common import NvimError
 
-from .consts import colours_var, ignores_var, settings_var, view_var
+from .consts import (
+    colours_var,
+    default_lang,
+    ignores_var,
+    lang_root,
+    settings_var,
+    view_var,
+)
 from .executor import Executor
 from .highlight import add_hl_groups
+from .localization import init as init_locale
 from .logging import log, setup
 from .nvim import autocmd, run_forever
 from .scheduler import schedule
@@ -78,6 +86,7 @@ class Main:
         self.nvim = nvim
 
         setup(nvim, settings.logging_level)
+        init_locale(lang_root, code=settings.lang, fallback=default_lang)
         self._init = create_task(self._initialize())
         run_forever(self.nvim, self._ooda_loop)
 
@@ -117,15 +126,21 @@ class Main:
 
     async def _initialize(self) -> None:
         await autocmd(
-            self.nvim, events=("DirChanged",), fn="_CHADchange_dir",
+            self.nvim,
+            events=("DirChanged",),
+            fn="_CHADchange_dir",
         )
 
         await autocmd(
-            self.nvim, events=("BufEnter",), fn="_CHADfollow",
+            self.nvim,
+            events=("BufEnter",),
+            fn="_CHADfollow",
         )
 
         await autocmd(
-            self.nvim, events=("BufWritePost", "FocusGained"), fn="CHADschedule_update",
+            self.nvim,
+            events=("BufWritePost", "FocusGained"),
+            fn="CHADschedule_update",
         )
 
         await autocmd(self.nvim, events=("FocusLost", "ExitPre"), fn="_CHADsession")
@@ -133,14 +148,17 @@ class Main:
         await autocmd(self.nvim, events=("QuickfixCmdPost",), fn="_CHADquickfix")
 
         groups = chain(
-            self.settings.hl_context.groups, self.settings.icons.colours.exts.values(),
+            self.settings.hl_context.groups,
+            self.settings.icons.colours.exts.values(),
         )
         await add_hl_groups(self.nvim, groups=groups)
 
     async def _ooda_loop(self) -> None:
         update = self.settings.update
         async for _ in schedule(
-            self.ch, min_time=update.min_time, max_time=update.max_time,
+            self.ch,
+            min_time=update.min_time,
+            max_time=update.max_time,
         ):
             async with self.lock:
                 state = await self._curr_state()
