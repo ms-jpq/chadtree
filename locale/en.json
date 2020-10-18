@@ -2,7 +2,7 @@
   "already_exists": "⚠️  Exists: ${name}",
   "ask_trash": "🗑 ${linesep}${display_paths}?",
   "ask_yesno": "&Yes${linesep}&No${linesep}",
-  "copy": "🔗",
+  "copy": "🖇",
   "copy_paths": "📎 ${copied_paths}",
   "cut": "✂️",
   "dead_link": "⚠️  cannot open dead link: ${name}",
