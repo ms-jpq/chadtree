@@ -2,9 +2,9 @@
   "already_exists": "⚠️  Exists: ${name}",
   "ask_trash": "🗑 ${linesep}${display_paths}?",
   "ask_yesno": "&Yes${linesep}&No${linesep}",
-  "copy": "Copy",
+  "copy": "📋",
   "copy_paths": "📎 ${copied_paths}",
-  "cut": "Cut",
+  "cut": "✂️",
   "dead_link": "⚠️  cannot open dead link: ${name}",
   "filter_click": "⚠️  cannot click on folders while filtering",
   "follow_mode_indi": "🐶 follow mode: ${follow}",
@@ -17,4 +17,3 @@
   "pencil": "✏️  :",
   "version_control_indi": "🐶 enable version control: ${enable_vc}"
 }
-
