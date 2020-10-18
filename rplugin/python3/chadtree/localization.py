@@ -32,4 +32,4 @@ def init(root: str, code: Optional[str], fallback: str) -> None:
 
 def LANG(key: str, **kwargs: str) -> str:
     template = spec.get(key, fspec[key])
-    return Template(template).substitute(**kwargs)
+    return Template(template).substitute(kwargs)
