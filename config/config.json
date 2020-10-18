@@ -33,6 +33,7 @@
     "trash": ["t"],
     "v_split": ["w"]
   },
+  "lang": null,
   "logging_level": "WARNING",
   "mimetypes": {
     "ignore_exts": [".ts"],
