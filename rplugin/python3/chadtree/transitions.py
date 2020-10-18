@@ -699,7 +699,10 @@ async def _operation(
                     resp = nvim.funcs.input("Path exist!!! Rename: ", dest)
                     return resp
                 new_dest = await call(nvim, ask_rename)
-                operations[source] = new_dest
+                if new_dest:
+                    operations[source] = new_dest
+                else:
+                    return None
 
             pre_existing = await run_in_executor(p_pre)
 
