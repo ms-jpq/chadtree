@@ -37,6 +37,7 @@ from .fs import (
     unify_ancestors,
 )
 from .git import status
+from .localization import LANG
 from .nvim import call, getcwd, print
 from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
@@ -742,7 +743,7 @@ async def _operation(
             else:
                 return None
     else:
-        await print(nvim, "⚠️  -- {name}: nothing selected!", error=True)
+        await print(nvim, LANG("nothing_select"), error=True)
         return None
 
 
