@@ -39,7 +39,7 @@ def load_session(cwd: str) -> Session:
     if json:
         try:
             session = Session(
-                index={*json.get("index", ())},
+                index={*json.get("index", (cwd,))},
                 show_hidden=json.get("show_hidden", False),
             )
         except Exception:
