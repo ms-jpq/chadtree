@@ -35,11 +35,11 @@ def session_path(cwd: str) -> str:
 def load_session(cwd: str) -> Session:
     load_path = session_path(cwd)
     json = load_json(load_path)
-    nil_session = Session(index=set(), show_hidden=False)
+    nil_session = Session(index={cwd}, show_hidden=False)
     if json:
         try:
             session = Session(
-                index={*json.get("index", ())},
+                index={*json.get("index", (cwd,))},
                 show_hidden=json.get("show_hidden", False),
             )
         except Exception:
