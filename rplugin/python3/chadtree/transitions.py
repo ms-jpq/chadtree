@@ -477,7 +477,7 @@ async def c_copy_name(
         nvim.funcs.setreg("*", clip)
 
     await call(nvim, cont)
-    await print(nvim, LANG("copy_paths"))
+    await print(nvim, LANG("copy_paths", copied_paths=copied_paths))
 
 
 async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
