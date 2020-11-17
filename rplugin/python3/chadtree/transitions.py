@@ -698,7 +698,7 @@ async def _operation(
             for source, dest in pre_existing.items():
 
                 def ask_rename() -> str:
-                    resp = nvim.funcs.input("Path exist!!! Rename: ", dest)
+                    resp = nvim.funcs.input(LANG("path_exists_err"), dest)
                     return resp
 
                 new_dest = await call(nvim, ask_rename)
@@ -710,7 +710,6 @@ async def _operation(
             pre_existing = await run_in_executor(p_pre)
 
         if pre_existing:
-            # If path(s) still exist after renaming the dest, show an error message
             msg = ", ".join(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
                 for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))

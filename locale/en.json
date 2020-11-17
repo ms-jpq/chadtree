@@ -14,6 +14,7 @@
   "new_search": "New Search",
   "nothing_select": "⚠️  -- nothing selected!",
   "ok_sym": "✅",
+  "path_exists_err": "⚠️  Path exist!!! Rename: ",
   "pencil": "✏️  :",
   "sys_open_err": "⚠️  Error -- cannot find system opener",
   "sys_trash_err": "⚠️  Error -- cannot find trash program",
