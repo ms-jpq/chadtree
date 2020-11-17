@@ -3,7 +3,7 @@ from itertools import chain
 from locale import strxfrm
 from mimetypes import guess_type
 from os import linesep
-from os.path import basename, dirname, exists, isdir, join, relpath, sep
+from os.path import basename, dirname, exists, isdir, join, relpath, sep, splitext
 from typing import (
     AsyncIterator,
     Awaitable,
@@ -226,6 +226,41 @@ async def c_resize(
     return Stage(new_state)
 
 
+async def _open_file(
+    nvim: Nvim, state: State, settings: Settings, path: str, click_type: ClickType
+) -> Optional[Stage]:
+    name = basename(path)
+    _, ext = splitext(name)
+    mime, _ = guess_type(name, strict=False)
+    m_type, _, _ = (mime or "").partition("/")
+
+    def ask() -> bool:
+        question = LANG("mime_warn", name=name, mime=str(mime))
+        resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
+        return resp == 1
+
+    ans = (
+        (await call(nvim, ask))
+        if m_type in settings.mime.warn and ext not in settings.mime.ignore_exts
+        else True
+    )
+    if ans:
+        new_state = await forward(state, settings=settings, current=path)
+
+        def cont() -> None:
+            show_file(
+                nvim,
+                state=new_state,
+                settings=settings,
+                click_type=click_type,
+            )
+
+        await call(nvim, cont)
+        return Stage(new_state)
+    else:
+        return None
+
+
 async def c_click(
     nvim: Nvim, state: State, settings: Settings, click_type: ClickType
 ) -> Optional[Stage]:
@@ -249,40 +284,14 @@ async def c_click(
                     )
                     return Stage(new_state)
             else:
-                mime, _ = guess_type(node.name, strict=False)
-                m_type, _, _ = (mime or "").partition("/")
-
-                def ask() -> bool:
-                    n = cast(Node, node)
-                    question = LANG("mime_warn", name=n.name, mime=str(mime))
-                    resp = nvim.funcs.confirm(
-                        question, LANG("ask_yesno", linesep=linesep), 2
-                    )
-                    return resp == 1
-
-                ans = (
-                    (await call(nvim, ask))
-                    if m_type in settings.mime.warn
-                    and node.ext not in settings.mime.ignore_exts
-                    else True
+                nxt = await _open_file(
+                    nvim,
+                    state=state,
+                    settings=settings,
+                    path=node.path,
+                    click_type=click_type,
                 )
-                if ans:
-                    new_state = await forward(
-                        state, settings=settings, current=node.path
-                    )
-
-                    def cont() -> None:
-                        show_file(
-                            nvim,
-                            state=new_state,
-                            settings=settings,
-                            click_type=click_type,
-                        )
-
-                    await call(nvim, cont)
-                    return Stage(new_state)
-                else:
-                    return None
+                return nxt
     else:
         return None
 
@@ -510,23 +519,30 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
     child = await call(nvim, ask)
 
     if child:
-        name = join(parent, child)
-        if await fs_exists(name):
-            await print(nvim, LANG("already_exists", name=name), error=True)
+        path = join(parent, child)
+        if await fs_exists(path):
+            await print(nvim, LANG("already_exists", name=path), error=True)
             return Stage(state)
         else:
             try:
-                await new(name)
+                await new(path)
             except Exception as e:
                 await print(nvim, e, error=True)
                 return await c_refresh(nvim, state=state, settings=settings)
             else:
-                paths = {*ancestors(name)}
+                paths = {*ancestors(path)}
                 index = state.index | paths
                 new_state = await forward(
                     state, settings=settings, index=index, paths=paths
                 )
-                return Stage(new_state)
+                nxt = await _open_file(
+                    nvim,
+                    state=new_state,
+                    settings=settings,
+                    path=path,
+                    click_type=ClickType.secondary,
+                )
+                return nxt
     else:
         return None
 
