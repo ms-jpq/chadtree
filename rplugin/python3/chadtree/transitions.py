@@ -693,12 +693,14 @@ async def _operation(
             return pe
 
         pre_existing = await run_in_executor(p_pre)
+
         if pre_existing:
-            # If path(s) already exist, allow user to rename the destination
             for source, dest in pre_existing.items():
-                def ask_rename() -> bool:
+
+                def ask_rename() -> str:
                     resp = nvim.funcs.input("Path exist!!! Rename: ", dest)
                     return resp
+
                 new_dest = await call(nvim, ask_rename)
                 if new_dest:
                     operations[source] = new_dest
