@@ -2,6 +2,7 @@ from shutil import which
 from typing import Iterable
 
 from .da import call
+from .localization import LANG
 
 
 class SystemIntegrationError(Exception):
@@ -18,7 +19,7 @@ async def open_gui(path: str) -> None:
         if ret.code != 0:
             raise SystemIntegrationError(ret.err)
     else:
-        raise SystemIntegrationError("⚠️  Error -- cannot find system opener")
+        raise SystemIntegrationError(LANG("sys_open_err"))
 
 
 async def trash(paths: Iterable[str]) -> None:
@@ -27,4 +28,4 @@ async def trash(paths: Iterable[str]) -> None:
         if ret.code != 0:
             raise SystemIntegrationError(ret.err)
     else:
-        raise SystemIntegrationError("⚠️  Error -- cannot find trash program")
+        raise SystemIntegrationError(LANG("sys_trash_err"))

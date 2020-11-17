@@ -15,5 +15,7 @@
   "nothing_select": "⚠️  -- nothing selected!",
   "ok_sym": "✅",
   "pencil": "✏️  :",
+  "sys_open_err": "⚠️  Error -- cannot find system opener",
+  "sys_trash_err": "⚠️  Error -- cannot find trash program",
   "version_control_indi": "🐶 enable version control: ${enable_vc}"
 }
