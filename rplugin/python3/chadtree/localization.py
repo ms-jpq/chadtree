@@ -4,6 +4,7 @@ from string import Template
 from typing import Dict, Optional, Protocol, cast
 
 from .da import load_json
+from .logging import log
 
 spec: Dict[str, str] = {}
 fspec: Dict[str, str] = {}
@@ -11,32 +12,24 @@ fspec: Dict[str, str] = {}
 
 def get_lang(code: Optional[str], fallback: str) -> str:
     if code:
-        return code
+        return code.lower()
     else:
         tag, _ = getdefaultlocale()
-        tag = tag or fallback
+        tag = (tag or fallback).lower()
         primary, _, _ = tag.partition("-")
-        lang = primary.upper()
+        lang, _, _ = primary.partition("_")
         return lang
 
 
 def init(root: str, code: Optional[str], fallback: str) -> None:
     global spec, fspec
     lang = get_lang(code, fallback=fallback)
-    ls, lf = join(root, lang), join(root, fallback)
+    ls, lf = f"{join(root, lang)}.json", f"{join(root, fallback)}.json"
 
-    spec = cast(Dict[str, str], load_json(ls))
-    fspec = cast(Dict[str, str], load_json(lf))
-
-
-class Localizer(Protocol):
-    def __call__(self, key: str, **kwargs: str) -> str:
-        return ""
+    spec = cast(Dict[str, str], load_json(ls)) or {}
+    fspec = cast(Dict[str, str], load_json(lf)) or {}
 
 
-def localize() -> Localizer:
-    def locale(key: str, **kwargs: str) -> str:
-        template = spec.get(key, fspec[key])
-        return Template(template).substitute(**kwargs)
-
-    return locale
+def LANG(key: str, **kwargs: str) -> str:
+    template = spec.get(key, fspec[key])
+    return Template(template).substitute(kwargs)

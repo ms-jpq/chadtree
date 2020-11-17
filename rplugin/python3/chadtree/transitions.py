@@ -37,6 +37,7 @@ from .fs import (
     unify_ancestors,
 )
 from .git import status
+from .localization import LANG
 from .nvim import call, getcwd, print
 from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
@@ -233,12 +234,12 @@ async def c_click(
     if node:
         if Mode.orphan_link in node.mode:
             name = node.name
-            await print(nvim, f"⚠️  cannot open dead link: {name}", error=True)
+            await print(nvim, LANG("dead_link", name=name), error=True)
             return None
         else:
             if Mode.folder in node.mode:
                 if state.filter_pattern:
-                    await print(nvim, "⚠️  cannot click on folders while filtering")
+                    await print(nvim, LANG("filter_click"))
                     return None
                 else:
                     paths = {node.path}
@@ -253,8 +254,10 @@ async def c_click(
 
                 def ask() -> bool:
                     n = cast(Node, node)
-                    question = f"{n.name} have possible mimetype {mime}, continue?"
-                    resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
+                    question = LANG("mime_warn", name=n.name, mime=str(mime))
+                    resp = nvim.funcs.confirm(
+                        question, LANG("ask_yesno", linesep=linesep), 2
+                    )
                     return resp == 1
 
                 ans = (
@@ -348,7 +351,7 @@ async def c_refresh(
     nvim: Nvim, state: State, settings: Settings, write: bool = False
 ) -> Stage:
     if write:
-        await print(nvim, "⏳...⌛️")
+        await print(nvim, LANG("hourglass"))
 
     def co() -> str:
         current = find_current_buffer_name(nvim)
@@ -383,7 +386,7 @@ async def c_refresh(
     )
 
     if write:
-        await print(nvim, "✅")
+        await print(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
 
@@ -411,7 +414,7 @@ async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 async def c_toggle_follow(nvim: Nvim, state: State, settings: Settings) -> Stage:
     new_state = await forward(state, settings=settings, follow=not state.follow)
-    await print(nvim, f"🐶 follow mode: {new_state.follow}")
+    await print(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
     return Stage(new_state)
 
 
@@ -419,14 +422,14 @@ async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
     enable_vc = not state.enable_vc
     vc = await _vc_stat(enable_vc)
     new_state = await forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
-    await print(nvim, f"🐶 enable version control: {new_state.enable_vc}")
+    await print(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
     return Stage(new_state)
 
 
 async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
     def ask() -> Optional[str]:
         pattern = state.filter_pattern.pattern if state.filter_pattern else ""
-        resp = nvim.funcs.input("New filter:", pattern)
+        resp = nvim.funcs.input(LANG("new_filter"), pattern)
         return resp
 
     pattern = await call(nvim, ask)
@@ -440,7 +443,7 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
 async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
     def ask() -> Optional[str]:
         pattern = ""
-        resp = nvim.funcs.input("New search:", pattern)
+        resp = nvim.funcs.input("new_search", pattern)
         return resp
 
     cwd = state.root.path
@@ -467,14 +470,14 @@ async def c_copy_name(
     paths = [path async for path in gen_paths()]
 
     clip = linesep.join(paths)
-    clap = ", ".join(paths)
+    copied_paths = ", ".join(paths)
 
     def cont() -> None:
         nvim.funcs.setreg("+", clip)
         nvim.funcs.setreg("*", clip)
 
     await call(nvim, cont)
-    await print(nvim, f"📎 {clap}")
+    await print(nvim, LANG("copy_paths", copied_paths=copied_paths))
 
 
 async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
@@ -509,8 +512,7 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
     if child:
         name = join(parent, child)
         if await fs_exists(name):
-            msg = f"⚠️  Exists: {name}"
-            await print(nvim, msg, error=True)
+            await print(nvim, LANG("already_exists", name=name), error=True)
             return Stage(state)
         else:
             try:
@@ -537,7 +539,7 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         rel_path = relpath(prev_name, start=parent)
 
         def ask() -> Optional[str]:
-            resp = nvim.funcs.input("✏️  :", rel_path)
+            resp = nvim.funcs.input(LANG("pencil"), rel_path)
             return resp
 
         child = await call(nvim, ask)
@@ -545,8 +547,7 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
             new_name = join(parent, child)
             new_parent = dirname(new_name)
             if await fs_exists(new_name):
-                msg = f"⚠️  Exists: {new_name}"
-                await print(nvim, msg, error=True)
+                await print(nvim, LANG("already_exists", name=new_name), error=True)
                 return Stage(state)
             else:
                 try:
@@ -617,8 +618,8 @@ async def _delete(
         )
 
         def ask() -> bool:
-            question = f"🗑{linesep}{display_paths}?"
-            resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
+            question = LANG("ask_trash", linesep=linesep, display_paths=display_paths)
+            resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
             return resp == 1
 
         ans = await call(nvim, ask)
@@ -710,7 +711,9 @@ async def _operation(
 
             def ask() -> bool:
                 question = f"{op_name}{linesep}{msg}?"
-                resp = nvim.funcs.confirm(question, f"&Yes{linesep}&No{linesep}", 2)
+                resp = nvim.funcs.confirm(
+                    question, LANG("ask_yesno", linesep=linesep), 2
+                )
                 return resp == 1
 
             ans = await call(nvim, ask)
@@ -742,19 +745,19 @@ async def _operation(
             else:
                 return None
     else:
-        await print(nvim, "⚠️  -- {name}: nothing selected!", error=True)
+        await print(nvim, LANG("nothing_select"), error=True)
         return None
 
 
 async def c_cut(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     return await _operation(
-        nvim, state=state, settings=settings, op_name="Cut", action=cut
+        nvim, state=state, settings=settings, op_name=LANG("cut"), action=cut
     )
 
 
 async def c_copy(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     return await _operation(
-        nvim, state=state, settings=settings, op_name="Copy", action=copy
+        nvim, state=state, settings=settings, op_name=LANG("copy"), action=copy
     )
 
 

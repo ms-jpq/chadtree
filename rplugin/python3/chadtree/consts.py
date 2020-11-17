@@ -22,6 +22,9 @@ config_json = join(__config__, "config.json")
 view_json = join(__config__, "view.json")
 ignore_json = join(__config__, "ignore.json")
 
+lang_root = join(__base__, "locale")
+default_lang = "en"
+
 unicode_icons_json = join(__artifacts__, "unicode_icons.json")
 ascii_icons_json = join(__artifacts__, "ascii_icons.json")
 emoji_icons_json = join(__artifacts__, "emoji_icons.json")

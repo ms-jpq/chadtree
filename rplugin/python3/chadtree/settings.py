@@ -81,6 +81,7 @@ def initial(
         hl_context=hl_context,
         icons=icons,
         keymap=keymap,
+        lang=config["lang"],
         logging_level=config["logging_level"],
         mime=mime,
         name_ignore=ignore["name"],
