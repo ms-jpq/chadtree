@@ -11,4 +11,4 @@ FILES=(
   rplugin/python3/chadtree/*.py
   )
 
-mypy --ignore-missing-imports -- "${FILES[@]}"
+mypy -- "${FILES[@]}"
