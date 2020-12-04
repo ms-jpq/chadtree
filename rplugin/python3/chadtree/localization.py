@@ -1,7 +1,7 @@
 from locale import getdefaultlocale
 from os.path import join
 from string import Template
-from typing import Dict, Optional, Protocol, cast
+from typing import Dict, Optional, cast
 
 from .da import load_json
 from .logging import log
