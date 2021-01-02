@@ -475,3 +475,13 @@ class Main:
         """
 
         self._run(c_open_system)
+
+
+
+from pynvim_pp.client import BasicClient
+from pynvim_pp.lib import async_call, write
+
+class Client(BasicClient):
+    async def wait(self, nvim: Nvim) -> int:
+        write(nvim, "GREAT SUCCESS")
+        return await super().wait(nvim)
