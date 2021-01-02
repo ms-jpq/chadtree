@@ -26,7 +26,7 @@ FILE_MODES: Dict[int, Mode] = {
 }
 
 
-def fs_modes(stat: int) -> Iterator[Mode]:
+def _fs_modes(stat: int) -> Iterator[Mode]:
     if S_ISDIR(stat):
         yield Mode.folder
     if S_ISREG(stat):
@@ -40,7 +40,7 @@ def fs_modes(stat: int) -> Iterator[Mode]:
             yield mode
 
 
-def fs_stat(path: str) -> Set[Mode]:
+def _fs_stat(path: str) -> Set[Mode]:
     try:
         info = stat(path, follow_symlinks=False)
     except FileNotFoundError:
@@ -52,15 +52,15 @@ def fs_stat(path: str) -> Set[Mode]:
             except FileNotFoundError:
                 return {Mode.orphan_link}
             else:
-                mode = {*fs_modes(link_info.st_mode)}
+                mode = {*_fs_modes(link_info.st_mode)}
                 return mode | {Mode.link}
         else:
-            mode = {*fs_modes(info.st_mode)}
+            mode = {*_fs_modes(info.st_mode)}
             return mode
 
 
 def _new(root: str, index: Index) -> Node:
-    mode = fs_stat(root)
+    mode = _fs_stat(root)
     name = basename(root)
     if Mode.folder not in mode:
         _, ext = splitext(name)

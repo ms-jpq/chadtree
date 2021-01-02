@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
+from http.client import HTTPResponse
 from json import dump, load
 from locale import strxfrm
 from os import getcwd, makedirs
 from os.path import dirname, join, realpath
 from subprocess import PIPE, run
-from typing import Any, Dict, Iterator
+from typing import Any, Dict, Iterator, cast
 from urllib.request import urlopen
 
 from yaml import safe_load
@@ -49,7 +50,7 @@ def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
 
 def fetch(uri: str) -> str:
     with urlopen(uri) as resp:
-        ret = resp.read().decode()
+        ret = cast(HTTPResponse, resp).read().decode()
         return ret
 
 

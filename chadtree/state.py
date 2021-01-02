@@ -1,6 +1,7 @@
 from asyncio import gather
 from hashlib import sha1
 from os.path import join
+from pathlib import Path
 from typing import Optional, Set, Union, cast
 
 from pynvim import Nvim
@@ -26,10 +27,10 @@ from .types import (
 )
 
 
-def session_path(cwd: str) -> str:
+def session_path(cwd: str) -> Path:
     hashed = sha1(cwd.encode()).hexdigest()
-    part = join(session_dir, hashed)
-    return f"{part}.json"
+    part = session_dir / hashed
+    return part.with_suffix("json")
 
 
 def load_session(cwd: str) -> Session:

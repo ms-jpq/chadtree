@@ -1,13 +1,12 @@
 from locale import getdefaultlocale
 from os.path import join
 from string import Template
-from typing import Dict, Optional, cast
-
+from typing import MutableMapping, Optional, cast
+from pathlib import Path
 from .da import load_json
-from .logging import log
 
-spec: Dict[str, str] = {}
-fspec: Dict[str, str] = {}
+spec: MutableMapping[str, str] = {}
+fspec: MutableMapping[str, str] = {}
 
 
 def get_lang(code: Optional[str], fallback: str) -> str:
@@ -21,13 +20,13 @@ def get_lang(code: Optional[str], fallback: str) -> str:
         return lang
 
 
-def init(root: str, code: Optional[str], fallback: str) -> None:
+def init(root: Path, code: Optional[str], fallback: str) -> None:
     global spec, fspec
     lang = get_lang(code, fallback=fallback)
-    ls, lf = f"{join(root, lang)}.json", f"{join(root, fallback)}.json"
+    ls, lf = (root / lang).with_suffix("json"), (root / fallback).with_suffix("json")
 
-    spec = cast(Dict[str, str], load_json(ls)) or {}
-    fspec = cast(Dict[str, str], load_json(lf)) or {}
+    spec = cast(MutableMapping[str, str], load_json(ls)) or {}
+    fspec = cast(MutableMapping[str, str], load_json(lf)) or {}
 
 
 def LANG(key: str, **kwargs: str) -> str:

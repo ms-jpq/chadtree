@@ -7,6 +7,7 @@ from json import dump, load
 from operator import pow
 from os import environ, makedirs
 from os.path import dirname, exists
+from pathlib import Path
 from subprocess import CompletedProcess, run
 from sys import version_info
 from typing import Any, Callable, Dict, Optional, TypeVar, Union, cast
@@ -109,16 +110,15 @@ else:
         return ProcReturn(code=code, out=stdout.decode(), err=stderr.decode())
 
 
-def load_json(path: str) -> Optional[Any]:
-    if exists(path):
-        with open(path, encoding="utf8") as fd:
+def load_json(path: Path) -> Optional[Any]:
+    if path.exists():
+        with path.open(encoding="utf8") as fd:
             return load(fd)
     else:
         return None
 
 
-def dump_json(path: str, json: Any) -> None:
-    parent = dirname(path)
-    makedirs(parent, mode=folder_mode, exist_ok=True)
-    with open(path, "w") as fd:
+def dump_json(path: Path, json: Any) -> None:
+    path.parent.mkdir(mode=folder_mode, parents=True, exist_ok=True)
+    with path.open("w") as fd:
         return dump(json, fd, ensure_ascii=False, indent=2)

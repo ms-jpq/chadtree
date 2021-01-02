@@ -7,7 +7,6 @@ from uuid import uuid4
 from pynvim import Nvim
 from pynvim.api.common import NvimError
 
-from .logging import log
 
 T = TypeVar("T")
 
@@ -47,48 +46,9 @@ async def print(
     await call(nvim, cont)
 
 
-def run_forever(
-    nvim: Nvim,
-    thing: Callable[[], Awaitable[None]],
-    retries: int = 3,
-    timeout: float = 1.0,
-) -> Task:
-    async def loop() -> None:
-        for _ in range(retries):
-            try:
-                await thing()
-            except Exception as e:
-                log.exception("%s", str(e))
-                sleep(timeout)
-
-    return create_task(loop())
 
 
 async def getcwd(nvim: Nvim) -> str:
-    cwd = await call(nvim, nvim.funcs.getcwd)
+    cwd: str = await call(nvim, nvim.funcs.getcwd)
     return cwd
 
-
-async def autocmd(
-    nvim: Nvim,
-    *,
-    events: Iterable[str],
-    fn: str,
-    filters: Iterable[str] = ("*",),
-    modifiers: Iterable[str] = (),
-    arg_eval: Iterable[str] = (),
-) -> None:
-    _events = ",".join(events)
-    _filters = " ".join(filters)
-    _modifiers = " ".join(modifiers)
-    _args = ", ".join(arg_eval)
-    group = f"augroup {uuid4().hex}"
-    cls = "autocmd!"
-    cmd = f"autocmd {_events} {_filters} {_modifiers} call {fn}({_args})"
-    group_end = "augroup END"
-
-    def cont() -> None:
-        commands = zip(repeat("command"), ((group,), (cls,), (cmd,), (group_end,)))
-        atomic(nvim, *commands)
-
-    await call(nvim, cont)
