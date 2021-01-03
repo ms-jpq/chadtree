@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
-from typing import Dict, Optional, Sequence, Set
+from typing import Mapping, Optional, Sequence, Set
 
 Index = Set[str]
 Selection = Set[str]
@@ -38,7 +38,7 @@ class Node:
     path: str
     mode: Set[Mode]
     name: str
-    children: Optional[Dict[str, Node]] = None
+    children: Optional[Mapping[str, Node]] = None
     ext: Optional[str] = None
 
 
@@ -66,8 +66,8 @@ class ColourMapping:
 
 @dataclass(frozen=True)
 class Colours:
-    bit8_mapping: Dict[str, ColourMapping]
-    exts: Dict[str, HLgroup]
+    bit8_mapping: Mapping[str, ColourMapping]
+    exts: Mapping[str, HLgroup]
 
 
 @dataclass(frozen=True)
@@ -82,9 +82,9 @@ class ViewOptions:
     selected: str
     quickfix_hl: str
     version_ctl_hl: str
-    filename_exact: Dict[str, str]
-    filename_glob: Dict[str, str]
-    filetype: Dict[str, str]
+    filename_exact: Mapping[str, str]
+    filename_glob: Mapping[str, str]
+    filetype: Mapping[str, str]
     colours: Colours
 
 
@@ -109,10 +109,10 @@ class MimetypeOptions:
 @dataclass(frozen=True)
 class HLcontext:
     groups: Sequence[HLgroup]
-    mode_lookup_pre: Dict[Mode, HLgroup]
-    mode_lookup_post: Dict[Optional[Mode], HLgroup]
-    ext_lookup: Dict[str, HLgroup]
-    name_lookup: Dict[str, HLgroup]
+    mode_lookup_pre: Mapping[Mode, HLgroup]
+    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
+    ext_lookup: Mapping[str, HLgroup]
+    name_lookup: Mapping[str, HLgroup]
 
 
 class Sortby(Enum):
@@ -126,7 +126,7 @@ class Settings:
     follow: bool
     hl_context: HLcontext
     icons: ViewOptions
-    keymap: Dict[str, Sequence[str]]
+    keymap: Mapping[str, Sequence[str]]
     lang: Optional[str]
     logging_level: str
     mime: MimetypeOptions
@@ -145,13 +145,13 @@ class Settings:
 
 @dataclass(frozen=True)
 class QuickFix:
-    locations: Dict[str, int]
+    locations: Mapping[str, int]
 
 
 @dataclass(frozen=True)
 class VCStatus:
     ignored: Set[str] = field(default_factory=set)
-    status: Dict[str, str] = field(default_factory=dict)
+    status: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -193,7 +193,7 @@ class State:
     vc: VCStatus
     current: Optional[str]
     lookup: Sequence[Node]
-    paths_lookup: Dict[str, int]
+    paths_lookup: Mapping[str, int]
     rendered: Sequence[Render]
 
 

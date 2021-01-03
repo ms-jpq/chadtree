@@ -22,6 +22,7 @@ def get_lang(code: Optional[str], fallback: str) -> str:
 
 def init(root: Path, code: Optional[str], fallback: str) -> None:
     global spec, fspec
+
     lang = get_lang(code, fallback=fallback)
     ls, lf = (root / lang).with_suffix("json"), (root / fallback).with_suffix("json")
 

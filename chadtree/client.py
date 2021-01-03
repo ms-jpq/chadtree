@@ -1,14 +1,15 @@
-from asyncio import (
-    create_task,
-)
+from asyncio import Task, create_task
+from asyncio.locks import Lock
+from asyncio.tasks import sleep
 from itertools import chain
 from operator import add, sub
-from typing import Any, Awaitable, Callable, Optional, Sequence
-
+from typing import Any, Awaitable, Callable, MutableMapping, Optional, Sequence
+from asyncio import sleep
 from pynvim import Nvim, command, function, plugin
 from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
 from pynvim_pp.lib import async_call, write
+from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 
 from .consts import (
     colours_var,
@@ -57,74 +58,60 @@ from .transitions import (
     c_trash,
     redraw,
 )
-from .types import ClickType, Stage, State
+from .types import ClickType, Settings, Stage, State
+from typing import TypeVar
+from math import inf
+from pynvim_pp.lib import go
+
+
+def _new_settings(nvim: Nvim) -> Settings:
+    user_config = nvim.vars.get(settings_var, {})
+    user_view = nvim.vars.get(view_var, {})
+    user_ignores = nvim.vars.get(ignores_var, {})
+    user_colours = nvim.vars.get(colours_var, {})
+    settings = initial_settings(
+        user_config=user_config,
+        user_view=user_view,
+        user_ignores=user_ignores,
+        user_colours=user_colours,
+    )
+    return settings
 
 
 class ChadClient(Client):
+    def __init__(self) -> None:
+        self._lock = Lock()
+        self._handlers: MutableMapping[str, RpcCallable] = {}
+        self._state: Optional[State]  = None
+        self._settings: Optional[Settings] = None
+
+    def _submit(self, nvim: Nvim, aw: Awaitable[Optional[Stage]]) -> None:
+        async def cont() -> None:
+            with self._lock:
+                stage = await aw
+                if stage:
+                    self._state = stage.state
+                    await redraw(nvim, state=self._state, focus=stage.focus)
+
+        go(cont())
+
+    def on_msg(self, nvim: Nvim, msg: RpcMsg) -> Any:
+        name, args = msg
+        handler = self._handlers.get(name, nil_handler(name))
+        ret = handler(nvim,state=self._state, settings=self._settings,  *args)
+        if isinstance(ret, Awaitable):
+            self._submit(ret)
+            return None
+        else:
+            return ret
+
     async def wait(self, nvim: Nvim) -> int:
-        write(nvim, "GREAT SUCCESS")
-        return await super().wait(nvim)
+        settings = _new_settings(nvim)
+        init_locale(lang_root, code=settings.lang, fallback=default_lang)
+        return await sleep(inf, 1)
 
 
-# @plugin
-# class Main:
-#     def __init__(self, nvim: Nvim):
-#         user_config = nvim.vars.get(settings_var, {})
-#         user_view = nvim.vars.get(view_var, {})
-#         user_ignores = nvim.vars.get(ignores_var, {})
-#         user_colours = nvim.vars.get(colours_var, {})
-#         settings = initial_settings(
-#             user_config=user_config,
-#             user_view=user_view,
-#             user_ignores=user_ignores,
-#             user_colours=user_colours,
-#         )
-#         self.settings = settings
-#         self.state: Optional[State] = None
 
-#         self.chan = Executor()
-#         self.ch = Event()
-#         self.lock = Lock()
-#         self.nvim = nvim
-
-#         setup(nvim, settings.logging_level)
-#         init_locale(lang_root, code=settings.lang, fallback=default_lang)
-#         self._init = create_task(self._initialize())
-#         run_forever(self.nvim, self._ooda_loop)
-
-#     def _submit(self, co: Awaitable[None]) -> None:
-#         loop: AbstractEventLoop = self.nvim.loop
-
-#         def run(nvim: Nvim) -> None:
-#             fut = run_coroutine_threadsafe(co, loop)
-#             try:
-#                 fut.result()
-#             except Exception as e:
-#                 log.exception("%s", str(e))
-
-#         self.chan.run_sync(run, self.nvim)
-
-#     async def _curr_state(self) -> State:
-#         if not self.state:
-#             self.state = await initial_state(self.nvim, settings=self.settings)
-
-#         return self.state
-
-#     def _run(
-#         self, fn: Callable[..., Awaitable[Optional[Stage]]], *args: Any, **kwargs: Any
-#     ) -> None:
-#         async def run() -> None:
-#             async with self.lock:
-#                 await self._init
-#                 state = await self._curr_state()
-#                 stage = await fn(
-#                     self.nvim, state=state, settings=self.settings, *args, **kwargs
-#                 )
-#                 if stage:
-#                     self.state = stage.state
-#                     await redraw(self.nvim, state=self.state, focus=stage.focus)
-
-#         self._submit(run())
 
 #     async def _initialize(self) -> None:
 #         await autocmd(
@@ -154,6 +141,8 @@ class ChadClient(Client):
 #             self.settings.icons.colours.exts.values(),
 #         )
 #         await add_hl_groups(self.nvim, groups=groups)
+
+
 
 #     async def _ooda_loop(self) -> None:
 #         update = self.settings.update
