@@ -8,7 +8,7 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
-    Dict,
+    Mapping,
     Iterable,
     Iterator,
     Optional,
@@ -40,7 +40,7 @@ from .fs import (
 )
 from .git import status
 from .localization import LANG
-from .nvim import  getcwd
+from .nvim import getcwd
 from pynvim_pp.lib import async_call
 
 from .opts import ArgparseError, parse_args
@@ -695,20 +695,20 @@ async def _operation(
     state: State,
     settings: Settings,
     op_name: str,
-    action: Callable[[Dict[str, str]], Awaitable[None]],
+    action: Callable[[Mapping[str, str]], Awaitable[None]],
 ) -> Optional[Stage]:
     node = await _index(nvim, state=state)
     selection = state.selection
     unified = tuple(unify_ancestors(selection))
     if unified and node:
 
-        def pre_op() -> Dict[str, str]:
+        def pre_op() -> Mapping[str, str]:
             op = {src: _find_dest(src, cast(Node, node)) for src in unified}
             return op
 
         operations = await run_in_executor(pre_op)
 
-        def p_pre() -> Dict[str, str]:
+        def p_pre() -> Mapping[str, str]:
             pe = {s: d for s, d in operations.items() if exists(d)}
             return pe
 

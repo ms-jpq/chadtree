@@ -3,7 +3,7 @@ from locale import strxfrm
 from os import linesep
 from os.path import join, sep
 from shutil import which
-from typing import Dict, Iterator, Set, Tuple
+from typing import Mapping, Iterator, Set, Tuple
 
 from std2.asyncio.subprocess import call
 from .fs import ancestors
@@ -26,7 +26,7 @@ async def root() -> str:
         return ret.out.rstrip()
 
 
-async def stat_main() -> Dict[str, str]:
+async def stat_main() -> Mapping[str, str]:
     ret = await call(*GIT_LIST_CMD, "-z")
     if ret.code != 0:
         raise GitError(ret.err)
@@ -44,7 +44,7 @@ async def stat_main() -> Dict[str, str]:
         return entries
 
 
-async def stat_sub_modules() -> Dict[str, str]:
+async def stat_sub_modules() -> Mapping[str, str]:
     ret = await call(
         "git",
         "submodule",
@@ -73,10 +73,10 @@ async def stat_sub_modules() -> Dict[str, str]:
         return entries
 
 
-def parse(root: str, stats: Dict[str, str]) -> VCStatus:
+def parse(root: str, stats: Mapping[str, str]) -> VCStatus:
     ignored: Set[str] = set()
-    status: Dict[str, str] = {}
-    directories: Dict[str, Set[str]] = {}
+    status: Mapping[str, str] = {}
+    directories: Mapping[str, Set[str]] = {}
 
     for name, stat in stats.items():
         path = join(root, name)

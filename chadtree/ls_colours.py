@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
 from itertools import chain, repeat
 from os import environ
-from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
+from typing import Callable, Mapping, Iterator, MutableMapping, Optional, Set, Tuple, Union, cast
 from uuid import uuid4
 
 from pynvim_pp.highlight import HLgroup
@@ -65,9 +65,9 @@ class Styling:
 ANSI_RANGE = range(256)
 RGB_RANGE = range(256)
 
-STYLE_TABLE: Dict[str, Style] = {str(code + 0): code for code in Style}
+STYLE_TABLE: Mapping[str, Style] = {str(code + 0): code for code in Style}
 
-GROUND_TABLE: Dict[str, Ground] = {
+GROUND_TABLE: Mapping[str, Ground] = {
     str(code): ground
     for code, ground in chain(
         zip(chain(range(30, 39), range(90, 98)), repeat(Ground.fore)),
@@ -75,7 +75,7 @@ GROUND_TABLE: Dict[str, Ground] = {
     )
 }
 
-COLOUR_TABLE: Dict[str, AnsiColour] = {
+COLOUR_TABLE: Mapping[str, AnsiColour] = {
     str(code): colour
     for code, colour in chain(
         ((c + 29 if c <= 8 else c + 31, c) for c in AnsiColour),
@@ -85,9 +85,9 @@ COLOUR_TABLE: Dict[str, AnsiColour] = {
 
 RGB_TABLE: Set[str] = {"38", "48"}
 
-E_BASIC_TABLE: Dict[int, AnsiColour] = {i: c for i, c in enumerate(AnsiColour)}
+E_BASIC_TABLE: Mapping[int, AnsiColour] = {i: c for i, c in enumerate(AnsiColour)}
 
-E_GREY_TABLE: Dict[int, Colour] = {
+E_GREY_TABLE: Mapping[int, Colour] = {
     i: Colour(r=s, g=s, b=s)
     for i, s in enumerate((round(step / 23 * 255) for step in range(24)), 232)
 }
@@ -128,13 +128,13 @@ def parse_24(codes: Iterator[str]) -> Optional[Colour]:
             return None
 
 
-PARSE_TABLE: Dict[str, Callable[[Iterator[str]], Union[AnsiColour, Colour, None]]] = {
+PARSE_TABLE: Mapping[str, Callable[[Iterator[str]], Union[AnsiColour, Colour, None]]] = {
     "5": parse_8,
     "2": parse_24,
 }
 
 
-SPECIAL_PRE_TABLE: Dict[str, Mode] = {
+SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "bd": Mode.block_device,
     "cd": Mode.char_device,
     "do": Mode.door,
@@ -154,13 +154,13 @@ SPECIAL_PRE_TABLE: Dict[str, Mode] = {
 }
 
 
-SPECIAL_POST_TABLE: Dict[str, Optional[Mode]] = {
+SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
     "fi": Mode.file,
     "no": None,
 }
 
 
-HL_STYLE_TABLE: Dict[Style, Optional[str]] = {
+HL_STYLE_TABLE: Mapping[Style, Optional[str]] = {
     Style.bold: "bold",
     Style.dimmed: None,
     Style.italic: "italic",
@@ -202,7 +202,7 @@ def to_hex(colour: Colour) -> str:
 
 def parse_styling(codes: str) -> Styling:
     styles: Set[Style] = set()
-    colours: Dict[Ground, Union[AnsiColour, Colour]] = {}
+    colours: MutableMapping[Ground, Union[AnsiColour, Colour]] = {}
     for ret in parse_codes(codes):
         if type(ret) is Style:
             styles.add(cast(Style, ret))
@@ -254,7 +254,7 @@ def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
 
 def parse_ls_colours(colours: Colours) -> HLcontext:
     ls_colours = environ.get("LS_COLORS", "")
-    hl_lookup: Dict[str, HLgroup] = {
+    hl_lookup: Mapping[str, HLgroup] = {
         k: parseHLGroup(parse_styling(v), colours=colours)
         for k, _, v in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")
@@ -262,13 +262,13 @@ def parse_ls_colours(colours: Colours) -> HLcontext:
     }
     groups = tuple(hl_lookup.values())
 
-    mode_lookup_pre: Dict[Mode, HLgroup] = {
+    mode_lookup_pre: Mapping[Mode, HLgroup] = {
         k: v
         for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_PRE_TABLE.items())
         if v
     }
 
-    mode_lookup_post: Dict[Optional[Mode], HLgroup] = {
+    mode_lookup_post: Mapping[Optional[Mode], HLgroup] = {
         k: v
         for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_POST_TABLE.items())
         if v
@@ -277,7 +277,7 @@ def parse_ls_colours(colours: Colours) -> HLcontext:
     ext_keys = tuple(
         key for key in hl_lookup if key.startswith("*.") and key.count(".") == 1
     )
-    ext_lookup: Dict[str, HLgroup] = {key[1:]: hl_lookup.pop(key) for key in ext_keys}
+    ext_lookup: Mapping[str, HLgroup] = {key[1:]: hl_lookup.pop(key) for key in ext_keys}
 
     context = HLcontext(
         groups=groups,

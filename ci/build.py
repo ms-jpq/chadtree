@@ -7,7 +7,7 @@ from locale import strxfrm
 from os import getcwd, makedirs
 from os.path import dirname, join, realpath
 from subprocess import PIPE, run
-from typing import Any, Dict, Iterator, cast
+from typing import Any, Mapping, Iterator, cast
 from urllib.request import urlopen
 
 from yaml import safe_load
@@ -74,7 +74,9 @@ def spit_json(path: str, json: Any) -> None:
         dump(sorted_json, fd, ensure_ascii=False, check_circular=False, indent=2)
 
 
-def process_json(json: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
+def process_json(
+    json: Mapping[str, Mapping[str, str]]
+) -> Mapping[str, Mapping[str, str]]:
     new = {}
     new["type"] = {f".{k}": v for k, v in json["extensions"].items()}
     new["name_exact"] = json["exact"]

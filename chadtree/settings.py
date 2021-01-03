@@ -1,4 +1,4 @@
-from typing import Any, Dict, cast
+from typing import Any, Mapping, cast
 
 from .consts import (
     colours_json,
@@ -31,7 +31,7 @@ def initial(
     icons_json = icon_lookup[config["use_icons"]]
     icon_c = cast(Any, load_json(icons_json))
     ignore = merge(load_json(ignore_json), user_ignores, replace=True)
-    github_colours = cast(Dict[str, str], load_json(colours_json))
+    github_colours = cast(Mapping[str, str], load_json(colours_json))
     colours_c = merge(cast(Any, load_json(custom_colours_json)), user_colours)
 
     use_icons = config["use_icons"]

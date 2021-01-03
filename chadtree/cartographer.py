@@ -12,12 +12,13 @@ from stat import (
     S_ISVTX,
     S_IWOTH,
 )
-from typing import Dict, Iterator, Set, cast
+from typing import Mapping, Iterator, Set, cast
 
-from .types import Index, Mode, Node
 from std2.asyncio import run_in_executor
 
-FILE_MODES: Dict[int, Mode] = {
+from .types import Index, Mode, Node
+
+FILE_MODES: Mapping[int, Mode] = {
     S_IEXEC: Mode.executable,
     S_IWOTH: Mode.other_writable,
     S_ISVTX: Mode.sticky_dir,
@@ -86,7 +87,7 @@ def _update(root: Node, index: Index, paths: Set[str]) -> Node:
     else:
         children = {
             k: _update(v, index=index, paths=paths)
-            for k, v in (root.children or cast(Dict[str, Node], {})).items()
+            for k, v in (root.children or cast(Mapping[str, Node], {})).items()
         }
         return Node(
             path=root.path,

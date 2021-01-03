@@ -11,7 +11,7 @@ from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
-from typing import Dict, Iterable, Iterator, Optional, Set
+from typing import Mapping, Iterable, Iterator, Optional, Set
 
 from .consts import file_mode, folder_mode
 from std2.asyncio import run_in_executor
@@ -156,7 +156,7 @@ def _cut(src: str, dest: str) -> None:
     mv(src, dest)
 
 
-async def cut(operations: Dict[str, str]) -> None:
+async def cut(operations: Mapping[str, str]) -> None:
     def cont() -> None:
         for src, dest in operations.items():
             _cut(src, dest)
@@ -172,7 +172,7 @@ def _copy(src: str, dest: str) -> None:
         copy2(src, dest)
 
 
-async def copy(operations: Dict[str, str]) -> None:
+async def copy(operations: Mapping[str, str]) -> None:
     def cont() -> None:
         for src, dest in operations.items():
             _copy(src, dest)

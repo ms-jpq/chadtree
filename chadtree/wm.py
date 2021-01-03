@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple, cast
+from typing import Mapping, Iterable, Iterator, Optional, Sequence, Tuple, cast
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -81,7 +81,7 @@ def find_current_buffer_name(nvim: Nvim) -> str:
     return name
 
 
-def new_fm_buffer(nvim: Nvim, keymap: Dict[str, Sequence[str]]) -> Buffer:
+def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, Sequence[str]]) -> Buffer:
     options = {"noremap": True, "silent": True, "nowait": True}
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
