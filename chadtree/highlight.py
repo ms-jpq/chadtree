@@ -5,8 +5,9 @@ from uuid import uuid4
 from pynvim import Nvim
 
 from .consts import fm_hl_prefix
-from .nvim import atomic, call
+from .nvim import atomic
 from .types import HLgroup
+from pynvim_pp.lib import async_call
 
 LEGAL_CTERM: Set[str] = {
     "bold",
@@ -47,4 +48,4 @@ async def add_hl_groups(nvim: Nvim, groups: Iterator[HLgroup]) -> None:
         commands = zip(repeat("command"), parse())
         atomic(nvim, *commands)
 
-    await call(nvim, cont)
+    await async_call(nvim, cont)

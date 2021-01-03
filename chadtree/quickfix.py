@@ -7,8 +7,9 @@ from typing import Iterator, Sequence
 from pynvim import Nvim
 
 from .fs import ancestors
-from .nvim import call, getcwd
+from .nvim import  getcwd
 from .types import QuickFix
+from pynvim_pp.lib import async_call
 
 
 async def quickfix(nvim: Nvim) -> QuickFix:
@@ -23,7 +24,7 @@ async def quickfix(nvim: Nvim) -> QuickFix:
 
         return tuple(c())
 
-    cwd, filenames = await gather(getcwd(nvim), call(nvim, cont))
+    cwd, filenames = await gather(getcwd(nvim), async_call(nvim, cont))
     full_names = tuple(join(cwd, filename) for filename in filenames)
     parents = (ancestor for fullname in full_names for ancestor in ancestors(fullname))
     count = Counter(chain(full_names, parents))

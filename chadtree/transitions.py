@@ -21,6 +21,7 @@ from typing import (
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
+from pynvim_pp.lib import write
 from std2.asyncio import run_in_executor
 
 from .cartographer import new as new_root
@@ -39,7 +40,9 @@ from .fs import (
 )
 from .git import status
 from .localization import LANG
-from .nvim import call, getcwd, print
+from .nvim import  getcwd
+from pynvim_pp.lib import async_call
+
 from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
 from .search import search
@@ -90,7 +93,7 @@ async def _index(nvim: Nvim, state: State) -> Optional[Node]:
         else:
             return None
 
-    return await call(nvim, cont)
+    return await async_call(nvim, cont)
 
 
 async def _indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
@@ -114,14 +117,14 @@ async def _indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
     def cont() -> Sequence[Node]:
         return tuple(step())
 
-    return await call(nvim, cont)
+    return await async_call(nvim, cont)
 
 
 async def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     def cont() -> None:
         update_buffers(nvim, state=state, focus=focus)
 
-    await call(nvim, cont)
+    await async_call(nvim, cont)
 
 
 def _display_path(path: str, state: State) -> str:
@@ -166,7 +169,7 @@ async def a_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         name = find_current_buffer_name(nvim)
         return name
 
-    current = await call(nvim, cont)
+    current = await async_call(nvim, cont)
     if current:
         return await _current(nvim, state=state, settings=settings, current=current)
     else:
@@ -187,7 +190,7 @@ async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     def cont() -> None:
         kill_fm_windows(nvim, settings=settings)
 
-    await call(nvim, cont)
+    await async_call(nvim, cont)
 
 
 async def c_open(
@@ -196,7 +199,7 @@ async def c_open(
     try:
         opts = parse_args(args)
     except ArgparseError as e:
-        await print(nvim, e, error=True)
+        await write(nvim, e, error=True)
         return None
     else:
 
@@ -205,7 +208,7 @@ async def c_open(
             toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
             return name
 
-        current = await call(nvim, cont)
+        current = await async_call(nvim, cont)
 
         stage = await _current(nvim, state=state, settings=settings, current=current)
         if stage:
@@ -223,7 +226,7 @@ async def c_resize(
     def cont() -> None:
         resize_fm_windows(nvim, width=new_state.width)
 
-    await call(nvim, cont)
+    await async_call(nvim, cont)
     return Stage(new_state)
 
 
@@ -241,7 +244,7 @@ async def _open_file(
         return resp == 1
 
     ans = (
-        (await call(nvim, ask))
+        (await async_call(nvim, ask))
         if m_type in settings.mime.warn and ext not in settings.mime.ignore_exts
         else True
     )
@@ -256,7 +259,7 @@ async def _open_file(
                 click_type=click_type,
             )
 
-        await call(nvim, cont)
+        await async_call(nvim, cont)
         return Stage(new_state)
     else:
         return None
@@ -270,12 +273,12 @@ async def c_click(
     if node:
         if Mode.orphan_link in node.mode:
             name = node.name
-            await print(nvim, LANG("dead_link", name=name), error=True)
+            await write(nvim, LANG("dead_link", name=name), error=True)
             return None
         else:
             if Mode.folder in node.mode:
                 if state.filter_pattern:
-                    await print(nvim, LANG("filter_click"))
+                    await write(nvim, LANG("filter_click"))
                     return None
                 else:
                     paths = {node.path}
@@ -341,7 +344,7 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[S
                     _, col = nvim.api.win_get_cursor(window)
                     nvim.api.win_set_cursor(window, (row + 1, col))
 
-                await call(nvim, cont)
+                await async_call(nvim, cont)
 
             return Stage(new_state)
         else:
@@ -361,13 +364,13 @@ async def c_refresh(
     nvim: Nvim, state: State, settings: Settings, write: bool = False
 ) -> Stage:
     if write:
-        await print(nvim, LANG("hourglass"))
+        await write(nvim, LANG("hourglass"))
 
     def co() -> str:
         current = find_current_buffer_name(nvim)
         return current
 
-    current = await call(nvim, co)
+    current = await async_call(nvim, co)
     cwd = state.root.path
     paths = {cwd}
     new_current = current if is_parent(parent=cwd, child=current) else None
@@ -396,7 +399,7 @@ async def c_refresh(
     )
 
     if write:
-        await print(nvim, LANG("ok_sym"))
+        await write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
 
@@ -424,7 +427,7 @@ async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 async def c_toggle_follow(nvim: Nvim, state: State, settings: Settings) -> Stage:
     new_state = await forward(state, settings=settings, follow=not state.follow)
-    await print(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
+    await write(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
     return Stage(new_state)
 
 
@@ -432,7 +435,7 @@ async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
     enable_vc = not state.enable_vc
     vc = await _vc_stat(enable_vc)
     new_state = await forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
-    await print(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
+    await write(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
     return Stage(new_state)
 
 
@@ -442,7 +445,7 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
         resp = nvim.funcs.input(LANG("new_filter"), pattern)
         return resp
 
-    pattern = await call(nvim, ask)
+    pattern = await async_call(nvim, ask)
     filter_pattern = FilterPattern(pattern=pattern) if pattern else None
     new_state = await forward(
         state, settings=settings, selection=set(), filter_pattern=filter_pattern
@@ -457,9 +460,9 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
         return resp
 
     cwd = state.root.path
-    pattern = await call(nvim, ask)
+    pattern = await async_call(nvim, ask)
     results = await search(pattern or "", cwd=cwd, sep=linesep)
-    await print(nvim, results)
+    await write(nvim, results)
 
     return Stage(state)
 
@@ -486,8 +489,8 @@ async def c_copy_name(
         nvim.funcs.setreg("+", clip)
         nvim.funcs.setreg("*", clip)
 
-    await call(nvim, cont)
-    await print(nvim, LANG("copy_paths", copied_paths=copied_paths))
+    await async_call(nvim, cont)
+    await write(nvim, LANG("copy_paths", copied_paths=copied_paths))
 
 
 async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
@@ -496,7 +499,7 @@ async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
         try:
             stat = await fs_stat(node.path)
         except Exception as e:
-            await print(nvim, e, error=True)
+            await write(nvim, e, error=True)
         else:
             permissions = stat.permissions
             size = human_readable_size(stat.size, truncate=2)
@@ -506,7 +509,7 @@ async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
             name = node.name + sep if Mode.folder in node.mode else node.name
             full_name = f"{name} -> {stat.link}" if stat.link else name
             mode_line = f"{permissions} {size} {user} {group} {mtime} {full_name}"
-            await print(nvim, mode_line)
+            await write(nvim, mode_line)
 
 
 async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
@@ -517,18 +520,18 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
         resp = nvim.funcs.input("✏️  :")
         return resp
 
-    child = await call(nvim, ask)
+    child = await async_call(nvim, ask)
 
     if child:
         path = join(parent, child)
         if await fs_exists(path):
-            await print(nvim, LANG("already_exists", name=path), error=True)
+            await write(nvim, LANG("already_exists", name=path), error=True)
             return Stage(state)
         else:
             try:
                 await new(path)
             except Exception as e:
-                await print(nvim, e, error=True)
+                await write(nvim, e, error=True)
                 return await c_refresh(nvim, state=state, settings=settings)
             else:
                 paths = {*ancestors(path)}
@@ -559,18 +562,18 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
             resp = nvim.funcs.input(LANG("pencil"), rel_path)
             return resp
 
-        child = await call(nvim, ask)
+        child = await async_call(nvim, ask)
         if child:
             new_name = join(parent, child)
             new_parent = dirname(new_name)
             if await fs_exists(new_name):
-                await print(nvim, LANG("already_exists", name=new_name), error=True)
+                await write(nvim, LANG("already_exists", name=new_name), error=True)
                 return Stage(state)
             else:
                 try:
                     await rename(prev_name, new_name)
                 except Exception as e:
-                    await print(nvim, e, error=True)
+                    await write(nvim, e, error=True)
                     return await c_refresh(nvim, state=state, settings=settings)
                 else:
                     paths = {parent, new_parent, *ancestors(new_parent)}
@@ -582,7 +585,7 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
                     def cont() -> None:
                         kill_buffers(nvim, paths=(prev_name,))
 
-                    await call(nvim, cont)
+                    await async_call(nvim, cont)
                     return Stage(new_state)
         else:
             return None
@@ -639,12 +642,12 @@ async def _delete(
             resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
             return resp == 1
 
-        ans = await call(nvim, ask)
+        ans = await async_call(nvim, ask)
         if ans:
             try:
                 await yeet(unified)
             except Exception as e:
-                await print(nvim, e, error=True)
+                await write(nvim, e, error=True)
                 return await c_refresh(nvim, state=state, settings=settings)
             else:
                 paths = {dirname(path) for path in unified}
@@ -655,7 +658,7 @@ async def _delete(
                 def cont() -> None:
                     kill_buffers(nvim, paths=selection)
 
-                await call(nvim, cont)
+                await async_call(nvim, cont)
                 return Stage(new_state)
         else:
             return None
@@ -718,7 +721,7 @@ async def _operation(
                     resp = nvim.funcs.input(LANG("path_exists_err"), dest)
                     return resp
 
-                new_dest = await call(nvim, ask_rename)
+                new_dest = await async_call(nvim, ask_rename)
                 if new_dest:
                     operations[source] = new_dest
                 else:
@@ -731,7 +734,7 @@ async def _operation(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
                 for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
             )
-            await print(
+            await write(
                 nvim, f"⚠️  -- {op_name}: path(s) already exist! :: {msg}", error=True
             )
             return None
@@ -748,12 +751,12 @@ async def _operation(
                 )
                 return resp == 1
 
-            ans = await call(nvim, ask)
+            ans = await async_call(nvim, ask)
             if ans:
                 try:
                     await action(operations)
                 except Exception as e:
-                    await print(nvim, e, error=True)
+                    await write(nvim, e, error=True)
                     return await c_refresh(nvim, state=state, settings=settings)
                 else:
                     paths = {
@@ -772,12 +775,12 @@ async def _operation(
                     def cont() -> None:
                         kill_buffers(nvim, paths=selection)
 
-                    await call(nvim, cont)
+                    await async_call(nvim, cont)
                     return Stage(new_state)
             else:
                 return None
     else:
-        await print(nvim, LANG("nothing_select"), error=True)
+        await write(nvim, LANG("nothing_select"), error=True)
         return None
 
 
@@ -799,4 +802,4 @@ async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> None:
         try:
             await open_gui(node.path)
         except SystemIntegrationError as e:
-            await print(nvim, e)
+            await write(nvim, e)
