@@ -1,28 +1,16 @@
-from typing import Any, Dict, Iterable, Iterator, Optional, Sequence, Tuple, cast
+from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple, cast
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.tabpage import Tabpage
 from pynvim.api.window import Window
+from pynvim_pp.atomic import Atomic
+from pynvim_pp.hold import hold_win_pos
+from std2.contextlib import nil_manager
 
 from .consts import fm_filetype, fm_namespace
 from .fs import is_parent
-from .nvim import atomic
 from .types import Badge, ClickType, Highlight, OpenArgs, Settings, State
-
-
-class HoldWindowPosition:
-    def __init__(self, nvim: Nvim, hold: bool):
-        self.nvim = nvim
-        self.hold = hold
-
-    def __enter__(self) -> None:
-        if self.hold:
-            self.window = self.nvim.api.get_current_win()
-
-    def __exit__(self, *_: Any) -> None:
-        if self.hold:
-            self.nvim.api.set_current_win(self.window)
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
@@ -192,7 +180,8 @@ def show_file(
     if click_type == ClickType.tertiary:
         nvim.api.command("tabnew")
     if path:
-        with HoldWindowPosition(nvim, hold=hold):
+        mgr = hold_win_pos(nvim) if hold else nil_manager()
+        with mgr:
             non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
             buffer: Optional[Buffer] = next(
                 find_buffer_with_file(nvim, file=path), None
@@ -235,36 +224,6 @@ def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
             nvim.command(f"bwipeout! {buffer.number}")
 
 
-def buf_setlines(
-    nvim: Nvim, buffer: Buffer, lines: Sequence[str]
-) -> Iterator[Tuple[str, Sequence[Any]]]:
-    yield "buf_set_option", (buffer, "modifiable", True)
-    yield "buf_set_lines", (buffer, 0, -1, True, lines)
-    yield "buf_set_option", (buffer, "modifiable", False)
-
-
-def buf_set_virtualtext(
-    nvim: Nvim, buffer: Buffer, ns: int, vtext: Sequence[Sequence[Badge]]
-) -> Iterator[Tuple[str, Sequence[Any]]]:
-    for idx, badges in enumerate(vtext):
-        vtxt = tuple((badge.text, badge.group) for badge in badges)
-        yield "buf_set_virtual_text", (
-            buffer,
-            ns,
-            idx,
-            vtxt,
-            {},
-        )
-
-
-def buf_set_highlights(
-    nvim: Nvim, buffer: Buffer, ns: int, highlights: Sequence[Sequence[Highlight]]
-) -> Iterator[Tuple[str, Sequence[Any]]]:
-    for idx, hl in enumerate(highlights):
-        for h in hl:
-            yield "buf_add_highlight", (buffer, ns, h.group, idx, h.begin, h.end)
-
-
 def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     focus_row = state.paths_lookup.get(focus) if focus else None
     current = state.current
@@ -286,26 +245,22 @@ def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
                 else min(row, len(lines))
             )
         )
-        it1 = "buf_clear_namespace", (buffer, ns, 0, -1)
-        it2 = buf_setlines(nvim, buffer=buffer, lines=lines)
-        it3 = buf_set_virtualtext(
-            nvim,
-            buffer=buffer,
-            ns=ns,
-            vtext=cast(Sequence[Sequence[Badge]], badges),
-        )
-        it4 = buf_set_highlights(
-            nvim,
-            buffer=buffer,
-            ns=ns,
-            highlights=cast(Sequence[Sequence[Highlight]], highlights),
-        )
-        it5 = "win_set_cursor", (window, (new_row, col))
-        atomic(
-            nvim,
-            it1,
-            *it2,
-            *it3,
-            *it4,
-            it5,
-        )
+
+        atomic = Atomic()
+        atomic.buf_clear_namespace(buffer, ns, 0, -1)
+        atomic.buf_set_option(buffer, "modifiable", True)
+        atomic.buf_set_lines(buffer, 0, -1, True, lines)
+        atomic.buf_set_option(buffer, "modifiable", False)
+
+        vtext = cast(Sequence[Sequence[Badge]], badges)
+        for idx, badges in enumerate(vtext):
+            vtxt = tuple((badge.text, badge.group) for badge in badges)
+            atomic.buf_set_virtual_text(buffer, ns, idx, vtxt)
+
+        hl2 = cast(Sequence[Sequence[Highlight]], highlights)
+        for idx, hl in enumerate(hl2):
+            for h in hl:
+                atomic.buf_add_highlight(buffer, ns, h.group, idx, h.begin, h.end)
+
+        atomic.win_set_cursor(window, (new_row, col))
+        atomic.commit(nvim)

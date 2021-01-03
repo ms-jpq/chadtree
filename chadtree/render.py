@@ -5,12 +5,13 @@ from os import linesep
 from os.path import sep
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
-from .da import constantly
+from pynvim_pp.highlight import HLgroup
+from std2.functools import constantly
+
 from .types import (
     Badge,
     FilterPattern,
     Highlight,
-    HLgroup,
     Index,
     Mode,
     Node,

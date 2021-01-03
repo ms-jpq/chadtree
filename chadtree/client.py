@@ -19,8 +19,7 @@ from .consts import (
     settings_var,
     view_var,
 )
-from .executor import Executor
-from .highlight import add_hl_groups
+from pynvim_pp.highlight import highlight
 from .localization import init as init_locale
 from .scheduler import schedule
 from .settings import initial as initial_settings
@@ -140,6 +139,7 @@ class ChadClient(Client):
 #             self.settings.hl_context.groups,
 #             self.settings.icons.colours.exts.values(),
 #         )
+            #highlight(*groups)
 #         await add_hl_groups(self.nvim, groups=groups)
 
 

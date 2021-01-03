@@ -5,8 +5,10 @@ from os import environ
 from typing import Callable, Dict, Iterator, Optional, Set, Tuple, Union, cast
 from uuid import uuid4
 
+from pynvim_pp.highlight import HLgroup
+
 from .consts import fm_hl_prefix
-from .types import Colours, HLcontext, HLgroup, Mode
+from .types import Colours, HLcontext, Mode
 
 
 class Style(IntEnum):

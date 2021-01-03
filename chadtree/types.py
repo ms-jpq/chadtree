@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
 from typing import Mapping, Optional, Sequence, Set
 
+from pynvim_pp.highlight import HLgroup
+
 Index = Set[str]
 Selection = Set[str]
 
@@ -48,14 +50,7 @@ class Session:
     show_hidden: bool
 
 
-@dataclass(frozen=True)
-class HLgroup:
-    name: str
-    cterm: Set[str] = field(default_factory=set)
-    ctermfg: Optional[str] = None
-    ctermbg: Optional[str] = None
-    guifg: Optional[str] = None
-    guibg: Optional[str] = None
+
 
 
 @dataclass(frozen=True)
