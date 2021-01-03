@@ -9,7 +9,7 @@ spec: MutableMapping[str, str] = {}
 fspec: MutableMapping[str, str] = {}
 
 
-def get_lang(code: Optional[str], fallback: str) -> str:
+def _get_lang(code: Optional[str], fallback: str) -> str:
     if code:
         return code.lower()
     else:
@@ -23,7 +23,7 @@ def get_lang(code: Optional[str], fallback: str) -> str:
 def init(root: Path, code: Optional[str], fallback: str) -> None:
     global spec, fspec
 
-    lang = get_lang(code, fallback=fallback)
+    lang = _get_lang(code, fallback=fallback)
     ls, lf = (root / lang).with_suffix("json"), (root / fallback).with_suffix("json")
 
     spec = cast(MutableMapping[str, str], load_json(ls)) or {}

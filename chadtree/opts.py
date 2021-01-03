@@ -8,7 +8,7 @@ class ArgparseError(Exception):
     pass
 
 
-class Argparse(ArgumentParser):
+class _Argparse(ArgumentParser):
     def error(self, message: str) -> NoReturn:
         raise ArgparseError(message)
 
@@ -18,7 +18,7 @@ class Argparse(ArgumentParser):
 
 
 def parse_args(args: Sequence[str]) -> OpenArgs:
-    parser = Argparse()
+    parser = _Argparse()
     parser.add_argument("--nofocus", dest="focus", action="store_false")
 
     ns = parser.parse_args(args=args)
