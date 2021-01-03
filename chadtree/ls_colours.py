@@ -270,7 +270,7 @@ def _parseHLGroup(styling: _Styling, colours: Colours) -> HLgroup:
 
 def parse_ls_colours(colours: Colours) -> HLcontext:
     ls_colours = environ.get("LS_COLORS", "")
-    hl_lookup: Mapping[str, HLgroup] = {
+    hl_lookup: MutableMapping[str, HLgroup] = {
         k: _parseHLGroup(_parse_styling(v), colours=colours)
         for k, _, v in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")

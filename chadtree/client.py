@@ -86,7 +86,7 @@ class ChadClient(Client):
 
     def _submit(self, nvim: Nvim, aw: Awaitable[Optional[Stage]]) -> None:
         async def cont() -> None:
-            with self._lock:
+            async with self._lock:
                 stage = await aw
                 if stage:
                     self._state = stage.state
@@ -99,7 +99,7 @@ class ChadClient(Client):
         handler = self._handlers.get(name, nil_handler(name))
         ret = handler(nvim,state=self._state, settings=self._settings,  *args)
         if isinstance(ret, Awaitable):
-            self._submit(ret)
+            self._submit(nvim, aw=ret)
             return None
         else:
             return ret

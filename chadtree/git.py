@@ -3,7 +3,7 @@ from locale import strxfrm
 from os import linesep
 from os.path import join, sep
 from shutil import which
-from typing import Iterator, Mapping, Set, Tuple
+from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
 from std2.asyncio.subprocess import call
 
@@ -24,7 +24,7 @@ async def _root() -> str:
     if ret.code != 0:
         raise GitError(ret.err)
     else:
-        return ret.out.rstrip()
+        return ret.out.decode().rstrip()
 
 
 async def _stat_main() -> Mapping[str, str]:
@@ -32,7 +32,7 @@ async def _stat_main() -> Mapping[str, str]:
     if ret.code != 0:
         raise GitError(ret.err)
     else:
-        it = iter(ret.out.split("\0"))
+        it = iter(ret.out.decode().split("\0"))
 
         def cont() -> Iterator[Tuple[str, str]]:
             for line in it:
@@ -57,7 +57,7 @@ async def _stat_sub_modules() -> Mapping[str, str]:
     if ret.code != 0:
         raise GitError(ret.err)
     else:
-        it = iter(ret.out.split(linesep))
+        it = iter(ret.out.decode().split(linesep))
 
         def cont() -> Iterator[Tuple[str, str]]:
             root = ""
@@ -76,8 +76,8 @@ async def _stat_sub_modules() -> Mapping[str, str]:
 
 def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
     ignored: Set[str] = set()
-    status: Mapping[str, str] = {}
-    directories: Mapping[str, Set[str]] = {}
+    status: MutableMapping[str, str] = {}
+    directories: MutableMapping[str, Set[str]] = {}
 
     for name, stat in stats.items():
         path = join(root, name)

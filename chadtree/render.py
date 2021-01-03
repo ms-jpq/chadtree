@@ -194,7 +194,11 @@ def render(
     show_hidden: bool,
     current: Optional[str],
 ) -> Tuple[Sequence[Node], Sequence[Render]]:
-    drop = constantly(False) if show_hidden else ignore(settings, vc=vc)
+    drop = (
+        cast(Callable[[Node], bool], constantly(False))
+        if show_hidden
+        else ignore(settings, vc=vc)
+    )
     show = paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )

@@ -10,7 +10,7 @@ from typing import (
     Callable,
     Iterable,
     Iterator,
-    Mapping,
+    Mapping, MutableMapping,
     Optional,
     Sequence,
     Set,
@@ -368,9 +368,9 @@ async def _vc_stat(enable: bool) -> VCStatus:
 
 @rpc(blocking=True)
 async def c_refresh(
-    nvim: Nvim, state: State, settings: Settings, write: bool = False
+    nvim: Nvim, state: State, settings: Settings, write_out: bool = False
 ) -> Stage:
-    if write:
+    if write_out:
         await write(nvim, LANG("hourglass"))
 
     def co() -> str:
@@ -405,7 +405,7 @@ async def c_refresh(
         current=new_current or Void(),
     )
 
-    if write:
+    if write_out:
         await write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
@@ -724,7 +724,7 @@ async def _operation(
     unified = tuple(unify_ancestors(selection))
     if unified and node:
 
-        def pre_op() -> Mapping[str, str]:
+        def pre_op() -> MutableMapping[str, str]:
             op = {src: _find_dest(src, cast(Node, node)) for src in unified}
             return op
 
