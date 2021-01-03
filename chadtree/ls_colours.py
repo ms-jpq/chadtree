@@ -2,7 +2,17 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
 from itertools import chain, repeat
 from os import environ
-from typing import Callable, Mapping, Iterator, MutableMapping, Optional, Set, Tuple, Union, cast
+from typing import (
+    Callable,
+    Mapping,
+    Iterator,
+    MutableMapping,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 from uuid import uuid4
 
 from pynvim_pp.highlight import HLgroup
@@ -11,7 +21,7 @@ from .consts import fm_hl_prefix
 from .types import Colours, HLcontext, Mode
 
 
-class Style(IntEnum):
+class _Style(IntEnum):
     bold = auto()
     dimmed = auto()
     italic = auto()
@@ -23,12 +33,12 @@ class Style(IntEnum):
     strikethrough = auto()
 
 
-class Ground(Enum):
+class _Ground(Enum):
     fore = auto()
     back = auto()
 
 
-class AnsiColour(IntEnum):
+class _AnsiColour(IntEnum):
     Black = auto()
     Red = auto()
     Green = auto()
@@ -49,61 +59,61 @@ class AnsiColour(IntEnum):
 
 
 @dataclass(frozen=True)
-class Colour:
+class _Colour:
     r: int
     g: int
     b: int
 
 
 @dataclass(frozen=True)
-class Styling:
-    styles: Set[Style]
-    foreground: Union[AnsiColour, Colour, None]
-    background: Union[AnsiColour, Colour, None]
+class _Styling:
+    styles: Set[_Style]
+    foreground: Union[_AnsiColour, _Colour, None]
+    background: Union[_AnsiColour, _Colour, None]
 
 
-ANSI_RANGE = range(256)
-RGB_RANGE = range(256)
+_ANSI_RANGE = range(256)
+_RGB_RANGE = range(256)
 
-STYLE_TABLE: Mapping[str, Style] = {str(code + 0): code for code in Style}
+_STYLE_TABLE: Mapping[str, _Style] = {str(code + 0): code for code in _Style}
 
-GROUND_TABLE: Mapping[str, Ground] = {
+_GROUND_TABLE: Mapping[str, _Ground] = {
     str(code): ground
     for code, ground in chain(
-        zip(chain(range(30, 39), range(90, 98)), repeat(Ground.fore)),
-        zip(chain(range(40, 49), range(100, 108)), repeat(Ground.back)),
+        zip(chain(range(30, 39), range(90, 98)), repeat(_Ground.fore)),
+        zip(chain(range(40, 49), range(100, 108)), repeat(_Ground.back)),
     )
 }
 
-COLOUR_TABLE: Mapping[str, AnsiColour] = {
+_COLOUR_TABLE: Mapping[str, _AnsiColour] = {
     str(code): colour
     for code, colour in chain(
-        ((c + 29 if c <= 8 else c + 31, c) for c in AnsiColour),
-        ((c + 89 if c <= 8 else c + 91, c) for c in AnsiColour),
+        ((c + 29 if c <= 8 else c + 31, c) for c in _AnsiColour),
+        ((c + 89 if c <= 8 else c + 91, c) for c in _AnsiColour),
     )
 }
 
-RGB_TABLE: Set[str] = {"38", "48"}
+_RGB_TABLE: Set[str] = {"38", "48"}
 
-E_BASIC_TABLE: Mapping[int, AnsiColour] = {i: c for i, c in enumerate(AnsiColour)}
+_E_BASIC_TABLE: Mapping[int, _AnsiColour] = {i: c for i, c in enumerate(_AnsiColour)}
 
-E_GREY_TABLE: Mapping[int, Colour] = {
-    i: Colour(r=s, g=s, b=s)
+_E_GREY_TABLE: Mapping[int, _Colour] = {
+    i: _Colour(r=s, g=s, b=s)
     for i, s in enumerate((round(step / 23 * 255) for step in range(24)), 232)
 }
 
 
-def parse_8(codes: Iterator[str]) -> Union[AnsiColour, Colour, None]:
+def _parse_8(codes: Iterator[str]) -> Union[_AnsiColour, _Colour, None]:
     try:
         ansi_code = int(next(codes, ""))
     except ValueError:
         return None
     else:
-        if ansi_code in ANSI_RANGE:
-            basic = E_BASIC_TABLE.get(ansi_code)
+        if ansi_code in _ANSI_RANGE:
+            basic = _E_BASIC_TABLE.get(ansi_code)
             if basic:
                 return basic
-            grey = E_GREY_TABLE.get(ansi_code)
+            grey = _E_GREY_TABLE.get(ansi_code)
             if grey:
                 return grey
             ratio = 255 / 5
@@ -111,30 +121,32 @@ def parse_8(codes: Iterator[str]) -> Union[AnsiColour, Colour, None]:
             r = code // 36
             g = code % 36 // 6
             b = code % 36 % 6
-            return Colour(r=round(r * ratio), g=round(g * ratio), b=round(b * ratio))
+            return _Colour(r=round(r * ratio), g=round(g * ratio), b=round(b * ratio))
         else:
             return None
 
 
-def parse_24(codes: Iterator[str]) -> Optional[Colour]:
+def _parse_24(codes: Iterator[str]) -> Optional[_Colour]:
     try:
         r, g, b = int(next(codes, "")), int(next(codes, "")), int(next(codes, ""))
     except ValueError:
         return None
     else:
-        if r in RGB_RANGE and g in RGB_RANGE and b in RGB_RANGE:
-            return Colour(r=r, g=g, b=b)
+        if r in _RGB_RANGE and g in _RGB_RANGE and b in _RGB_RANGE:
+            return _Colour(r=r, g=g, b=b)
         else:
             return None
 
 
-PARSE_TABLE: Mapping[str, Callable[[Iterator[str]], Union[AnsiColour, Colour, None]]] = {
-    "5": parse_8,
-    "2": parse_24,
+_PARSE_TABLE: Mapping[
+    str, Callable[[Iterator[str]], Union[_AnsiColour, _Colour, None]]
+] = {
+    "5": _parse_8,
+    "2": _parse_24,
 }
 
 
-SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
+_SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "bd": Mode.block_device,
     "cd": Mode.char_device,
     "do": Mode.door,
@@ -154,91 +166,95 @@ SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
 }
 
 
-SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
+_SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
     "fi": Mode.file,
     "no": None,
 }
 
 
-HL_STYLE_TABLE: Mapping[Style, Optional[str]] = {
-    Style.bold: "bold",
-    Style.dimmed: None,
-    Style.italic: "italic",
-    Style.underline: "underline",
-    Style.blink: None,
-    Style.blink_fast: None,
-    Style.reverse: "reverse",
-    Style.hidden: None,
-    Style.strikethrough: "strikethrough",
+_HL_STYLE_TABLE: Mapping[_Style, Optional[str]] = {
+    _Style.bold: "bold",
+    _Style.dimmed: None,
+    _Style.italic: "italic",
+    _Style.underline: "underline",
+    _Style.blink: None,
+    _Style.blink_fast: None,
+    _Style.reverse: "reverse",
+    _Style.hidden: None,
+    _Style.strikethrough: "strikethrough",
 }
 
 
-def parse_codes(
+def _parse_codes(
     codes: str,
-) -> Iterator[Union[Style, Tuple[Ground, Union[AnsiColour, Colour]]]]:
+) -> Iterator[Union[_Style, Tuple[_Ground, Union[_AnsiColour, _Colour]]]]:
     it = (code.lstrip("0") for code in codes.split(";"))
     for code in it:
-        style = STYLE_TABLE.get(code)
+        style = _STYLE_TABLE.get(code)
         if style:
             yield style
             continue
-        ground = GROUND_TABLE.get(code)
-        ansi_colour = COLOUR_TABLE.get(code)
+        ground = _GROUND_TABLE.get(code)
+        ansi_colour = _COLOUR_TABLE.get(code)
         if ground and ansi_colour:
             yield ground, ansi_colour
-        elif ground and code in RGB_TABLE:
+        elif ground and code in _RGB_TABLE:
             code = next(it, "")
-            parse = PARSE_TABLE.get(code)
+            parse = _PARSE_TABLE.get(code)
             if parse:
                 colour = parse(it)
                 if colour:
                     yield ground, colour
 
 
-def to_hex(colour: Colour) -> str:
+def _to_hex(colour: _Colour) -> str:
     r, g, b = format(colour.r, "02x"), format(colour.g, "02x"), format(colour.b, "02x")
     return f"#{r}{g}{b}"
 
 
-def parse_styling(codes: str) -> Styling:
-    styles: Set[Style] = set()
-    colours: MutableMapping[Ground, Union[AnsiColour, Colour]] = {}
-    for ret in parse_codes(codes):
-        if type(ret) is Style:
-            styles.add(cast(Style, ret))
+def _parse_styling(codes: str) -> _Styling:
+    styles: Set[_Style] = set()
+    colours: MutableMapping[_Ground, Union[_AnsiColour, _Colour]] = {}
+    for ret in _parse_codes(codes):
+        if type(ret) is _Style:
+            styles.add(cast(_Style, ret))
         elif type(ret) is tuple:
-            ground, colour = cast(Tuple[Ground, Union[AnsiColour, Colour]], ret)
+            ground, colour = cast(Tuple[_Ground, Union[_AnsiColour, _Colour]], ret)
             colours[ground] = colour
 
-    styling = Styling(
+    styling = _Styling(
         styles=styles,
-        foreground=colours.get(Ground.fore),
-        background=colours.get(Ground.back),
+        foreground=colours.get(_Ground.fore),
+        background=colours.get(_Ground.back),
     )
     return styling
 
 
-def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
+def _parseHLGroup(styling: _Styling, colours: Colours) -> HLgroup:
     bit8_mapping = colours.bit8_mapping
     fg, bg = styling.foreground, styling.background
     name = f"{fm_hl_prefix}_ls_{uuid4().hex}"
     cterm = {
         style
-        for style in (HL_STYLE_TABLE.get(style) for style in styling.styles)
+        for style in (_HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ansifg = bit8_mapping[cast(AnsiColour, fg).name] if type(fg) is AnsiColour else None
-    ansibg = bit8_mapping[cast(AnsiColour, bg).name] if type(bg) is AnsiColour else None
+    ansifg = (
+        bit8_mapping[cast(_AnsiColour, fg).name] if type(fg) is _AnsiColour else None
+    )
+    ansibg = (
+        bit8_mapping[cast(_AnsiColour, bg).name] if type(bg) is _AnsiColour else None
+    )
     ctermfg = ansifg.hl8 if ansifg else None
     ctermbg = ansibg.hl8 if ansibg else None
     guifg = (
-        to_hex(cast(Colour, fg))
-        if type(fg) is Colour
+        _to_hex(cast(_Colour, fg))
+        if type(fg) is _Colour
         else (ansifg.hl24 if ansifg else None)
     )
     guibg = (
-        to_hex(cast(Colour, bg))
-        if type(bg) is Colour
+        _to_hex(cast(_Colour, bg))
+        if type(bg) is _Colour
         else (ansibg.hl24 if ansibg else None)
     )
     group = HLgroup(
@@ -255,7 +271,7 @@ def parseHLGroup(styling: Styling, colours: Colours) -> HLgroup:
 def parse_ls_colours(colours: Colours) -> HLcontext:
     ls_colours = environ.get("LS_COLORS", "")
     hl_lookup: Mapping[str, HLgroup] = {
-        k: parseHLGroup(parse_styling(v), colours=colours)
+        k: _parseHLGroup(_parse_styling(v), colours=colours)
         for k, _, v in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")
         )
@@ -264,20 +280,24 @@ def parse_ls_colours(colours: Colours) -> HLcontext:
 
     mode_lookup_pre: Mapping[Mode, HLgroup] = {
         k: v
-        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_PRE_TABLE.items())
+        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_PRE_TABLE.items())
         if v
     }
 
     mode_lookup_post: Mapping[Optional[Mode], HLgroup] = {
         k: v
-        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in SPECIAL_POST_TABLE.items())
+        for k, v in (
+            (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_POST_TABLE.items()
+        )
         if v
     }
 
     ext_keys = tuple(
         key for key in hl_lookup if key.startswith("*.") and key.count(".") == 1
     )
-    ext_lookup: Mapping[str, HLgroup] = {key[1:]: hl_lookup.pop(key) for key in ext_keys}
+    ext_lookup: Mapping[str, HLgroup] = {
+        key[1:]: hl_lookup.pop(key) for key in ext_keys
+    }
 
     context = HLcontext(
         groups=groups,
