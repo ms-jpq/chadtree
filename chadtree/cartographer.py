@@ -14,8 +14,8 @@ from stat import (
 )
 from typing import Dict, Iterator, Set, cast
 
-from .da import run_in_executor
 from .types import Index, Mode, Node
+from std2.asyncio import run_in_executor
 
 FILE_MODES: Dict[int, Mode] = {
     S_IEXEC: Mode.executable,

@@ -1,6 +1,5 @@
 from asyncio import gather
 from hashlib import sha1
-from os.path import join
 from pathlib import Path
 from typing import Optional, Set, Union, cast
 

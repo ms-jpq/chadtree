@@ -14,7 +14,7 @@ from stat import S_ISDIR, S_ISLNK, filemode
 from typing import Dict, Iterable, Iterator, Optional, Set
 
 from .consts import file_mode, folder_mode
-from .da import run_in_executor
+from std2.asyncio import run_in_executor
 
 
 def ancestors(path: str) -> Iterator[str]:

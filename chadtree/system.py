@@ -1,12 +1,12 @@
 from shutil import which
 from typing import Iterable
 
-from .da import call
+from std2.asyncio.subprocess import call
 from .localization import LANG
 
 
 class SystemIntegrationError(Exception):
-    pass
+    ...
 
 
 async def open_gui(path: str) -> None:

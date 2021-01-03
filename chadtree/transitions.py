@@ -21,9 +21,10 @@ from typing import (
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
+from std2.asyncio import run_in_executor
 
 from .cartographer import new as new_root
-from .da import Void, human_readable_size, run_in_executor
+from .da import Void, human_readable_size
 from .fs import (
     ancestors,
     copy,

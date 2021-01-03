@@ -5,7 +5,7 @@ from os.path import join, sep
 from shutil import which
 from typing import Dict, Iterator, Set, Tuple
 
-from .da import call
+from std2.asyncio.subprocess import call
 from .fs import ancestors
 from .types import VCStatus
 
