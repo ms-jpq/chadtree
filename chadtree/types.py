@@ -50,9 +50,6 @@ class Session:
     show_hidden: bool
 
 
-
-
-
 @dataclass(frozen=True)
 class ColourMapping:
     hl8: str

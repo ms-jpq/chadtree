@@ -8,9 +8,9 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
-    Mapping,
     Iterable,
     Iterator,
+    Mapping,
     Optional,
     Sequence,
     Set,
@@ -21,7 +21,7 @@ from typing import (
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
-from pynvim_pp.lib import write
+from pynvim_pp.lib import async_call, write
 from std2.asyncio import run_in_executor
 
 from .cartographer import new as new_root
@@ -41,10 +41,9 @@ from .fs import (
 from .git import status
 from .localization import LANG
 from .nvim import getcwd
-from pynvim_pp.lib import async_call
-
 from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
+from .registry import rpc
 from .search import search
 from .state import dump_session, forward
 from .state import index as state_index
@@ -186,6 +185,7 @@ async def a_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     def cont() -> None:
         kill_fm_windows(nvim, settings=settings)
@@ -193,6 +193,7 @@ async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     await async_call(nvim, cont)
 
 
+@rpc(blocking=True)
 async def c_open(
     nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
 ) -> Optional[Stage]:
@@ -217,6 +218,7 @@ async def c_open(
             return Stage(state)
 
 
+@rpc(blocking=True)
 async def c_resize(
     nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]
 ) -> Stage:
@@ -265,6 +267,7 @@ async def _open_file(
         return None
 
 
+@rpc(blocking=True)
 async def c_click(
     nvim: Nvim, state: State, settings: Settings, click_type: ClickType
 ) -> Optional[Stage]:
@@ -300,6 +303,7 @@ async def c_click(
         return None
 
 
+@rpc(blocking=True)
 async def c_change_focus(
     nvim: Nvim, state: State, settings: Settings
 ) -> Optional[Stage]:
@@ -313,6 +317,7 @@ async def c_change_focus(
         return None
 
 
+@rpc(blocking=True)
 async def c_change_focus_up(
     nvim: Nvim, state: State, settings: Settings
 ) -> Optional[Stage]:
@@ -324,6 +329,7 @@ async def c_change_focus_up(
         return None
 
 
+@rpc(blocking=True)
 async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     node = await _index(nvim, state=state)
     if node:
@@ -360,6 +366,7 @@ async def _vc_stat(enable: bool) -> VCStatus:
         return VCStatus()
 
 
+@rpc(blocking=True)
 async def c_refresh(
     nvim: Nvim, state: State, settings: Settings, write: bool = False
 ) -> Stage:
@@ -404,6 +411,7 @@ async def c_refresh(
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_jump_to_current(
     nvim: Nvim, state: State, settings: Settings
 ) -> Optional[Stage]:
@@ -418,6 +426,7 @@ async def c_jump_to_current(
         return None
 
 
+@rpc(blocking=True)
 async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
     new_state = await forward(
         state, settings=settings, show_hidden=not state.show_hidden
@@ -425,12 +434,14 @@ async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_toggle_follow(nvim: Nvim, state: State, settings: Settings) -> Stage:
     new_state = await forward(state, settings=settings, follow=not state.follow)
     await write(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
     enable_vc = not state.enable_vc
     vc = await _vc_stat(enable_vc)
@@ -439,6 +450,7 @@ async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
     def ask() -> Optional[str]:
         pattern = state.filter_pattern.pattern if state.filter_pattern else ""
@@ -453,6 +465,7 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
     def ask() -> Optional[str]:
         pattern = ""
@@ -467,6 +480,7 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(state)
 
 
+@rpc(blocking=True)
 async def c_copy_name(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> None:
@@ -493,6 +507,7 @@ async def c_copy_name(
     await write(nvim, LANG("copy_paths", copied_paths=copied_paths))
 
 
+@rpc(blocking=True)
 async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
     node = await _index(nvim, state=state)
     if node:
@@ -512,6 +527,7 @@ async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
             await write(nvim, mode_line)
 
 
+@rpc(blocking=True)
 async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     node = await _index(nvim, state=state) or state.root
     parent = node.path if is_dir(node) else dirname(node.path)
@@ -551,6 +567,7 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
         return None
 
 
+@rpc(blocking=True)
 async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     node = await _index(nvim, state=state)
     if node:
@@ -593,16 +610,19 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         return None
 
 
+@rpc(blocking=True)
 async def c_clear_selection(nvim: Nvim, state: State, settings: Settings) -> Stage:
     new_state = await forward(state, settings=settings, selection=set())
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_clear_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
     new_state = await forward(state, settings=settings, filter_pattern=None)
     return Stage(new_state)
 
 
+@rpc(blocking=True)
 async def c_select(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
@@ -666,6 +686,7 @@ async def _delete(
         return None
 
 
+@rpc(blocking=True)
 async def c_delete(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
@@ -674,6 +695,7 @@ async def c_delete(
     )
 
 
+@rpc(blocking=True)
 async def c_trash(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
@@ -784,18 +806,21 @@ async def _operation(
         return None
 
 
+@rpc(blocking=True)
 async def c_cut(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     return await _operation(
         nvim, state=state, settings=settings, op_name=LANG("cut"), action=cut
     )
 
 
+@rpc(blocking=True)
 async def c_copy(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     return await _operation(
         nvim, state=state, settings=settings, op_name=LANG("copy"), action=copy
     )
 
 
+@rpc(blocking=True)
 async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> None:
     node = await _index(nvim, state=state)
     if node:
