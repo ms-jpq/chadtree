@@ -5,8 +5,7 @@ from functools import partial
 from itertools import count
 from json import dump, load
 from operator import pow
-from os import environ, makedirs
-from os.path import dirname, exists
+from os import environ
 from pathlib import Path
 from subprocess import CompletedProcess, run
 from sys import version_info

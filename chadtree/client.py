@@ -1,9 +1,5 @@
 from asyncio import (
-    AbstractEventLoop,
-    Event,
-    Lock,
     create_task,
-    run_coroutine_threadsafe,
 )
 from itertools import chain
 from operator import add, sub
