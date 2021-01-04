@@ -1,5 +1,7 @@
 from typing import Any, Mapping, cast
 
+from std2.tree import merge
+
 from .consts import (
     colours_json,
     config_json,
@@ -8,7 +10,7 @@ from .consts import (
     ignore_json,
     view_json,
 )
-from .da import load_json, merge
+from .da import load_json
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
 from .types import (
