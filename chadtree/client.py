@@ -1,14 +1,15 @@
-from asyncio import Task, create_task
 from asyncio.locks import Lock
 from asyncio.tasks import sleep
 from itertools import chain
+from math import inf
 from operator import add, sub
-from typing import Any, Awaitable, Callable, MutableMapping, Optional, Sequence
-from asyncio import sleep
-from pynvim import Nvim, command, function, plugin
+from typing import Any, Awaitable, Callable, MutableMapping, Optional, Sequence, TypeVar
+
+from pynvim import Nvim
 from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
-from pynvim_pp.lib import async_call, write
+from pynvim_pp.highlight import highlight
+from pynvim_pp.lib import async_call, go, write
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 
 from .consts import (
@@ -19,9 +20,7 @@ from .consts import (
     settings_var,
     view_var,
 )
-from pynvim_pp.highlight import highlight
 from .localization import init as init_locale
-from .scheduler import schedule
 from .settings import initial as initial_settings
 from .state import initial as initial_state
 from .transitions import (
@@ -58,9 +57,6 @@ from .transitions import (
     redraw,
 )
 from .types import ClickType, Settings, Stage, State
-from typing import TypeVar
-from math import inf
-from pynvim_pp.lib import go
 
 
 def _new_settings(nvim: Nvim) -> Settings:
@@ -81,7 +77,7 @@ class ChadClient(Client):
     def __init__(self) -> None:
         self._lock = Lock()
         self._handlers: MutableMapping[str, RpcCallable] = {}
-        self._state: Optional[State]  = None
+        self._state: Optional[State] = None
         self._settings: Optional[Settings] = None
 
     def _submit(self, nvim: Nvim, aw: Awaitable[Optional[Stage]]) -> None:
@@ -97,7 +93,7 @@ class ChadClient(Client):
     def on_msg(self, nvim: Nvim, msg: RpcMsg) -> Any:
         name, args = msg
         handler = self._handlers.get(name, nil_handler(name))
-        ret = handler(nvim,state=self._state, settings=self._settings,  *args)
+        ret = handler(nvim, state=self._state, settings=self._settings, *args)
         if isinstance(ret, Awaitable):
             self._submit(nvim, aw=ret)
             return None
@@ -108,8 +104,6 @@ class ChadClient(Client):
         settings = _new_settings(nvim)
         init_locale(lang_root, code=settings.lang, fallback=default_lang)
         return await sleep(inf, 1)
-
-
 
 
 #     async def _initialize(self) -> None:
@@ -139,28 +133,10 @@ class ChadClient(Client):
 #             self.settings.hl_context.groups,
 #             self.settings.icons.colours.exts.values(),
 #         )
-            #highlight(*groups)
+# highlight(*groups)
 #         await add_hl_groups(self.nvim, groups=groups)
 
 
-
-#     async def _ooda_loop(self) -> None:
-#         update = self.settings.update
-#         async for _ in schedule(
-#             self.ch,
-#             min_time=update.min_time,
-#             max_time=update.max_time,
-#         ):
-#             async with self.lock:
-#                 state = await self._curr_state()
-#                 try:
-#                     stage = await c_refresh(
-#                         self.nvim, state=state, settings=self.settings
-#                     )
-#                     self.state = stage.state
-#                     await redraw(self.nvim, state=self.state, focus=None)
-#                 except NvimError:
-#                     self.ch.set()
 
 #     @command("CHADopen", nargs="*")
 #     def fm_open(self, c_args: str = "", *args: Any, **kwargs: Any) -> None:
