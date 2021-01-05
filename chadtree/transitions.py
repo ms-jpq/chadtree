@@ -956,34 +956,28 @@ async def _operation(
     unified = tuple(unify_ancestors(selection))
     if unified and node:
 
-        def pre_op() -> MutableMapping[str, str]:
+        def pre_op() -> Mapping[str, str]:
             op = {src: _find_dest(src, cast(Node, node)) for src in unified}
             return op
 
-        operations = await run_in_executor(pre_op)
+        pre_operations = await run_in_executor(pre_op)
 
-        def p_pre() -> Mapping[str, str]:
-            pe = {s: d for s, d in operations.items() if exists(d)}
-            return pe
-
-        pre_existing = await run_in_executor(p_pre)
-
-        if pre_existing:
-            for source, dest in pre_existing.items():
-
-                def ask_rename() -> Optional[str]:
-                    resp: Optional[str] = nvim.funcs.input(
-                        LANG("path_exists_err"), dest
-                    )
-                    return resp
-
-                new_dest = await async_call(nvim, ask_rename)
-                if new_dest:
-                    operations[source] = new_dest
+        def ask_rename() -> Tuple[Mapping[str, str], Mapping[str, str]]:
+            pre_existing = {s: d for s, d in pre_operations.items() if exists(d)}
+            new_operations: MutableMapping[str, str] = {}
+            while pre_existing:
+                source, dest = pre_existing.popitem()
+                resp: Optional[str] = nvim.funcs.input(LANG("path_exists_err"), dest)
+                if not resp:
+                    break
+                elif exists(resp):
+                    pre_existing[source] = resp
                 else:
-                    return None
+                    new_operations[source] = resp
 
-            pre_existing = await run_in_executor(p_pre)
+            return pre_existing, new_operations
+
+        pre_existing, new_operations = await async_call(nvim, ask_rename)
 
         if pre_existing:
             msg = ", ".join(
@@ -995,6 +989,7 @@ async def _operation(
             )
             return None
         else:
+            operations: Mapping[str, str] = {**pre_operations, **new_operations}
             msg = linesep.join(
                 f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
                 for s, d in sorted(operations.items(), key=lambda t: strxfrm(t[0]))
