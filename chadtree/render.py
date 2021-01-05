@@ -69,14 +69,14 @@ def _paint(
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
     context = settings.hl_context
-    icon_lookup = settings.icons.colours.exts
+    icon_lookup = settings.view.colours.exts
     mode_lookup_pre, mode_lookup_post, ext_lookup, name_lookup = (
         context.mode_lookup_pre,
         context.mode_lookup_post,
         context.ext_lookup,
         context.name_lookup,
     )
-    icons = settings.icons
+    icons = settings.view
     use_icons = settings.use_icons
 
     def search_hl(node: Node) -> Optional[HLgroup]:

@@ -117,7 +117,7 @@ class Sortby(Enum):
 class Settings:
     follow: bool
     hl_context: HLcontext
-    icons: ViewOptions
+    view: ViewOptions
     keymap: Mapping[str, Sequence[str]]
     lang: Optional[str]
     mime: MimetypeOptions

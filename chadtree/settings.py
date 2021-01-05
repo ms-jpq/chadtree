@@ -164,7 +164,7 @@ def initial(
     settings = Settings(
         follow=config["follow"],
         hl_context=hl_context,
-        icons=icons,
+        view=icons,
         keymap=keymap,
         lang=config["lang"],
         mime=mime,

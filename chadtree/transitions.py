@@ -716,7 +716,7 @@ async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
             size = human_readable_size(stat.size, truncate=2)
             user = stat.user
             group = stat.group
-            mtime = format(stat.date_mod, settings.icons.time_fmt)
+            mtime = format(stat.date_mod, settings.view.time_fmt)
             name = node.name + sep if Mode.folder in node.mode else node.name
             full_name = f"{name} -> {stat.link}" if stat.link else name
             mode_line = f"{permissions} {size} {user} {group} {mtime} {full_name}"
