@@ -14,7 +14,7 @@ from .types import Badge, ClickType, Highlight, OpenArgs, Settings, State
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
-    ft = nvim.api.buf_get_option(buffer, "filetype")
+    ft: str = nvim.api.buf_get_option(buffer, "filetype")
     return ft == fm_filetype
 
 
@@ -76,8 +76,8 @@ def find_buffer_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
 
 
 def find_current_buffer_name(nvim: Nvim) -> str:
-    buffer = nvim.api.get_current_buf()
-    name = nvim.api.buf_get_name(buffer)
+    buffer: Buffer = nvim.api.get_current_buf()
+    name: str = nvim.api.buf_get_name(buffer)
     return name
 
 

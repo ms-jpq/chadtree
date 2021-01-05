@@ -22,6 +22,7 @@ from typing import (
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
+from pynvim.api.common import NvimError
 from pynvim.api.window import Window
 from pynvim_pp.lib import async_call, write
 from std2.asyncio import run_in_executor
@@ -161,8 +162,7 @@ async def _change_dir(
     return Stage(new_state)
 
 
-@rpc(blocking=False, name="CHADrefocus")
-async def on_changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def _refocus(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
     Follow cwd update
     """
@@ -171,7 +171,12 @@ async def on_changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return await _change_dir(nvim, state=state, settings=settings, new_base=cwd)
 
 
-autocmd("DirChanged") << f"lua {on_changedir.remote_name}()"
+@rpc(blocking=False, name="CHADrefocus")
+async def c_changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
+    return await _refocus(nvim, state=state, settings=settings)
+
+
+autocmd("DirChanged") << f"lua {c_changedir.remote_name}()"
 
 
 @rpc(blocking=False)
@@ -317,7 +322,7 @@ async def _open_file(
 
     def ask() -> bool:
         question = LANG("mime_warn", name=name, mime=str(mime))
-        resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
+        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
         return resp == 1
 
     ans = (
@@ -512,8 +517,7 @@ async def _vc_stat(enable: bool) -> VCStatus:
         return VCStatus()
 
 
-@rpc(blocking=False, name="CHADrefresh")
-async def c_refresh(
+async def _refresh(
     nvim: Nvim, state: State, settings: Settings, write_out: bool = False
 ) -> Stage:
     """
@@ -559,6 +563,24 @@ async def c_refresh(
         await write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
+
+
+@rpc(blocking=False)
+async def a_schedule_update(
+    nvim: Nvim, state: State, settings: Settings
+) -> Optional[Stage]:
+    try:
+        return await _refresh(nvim, state=state, settings=settings, write_out=False)
+    except NvimError:
+        return None
+
+
+autocmd("BufWritePost", "FocusGained") << f"lua {a_schedule_update.remote_name}()"
+
+
+@rpc(blocking=False, name="CHADrefresh")
+async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> Stage:
+    return await _refresh(nvim, state=state, settings=settings, write_out=True)
 
 
 @rpc(blocking=False, name="CHADjump_to_current")
@@ -616,7 +638,7 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
     def ask() -> Optional[str]:
         pattern = state.filter_pattern.pattern if state.filter_pattern else ""
-        resp = nvim.funcs.input(LANG("new_filter"), pattern)
+        resp: Optional[str] = nvim.funcs.input(LANG("new_filter"), pattern)
         return resp
 
     pattern = await async_call(nvim, ask)
@@ -635,7 +657,7 @@ async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
     def ask() -> Optional[str]:
         pattern = ""
-        resp = nvim.funcs.input("new_search", pattern)
+        resp: Optional[str] = nvim.funcs.input("new_search", pattern)
         return resp
 
     cwd = state.root.path
@@ -711,7 +733,7 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
     parent = node.path if is_dir(node) else dirname(node.path)
 
     def ask() -> Optional[str]:
-        resp = nvim.funcs.input(LANG("pencil"))
+        resp: Optional[str] = nvim.funcs.input(LANG("pencil"))
         return resp
 
     child = await async_call(nvim, ask)
@@ -726,7 +748,7 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
                 await new(path)
             except Exception as e:
                 await write(nvim, e, error=True)
-                return await c_refresh(nvim, state=state, settings=settings)
+                return await _refresh(nvim, state=state, settings=settings)
             else:
                 paths = {*ancestors(path)}
                 index = state.index | paths
@@ -758,7 +780,7 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         rel_path = relpath(prev_name, start=parent)
 
         def ask() -> Optional[str]:
-            resp = nvim.funcs.input(LANG("pencil"), rel_path)
+            resp: Optional[str] = nvim.funcs.input(LANG("pencil"), rel_path)
             return resp
 
         child = await async_call(nvim, ask)
@@ -773,7 +795,7 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
                     await rename(prev_name, new_name)
                 except Exception as e:
                     await write(nvim, e, error=True)
-                    return await c_refresh(nvim, state=state, settings=settings)
+                    return await _refresh(nvim, state=state, settings=settings)
                 else:
                     paths = {parent, new_parent, *ancestors(new_parent)}
                     index = state.index | paths
@@ -853,7 +875,9 @@ async def _delete(
 
         def ask() -> bool:
             question = LANG("ask_trash", linesep=linesep, display_paths=display_paths)
-            resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
+            resp: int = nvim.funcs.confirm(
+                question, LANG("ask_yesno", linesep=linesep), 2
+            )
             return resp == 1
 
         ans = await async_call(nvim, ask)
@@ -862,7 +886,7 @@ async def _delete(
                 await yeet(unified)
             except Exception as e:
                 await write(nvim, e, error=True)
-                return await c_refresh(nvim, state=state, settings=settings)
+                return await _refresh(nvim, state=state, settings=settings)
             else:
                 paths = {dirname(path) for path in unified}
                 new_state = await forward(
@@ -941,8 +965,10 @@ async def _operation(
         if pre_existing:
             for source, dest in pre_existing.items():
 
-                def ask_rename() -> str:
-                    resp = nvim.funcs.input(LANG("path_exists_err"), dest)
+                def ask_rename() -> Optional[str]:
+                    resp: Optional[str] = nvim.funcs.input(
+                        LANG("path_exists_err"), dest
+                    )
                     return resp
 
                 new_dest = await async_call(nvim, ask_rename)
@@ -970,7 +996,7 @@ async def _operation(
 
             def ask() -> bool:
                 question = f"{op_name}{linesep}{msg}?"
-                resp = nvim.funcs.confirm(
+                resp: int = nvim.funcs.confirm(
                     question, LANG("ask_yesno", linesep=linesep), 2
                 )
                 return resp == 1
@@ -981,7 +1007,7 @@ async def _operation(
                     await action(operations)
                 except Exception as e:
                     await write(nvim, e, error=True)
-                    return await c_refresh(nvim, state=state, settings=settings)
+                    return await _refresh(nvim, state=state, settings=settings)
                 else:
                     paths = {
                         dirname(p)
@@ -1044,31 +1070,9 @@ async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> None:
             await write(nvim, e)
 
 
-#         await autocmd(
-#             self.nvim,
-#             events=("BufWritePost", "FocusGained"),
-#             fn="CHADschedule_update",
-#         )
-
-
 #         groups = chain(
 #             self.settings.hl_context.groups,
 #             self.settings.icons.colours.exts.values(),
 #         )
 # highlight(*groups)
 #         await add_hl_groups(self.nvim, groups=groups)
-
-
-#     @command("CHADopen", nargs="*")
-#     def fm_open(self, c_args: str = "", *args: Any, **kwargs: Any) -> None:
-
-
-#         self._run(c_open, args=c_args)
-
-#     @function("CHADschedule_update")
-#     def schedule_udpate(self, args: Sequence[Any]) -> None:
-#         """
-#         Follow directory
-#         """
-
-#         self.ch.set()

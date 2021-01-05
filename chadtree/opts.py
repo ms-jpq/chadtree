@@ -19,7 +19,7 @@ class _Argparse(ArgumentParser):
 
 def parse_args(args: Sequence[str]) -> OpenArgs:
     parser = _Argparse()
-    parser.add_argument("--nofocus", dest="focus", action="store_false")
+    parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
 
     ns = parser.parse_args(args=args)
     opts = OpenArgs(focus=ns.focus)
