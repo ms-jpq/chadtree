@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
-from typing import FrozenSet, Mapping, Optional, Sequence
+from typing import FrozenSet, Mapping, Optional, Sequence, Union
 
 from pynvim_pp.highlight import HLgroup
 
@@ -145,7 +145,7 @@ class UserIgnore:
 class Settings:
     follow: bool
     ignores: UserIgnore
-    keymap: Mapping[str, Sequence[str]]
+    keymap: Mapping[str, FrozenSet[str]]
     lang: Optional[str]
     mime: MimetypeOptions
     open_left: bool
@@ -154,7 +154,7 @@ class Settings:
     version_ctl: VersionCtlOpts
     view: ViewOptions
     width: int
-    win_local_opts: Sequence[str]
+    win_local_opts: Mapping[str, Union[bool, str]]
 
 
 @dataclass(frozen=True)

@@ -98,7 +98,7 @@ def initial(
         highlights=highlights,
         icons=icons,
         sort_by=config.sort_by,
-        use_icons=config.use_icons,
+        use_icons=bool(config.use_icons),
         time_fmt=view.time_format,
     )
 

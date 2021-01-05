@@ -1,9 +1,10 @@
 from asyncio import gather
 from hashlib import sha1
 from pathlib import Path
-from typing import Optional, Set, Union, cast
+from typing import FrozenSet, Optional, Union, cast
 
 from pynvim import Nvim
+from std2.pickle import decode, encode
 from std2.types import Void, VoidType, or_else
 
 from .cartographer import new, update
@@ -35,26 +36,16 @@ def session_path(cwd: str) -> Path:
 
 def load_session(cwd: str) -> Session:
     load_path = session_path(cwd)
-    json = load_json(load_path)
-    nil_session = Session(index={cwd}, show_hidden=False)
-    if json:
-        try:
-            session = Session(
-                index={*json.get("index", (cwd,))},
-                show_hidden=json.get("show_hidden", False),
-            )
-        except Exception:
-            return nil_session
-        else:
-            return session
-    else:
-        return nil_session
+    try:
+        return decode(Session, load_json(load_path))
+    except Exception:
+        return Session(index=frozenset((cwd,)), show_hidden=False)
 
 
 def dump_session(state: State) -> None:
     load_path = session_path(state.root.path)
-    json = {"index": [*state.index], "show_hidden": state.show_hidden}
-    dump_json(load_path, json)
+    json = Session(index=state.index, show_hidden=state.show_hidden)
+    dump_json(load_path, encode(json))
 
 
 async def initial(nvim: Nvim, settings: Settings) -> State:
@@ -62,10 +53,10 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     cwd = await getcwd(nvim)
 
     session = load_session(cwd)
-    index = session.index if settings.session else {cwd}
+    index = session.index if settings.session else frozenset((cwd,))
     show_hidden = session.show_hidden if settings.session else settings.show_hidden
 
-    selection: Selection = set()
+    selection: Selection = frozenset()
     node, qf = await gather(new(cwd, index=index), quickfix(nvim))
     vc = VCStatus() if not version_ctl.enable or version_ctl.defer else await status()
 
@@ -116,7 +107,7 @@ async def forward(
     qf: Union[QuickFix, VoidType] = Void,
     vc: Union[VCStatus, VoidType] = Void,
     current: Union[str, VoidType] = Void,
-    paths: Union[Set[str], VoidType] = Void,
+    paths: Union[FrozenSet[str], VoidType] = Void,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
@@ -126,7 +117,7 @@ async def forward(
         Node,
         root
         or (
-            await update(state.root, index=new_index, paths=cast(Set[str], paths))
+            await update(state.root, index=new_index, paths=cast(FrozenSet[str], paths))
             if paths
             else state.root
         ),
@@ -134,7 +125,7 @@ async def forward(
     new_qf = or_else(qf, state.qf)
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
-    lookup, rendered = render(
+    derived = render(
         new_root,
         settings=settings,
         index=new_index,
@@ -145,7 +136,6 @@ async def forward(
         show_hidden=new_hidden,
         current=new_current,
     )
-    paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
 
     new_state = State(
         index=new_index,
@@ -159,17 +149,15 @@ async def forward(
         qf=new_qf,
         vc=new_vc,
         current=new_current,
-        lookup=lookup,
-        paths_lookup=paths_lookup,
-        rendered=rendered,
+        derived=derived,
     )
 
     return new_state
 
 
 def index(state: State, row: int) -> Optional[Node]:
-    if (row > 0) and (row < len(state.lookup)):
-        return state.lookup[row]
+    if (row > 0) and (row < len(state.derived.lookup)):
+        return state.derived.lookup[row]
     else:
         return None
 

@@ -1,4 +1,14 @@
-from typing import Mapping, Iterable, Iterator, Optional, Sequence, Tuple, cast
+from typing import (
+    FrozenSet,
+    Iterable,
+    Iterator,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -81,7 +91,9 @@ def find_current_buffer_name(nvim: Nvim) -> str:
     return name
 
 
-def _new_fm_buffer(nvim: Nvim, keymap: Mapping[str, Sequence[str]]) -> Buffer:
+def _new_fm_buffer(
+    nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]
+) -> Buffer:
     options = {"noremap": True, "silent": True, "nowait": True}
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
@@ -90,13 +102,13 @@ def _new_fm_buffer(nvim: Nvim, keymap: Mapping[str, Sequence[str]]) -> Buffer:
     for function, mappings in keymap.items():
         for mapping in mappings:
             nvim.api.buf_set_keymap(
-                buffer, "n", mapping, f"<cmd>call {function}(v:false)<cr>", options
+                buffer, "n", mapping, f"<cmd>lua {function}(false)<cr>", options
             )
             nvim.api.buf_set_keymap(
                 buffer,
                 "v",
                 mapping,
-                f"<esc><cmd>call {function}(v:true)<cr>",
+                f"<esc><cmd>lua {function}(true)<cr>",
                 options,
             )
     return buffer

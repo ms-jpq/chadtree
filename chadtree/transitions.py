@@ -9,13 +9,13 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
+    FrozenSet,
     Iterable,
     Iterator,
     Mapping,
     MutableMapping,
     Optional,
     Sequence,
-    Set,
     Tuple,
     cast,
 )
@@ -143,7 +143,9 @@ async def _current(
     nvim: Nvim, state: State, settings: Settings, current: str
 ) -> Optional[Stage]:
     if is_parent(parent=state.root.path, child=current):
-        paths: Set[str] = {*ancestors(current)} if state.follow else set()
+        paths: FrozenSet[str] = (
+            frozenset(ancestors(current)) if state.follow else frozenset()
+        )
         index = state.index | paths
         new_state = await forward(
             state, settings=settings, index=index, paths=paths, current=current
@@ -363,7 +365,7 @@ async def _click(
                     await write(nvim, LANG("filter_click"))
                     return None
                 else:
-                    paths = {node.path}
+                    paths = frozenset((node.path,))
                     index = state.index ^ paths
                     new_state = await forward(
                         state, settings=settings, index=index, paths=paths
@@ -486,9 +488,9 @@ async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[S
     if node:
         path = node.path if Mode.folder in node.mode else dirname(node.path)
         if path != state.root.path:
-            paths = {
+            paths = frozenset(
                 i for i in state.index if i == path or is_parent(parent=path, child=i)
-            }
+            )
             index = state.index - paths
             new_state = await forward(
                 state, settings=settings, index=index, paths=paths
@@ -533,18 +535,22 @@ async def _refresh(
 
     current = await async_call(nvim, co)
     cwd = state.root.path
-    paths = {cwd}
+    paths = frozenset((cwd,))
     new_current = current if is_parent(parent=cwd, child=current) else None
 
     def cont() -> Tuple[Index, Selection]:
-        index = {i for i in state.index if exists(i)} | paths
+        index = frozenset(i for i in state.index if exists(i)) | paths
         selection = (
-            set() if state.filter_pattern else {s for s in state.selection if exists(s)}
+            frozenset()
+            if state.filter_pattern
+            else frozenset(s for s in state.selection if exists(s))
         )
         return index, selection
 
     index, selection = await run_in_executor(cont)
-    current_paths: Set[str] = {*ancestors(current)} if state.follow else set()
+    current_paths: FrozenSet[str] = (
+        frozenset(ancestors(current)) if state.follow else frozenset()
+    )
     new_index = index if new_current else index | current_paths
 
     qf, vc = await gather(quickfix(nvim), _vc_stat(state.enable_vc))
@@ -644,7 +650,7 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
     pattern = await async_call(nvim, ask)
     filter_pattern = FilterPattern(pattern=pattern) if pattern else None
     new_state = await forward(
-        state, settings=settings, selection=set(), filter_pattern=filter_pattern
+        state, settings=settings, selection=frozenset(), filter_pattern=filter_pattern
     )
     return Stage(new_state)
 
@@ -750,7 +756,7 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
                 await write(nvim, e, error=True)
                 return await _refresh(nvim, state=state, settings=settings)
             else:
-                paths = {*ancestors(path)}
+                paths = frozenset(ancestors(path))
                 index = state.index | paths
                 new_state = await forward(
                     state, settings=settings, index=index, paths=paths
@@ -797,7 +803,7 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
                     await write(nvim, e, error=True)
                     return await _refresh(nvim, state=state, settings=settings)
                 else:
-                    paths = {parent, new_parent, *ancestors(new_parent)}
+                    paths = frozenset((parent, new_parent, *ancestors(new_parent)))
                     index = state.index | paths
                     new_state = await forward(
                         state, settings=settings, index=index, paths=paths
@@ -820,7 +826,7 @@ async def c_clear_selection(nvim: Nvim, state: State, settings: Settings) -> Sta
     Clear selected
     """
 
-    new_state = await forward(state, settings=settings, selection=set())
+    new_state = await forward(state, settings=settings, selection=frozenset())
     return Stage(new_state)
 
 
@@ -864,9 +870,9 @@ async def _delete(
     is_visual: bool,
     yeet: Callable[[Iterable[str]], Awaitable[None]],
 ) -> Optional[Stage]:
-    selection = state.selection or {
+    selection = state.selection or frozenset(
         node.path for node in await _indices(nvim, state=state, is_visual=is_visual)
-    }
+    )
     unified = tuple(unify_ancestors(selection))
     if unified:
         display_paths = linesep.join(
@@ -888,9 +894,9 @@ async def _delete(
                 await write(nvim, e, error=True)
                 return await _refresh(nvim, state=state, settings=settings)
             else:
-                paths = {dirname(path) for path in unified}
+                paths = frozenset(dirname(path) for path in unified)
                 new_state = await forward(
-                    state, settings=settings, selection=set(), paths=paths
+                    state, settings=settings, selection=frozenset(), paths=paths
                 )
 
                 def cont() -> None:
@@ -1009,16 +1015,16 @@ async def _operation(
                     await write(nvim, e, error=True)
                     return await _refresh(nvim, state=state, settings=settings)
                 else:
-                    paths = {
+                    paths = frozenset(
                         dirname(p)
                         for p in chain(operations.keys(), operations.values())
-                    }
+                    )
                     index = state.index | paths
                     new_state = await forward(
                         state,
                         settings=settings,
                         index=index,
-                        selection=set(),
+                        selection=frozenset(),
                         paths=paths,
                     )
 
