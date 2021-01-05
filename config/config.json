@@ -34,7 +34,6 @@
     "v_split": ["w"]
   },
   "lang": null,
-  "logging_level": "WARNING",
   "mimetypes": {
     "ignore_exts": [".ts"],
     "warn": ["audio", "font", "image", "video"]
@@ -43,10 +42,6 @@
   "session": true,
   "show_hidden": false,
   "sort_by": ["is_folder", "ext", "fname"],
-  "update_time": {
-    "max": 2,
-    "min": 1
-  },
   "use_icons": true,
   "version_control": {
     "defer": false,

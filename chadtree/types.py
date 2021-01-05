@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
-from typing import Mapping, Optional, Sequence, Set
+from typing import FrozenSet, Mapping, Optional, Sequence, Set
 
 from pynvim_pp.highlight import HLgroup
 
@@ -94,8 +94,8 @@ class VersionControlOptions:
 
 @dataclass(frozen=True)
 class MimetypeOptions:
-    warn: Set[str]
-    ignore_exts: Set[str]
+    warn: FrozenSet[str]
+    ignore_exts: FrozenSet[str]
 
 
 @dataclass(frozen=True)
@@ -120,7 +120,6 @@ class Settings:
     icons: ViewOptions
     keymap: Mapping[str, Sequence[str]]
     lang: Optional[str]
-    logging_level: str
     mime: MimetypeOptions
     name_ignore: Sequence[str]
     open_left: bool

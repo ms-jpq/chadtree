@@ -1,11 +1,11 @@
-from typing import Iterator, Mapping, Set, Tuple
+from typing import Iterator, Mapping, Tuple
 from uuid import uuid4
 
 from pynvim_pp.highlight import HLgroup
 
 from .consts import FM_HL_PREFIX
 
-LEGAL_CTERM: Set[str] = {
+LEGAL_CTERM = {
     "bold",
     "underline",
     "undercurl",

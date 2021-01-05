@@ -1,43 +1,20 @@
 from asyncio.locks import Lock
 from asyncio.tasks import sleep
 from math import inf
-from operator import add, sub
 from typing import Any, Awaitable, MutableMapping, Optional
 
 from pynvim import Nvim
-from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import async_call, go, write
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 
-from .consts import (
-    COLOURS_VAR,
-    DEFAULT_LANG,
-    IGNORES_VAR,
-    LANG_ROOT,
-    SETTINGS_VAR,
-    VIEW_VAR,
-)
+from .consts import DEFAULT_LANG, LANG_ROOT
 from .localization import init as init_locale
 from .settings import initial as initial_settings
 from .state import initial as initial_state
 from .transitions import redraw
-from .types import ClickType, Settings, Stage, State
-
-
-def _new_settings(nvim: Nvim) -> Settings:
-    user_config = nvim.vars.get(SETTINGS_VAR, {})
-    user_view = nvim.vars.get(VIEW_VAR, {})
-    user_ignores = nvim.vars.get(IGNORES_VAR, {})
-    user_colours = nvim.vars.get(COLOURS_VAR, {})
-    settings = initial_settings(
-        user_config=user_config,
-        user_view=user_view,
-        user_ignores=user_ignores,
-        user_colours=user_colours,
-    )
-    return settings
+from .types import Settings, Stage, State
 
 
 class ChadClient(Client):
@@ -68,6 +45,6 @@ class ChadClient(Client):
             return ret
 
     async def wait(self, nvim: Nvim) -> int:
-        settings = _new_settings(nvim)
+        settings = initial_settings(nvim)
         init_locale(LANG_ROOT, code=settings.lang, fallback=DEFAULT_LANG)
         return await sleep(inf, 1)
