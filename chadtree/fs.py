@@ -13,7 +13,7 @@ from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
 from typing import Mapping, Iterable, Iterator, Optional, Set
 
-from .consts import file_mode, folder_mode
+from .consts import FILE_MODE, FOLDER_MODE
 from std2.asyncio import run_in_executor
 
 
@@ -109,11 +109,11 @@ async def fs_stat(path: str) -> FSstat:
 
 def _new(dest: str) -> None:
     if dest.endswith(sep):
-        makedirs(dest, mode=folder_mode, exist_ok=True)
+        makedirs(dest, mode=FOLDER_MODE, exist_ok=True)
     else:
         parent = dirname(dest)
-        makedirs(parent, mode=folder_mode, exist_ok=True)
-        Path(dest).touch(mode=file_mode, exist_ok=True)
+        makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
+        Path(dest).touch(mode=FILE_MODE, exist_ok=True)
 
 
 async def new(dest: str) -> None:
@@ -125,7 +125,7 @@ async def new(dest: str) -> None:
 
 def _rename(src: str, dest: str) -> None:
     parent = dirname(dest)
-    makedirs(parent, mode=folder_mode, exist_ok=True)
+    makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
     mv(src, dest)
 
 

@@ -12,12 +12,12 @@ from pynvim_pp.lib import async_call, go, write
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 
 from .consts import (
-    colours_var,
-    default_lang,
-    ignores_var,
-    lang_root,
-    settings_var,
-    view_var,
+    COLOURS_VAR,
+    DEFAULT_LANG,
+    IGNORES_VAR,
+    LANG_ROOT,
+    SETTINGS_VAR,
+    VIEW_VAR,
 )
 from .localization import init as init_locale
 from .settings import initial as initial_settings
@@ -27,10 +27,10 @@ from .types import ClickType, Settings, Stage, State
 
 
 def _new_settings(nvim: Nvim) -> Settings:
-    user_config = nvim.vars.get(settings_var, {})
-    user_view = nvim.vars.get(view_var, {})
-    user_ignores = nvim.vars.get(ignores_var, {})
-    user_colours = nvim.vars.get(colours_var, {})
+    user_config = nvim.vars.get(SETTINGS_VAR, {})
+    user_view = nvim.vars.get(VIEW_VAR, {})
+    user_ignores = nvim.vars.get(IGNORES_VAR, {})
+    user_colours = nvim.vars.get(COLOURS_VAR, {})
     settings = initial_settings(
         user_config=user_config,
         user_view=user_view,
@@ -69,5 +69,5 @@ class ChadClient(Client):
 
     async def wait(self, nvim: Nvim) -> int:
         settings = _new_settings(nvim)
-        init_locale(lang_root, code=settings.lang, fallback=default_lang)
+        init_locale(LANG_ROOT, code=settings.lang, fallback=DEFAULT_LANG)
         return await sleep(inf, 1)

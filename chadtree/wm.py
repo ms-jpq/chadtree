@@ -8,14 +8,14 @@ from pynvim_pp.atomic import Atomic
 from pynvim_pp.hold import hold_win_pos
 from std2.contextlib import nil_manager
 
-from .consts import fm_filetype, fm_namespace
+from .consts import FM_FILETYPE, FM_NAMESPACE
 from .fs import is_parent
 from .types import Badge, ClickType, Highlight, OpenArgs, Settings, State
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
     ft: str = nvim.api.buf_get_option(buffer, "filetype")
-    return ft == fm_filetype
+    return ft == FM_FILETYPE
 
 
 def _find_windows_in_tab(nvim: Nvim, exclude: bool) -> Iterator[Window]:
@@ -85,7 +85,7 @@ def _new_fm_buffer(nvim: Nvim, keymap: Mapping[str, Sequence[str]]) -> Buffer:
     options = {"noremap": True, "silent": True, "nowait": True}
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
-    nvim.api.buf_set_option(buffer, "filetype", fm_filetype)
+    nvim.api.buf_set_option(buffer, "filetype", FM_FILETYPE)
 
     for function, mappings in keymap.items():
         for mapping in mappings:
@@ -232,7 +232,7 @@ def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
         *((render.line, render.badges, render.highlights) for render in state.rendered)
     )
     cwin = nvim.api.get_current_win()
-    ns = nvim.api.create_namespace(fm_namespace)
+    ns = nvim.api.create_namespace(FM_NAMESPACE)
 
     for window, buffer in _find_fm_windows(nvim):
         row, col = nvim.api.win_get_cursor(window)

@@ -3,12 +3,12 @@ from typing import Any, Mapping, cast
 from std2.tree import merge
 
 from .consts import (
-    colours_json,
-    config_json,
-    custom_colours_json,
-    icon_lookup,
-    ignore_json,
-    view_json,
+    COLOURS_JSON,
+    CONFIG_JSON,
+    CUSTOM_COLOURS_JSON,
+    ICON_LOOKUP,
+    IGNORE_JSON,
+    VIEW_JSON,
 )
 from .da import load_json
 from .highlight import gen_hl
@@ -28,13 +28,13 @@ from .types import (
 def initial(
     user_config: Any, user_view: Any, user_ignores: Any, user_colours: Any
 ) -> Settings:
-    config = merge(load_json(config_json), user_config, replace=True)
-    view = merge(load_json(view_json), user_view, replace=True)
-    icons_json = icon_lookup[config["use_icons"]]
+    config = merge(load_json(CONFIG_JSON), user_config, replace=True)
+    view = merge(load_json(VIEW_JSON), user_view, replace=True)
+    icons_json = ICON_LOOKUP[config["use_icons"]]
     icon_c = cast(Any, load_json(icons_json))
-    ignore = merge(load_json(ignore_json), user_ignores, replace=True)
-    github_colours = cast(Mapping[str, str], load_json(colours_json))
-    colours_c = merge(cast(Any, load_json(custom_colours_json)), user_colours)
+    ignore = merge(load_json(IGNORE_JSON), user_ignores, replace=True)
+    github_colours = cast(Mapping[str, str], load_json(COLOURS_JSON))
+    colours_c = merge(cast(Any, load_json(CUSTOM_COLOURS_JSON)), user_colours)
 
     use_icons = config["use_icons"]
 

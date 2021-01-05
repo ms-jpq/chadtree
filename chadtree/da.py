@@ -5,7 +5,7 @@ from operator import pow
 from pathlib import Path
 from typing import Any, Optional
 
-from .consts import folder_mode
+from .consts import FOLDER_MODE
 
 
 def human_readable_size(size: int, truncate: int = 3) -> str:
@@ -30,6 +30,6 @@ def load_json(path: Path) -> Optional[Any]:
 
 
 def dump_json(path: Path, json: Any) -> None:
-    path.parent.mkdir(mode=folder_mode, parents=True, exist_ok=True)
+    path.parent.mkdir(mode=FOLDER_MODE, parents=True, exist_ok=True)
     with path.open("w") as fd:
         return dump(json, fd, ensure_ascii=False, indent=2)

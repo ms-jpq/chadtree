@@ -7,7 +7,7 @@ from pynvim import Nvim
 from std2.types import Void, VoidType, or_else
 
 from .cartographer import new, update
-from .consts import session_dir
+from .consts import SESSION_DIR
 from .da import dump_json, load_json
 from .git import status
 from .nvim import getcwd
@@ -29,7 +29,7 @@ from .types import (
 
 def session_path(cwd: str) -> Path:
     hashed = sha1(cwd.encode()).hexdigest()
-    part = session_dir / hashed
+    part = SESSION_DIR / hashed
     return part.with_suffix("json")
 
 

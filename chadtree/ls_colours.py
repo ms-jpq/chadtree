@@ -17,7 +17,7 @@ from uuid import uuid4
 
 from pynvim_pp.highlight import HLgroup
 
-from .consts import fm_hl_prefix
+from .consts import FM_HL_PREFIX
 from .types import Colours, HLcontext, Mode
 
 
@@ -233,7 +233,7 @@ def _parse_styling(codes: str) -> _Styling:
 def _parseHLGroup(styling: _Styling, colours: Colours) -> HLgroup:
     bit8_mapping = colours.bit8_mapping
     fg, bg = styling.foreground, styling.background
-    name = f"{fm_hl_prefix}_ls_{uuid4().hex}"
+    name = f"{FM_HL_PREFIX}_ls_{uuid4().hex}"
     cterm = {
         style
         for style in (_HL_STYLE_TABLE.get(style) for style in styling.styles)
