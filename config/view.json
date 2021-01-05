@@ -4,12 +4,12 @@
     "version_control": "Comment"
   },
   "time_format": "%Y-%m-%d %H:%M",
-  "window_options": [
-    "nonumber",
-    "norelativenumber",
-    "nowrap",
-    "signcolumn=no",
-    "cursorline",
-    "winfixwidth"
-  ]
+  "window_options": {
+    "cursorline": true,
+    "number": false,
+    "relativenumber": false,
+    "signcolumn": false,
+    "winfixwidth": true,
+    "wrap": false
+  }
 }
