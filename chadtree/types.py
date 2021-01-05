@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum, auto
-from typing import FrozenSet, Mapping, Optional, Sequence, Set
+from typing import FrozenSet, Mapping, Optional, Sequence
 
 from pynvim_pp.highlight import HLgroup
 
-Index = Set[str]
-Selection = Set[str]
+Index = FrozenSet[str]
+Selection = FrozenSet[str]
 
 
 @dataclass(frozen=True)
@@ -37,9 +37,9 @@ class Mode(IntEnum):
 
 @dataclass(frozen=True)
 class Node:
-    path: str
-    mode: Set[Mode]
+    mode: FrozenSet[Mode]
     name: str
+    path: str
     children: Optional[Mapping[str, Node]] = None
     ext: Optional[str] = None
 
@@ -73,9 +73,9 @@ class UserIcons:
     default_icon: str
     folder: UserFolderIcons
     link: UserLinkIcons
-    status: UserStatusIcons
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
+    status: UserStatusIcons
     type: Mapping[str, str]
 
 
@@ -93,17 +93,17 @@ class UserHLGroups:
 
 @dataclass(frozen=True)
 class UserHighlights:
-    groups: UserHLGroups
     eight_bit: Mapping[str, UserColourMapping]
     exts: Mapping[str, HLgroup]
+    groups: UserHLGroups
 
 
 @dataclass(frozen=True)
 class HLcontext:
-    groups: Sequence[HLgroup]
-    mode_lookup_pre: Mapping[Mode, HLgroup]
-    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
     ext_lookup: Mapping[str, HLgroup]
+    groups: Sequence[HLgroup]
+    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
+    mode_lookup_pre: Mapping[Mode, HLgroup]
     name_lookup: Mapping[str, HLgroup]
 
 
@@ -115,12 +115,12 @@ class Sortby(Enum):
 
 @dataclass(frozen=True)
 class ViewOptions:
-    time_fmt: str
-    sort_by: Sequence[Sortby]
-    use_icons: bool
-    icons: UserIcons
     highlights: UserHighlights
     hl_context: HLcontext
+    icons: UserIcons
+    sort_by: Sequence[Sortby]
+    time_fmt: str
+    use_icons: bool
 
 
 @dataclass(frozen=True)
@@ -143,9 +143,8 @@ class UserIgnore:
 
 @dataclass(frozen=True)
 class Settings:
-    ignores: UserIgnore
     follow: bool
-    view: ViewOptions
+    ignores: UserIgnore
     keymap: Mapping[str, Sequence[str]]
     lang: Optional[str]
     mime: MimetypeOptions
@@ -153,6 +152,7 @@ class Settings:
     session: bool
     show_hidden: bool
     version_ctl: VersionCtlOpts
+    view: ViewOptions
     width: int
     win_local_opts: Sequence[str]
 
@@ -169,7 +169,7 @@ class QuickFix:
 
 @dataclass(frozen=True)
 class VCStatus:
-    ignored: Set[str] = field(default_factory=set)
+    ignored: FrozenSet[str] = frozenset()
     status: Mapping[str, str] = field(default_factory=dict)
 
 
@@ -188,9 +188,9 @@ class Highlight:
 
 @dataclass(frozen=True)
 class Render:
-    line: str
     badges: Sequence[Badge]
     highlights: Sequence[Highlight]
+    line: str
 
 
 @dataclass(frozen=True)
@@ -202,18 +202,18 @@ class Derived:
 
 @dataclass(frozen=True)
 class State:
-    index: Index
-    selection: Selection
-    filter_pattern: Optional[FilterPattern]
-    show_hidden: bool
-    follow: bool
-    enable_vc: bool
-    width: int
-    root: Node
-    qf: QuickFix
-    vc: VCStatus
     current: Optional[str]
     derived: Derived
+    enable_vc: bool
+    filter_pattern: Optional[FilterPattern]
+    follow: bool
+    index: Index
+    qf: QuickFix
+    root: Node
+    selection: Selection
+    show_hidden: bool
+    vc: VCStatus
+    width: int
 
 
 @dataclass(frozen=True)
