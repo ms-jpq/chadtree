@@ -178,7 +178,7 @@ async def c_changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return await _refocus(nvim, state=state, settings=settings)
 
 
-autocmd("DirChanged") << f"lua {c_changedir.remote_name}()"
+autocmd("DirChanged") << f"lua {c_changedir.name}()"
 
 
 @rpc(blocking=False)
@@ -198,7 +198,7 @@ async def a_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         return None
 
 
-autocmd("BufEnter") << f"lua {a_follow.remote_name}()"
+autocmd("BufEnter") << f"lua {a_follow.name}()"
 
 
 @rpc(blocking=False)
@@ -210,7 +210,7 @@ async def a_session(nvim: Nvim, state: State, settings: Settings) -> None:
     dump_session(state)
 
 
-autocmd("FocusLost", "ExitPre") << f"lua {a_session.remote_name}()"
+autocmd("FocusLost", "ExitPre") << f"lua {a_session.name}()"
 
 
 @rpc(blocking=False)
@@ -224,7 +224,7 @@ async def a_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
-autocmd("QuickfixCmdPost") << f"lua {a_quickfix.remote_name}()"
+autocmd("QuickfixCmdPost") << f"lua {a_quickfix.name}()"
 
 
 @rpc(blocking=False, name="CHADquit")
@@ -581,7 +581,7 @@ async def a_schedule_update(
         return None
 
 
-autocmd("BufWritePost", "FocusGained") << f"lua {a_schedule_update.remote_name}()"
+autocmd("BufWritePost", "FocusGained") << f"lua {a_schedule_update.name}()"
 
 
 @rpc(blocking=False, name="CHADrefresh")
