@@ -189,7 +189,9 @@ def show_file(
             window: Window = (
                 next(_find_window_with_file_in_tab(nvim, file=path), None)
                 or next(iter(non_fm_windows), None)
-                or _new_window(nvim, open_left=not settings.open_left, width=state.width)
+                or _new_window(
+                    nvim, open_left=not settings.open_left, width=state.width
+                )
             )
 
             nvim.api.set_current_win(window)
@@ -225,11 +227,14 @@ def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
 
 
 def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
-    focus_row = state.paths_lookup.get(focus) if focus else None
+    focus_row = state.derived.paths_lookup.get(focus) if focus else None
     current = state.current
-    current_row = state.paths_lookup.get(current or "")
+    current_row = state.derived.paths_lookup.get(current or "")
     lines, badges, highlights = zip(
-        *((render.line, render.badges, render.highlights) for render in state.rendered)
+        *(
+            (render.line, render.badges, render.highlights)
+            for render in state.derived.rendered
+        )
     )
     cwin = nvim.api.get_current_win()
     ns = nvim.api.create_namespace(FM_NAMESPACE)

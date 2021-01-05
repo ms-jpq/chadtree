@@ -11,7 +11,7 @@ from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
-from typing import Mapping, Iterable, Iterator, Optional, Set
+from typing import FrozenSet, Mapping, Iterable, Iterator, Optional
 
 from .consts import FILE_MODE, FOLDER_MODE
 from std2.asyncio import run_in_executor
@@ -32,7 +32,7 @@ def is_parent(*, parent: str, child: str) -> bool:
     return any(parent == ancestor for ancestor in ancestors(child))
 
 
-def unify_ancestors(paths: Set[str]) -> Iterator[str]:
+def unify_ancestors(paths: FrozenSet[str]) -> Iterator[str]:
     for path in paths:
         if not any(a in paths for a in ancestors(path)):
             yield path

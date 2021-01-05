@@ -72,7 +72,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     current = None
     filter_pattern = None
 
-    lookup, rendered = render(
+    derived = render(
         node,
         settings=settings,
         index=index,
@@ -83,7 +83,6 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         show_hidden=show_hidden,
         current=current,
     )
-    paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
 
     state = State(
         index=index,
@@ -97,9 +96,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
         qf=qf,
         vc=vc,
         current=current,
-        lookup=lookup,
-        paths_lookup=paths_lookup,
-        rendered=rendered,
+        derived=derived,
     )
     return state
 

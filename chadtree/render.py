@@ -11,6 +11,7 @@ from std2.types import never
 
 from .types import (
     Badge,
+    Derived,
     FilterPattern,
     Highlight,
     Index,
@@ -188,7 +189,7 @@ def render(
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[str],
-) -> Tuple[Sequence[Node], Sequence[Render]]:
+) -> Derived:
     drop = (
         cast(Callable[[Node], bool], constantly(False))
         if show_hidden
@@ -218,5 +219,9 @@ def render(
             yield node, rend
         yield from iter(children)
 
-    lookup, rendered = zip(*render(node, depth=0, cleared=False))
-    return cast(Sequence[Node], lookup), cast(Sequence[Render], rendered)
+    _lookup, _rendered = zip(*render(node, depth=0, cleared=False))
+    lookup = cast(Sequence[Node], _lookup)
+    rendered = cast(Sequence[Render], _rendered)
+    paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
+    derived = Derived(lookup=lookup, paths_lookup=paths_lookup, rendered=rendered)
+    return derived

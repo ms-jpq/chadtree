@@ -6,6 +6,7 @@ from shutil import which
 from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
 from std2.asyncio.subprocess import call
+from std2.types import freeze
 
 from .fs import ancestors
 from .types import VCStatus
@@ -93,7 +94,7 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
         symbols = sorted((s for s in syms if s != " "), key=strxfrm)
         status[directory] = "".join(symbols)
 
-    return VCStatus(ignored=ignored, status=status)
+    return VCStatus(ignored=freeze(ignored), status=freeze(status))
 
 
 async def status() -> VCStatus:

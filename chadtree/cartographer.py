@@ -12,7 +12,7 @@ from stat import (
     S_ISVTX,
     S_IWOTH,
 )
-from typing import Mapping, Iterator, Set, cast
+from typing import FrozenSet, Mapping, Iterator,  cast
 
 from std2.asyncio import run_in_executor
 
@@ -41,22 +41,22 @@ def _fs_modes(stat: int) -> Iterator[Mode]:
             yield mode
 
 
-def _fs_stat(path: str) -> Set[Mode]:
+def _fs_stat(path: str) -> FrozenSet[Mode]:
     try:
         info = stat(path, follow_symlinks=False)
     except FileNotFoundError:
-        return {Mode.orphan_link}
+        return frozenset((Mode.orphan_link,))
     else:
         if S_ISLNK(info.st_mode):
             try:
                 link_info = stat(path, follow_symlinks=True)
             except FileNotFoundError:
-                return {Mode.orphan_link}
+                return frozenset((Mode.orphan_link,))
             else:
-                mode = {*_fs_modes(link_info.st_mode)}
+                mode = frozenset(_fs_modes(link_info.st_mode))
                 return mode | {Mode.link}
         else:
-            mode = {*_fs_modes(info.st_mode)}
+            mode = frozenset(_fs_modes(info.st_mode))
             return mode
 
 
@@ -81,7 +81,7 @@ async def new(root: str, index: Index) -> Node:
     return await run_in_executor(_new, root, index)
 
 
-def _update(root: Node, index: Index, paths: Set[str]) -> Node:
+def _update(root: Node, index: Index, paths: FrozenSet[str]) -> Node:
     if root.path in paths:
         return _new(root.path, index=index)
     else:
@@ -98,7 +98,7 @@ def _update(root: Node, index: Index, paths: Set[str]) -> Node:
         )
 
 
-async def update(root: Node, *, index: Index, paths: Set[str]) -> Node:
+async def update(root: Node, *, index: Index, paths: FrozenSet[str]) -> Node:
     try:
         return await run_in_executor(_update, root, index, paths)
     except FileNotFoundError:

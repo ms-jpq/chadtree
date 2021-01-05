@@ -18,7 +18,7 @@ from uuid import uuid4
 from pynvim_pp.highlight import HLgroup
 
 from .consts import FM_HL_PREFIX
-from .types import  HLcontext, Mode, UserHighlights
+from .types import HLcontext, Mode, UserHighlights
 
 
 class _Style(IntEnum):
@@ -234,11 +234,11 @@ def _parseHLGroup(styling: _Styling, colours: UserHighlights) -> HLgroup:
     bit8_mapping = colours.eight_bit
     fg, bg = styling.foreground, styling.background
     name = f"{FM_HL_PREFIX}_ls_{uuid4().hex}"
-    cterm = {
+    cterm = frozenset(
         style
         for style in (_HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
-    }
+    )
     ansifg = (
         bit8_mapping[cast(_AnsiColour, fg).name] if type(fg) is _AnsiColour else None
     )

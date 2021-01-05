@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, FrozenSet, Literal, Mapping, Optional, Sequence, Union, cast
+from typing import FrozenSet, Literal, Mapping, Optional, Sequence, Union
 
 from pynvim.api.nvim import Nvim
 from std2.pickle import DecodeError, decode
@@ -20,14 +20,16 @@ from .consts import (
 from .da import load_json
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
+from .registry import rpc
 from .types import (
     MimetypeOptions,
     Settings,
     Sortby,
     UserColourMapping,
     UserHighlights,
-    UserIcons,
     UserHLGroups,
+    UserIcons,
+    UserIgnore,
     VersionCtlOpts,
     ViewOptions,
 )
@@ -53,7 +55,6 @@ class UserView:
     highlights: UserHLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
-
 
 
 @dataclass(frozen=True)
@@ -86,60 +87,34 @@ def initial(
         Mapping[str, str], load_json(COLOURS_JSON)
     )
 
-    use_icons = config["use_icons"]
-
-    bit8_mapping = {
-        key: ColourMapping(hl8=val["hl8"], hl24=val["hl24"])
-        for key, val in colours_c["8_bit"].items()
-    }
     ext_colours = gen_hl("github", mapping=github_colours)
-    colours = Colours(bit8_mapping=bit8_mapping, exts=ext_colours)
-    icons = ViewOptions(
-        active=icon_c["status"]["active"],
-        default_icon=icon_c["default_icon"],
-        colours=colours,
-        filename_exact=icon_c["name_exact"],
-        filename_glob=icon_c["name_glob"],
-        filetype=icon_c["type"],
-        folder_closed=icon_c["folder"]["closed"],
-        folder_open=icon_c["folder"]["open"],
-        link=icon_c["link"]["normal"],
-        link_broken=icon_c["link"]["broken"],
-        quickfix_hl=view["highlights"]["quickfix"],
-        selected=icon_c["status"]["selected"],
-        time_fmt=view["time_format"],
-        version_ctl_hl=view["highlights"]["version_control"],
+    highlights = UserHighlights(
+        eight_bit=colours.eight_bit, exts=ext_colours, groups=view.highlights
     )
+    hl_context = parse_ls_colours(highlights)
 
-    version_ctl = VersionCtlOpts(
-        defer=config["version_control"]["defer"],
-        enable=config["version_control"]["enable"],
-    )
-    hl_context = parse_ls_colours(colours)
-
-    keymap = {f"CHAD{k}": v for k, v in config["keymap"].items()}
-    mime = MimetypeOptions(
-        warn={*config["mimetypes"]["warn"]},
-        ignore_exts={*config["mimetypes"]["ignore_exts"]},
-    )
-
-    sortby = tuple(Sortby[sb] for sb in config["sort_by"])
-    settings = Settings(
-        follow=config["follow"],
+    view_opts = ViewOptions(
         hl_context=hl_context,
-        view=icons,
-        keymap=keymap,
-        lang=config["lang"],
-        mime=mime,
-        name_ignore=ignore["name"],
-        open_left=config["open_left"],
-        path_ignore=ignore["path"],
-        session=config["session"],
-        show_hidden=config["show_hidden"],
-        sort_by=sortby,
-        version_ctl=version_ctl,
-        width=config["width"],
-        win_local_opts=view["window_options"],
+        highlights=highlights,
+        icons=icons,
+        sort_by=config.sort_by,
+        use_icons=config.use_icons,
+        time_fmt=view.time_format,
+    )
+
+    settings = Settings(
+        follow=config.follow,
+        ignores=ignore,
+        keymap=config.keymap,
+        lang=config.lang,
+        mime=config.mimetypes,
+        open_left=config.open_left,
+        session=config.session,
+        show_hidden=config.show_hidden,
+        version_ctl=config.version_control,
+        view=view_opts,
+        width=config.width,
+        win_local_opts=view.window_options,
     )
 
     return settings
