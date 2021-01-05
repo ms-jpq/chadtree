@@ -1,34 +1,43 @@
 from locale import getdefaultlocale
 from string import Template
-from typing import MutableMapping, Optional, cast
-from pathlib import Path
-from .da import load_json
+from typing import Mapping, MutableMapping, Optional
 
-spec: MutableMapping[str, str] = {}
-fspec: MutableMapping[str, str] = {}
+from std2.pickle.decode import decode
+from std2.tree import merge
+
+from .consts import DEFAULT_LANG, LANG_ROOT
+from .da import load_json
 
 
 def _get_lang(code: Optional[str], fallback: str) -> str:
     if code:
-        return code.lower()
+        return code.casefold()
     else:
         tag, _ = getdefaultlocale()
-        tag = (tag or fallback).lower()
+        tag = (tag or fallback).casefold()
         primary, _, _ = tag.partition("-")
         lang, _, _ = primary.partition("_")
         return lang
 
 
-def init(root: Path, code: Optional[str], fallback: str) -> None:
-    global spec, fspec
+class Lang:
+    def __init__(self, specs: MutableMapping[str, str]) -> None:
+        self._specs = specs
 
-    lang = _get_lang(code, fallback=fallback)
-    ls, lf = (root / lang).with_suffix(".json"), (root / fallback).with_suffix(".json")
-
-    spec = cast(MutableMapping[str, str], load_json(ls)) or {}
-    fspec = cast(MutableMapping[str, str], load_json(lf)) or {}
+    def __call__(self, key: str, **kwds: str) -> str:
+        spec = self._specs[key]
+        return Template(spec).substitute(kwds)
 
 
-def LANG(key: str, **kwargs: str) -> str:
-    template = spec.get(key, fspec[key])
-    return Template(template).substitute(kwargs)
+LANG = Lang({})
+
+
+def init(code: Optional[str]) -> None:
+    lang = _get_lang(code, fallback=DEFAULT_LANG)
+
+    lf = (LANG_ROOT / DEFAULT_LANG).with_suffix(".json")
+    ls = (LANG_ROOT / lang).with_suffix(".json")
+    specs: Mapping[str, str] = decode(
+        Mapping[str, str], merge(load_json(lf) or {}, load_json(ls) or {})
+    )
+    LANG._specs.update(specs)

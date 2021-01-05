@@ -11,10 +11,11 @@ from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
-from typing import FrozenSet, Mapping, Iterable, Iterator, Optional
+from typing import FrozenSet, Iterable, Iterator, Mapping, Optional
+
+from std2.asyncio import run_in_executor
 
 from .consts import FILE_MODE, FOLDER_MODE
-from std2.asyncio import run_in_executor
 
 
 def ancestors(path: str) -> Iterator[str]:

@@ -9,7 +9,6 @@ from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import async_call, go, write
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 
-from .consts import DEFAULT_LANG, LANG_ROOT
 from .localization import init as init_locale
 from .settings import initial as initial_settings
 from .state import initial as initial_state
@@ -47,7 +46,7 @@ class ChadClient(Client):
     async def wait(self, nvim: Nvim) -> int:
         def cont() -> None:
             self._settings = initial_settings(nvim)
-            init_locale(LANG_ROOT, code=self._settings.lang, fallback=DEFAULT_LANG)
+            init_locale(self._settings.lang)
 
         await async_call(nvim, cont)
         return await sleep(inf, 1)
