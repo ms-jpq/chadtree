@@ -99,11 +99,21 @@ class UserHighlights:
 
 
 @dataclass(frozen=True)
+class HLcontext:
+    groups: Sequence[HLgroup]
+    mode_lookup_pre: Mapping[Mode, HLgroup]
+    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
+    ext_lookup: Mapping[str, HLgroup]
+    name_lookup: Mapping[str, HLgroup]
+
+
+@dataclass(frozen=True)
 class ViewOptions:
     time_fmt: str
     use_icons: bool
     icons: UserIcons
     highlights: UserHighlights
+    hl_context: HLcontext
 
 
 @dataclass(frozen=True)
@@ -118,15 +128,6 @@ class MimetypeOptions:
     ignore_exts: FrozenSet[str]
 
 
-@dataclass(frozen=True)
-class HLcontext:
-    groups: Sequence[HLgroup]
-    mode_lookup_pre: Mapping[Mode, HLgroup]
-    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
-    ext_lookup: Mapping[str, HLgroup]
-    name_lookup: Mapping[str, HLgroup]
-
-
 class Sortby(Enum):
     is_folder = auto()
     ext = auto()
@@ -136,7 +137,7 @@ class Sortby(Enum):
 @dataclass(frozen=True)
 class Settings:
     follow: bool
-    hl_context: HLcontext
+
     view: ViewOptions
     keymap: Mapping[str, Sequence[str]]
     lang: Optional[str]

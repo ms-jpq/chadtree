@@ -68,7 +68,7 @@ def _paint(
     vc: VCStatus,
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
-    context = settings.hl_context
+    context = settings.view.hl_context
     mode_lookup_pre, mode_lookup_post, ext_lookup, name_lookup = (
         context.mode_lookup_pre,
         context.mode_lookup_post,

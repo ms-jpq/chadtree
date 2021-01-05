@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Any, FrozenSet, Literal, Mapping, Optional, Sequence, Union, cast
 
 from pynvim.api.nvim import Nvim
+from std2.pickle import DecodeError, decode
 from std2.tree import merge
-from std2.pickle import decode,DecodeError
 
 from .consts import (
     COLOURS_JSON,
@@ -21,12 +21,13 @@ from .da import load_json
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
 from .types import (
-    UserHLGroups,
-    UserHighlights,
     MimetypeOptions,
     Settings,
-    UserColourMapping,
     Sortby,
+    UserColourMapping,
+    UserHighlights,
+    UserIcons,
+    UserHLGroups,
     VersionCtlOpts,
     ViewOptions,
 )
@@ -73,13 +74,22 @@ def initial(
     user_ignores = nvim.vars.get(IGNORES_VAR, {})
     user_colours = nvim.vars.get(COLOURS_VAR, {})
 
-    config = merge(load_json(CONFIG_JSON), user_config, replace=True)
-    view = merge(load_json(VIEW_JSON), user_view, replace=True)
-    icons_json = ICON_LOOKUP[config["use_icons"]]
-    icon_c = cast(Any, load_json(icons_json))
-    ignore = merge(load_json(IGNORE_JSON), user_ignores, replace=True)
-    github_colours = cast(Mapping[str, str], load_json(COLOURS_JSON))
-    colours_c = merge(cast(Any, load_json(CUSTOM_COLOURS_JSON)), user_colours)
+    config: UserConfig = decode(
+        UserConfig, merge(load_json(CONFIG_JSON), user_config, replace=True)
+    )
+    view: UserView = decode(
+        UserView, merge(load_json(VIEW_JSON), user_view, replace=True)
+    )
+    ignore: UserIgnore = decode(
+        UserIgnore, merge(load_json(IGNORE_JSON), user_ignores, replace=True)
+    )
+    colours: UserColours = decode(
+        UserColours, merge(load_json(CUSTOM_COLOURS_JSON), user_colours)
+    )
+    icons: UserIcons = decode(UserIcons, load_json(ICON_LOOKUP[config.use_icons]))
+    github_colours: Mapping[str, str] = decode(
+        Mapping[str, str], load_json(COLOURS_JSON)
+    )
 
     use_icons = config["use_icons"]
 
@@ -132,8 +142,6 @@ def initial(
         session=config["session"],
         show_hidden=config["show_hidden"],
         sort_by=sortby,
-        update=update,
-        use_icons=use_icons,
         version_ctl=version_ctl,
         width=config["width"],
         win_local_opts=view["window_options"],
