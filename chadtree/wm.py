@@ -177,8 +177,8 @@ def toggle_fm_window(
             buffer = _new_fm_buffer(nvim, keymap=settings.keymap)
         window = _new_window(nvim, open_left=settings.open_left, width=state.width)
         nvim.api.win_set_buf(window, buffer)
-        for option in settings.win_local_opts:
-            nvim.api.win_set_option(window, option)
+        for option, value in settings.win_local_opts.items():
+            nvim.api.win_set_option(window, option, value)
         _ensure_side_window(nvim, window=window, state=state, settings=settings)
         if not opts.focus:
             nvim.api.set_current_win(cwin)
