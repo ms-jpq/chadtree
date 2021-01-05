@@ -76,7 +76,7 @@ def _paint(
         context.ext_lookup,
         context.name_lookup,
     )
-    icons = settings.view
+    icons = settings.view.icons
     use_icons = settings.use_icons
 
     def search_hl(node: Node) -> Optional[HLgroup]:
@@ -103,8 +103,8 @@ def _paint(
         return (depth * 2 - 1) * " "
 
     def gen_status(path: str) -> str:
-        selected = icons.selected if path in selection else " "
-        active = icons.active if path == current else " "
+        selected = icons.status.selected if path in selection else " "
+        active = icons.status.active if path == current else " "
         return f"{selected}{active}"
 
     def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
@@ -114,15 +114,15 @@ def _paint(
     def gen_icon(node: Node) -> Iterator[str]:
         yield " "
         if Mode.folder in node.mode:
-            yield icons.folder_open if node.path in index else icons.folder_closed
+            yield icons.folder.open if node.path in index else icons.folder.closed
         else:
             yield (
-                icons.filename_exact.get(node.name, "")
-                or icons.filetype.get(node.ext or "", "")
+                icons.name_exact.get(node.name, "")
+                or icons.type.get(node.ext or "", "")
                 or next(
                     (
                         v
-                        for k, v in icons.filename_glob.items()
+                        for k, v in icons.name_glob.items()
                         if fnmatch(node.name, k)
                     ),
                     icons.default_icon,
@@ -139,10 +139,10 @@ def _paint(
         mode = node.mode
         if Mode.orphan_link in mode:
             yield " "
-            yield icons.link_broken
+            yield icons.link.broken
         elif Mode.link in mode:
             yield " "
-            yield icons.link
+            yield icons.link.normal
 
     def gen_badges(path: str) -> Iterator[Badge]:
         qf_count = qf.locations[path]

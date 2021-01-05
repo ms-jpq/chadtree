@@ -70,37 +70,6 @@ class UserColours:
     eight_bit: Mapping[str, ColourMapping]
 
 
-@dataclass(frozen=True)
-class UserFolderIcons:
-    open: str
-    closed: str
-
-
-@dataclass(frozen=True)
-class UserLinkIcons:
-    normal: str
-    broken: str
-
-
-@dataclass(frozen=True)
-class UserStatusIcons:
-    active: str
-    selected: str
-
-
-GithubColours = Mapping[str, str]
-
-
-@dataclass(frozen=True)
-class UserIcons:
-    default_icon: str
-    folder: UserFolderIcons
-    link: UserLinkIcons
-    status: UserStatusIcons
-    name_exact: Mapping[str, str]
-    name_glob: Mapping[str, str]
-    type: GithubColours
-
 
 def initial(
     nvim: Nvim,
@@ -109,7 +78,6 @@ def initial(
     user_view = nvim.vars.get(VIEW_VAR, {})
     user_ignores = nvim.vars.get(IGNORES_VAR, {})
     user_colours = nvim.vars.get(COLOURS_VAR, {})
-
 
     config = merge(load_json(CONFIG_JSON), user_config, replace=True)
     view = merge(load_json(VIEW_JSON), user_view, replace=True)

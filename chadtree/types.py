@@ -63,20 +63,40 @@ class Colours:
 
 
 @dataclass(frozen=True)
+class UserFolderIcons:
+    open: str
+    closed: str
+
+
+@dataclass(frozen=True)
+class UserLinkIcons:
+    normal: str
+    broken: str
+
+
+@dataclass(frozen=True)
+class UserStatusIcons:
+    active: str
+    selected: str
+
+
+@dataclass(frozen=True)
+class UserIcons:
+    default_icon: str
+    folder: UserFolderIcons
+    link: UserLinkIcons
+    status: UserStatusIcons
+    name_exact: Mapping[str, str]
+    name_glob: Mapping[str, str]
+    type: Mapping[str, str]
+
+
+@dataclass(frozen=True)
 class ViewOptions:
     time_fmt: str
-    active: str
-    default_icon: str
-    folder_closed: str
-    folder_open: str
-    link: str
-    link_broken: str
-    selected: str
+    icons: UserIcons
     quickfix_hl: str
     version_ctl_hl: str
-    filename_exact: Mapping[str, str]
-    filename_glob: Mapping[str, str]
-    filetype: Mapping[str, str]
     colours: Colours
 
 
