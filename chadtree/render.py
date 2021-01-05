@@ -7,6 +7,7 @@ from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from pynvim_pp.highlight import HLgroup
 from std2.functools import constantly
+from std2.types import never
 
 from .types import (
     Badge,
@@ -33,14 +34,14 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     def comp(node: Node) -> Sequence[Any]:
         def cont() -> Iterator[Any]:
             for sb in sortby:
-                if sb == Sortby.is_folder:
+                if sb is Sortby.is_folder:
                     yield CompVals.FOLDER if Mode.folder in node.mode else CompVals.FILE
-                elif sb == Sortby.ext:
+                elif sb is Sortby.ext:
                     yield strxfrm(node.ext or ""),
-                elif sb == Sortby.fname:
+                elif sb is Sortby.fname:
                     yield strxfrm(node.name)
                 else:
-                    raise ValueError(f"Bad sortby - {sb}")
+                    never(sb)
 
         return tuple(cont())
 

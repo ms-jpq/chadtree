@@ -176,8 +176,8 @@ def show_file(
     nvim: Nvim, *, state: State, settings: Settings, click_type: ClickType
 ) -> None:
     path = state.current
-    hold = click_type == ClickType.secondary
-    if click_type == ClickType.tertiary:
+    hold = click_type is ClickType.secondary
+    if click_type is ClickType.tertiary:
         nvim.api.command("tabnew")
     if path:
         mgr = hold_win_pos(nvim) if hold else nil_manager()
@@ -197,11 +197,11 @@ def show_file(
 
             temp_buf: Optional[Buffer] = None
 
-            if click_type == ClickType.v_split and non_fm_count:
+            if click_type is ClickType.v_split and non_fm_count:
                 nvim.api.command("vnew")
                 temp_buf = nvim.api.get_current_buf()
                 nvim.api.buf_set_option(temp_buf, "bufhidden", "wipe")
-            elif click_type == ClickType.h_split and non_fm_count:
+            elif click_type is ClickType.h_split and non_fm_count:
                 nvim.api.command("new")
                 temp_buf = nvim.api.get_current_buf()
                 nvim.api.buf_set_option(temp_buf, "bufhidden", "wipe")

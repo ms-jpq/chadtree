@@ -129,8 +129,7 @@ def github_colours() -> None:
 
 def git_alert() -> None:
     prefix = "update-icons"
-    proc = run(("git", "branch", "--remotes"), stdout=PIPE)
-    assert proc.returncode == 0
+    proc = run(("git", "branch", "--remotes"), stdout=PIPE, check=True)
     remote_brs = proc.stdout.decode()
 
     print("DEBUG")
