@@ -113,7 +113,6 @@ class Sortby(Enum):
     fname = auto()
 
 
-
 @dataclass(frozen=True)
 class ViewOptions:
     time_fmt: str
@@ -159,6 +158,11 @@ class Settings:
 
 
 @dataclass(frozen=True)
+class FilterPattern:
+    pattern: str
+
+
+@dataclass(frozen=True)
 class QuickFix:
     locations: Mapping[str, int]
 
@@ -170,15 +174,15 @@ class VCStatus:
 
 
 @dataclass(frozen=True)
-class Highlight:
-    begin: int
-    end: int
+class Badge:
+    text: str
     group: str
 
 
 @dataclass(frozen=True)
-class Badge:
-    text: str
+class Highlight:
+    begin: int
+    end: int
     group: str
 
 
@@ -190,8 +194,10 @@ class Render:
 
 
 @dataclass(frozen=True)
-class FilterPattern:
-    pattern: str
+class Derived:
+    lookup: Sequence[Node]
+    paths_lookup: Mapping[str, int]
+    rendered: Sequence[Render]
 
 
 @dataclass(frozen=True)
@@ -207,9 +213,7 @@ class State:
     qf: QuickFix
     vc: VCStatus
     current: Optional[str]
-    lookup: Sequence[Node]
-    paths_lookup: Mapping[str, int]
-    rendered: Sequence[Render]
+    derived: Derived
 
 
 @dataclass(frozen=True)
