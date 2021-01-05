@@ -45,6 +45,9 @@ class ChadClient(Client):
             return ret
 
     async def wait(self, nvim: Nvim) -> int:
-        settings = initial_settings(nvim)
-        init_locale(LANG_ROOT, code=settings.lang, fallback=DEFAULT_LANG)
+        def cont() -> None:
+            settings = initial_settings(nvim)
+            init_locale(LANG_ROOT, code=settings.lang, fallback=DEFAULT_LANG)
+
+        await async_call(nvim, cont)
         return await sleep(inf, 1)

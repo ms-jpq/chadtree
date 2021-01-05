@@ -23,7 +23,7 @@ def init(root: Path, code: Optional[str], fallback: str) -> None:
     global spec, fspec
 
     lang = _get_lang(code, fallback=fallback)
-    ls, lf = (root / lang).with_suffix("json"), (root / fallback).with_suffix("json")
+    ls, lf = (root / lang).with_suffix(".json"), (root / fallback).with_suffix(".json")
 
     spec = cast(MutableMapping[str, str], load_json(ls)) or {}
     fspec = cast(MutableMapping[str, str], load_json(lf)) or {}
