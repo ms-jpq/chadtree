@@ -1,5 +1,4 @@
 from locale import getdefaultlocale
-from os.path import join
 from string import Template
 from typing import MutableMapping, Optional, cast
 from pathlib import Path
