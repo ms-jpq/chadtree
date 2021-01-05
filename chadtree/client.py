@@ -1,12 +1,10 @@
-from asyncio.locks import Lock
-from asyncio.tasks import sleep
-from math import inf
-from typing import Any, Awaitable, MutableMapping, Optional
+from asyncio.locks import Event
+from typing import Any, Optional
 
 from pynvim import Nvim
-from pynvim_pp.client import Client
+from pynvim_pp.client import BasicClient
 from pynvim_pp.highlight import highlight
-from pynvim_pp.lib import async_call, go, write
+from pynvim_pp.lib import async_call, write
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 
 from .localization import init as init_locale
@@ -16,32 +14,30 @@ from .transitions import redraw
 from .types import Settings, Stage, State
 
 
-class ChadClient(Client):
+class ChadClient(BasicClient):
     def __init__(self) -> None:
-        self._lock = Lock()
-        self._handlers: MutableMapping[str, RpcCallable] = {}
+        super().__init__()
+        self._init_lock = Event()
         self._state: Optional[State] = None
         self._settings: Optional[Settings] = None
-
-    def _submit(self, nvim: Nvim, aw: Awaitable[Optional[Stage]]) -> None:
-        async def cont() -> None:
-            async with self._lock:
-                stage = await aw
-                if stage:
-                    self._state = stage.state
-                    await redraw(nvim, state=self._state, focus=stage.focus)
-
-        go(cont())
 
     def on_msg(self, nvim: Nvim, msg: RpcMsg) -> Any:
         name, args = msg
         handler = self._handlers.get(name, nil_handler(name))
-        ret = handler(nvim, state=self._state, settings=self._settings, *args)
-        if isinstance(ret, Awaitable):
-            self._submit(nvim, aw=ret)
-            return None
+        if handler.is_async:
+
+            async def cont() -> None:
+                await self._init_lock.wait()
+                stage: Optional[Stage] = await handler(
+                    nvim, state=self._state, settings=self._settings, *args
+                )
+                if stage:
+                    self._state = stage.state
+                    await redraw(nvim, state=self._state, focus=stage.focus)
+
+            self._q.put((name, args, cont()))
         else:
-            return ret
+            assert False
 
     async def wait(self, nvim: Nvim) -> int:
         def cont() -> None:
@@ -49,4 +45,4 @@ class ChadClient(Client):
             init_locale(self._settings.lang)
 
         await async_call(nvim, cont)
-        return await sleep(inf, 1)
+        return await super().wait()
