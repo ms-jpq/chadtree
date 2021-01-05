@@ -29,7 +29,7 @@ class CompVals(IntEnum):
     FILE = auto()
 
 
-def gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
+def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     def comp(node: Node) -> Sequence[Any]:
         def cont() -> Iterator[Any]:
             for sb in sortby:
@@ -47,7 +47,7 @@ def gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     return comp
 
 
-def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
+def _ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     def drop(node: Node) -> bool:
         ignore = (
             node.path in vc.ignored
@@ -59,7 +59,7 @@ def ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     return drop
 
 
-def paint(
+def _paint(
     settings: Settings,
     index: Index,
     selection: Selection,
@@ -197,12 +197,12 @@ def render(
     drop = (
         cast(Callable[[Node], bool], constantly(False))
         if show_hidden
-        else ignore(settings, vc=vc)
+        else _ignore(settings, vc=vc)
     )
-    show = paint(
+    show = _paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
-    comp = gen_comp(settings.sort_by)
+    comp = _gen_comp(settings.sort_by)
     keep_open = {node.path}
 
     def render(
