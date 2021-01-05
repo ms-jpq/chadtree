@@ -6,7 +6,6 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    Union,
     cast,
 )
 
@@ -91,9 +90,7 @@ def find_current_buffer_name(nvim: Nvim) -> str:
     return name
 
 
-def _new_fm_buffer(
-    nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]
-) -> Buffer:
+def _new_fm_buffer(nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]) -> Buffer:
     options = {"noremap": True, "silent": True, "nowait": True}
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
