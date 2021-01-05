@@ -3,27 +3,9 @@ from itertools import count
 from json import dump, load
 from operator import pow
 from pathlib import Path
-from typing import Any,  Optional, TypeVar, Union, cast
+from typing import Any, Optional
 
 from .consts import folder_mode
-
-T = TypeVar("T")
-
-
-class Void:
-    def __bool__(self) -> bool:
-        return False
-
-    def __eq__(self, o: Any) -> bool:
-        return type(o) is Void
-
-    def __str__(self) -> str:
-        return type(self).__name__
-
-
-def or_else(thing: Union[T, Void], default: T) -> T:
-    return default if thing == Void() else cast(T, thing)
-
 
 
 def human_readable_size(size: int, truncate: int = 3) -> str:

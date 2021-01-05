@@ -4,10 +4,11 @@ from pathlib import Path
 from typing import Optional, Set, Union, cast
 
 from pynvim import Nvim
+from std2.types import Void, VoidType, or_else
 
 from .cartographer import new, update
 from .consts import session_dir
-from .da import Void, dump_json, load_json, or_else
+from .da import dump_json, load_json
 from .git import status
 from .nvim import getcwd
 from .quickfix import quickfix
@@ -107,18 +108,18 @@ async def forward(
     state: State,
     *,
     settings: Settings,
-    root: Union[Node, Void] = Void(),
-    index: Union[Index, Void] = Void(),
-    selection: Union[Selection, Void] = Void(),
-    filter_pattern: Union[Optional[FilterPattern], Void] = Void(),
-    show_hidden: Union[bool, Void] = Void(),
-    follow: Union[bool, Void] = Void(),
-    enable_vc: Union[bool, Void] = Void(),
-    width: Union[int, Void] = Void(),
-    qf: Union[QuickFix, Void] = Void(),
-    vc: Union[VCStatus, Void] = Void(),
-    current: Union[str, Void] = Void(),
-    paths: Union[Set[str], Void] = Void(),
+    root: Union[Node, VoidType] = Void,
+    index: Union[Index, VoidType] = Void,
+    selection: Union[Selection, VoidType] = Void,
+    filter_pattern: Union[Optional[FilterPattern], VoidType] = Void,
+    show_hidden: Union[bool, VoidType] = Void,
+    follow: Union[bool, VoidType] = Void,
+    enable_vc: Union[bool, VoidType] = Void,
+    width: Union[int, VoidType] = Void,
+    qf: Union[QuickFix, VoidType] = Void,
+    vc: Union[VCStatus, VoidType] = Void,
+    current: Union[str, VoidType] = Void,
+    paths: Union[Set[str], VoidType] = Void,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)

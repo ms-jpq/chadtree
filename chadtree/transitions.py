@@ -10,7 +10,8 @@ from typing import (
     Callable,
     Iterable,
     Iterator,
-    Mapping, MutableMapping,
+    Mapping,
+    MutableMapping,
     Optional,
     Sequence,
     Set,
@@ -23,9 +24,10 @@ from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 from pynvim_pp.lib import async_call, write
 from std2.asyncio import run_in_executor
+from std2.types import Void
 
 from .cartographer import new as new_root
-from .da import Void, human_readable_size
+from .da import human_readable_size
 from .fs import (
     ancestors,
     copy,
@@ -402,7 +404,7 @@ async def c_refresh(
         qf=qf,
         vc=vc,
         paths=paths,
-        current=new_current or Void(),
+        current=new_current or Void,
     )
 
     if write_out:
