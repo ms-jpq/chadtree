@@ -52,8 +52,8 @@ def _ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
     def drop(node: Node) -> bool:
         ignore = (
             node.path in vc.ignored
-            or any(fnmatch(node.name, pattern) for pattern in settings.name_ignore)
-            or any(fnmatch(node.path, pattern) for pattern in settings.path_ignore)
+            or any(fnmatch(node.name, pattern) for pattern in settings.ignores.name)
+            or any(fnmatch(node.path, pattern) for pattern in settings.ignores.path)
         )
         return ignore
 
@@ -197,7 +197,7 @@ def render(
     show = _paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
     )
-    comp = _gen_comp(settings.sort_by)
+    comp = _gen_comp(settings.view.sort_by)
     keep_open = {node.path}
 
     def render(

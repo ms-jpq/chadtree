@@ -55,11 +55,6 @@ class UserView:
     window_options: Mapping[str, Union[bool, str]]
 
 
-@dataclass(frozen=True)
-class UserIgnore:
-    name: FrozenSet[str]
-    path: FrozenSet[str]
-
 
 @dataclass(frozen=True)
 class UserColours:

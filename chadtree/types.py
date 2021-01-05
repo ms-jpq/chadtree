@@ -107,9 +107,17 @@ class HLcontext:
     name_lookup: Mapping[str, HLgroup]
 
 
+class Sortby(Enum):
+    is_folder = auto()
+    ext = auto()
+    fname = auto()
+
+
+
 @dataclass(frozen=True)
 class ViewOptions:
     time_fmt: str
+    sort_by: Sequence[Sortby]
     use_icons: bool
     icons: UserIcons
     highlights: UserHighlights
@@ -128,26 +136,23 @@ class MimetypeOptions:
     ignore_exts: FrozenSet[str]
 
 
-class Sortby(Enum):
-    is_folder = auto()
-    ext = auto()
-    fname = auto()
+@dataclass(frozen=True)
+class UserIgnore:
+    name: FrozenSet[str]
+    path: FrozenSet[str]
 
 
 @dataclass(frozen=True)
 class Settings:
+    ignores: UserIgnore
     follow: bool
-
     view: ViewOptions
     keymap: Mapping[str, Sequence[str]]
     lang: Optional[str]
     mime: MimetypeOptions
-    name_ignore: Sequence[str]
     open_left: bool
-    path_ignore: Sequence[str]
     session: bool
     show_hidden: bool
-    sort_by: Sequence[Sortby]
     version_ctl: VersionCtlOpts
     width: int
     win_local_opts: Sequence[str]
