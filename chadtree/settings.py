@@ -3,6 +3,7 @@ from typing import Any, FrozenSet, Literal, Mapping, Optional, Sequence, Union, 
 
 from pynvim.api.nvim import Nvim
 from std2.tree import merge
+from std2.pickle import decode,DecodeError
 
 from .consts import (
     COLOURS_JSON,

@@ -101,6 +101,7 @@ class UserHighlights:
 @dataclass(frozen=True)
 class ViewOptions:
     time_fmt: str
+    use_icons: bool
     icons: UserIcons
     highlights: UserHighlights
 
@@ -146,7 +147,6 @@ class Settings:
     session: bool
     show_hidden: bool
     sort_by: Sequence[Sortby]
-    use_icons: bool
     version_ctl: VersionCtlOpts
     width: int
     win_local_opts: Sequence[str]

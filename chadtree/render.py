@@ -121,12 +121,12 @@ def _paint(
                     (v for k, v in icons.name_glob.items() if fnmatch(node.name, k)),
                     icons.default_icon,
                 )
-            ) if settings.use_icons else icons.default_icon
+            ) if settings.view.use_icons else icons.default_icon
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
         yield node.name.replace(linesep, r"\n")
-        if not settings.use_icons and Mode.folder in node.mode:
+        if not settings.view.use_icons and Mode.folder in node.mode:
             yield sep
 
     def gen_decor_post(node: Node) -> Iterator[str]:
