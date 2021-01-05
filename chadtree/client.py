@@ -45,4 +45,4 @@ class ChadClient(BasicClient):
             init_locale(self._settings.lang)
 
         await async_call(nvim, cont)
-        return await super().wait()
+        return await super().wait(nvim)
