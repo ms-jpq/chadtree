@@ -51,18 +51,6 @@ class Session:
 
 
 @dataclass(frozen=True)
-class ColourMapping:
-    hl8: str
-    hl24: str
-
-
-@dataclass(frozen=True)
-class Colours:
-    bit8_mapping: Mapping[str, ColourMapping]
-    exts: Mapping[str, HLgroup]
-
-
-@dataclass(frozen=True)
 class UserFolderIcons:
     open: str
     closed: str
@@ -92,22 +80,33 @@ class UserIcons:
 
 
 @dataclass(frozen=True)
+class UserColourMapping:
+    hl8: str
+    hl24: str
+
+
+@dataclass(frozen=True)
+class UserHLGroups:
+    quickfix: str
+    version_control: str
+
+
+@dataclass(frozen=True)
+class UserHighlights:
+    groups: UserHLGroups
+    eight_bit: Mapping[str, UserColourMapping]
+    exts: Mapping[str, HLgroup]
+
+
+@dataclass(frozen=True)
 class ViewOptions:
     time_fmt: str
     icons: UserIcons
-    quickfix_hl: str
-    version_ctl_hl: str
-    colours: Colours
+    highlights: UserHighlights
 
 
 @dataclass(frozen=True)
-class UpdateTime:
-    min_time: float
-    max_time: float
-
-
-@dataclass(frozen=True)
-class VersionControlOptions:
+class VersionCtlOpts:
     defer: bool
     enable: bool
 
@@ -147,9 +146,8 @@ class Settings:
     session: bool
     show_hidden: bool
     sort_by: Sequence[Sortby]
-    update: UpdateTime
     use_icons: bool
-    version_ctl: VersionControlOptions
+    version_ctl: VersionCtlOpts
     width: int
     win_local_opts: Sequence[str]
 

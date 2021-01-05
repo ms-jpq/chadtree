@@ -20,13 +20,13 @@ from .da import load_json
 from .highlight import gen_hl
 from .ls_colours import parse_ls_colours
 from .types import (
-    ColourMapping,
-    Colours,
+    UserHLGroups,
+    UserHighlights,
     MimetypeOptions,
     Settings,
+    UserColourMapping,
     Sortby,
-    UpdateTime,
-    VersionControlOptions,
+    VersionCtlOpts,
     ViewOptions,
 )
 
@@ -42,19 +42,13 @@ class UserConfig:
     show_hidden: bool
     sort_by: Sequence[Sortby]
     use_icons: Union[bool, Literal["emoji"]]
-    version_control: VersionControlOptions
+    version_control: VersionCtlOpts
     width: int
 
 
 @dataclass(frozen=True)
-class UserHLOpt:
-    quickfix: str
-    version_control: str
-
-
-@dataclass(frozen=True)
 class UserView:
-    highlights: UserHLOpt
+    highlights: UserHLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
 
@@ -67,8 +61,7 @@ class UserIgnore:
 
 @dataclass(frozen=True)
 class UserColours:
-    eight_bit: Mapping[str, ColourMapping]
-
+    eight_bit: Mapping[str, UserColourMapping]
 
 
 def initial(
@@ -112,11 +105,7 @@ def initial(
         version_ctl_hl=view["highlights"]["version_control"],
     )
 
-    update = UpdateTime(
-        min_time=config["update_time"]["min"], max_time=config["update_time"]["max"]
-    )
-
-    version_ctl = VersionControlOptions(
+    version_ctl = VersionCtlOpts(
         defer=config["version_control"]["defer"],
         enable=config["version_control"]["enable"],
     )

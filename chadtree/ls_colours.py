@@ -18,7 +18,7 @@ from uuid import uuid4
 from pynvim_pp.highlight import HLgroup
 
 from .consts import FM_HL_PREFIX
-from .types import Colours, HLcontext, Mode
+from .types import  HLcontext, Mode, UserHighlights
 
 
 class _Style(IntEnum):
@@ -230,8 +230,8 @@ def _parse_styling(codes: str) -> _Styling:
     return styling
 
 
-def _parseHLGroup(styling: _Styling, colours: Colours) -> HLgroup:
-    bit8_mapping = colours.bit8_mapping
+def _parseHLGroup(styling: _Styling, colours: UserHighlights) -> HLgroup:
+    bit8_mapping = colours.eight_bit
     fg, bg = styling.foreground, styling.background
     name = f"{FM_HL_PREFIX}_ls_{uuid4().hex}"
     cterm = {
@@ -268,7 +268,7 @@ def _parseHLGroup(styling: _Styling, colours: Colours) -> HLgroup:
     return group
 
 
-def parse_ls_colours(colours: Colours) -> HLcontext:
+def parse_ls_colours(colours: UserHighlights) -> HLcontext:
     ls_colours = environ.get("LS_COLORS", "")
     hl_lookup: MutableMapping[str, HLgroup] = {
         k: _parseHLGroup(_parse_styling(v), colours=colours)

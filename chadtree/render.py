@@ -69,15 +69,13 @@ def _paint(
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
     context = settings.hl_context
-    icon_lookup = settings.view.colours.exts
     mode_lookup_pre, mode_lookup_post, ext_lookup, name_lookup = (
         context.mode_lookup_pre,
         context.mode_lookup_post,
         context.ext_lookup,
         context.name_lookup,
     )
-    icons = settings.view.icons
-    use_icons = settings.use_icons
+    icons, highlights = settings.view.icons, settings.view.highlights
 
     def search_hl(node: Node) -> Optional[HLgroup]:
         s_modes = sorted(node.mode)
@@ -120,19 +118,15 @@ def _paint(
                 icons.name_exact.get(node.name, "")
                 or icons.type.get(node.ext or "", "")
                 or next(
-                    (
-                        v
-                        for k, v in icons.name_glob.items()
-                        if fnmatch(node.name, k)
-                    ),
+                    (v for k, v in icons.name_glob.items() if fnmatch(node.name, k)),
                     icons.default_icon,
                 )
-            ) if use_icons else icons.default_icon
+            ) if settings.use_icons else icons.default_icon
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
         yield node.name.replace(linesep, r"\n")
-        if not use_icons and Mode.folder in node.mode:
+        if not settings.use_icons and Mode.folder in node.mode:
             yield sep
 
     def gen_decor_post(node: Node) -> Iterator[str]:
@@ -148,16 +142,16 @@ def _paint(
         qf_count = qf.locations[path]
         stat = vc.status.get(path)
         if qf_count:
-            yield Badge(text=f"({qf_count})", group=icons.quickfix_hl)
+            yield Badge(text=f"({qf_count})", group=highlights.groups.quickfix)
         if stat:
-            yield Badge(text=f"[{stat}]", group=icons.version_ctl_hl)
+            yield Badge(text=f"[{stat}]", group=highlights.groups.version_control)
 
     def gen_highlights(
         node: Node, pre: str, icon: str, name: str
     ) -> Iterator[Highlight]:
         begin = len(pre.encode())
         end = begin + len(icon.encode())
-        group = icon_lookup.get(node.ext or "")
+        group = highlights.exts.get(node.ext or "")
         if group:
             hl = Highlight(group=group.name, begin=begin, end=end)
             yield hl
