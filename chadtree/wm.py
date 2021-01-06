@@ -15,6 +15,7 @@ from pynvim.api.tabpage import Tabpage
 from pynvim.api.window import Window
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.hold import hold_win_pos
+from pynvim_pp.keymap import Keymap
 from std2.contextlib import nil_manager
 
 from .consts import FM_FILETYPE, FM_NAMESPACE
@@ -91,23 +92,21 @@ def find_current_buffer_name(nvim: Nvim) -> str:
 
 
 def _new_fm_buffer(nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]) -> Buffer:
-    options = {"noremap": True, "silent": True, "nowait": True}
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
     nvim.api.buf_set_option(buffer, "filetype", FM_FILETYPE)
 
+    km = Keymap()
     for function, mappings in keymap.items():
         for mapping in mappings:
-            nvim.api.buf_set_keymap(
-                buffer, "n", mapping, f"<cmd>lua {function}(false)<cr>", options
-            )
-            nvim.api.buf_set_keymap(
-                buffer,
-                "v",
-                mapping,
-                f"<esc><cmd>lua {function}(true)<cr>",
-                options,
-            )
+            km.n(
+                mapping, noremap=True, silent=True, nowait=True
+            ) << f"<cmd>lua {function}(false)<cr>"
+            km.v(
+                mapping, noremap=True, silent=True, nowait=True
+            ) << f"<cmd>lua {function}(true)<cr>"
+
+    km.drain().commit(nvim)
     return buffer
 
 
