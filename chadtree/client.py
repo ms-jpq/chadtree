@@ -42,7 +42,8 @@ class ChadClient(BasicClient):
             atomic, specs = rpc.drain(nvim.channel_id)
             self._handlers.update(specs)
             self._settings = initial_settings(nvim, specs)
-            hl = highlight()
+            hl_ctx = self._settings.view.hl_context
+            hl = highlight(*hl_ctx.groups)
             (atomic + autocmd.drain() + hl).commit(nvim)
 
         await async_call(nvim, cont)
