@@ -1,13 +1,13 @@
-from asyncio.locks import Event
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from pynvim import Nvim
 from pynvim_pp.client import BasicClient
 from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import async_call, write
-from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
+from pynvim_pp.rpc import RpcMsg, nil_handler
 
 from .localization import init as init_locale
+from .registry import autocmd, rpc
 from .settings import initial as initial_settings
 from .state import initial as initial_state
 from .transitions import redraw
@@ -17,7 +17,6 @@ from .types import Settings, Stage, State
 class ChadClient(BasicClient):
     def __init__(self) -> None:
         super().__init__()
-        self._init_lock = Event()
         self._state: Optional[State] = None
         self._settings: Optional[Settings] = None
 
@@ -27,7 +26,6 @@ class ChadClient(BasicClient):
         if handler.is_async:
 
             async def cont() -> None:
-                await self._init_lock.wait()
                 stage: Optional[Stage] = await handler(
                     nvim, state=self._state, settings=self._settings, *args
                 )
@@ -41,8 +39,12 @@ class ChadClient(BasicClient):
 
     async def wait(self, nvim: Nvim) -> int:
         def cont() -> None:
-            self._settings = initial_settings(nvim)
-            init_locale(self._settings.lang)
+            atomic, specs = rpc.drain(nvim.channel_id)
+            self._handlers.update(specs)
+            self._settings = initial_settings(nvim, specs)
+            (atomic + autocmd.drain()).commit(nvim)
 
         await async_call(nvim, cont)
+        self._state = await initial_state(nvim, settings=cast(Settings, self._settings))
+        init_locale(cast(Settings, self._settings).lang)
         return await super().wait(nvim)

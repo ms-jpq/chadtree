@@ -106,7 +106,7 @@ def _new_fm_buffer(nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]) -> Buffer:
                 mapping, noremap=True, silent=True, nowait=True
             ) << f"<cmd>lua {function}(true)<cr>"
 
-    km.drain().commit(nvim)
+    km.drain(buf=buffer).commit(nvim)
     return buffer
 
 

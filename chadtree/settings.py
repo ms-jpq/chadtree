@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+from locale import strxfrm
 from typing import FrozenSet, Literal, Mapping, Optional, Sequence, Union
 
 from pynvim.api.nvim import Nvim
+from pynvim_pp.rpc import RpcSpec
 from std2.pickle import DecodeError, decode
 from std2.tree import merge
 
@@ -62,9 +64,7 @@ class UserColours:
     eight_bit: Mapping[str, UserColourMapping]
 
 
-def initial(
-    nvim: Nvim,
-) -> Settings:
+def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
     user_view = nvim.vars.get(VIEW_VAR, {})
     user_ignores = nvim.vars.get(IGNORES_VAR, {})
@@ -102,10 +102,21 @@ def initial(
         time_fmt=view.time_format,
     )
 
+    keymap = {f"CHAD{k}": v for k, v in config.keymap.items()}
+    legal_keys = frozenset(name for name, _ in specs)
+    extra_keys = keymap.keys() - legal_keys
+    if extra_keys:
+        raise DecodeError(
+            path=(UserConfig, "<field 'keymap'>"),
+            actual=None,
+            missing_keys=(),
+            extra_keys=sorted(extra_keys, key=strxfrm),
+        )
+
     settings = Settings(
         follow=config.follow,
         ignores=ignore,
-        keymap=config.keymap,
+        keymap=keymap,
         lang=config.lang,
         mime=config.mimetypes,
         open_left=config.open_left,
