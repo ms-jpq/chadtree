@@ -8,7 +8,7 @@
     "cursorline": true,
     "number": false,
     "relativenumber": false,
-    "signcolumn": false,
+    "signcolumn": "no",
     "winfixwidth": true,
     "wrap": false
   }

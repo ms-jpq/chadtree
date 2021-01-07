@@ -77,14 +77,6 @@ from .wm import (
 )
 
 
-def find_buffer(nvim: Nvim, bufnr: int) -> Optional[Buffer]:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
-    for buffer in buffers:
-        if buffer.number == bufnr:
-            return buffer
-    return None
-
-
 async def _index(nvim: Nvim, state: State) -> Optional[Node]:
     def cont() -> Optional[Node]:
         window: Window = nvim.api.get_current_win()
@@ -165,16 +157,18 @@ async def _change_dir(
 
 
 async def _refocus(nvim: Nvim, state: State, settings: Settings) -> Stage:
-    """
-    Follow cwd update
-    """
-
     cwd = await getcwd(nvim)
     return await _change_dir(nvim, state=state, settings=settings, new_base=cwd)
 
 
 @rpc(blocking=False, name="CHADrefocus")
-async def c_changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_changedir(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
+    """
+    Follow cwd update
+    """
+
     return await _refocus(nvim, state=state, settings=settings)
 
 
@@ -228,7 +222,7 @@ autocmd("QuickfixCmdPost") << f"lua {a_quickfix.name}()"
 
 
 @rpc(blocking=False, name="CHADquit")
-async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
+async def c_quit(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None:
     """
     Close sidebar
     """
@@ -282,7 +276,9 @@ async def _resize(
 
 
 @rpc(blocking=False, name="CHADbigger")
-async def c_bigger(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_bigger(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Bigger sidebar
     """
@@ -290,7 +286,9 @@ async def c_bigger(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 
 @rpc(blocking=False, name="CHADsmaller")
-async def c_smaller(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_smaller(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Smaller sidebar
     """
@@ -368,7 +366,9 @@ async def _click(
 
 
 @rpc(blocking=False, name="CHADprimary")
-async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_primary(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open
@@ -380,7 +380,9 @@ async def c_primary(nvim: Nvim, state: State, settings: Settings) -> Optional[St
 
 
 @rpc(blocking=False, name="CHADsecondary")
-async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_secondary(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> preview
@@ -392,7 +394,9 @@ async def c_secondary(nvim: Nvim, state: State, settings: Settings) -> Optional[
 
 
 @rpc(blocking=False, name="CHADtertiary")
-async def c_tertiary(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_tertiary(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in new tab
@@ -404,7 +408,9 @@ async def c_tertiary(nvim: Nvim, state: State, settings: Settings) -> Optional[S
 
 
 @rpc(blocking=False, name="CHADv_split")
-async def c_v_split(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_v_split(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in vertical split
@@ -416,7 +422,9 @@ async def c_v_split(nvim: Nvim, state: State, settings: Settings) -> Optional[St
 
 
 @rpc(blocking=False, name="CHADh_split")
-async def c_h_split(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_h_split(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in horizontal split
@@ -429,7 +437,7 @@ async def c_h_split(nvim: Nvim, state: State, settings: Settings) -> Optional[St
 
 @rpc(blocking=False, name="CHADchange_focus")
 async def c_change_focus(
-    nvim: Nvim, state: State, settings: Settings
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Refocus root directory
@@ -447,7 +455,7 @@ async def c_change_focus(
 
 @rpc(blocking=False, name="CHADchange_focus_up")
 async def c_change_focus_up(
-    nvim: Nvim, state: State, settings: Settings
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Refocus root directory up
@@ -462,7 +470,9 @@ async def c_change_focus_up(
 
 
 @rpc(blocking=False, name="CHADcollapse")
-async def c_collapse(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_collapse(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Collapse folder
     """
@@ -568,13 +578,15 @@ autocmd("BufWritePost", "FocusGained") << f"lua {a_schedule_update.name}()"
 
 
 @rpc(blocking=False, name="CHADrefresh")
-async def c_refresh(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_refresh(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     return await _refresh(nvim, state=state, settings=settings, write_out=True)
 
 
 @rpc(blocking=False, name="CHADjump_to_current")
 async def c_jump_to_current(
-    nvim: Nvim, state: State, settings: Settings
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Jump to active file
@@ -592,7 +604,9 @@ async def c_jump_to_current(
 
 
 @rpc(blocking=False, name="CHADtoggle_hidden")
-async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_hidden(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Toggle hidden
     """
@@ -604,7 +618,9 @@ async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 
 @rpc(blocking=False, name="CHADtoggle_follow")
-async def c_toggle_follow(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_toggle_follow(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Toggle follow
     """
@@ -615,7 +631,9 @@ async def c_toggle_follow(nvim: Nvim, state: State, settings: Settings) -> Stage
 
 
 @rpc(blocking=False, name="CHADtoggle_version_control")
-async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_toggle_vc(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Toggle version control
     """
@@ -628,7 +646,9 @@ async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 
 @rpc(blocking=False, name="CHADfilter")
-async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_new_filter(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Update filter
     """
@@ -647,7 +667,9 @@ async def c_new_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 
 @rpc(blocking=False, name="CHADsearch")
-async def c_new_search(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_new_search(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     New search params
     """
@@ -697,7 +719,7 @@ async def c_copy_name(
 
 
 @rpc(blocking=False, name="CHADstat")
-async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
+async def c_stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None:
     """
     Print file stat to cmdline
     """
@@ -721,7 +743,9 @@ async def c_stat(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 @rpc(blocking=False, name="CHADnew")
-async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_new(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     new file / folder
     """
@@ -765,7 +789,9 @@ async def c_new(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
 
 
 @rpc(blocking=False, name="CHADrename")
-async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_rename(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     rename file / folder
     """
@@ -812,7 +838,9 @@ async def c_rename(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
 
 
 @rpc(blocking=False, name="CHADclear_selection")
-async def c_clear_selection(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_clear_selection(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Clear selected
     """
@@ -822,7 +850,9 @@ async def c_clear_selection(nvim: Nvim, state: State, settings: Settings) -> Sta
 
 
 @rpc(blocking=False, name="CHADclear_filter")
-async def c_clear_filter(nvim: Nvim, state: State, settings: Settings) -> Stage:
+async def c_clear_filter(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Clear filter
     """
@@ -1027,7 +1057,9 @@ async def _operation(
 
 
 @rpc(blocking=False, name="CHADcut")
-async def c_cut(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_cut(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Cut selected
     """
@@ -1038,7 +1070,9 @@ async def c_cut(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]
 
 
 @rpc(blocking=False, name="CHADcopy")
-async def c_copy(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def c_copy(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Copy selected
     """
@@ -1049,7 +1083,9 @@ async def c_copy(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage
 
 
 @rpc(blocking=False, name="CHADopen_sys")
-async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> None:
+async def c_open_system(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> None:
     """
     Open using finder / dolphin, etc
     """
@@ -1060,11 +1096,3 @@ async def c_open_system(nvim: Nvim, state: State, settings: Settings) -> None:
             await open_gui(node.path)
         except SystemIntegrationError as e:
             await write(nvim, e)
-
-
-#         groups = chain(
-#             self.settings.hl_context.groups,
-#             self.settings.icons.colours.exts.values(),
-#         )
-# highlight(*groups)
-#         await add_hl_groups(self.nvim, groups=groups)

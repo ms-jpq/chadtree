@@ -27,7 +27,7 @@ class ChadClient(BasicClient):
 
             async def cont() -> None:
                 stage: Optional[Stage] = await handler(
-                    nvim, state=self._state, settings=self._settings, *args
+                    nvim, self._state, self._settings, *args
                 )
                 if stage:
                     self._state = stage.state

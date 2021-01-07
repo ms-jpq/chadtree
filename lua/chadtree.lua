@@ -43,7 +43,7 @@ chad_open_cmd = function (...)
   end
 
   if _G[open_cmd] then
-    _G[open_cmd]()
+    _G[open_cmd](args)
   else
     vim.defer_fn(function ()
       chad_open_cmd(unpack(args))
