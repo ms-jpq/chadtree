@@ -268,23 +268,6 @@ async def c_open(
             return Stage(state)
 
 
-#     @function("CHADtoggle_follow")
-#     def toggle_follow(self, args: Sequence[Any]) -> None:
-#         """
-#         Toggle follow
-#         """
-
-#         self._run(c_toggle_follow)
-
-#     @function("CHADtoggle_version_control")
-#     def toggle_vc(self, args: Sequence[Any]) -> None:
-#         """
-#         Toggle version control
-#         """
-
-#         self._run(c_toggle_vc)
-
-
 async def _resize(
     nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]
 ) -> Stage:
@@ -620,15 +603,23 @@ async def c_hidden(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
-@rpc(blocking=False)
+@rpc(blocking=False, name="CHADtoggle_follow")
 async def c_toggle_follow(nvim: Nvim, state: State, settings: Settings) -> Stage:
+    """
+    Toggle follow
+    """
+
     new_state = await forward(state, settings=settings, follow=not state.follow)
     await write(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
     return Stage(new_state)
 
 
-@rpc(blocking=False)
+@rpc(blocking=False, name="CHADtoggle_version_control")
 async def c_toggle_vc(nvim: Nvim, state: State, settings: Settings) -> Stage:
+    """
+    Toggle version control
+    """
+
     enable_vc = not state.enable_vc
     vc = await _vc_stat(enable_vc)
     new_state = await forward(state, settings=settings, enable_vc=enable_vc, vc=vc)

@@ -31,7 +31,7 @@ from .types import (
 def session_path(cwd: str) -> Path:
     hashed = sha1(cwd.encode()).hexdigest()
     part = SESSION_DIR / hashed
-    return part.with_suffix("json")
+    return part.with_suffix(".json")
 
 
 def load_session(cwd: str) -> Session:
