@@ -239,7 +239,7 @@ async def c_quit(nvim: Nvim, state: State, settings: Settings) -> None:
     await async_call(nvim, cont)
 
 
-@rpc(blocking=False)
+@rpc(blocking=False, name="CHADopen")
 async def c_open(
     nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
 ) -> Optional[Stage]:

@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-from typing import NoReturn, Optional
+from typing import NoReturn, Optional, Sequence
 
-from .types import OpenArgs, Sequence
+from .types import OpenArgs
 
 
 class ArgparseError(Exception):

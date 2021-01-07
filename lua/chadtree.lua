@@ -22,6 +22,34 @@ local py_main = function ()
 end
 
 
-local main = py_main()
-local args = { "python3", main, vim.fn.serverstart() }
-vim.fn.jobstart(args, { on_exit = on_exit, on_stdout = on_stdout, on_stderr = on_stderr })
+local start = function ()
+  local main = py_main()
+  local args = { "python3", main, vim.fn.serverstart() }
+  local job_id = vim.fn.jobstart(args, { on_exit = on_exit, on_stdout = on_stdout, on_stderr = on_stderr })
+  return job_id
+end
+
+
+local POLLING_RATE = 10
+local job_id = nil
+local open_cmd = "CHADopen"
+
+
+chad_open_cmd = function (...)
+  local args = {...}
+
+  if not job_id then
+    job_id = start()
+  end
+
+  if _G[open_cmd] then
+    _G[open_cmd]()
+  else
+    vim.defer_fn(function ()
+      chad_open_cmd(unpack(args))
+    end, POLLING_RATE)
+  end
+end
+
+
+vim.api.nvim_command[[command! -nargs=* CHADopen lua chad_open_cmd(<f-args>)]]
