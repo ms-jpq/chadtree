@@ -1,11 +1,10 @@
-from asyncio import gather
 from locale import strxfrm
-from os import linesep
+from os import environ, linesep
 from os.path import join, sep
 from shutil import which
+from subprocess import DEVNULL, PIPE, run
 from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
-from std2.asyncio.subprocess import call
 from std2.types import freeze
 
 from .fs import ancestors
@@ -16,24 +15,36 @@ _GIT_SUBMODULE_MARKER = "Entering "
 _GIT_ENV = {"LC_ALL": "C"}
 
 
-class GitError(Exception):
+class _GitError(Exception):
     pass
 
 
-async def _root() -> str:
-    ret = await call("git", "rev-parse", "--show-toplevel")
-    if ret.code != 0:
-        raise GitError(ret.err)
+def _root() -> str:
+    ret = run(
+        ("git", "rev-parse", "--show-toplevel"),
+        stdin=DEVNULL,
+        stdout=PIPE,
+        stderr=PIPE,
+        text=True,
+    )
+    if ret.returncode != 0:
+        raise _GitError(ret.stderr)
     else:
-        return ret.out.decode().rstrip()
+        return ret.stdout.rstrip()
 
 
-async def _stat_main() -> Mapping[str, str]:
-    ret = await call(*_GIT_LIST_CMD, "-z")
-    if ret.code != 0:
-        raise GitError(ret.err)
+def _stat_main() -> Mapping[str, str]:
+    ret = run(
+        tuple(_GIT_LIST_CMD, "-z"),
+        stdin=DEVNULL,
+        stdout=PIPE,
+        stderr=PIPE,
+        text=True,
+    )
+    if ret.returncode != 0:
+        raise _GitError(ret.stderr)
     else:
-        it = iter(ret.out.decode().split("\0"))
+        it = iter(ret.stdout.split("\0"))
 
         def cont() -> Iterator[Tuple[str, str]]:
             for line in it:
@@ -46,19 +57,19 @@ async def _stat_main() -> Mapping[str, str]:
         return entries
 
 
-async def _stat_sub_modules() -> Mapping[str, str]:
-    ret = await call(
-        "git",
-        "submodule",
-        "foreach",
-        "--recursive",
-        " ".join(_GIT_LIST_CMD),
-        env=_GIT_ENV,
+def _stat_sub_modules() -> Mapping[str, str]:
+    ret = run(
+        ("git", "submodule", "foreach", "--recursive", " ".join(_GIT_LIST_CMD)),
+        env={**environ, **_GIT_ENV},
+        stdin=DEVNULL,
+        stdout=PIPE,
+        stderr=PIPE,
+        text=True,
     )
-    if ret.code != 0:
-        raise GitError(ret.err)
+    if ret.returncode != 0:
+        raise _GitError(ret.stderr)
     else:
-        it = iter(ret.out.decode().split(linesep))
+        it = iter(ret.stdout.split(linesep))
 
         def cont() -> Iterator[Tuple[str, str]]:
             root = ""
@@ -97,13 +108,13 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
     return VCStatus(ignored=freeze(ignored), status=freeze(status))
 
 
-async def status() -> VCStatus:
+def status() -> VCStatus:
     if which("git"):
         try:
-            r, s_main, s_sub = await gather(_root(), _stat_main(), _stat_sub_modules())
+            r, s_main, s_sub = _root(), _stat_main(), _stat_sub_modules()
             stats = {**s_sub, **s_main}
             return _parse(r, stats)
-        except GitError:
+        except _GitError:
             return VCStatus()
     else:
         return VCStatus()
