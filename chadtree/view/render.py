@@ -9,21 +9,13 @@ from pynvim_pp.highlight import HLgroup
 from std2.functools import constantly
 from std2.types import never
 
-from .fs.types import Mode
-from .settings.types import Settings
-from .types import (
-    Derived,
-    FilterPattern,
-    Index,
-    Node,
-    QuickFix,
-    Selection,
-    VCStatus,
-)
-from .view.types import Badge, Highlight, Render, Sortby
+from ..fs.types import Mode, Node
+from ..settings.types import Settings
+from ..types import FilterPattern, Index, QuickFix, Selection, VCStatus
+from .types import Badge, Derived, Highlight, Render, Sortby
 
 
-class CompVals(IntEnum):
+class _CompVals(IntEnum):
     FOLDER = auto()
     FILE = auto()
 
@@ -33,7 +25,7 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
         def cont() -> Iterator[Any]:
             for sb in sortby:
                 if sb is Sortby.is_folder:
-                    yield CompVals.FOLDER if Mode.folder in node.mode else CompVals.FILE
+                    yield _CompVals.FOLDER if Mode.folder in node.mode else _CompVals.FILE
                 elif sb is Sortby.ext:
                     yield strxfrm(node.ext or ""),
                 elif sb is Sortby.fname:

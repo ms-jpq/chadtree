@@ -12,7 +12,7 @@ from .da import dump_json, load_json
 from .git import status
 from .nvim import getcwd
 from .quickfix import quickfix
-from .render import render
+from .view.render import render
 from .types import (
     FilterPattern,
     Index,
