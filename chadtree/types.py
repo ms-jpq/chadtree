@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum,  auto
-from typing import FrozenSet, Mapping, Optional, Sequence, Union
+from enum import Enum, auto
+from typing import FrozenSet, Mapping, Optional
 
-from pynvim_pp.highlight import HLgroup
-from .fs.types import Node, Mode
+from .fs.types import Node
+from .view.types import Derived
+
 Index = FrozenSet[str]
 Selection = FrozenSet[str]
 
@@ -13,120 +14,6 @@ Selection = FrozenSet[str]
 @dataclass(frozen=True)
 class OpenArgs:
     focus: bool
-
-
-
-@dataclass(frozen=True)
-class Session:
-    index: Index
-    show_hidden: bool
-
-
-@dataclass(frozen=True)
-class UserFolderIcons:
-    open: str
-    closed: str
-
-
-@dataclass(frozen=True)
-class UserLinkIcons:
-    normal: str
-    broken: str
-
-
-@dataclass(frozen=True)
-class UserStatusIcons:
-    active: str
-    selected: str
-
-
-@dataclass(frozen=True)
-class UserIcons:
-    default_icon: str
-    folder: UserFolderIcons
-    link: UserLinkIcons
-    name_exact: Mapping[str, str]
-    name_glob: Mapping[str, str]
-    status: UserStatusIcons
-    type: Mapping[str, str]
-
-
-@dataclass(frozen=True)
-class UserColourMapping:
-    hl8: str
-    hl24: str
-
-
-@dataclass(frozen=True)
-class UserHLGroups:
-    quickfix: str
-    version_control: str
-
-
-@dataclass(frozen=True)
-class UserHighlights:
-    eight_bit: Mapping[str, UserColourMapping]
-    exts: Mapping[str, HLgroup]
-    groups: UserHLGroups
-
-
-@dataclass(frozen=True)
-class HLcontext:
-    ext_lookup: Mapping[str, HLgroup]
-    groups: Sequence[HLgroup]
-    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
-    mode_lookup_pre: Mapping[Mode, HLgroup]
-    name_lookup: Mapping[str, HLgroup]
-
-
-class Sortby(Enum):
-    is_folder = auto()
-    ext = auto()
-    fname = auto()
-
-
-@dataclass(frozen=True)
-class ViewOptions:
-    highlights: UserHighlights
-    hl_context: HLcontext
-    icons: UserIcons
-    sort_by: Sequence[Sortby]
-    time_fmt: str
-    use_icons: bool
-
-
-@dataclass(frozen=True)
-class VersionCtlOpts:
-    defer: bool
-    enable: bool
-
-
-@dataclass(frozen=True)
-class MimetypeOptions:
-    warn: FrozenSet[str]
-    ignore_exts: FrozenSet[str]
-
-
-@dataclass(frozen=True)
-class UserIgnore:
-    name: FrozenSet[str]
-    path: FrozenSet[str]
-
-
-@dataclass(frozen=True)
-class Settings:
-    follow: bool
-    ignores: UserIgnore
-    keymap: Mapping[str, FrozenSet[str]]
-    lang: Optional[str]
-    mime: MimetypeOptions
-    open_left: bool
-    session: bool
-    show_hidden: bool
-    version_ctl: VersionCtlOpts
-    view: ViewOptions
-    width: int
-    win_local_opts: Mapping[str, Union[bool, str]]
 
 
 @dataclass(frozen=True)
@@ -143,33 +30,6 @@ class QuickFix:
 class VCStatus:
     ignored: FrozenSet[str] = frozenset()
     status: Mapping[str, str] = field(default_factory=dict)
-
-
-@dataclass(frozen=True)
-class Badge:
-    text: str
-    group: str
-
-
-@dataclass(frozen=True)
-class Highlight:
-    begin: int
-    end: int
-    group: str
-
-
-@dataclass(frozen=True)
-class Render:
-    badges: Sequence[Badge]
-    highlights: Sequence[Highlight]
-    line: str
-
-
-@dataclass(frozen=True)
-class Derived:
-    lookup: Sequence[Node]
-    paths_lookup: Mapping[str, int]
-    rendered: Sequence[Render]
 
 
 @dataclass(frozen=True)

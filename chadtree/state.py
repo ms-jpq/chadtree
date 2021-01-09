@@ -5,7 +5,7 @@ from typing import FrozenSet, Optional, Union, cast
 from pynvim import Nvim
 from std2.pickle import decode, encode
 from std2.types import Void, VoidType, or_else
-
+from dataclasses import dataclass
 from .fs.cartographer import new, update
 from .consts import SESSION_DIR
 from .da import dump_json, load_json
@@ -16,34 +16,37 @@ from .render import render
 from .types import (
     FilterPattern,
     Index,
-    Mode,
-    Node,
     QuickFix,
     Selection,
-    Session,
-    Settings,
     State,
     VCStatus,
 )
+from .fs.types import Node, Mode
+from .settings.types import Settings
+
+@dataclass(frozen=True)
+class _Session:
+    index: Index
+    show_hidden: bool
 
 
-def session_path(cwd: str) -> Path:
+def _session_path(cwd: str) -> Path:
     hashed = sha1(cwd.encode()).hexdigest()
     part = SESSION_DIR / hashed
     return part.with_suffix(".json")
 
 
-def load_session(cwd: str) -> Session:
-    load_path = session_path(cwd)
+def load_session(cwd: str) -> _Session:
+    load_path = _session_path(cwd)
     try:
-        return decode(Session, load_json(load_path))
+        return decode(_Session, load_json(load_path))
     except Exception:
-        return Session(index=frozenset((cwd,)), show_hidden=False)
+        return _Session(index=frozenset((cwd,)), show_hidden=False)
 
 
 def dump_session(state: State) -> None:
-    load_path = session_path(state.root.path)
-    json = Session(index=state.index, show_hidden=state.show_hidden)
+    load_path = _session_path(state.root.path)
+    json = _Session(index=state.index, show_hidden=state.show_hidden)
     dump_json(load_path, encode(json))
 
 

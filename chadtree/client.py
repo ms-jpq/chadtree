@@ -10,9 +10,10 @@ from pynvim_pp.rpc import RpcMsg, nil_handler
 from .localization import init as init_locale
 from .registry import autocmd, rpc
 from .settings.load import initial as initial_settings
+from .settings.types import Settings
 from .state import initial as initial_state
 from .transitions import redraw
-from .types import Settings, Stage, State
+from .types import Stage, State
 
 
 class ChadClient(BasicClient):
