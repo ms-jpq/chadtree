@@ -20,7 +20,7 @@ from ..consts import (
     VIEW_VAR,
 )
 from ..da import load_json
-from ..highlight import gen_hl
+from ..view.highlight import gen_hl
 from ..view.ls_colours import parse_ls_colours
 from ..view.types import (
     Sortby,
