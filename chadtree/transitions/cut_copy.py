@@ -39,7 +39,7 @@ def _operation(
 ) -> Optional[Stage]:
     node = index(nvim, state=state)
     selection = state.selection
-    unified = tuple(unify_ancestors(selection))
+    unified = unify_ancestors(selection)
     if unified and node:
         pre_operations = {src: _find_dest(src, node) for src in unified}
         pre_existing = {s: d for s, d in pre_operations.items() if exists(d)}

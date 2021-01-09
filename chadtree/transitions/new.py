@@ -17,8 +17,8 @@ from .shared.refresh import refresh
 from .types import ClickType, Stage
 
 
-@rpc(blocking=False, name="CHADnew")
-def c_new(
+@rpc(blocking=False)
+def _new(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
@@ -42,7 +42,7 @@ def c_new(
                 s_write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
             else:
-                paths = frozenset(ancestors(path))
+                paths = ancestors(path)
                 _index = state.index | paths
                 new_state = forward(state, settings=settings, index=_index, paths=paths)
                 nxt = open_file(

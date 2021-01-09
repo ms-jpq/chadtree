@@ -35,9 +35,7 @@ def refresh(
         if state.filter_pattern
         else frozenset(s for s in state.selection if exists(s))
     )
-    current_paths: FrozenSet[str] = (
-        frozenset(ancestors(current)) if state.follow else frozenset()
-    )
+    current_paths: FrozenSet[str] = ancestors(current) if state.follow else frozenset()
     new_index = index if new_current else index | current_paths
 
     qf = quickfix(nvim)

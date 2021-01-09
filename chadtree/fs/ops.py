@@ -6,35 +6,26 @@ from os import readlink
 from os import remove as rm
 from os import sep, stat
 from os.path import dirname
-from pathlib import Path
+from pathlib import Path, PurePath
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
-from typing import FrozenSet, Iterable, Iterator, Mapping, Optional
+from typing import FrozenSet, Iterable, Mapping, Optional
 
 from ..consts import FILE_MODE, FOLDER_MODE
 
 
-def ancestors(path: str) -> Iterator[str]:
-    if not path:
-        return
-    parent = dirname(path)
-    if path == parent:
-        return
-    else:
-        yield from ancestors(parent)
-        yield parent
+def ancestors(path: str) -> FrozenSet[str]:
+    return frozenset(str(p) for p in PurePath(path).parents)
 
 
 def is_parent(*, parent: str, child: str) -> bool:
-    return any(parent == ancestor for ancestor in ancestors(child))
+    return parent in ancestors(child)
 
 
-def unify_ancestors(paths: FrozenSet[str]) -> Iterator[str]:
-    for path in paths:
-        if not any(a in paths for a in ancestors(path)):
-            yield path
+def unify_ancestors(paths: FrozenSet[str]) -> FrozenSet[str]:
+    return frozenset(p for p in paths if ancestors(p).isdisjoint(paths))
 
 
 @dataclass(frozen=True)

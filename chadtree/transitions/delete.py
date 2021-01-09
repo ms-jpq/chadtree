@@ -31,7 +31,7 @@ def _delete(
     selection = state.selection or frozenset(
         node.path for node in indices(nvim, state=state, is_visual=is_visual)
     )
-    unified = tuple(unify_ancestors(selection))
+    unified = unify_ancestors(selection)
     if unified:
         display_paths = linesep.join(
             sorted((display_path(path, state=state) for path in unified), key=strxfrm)

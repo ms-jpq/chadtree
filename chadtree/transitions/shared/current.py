@@ -14,9 +14,7 @@ def current(
     nvim: Nvim, state: State, settings: Settings, current: str
 ) -> Optional[Stage]:
     if is_parent(parent=state.root.path, child=current):
-        paths: FrozenSet[str] = (
-            frozenset(ancestors(current)) if state.follow else frozenset()
-        )
+        paths: FrozenSet[str] = ancestors(current) if state.follow else frozenset()
         index = state.index | paths
         new_state = forward(
             state, settings=settings, index=index, paths=paths, current=current
