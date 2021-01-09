@@ -3,7 +3,6 @@ from typing import Optional
 from pynvim import Nvim
 from pynvim.api.common import NvimError
 
-from ..fs.cartographer import new
 from ..nvim.quickfix import quickfix
 from ..nvim.wm import find_current_buffer_name
 from ..registry import autocmd, rpc
@@ -11,9 +10,9 @@ from ..settings.types import Settings
 from ..state.next import forward
 from ..state.ops import dump_session
 from ..state.types import State
-from .refresh import refresh
+from .shared.current import current, new_cwd
+from .shared.refresh import refresh
 from .types import Stage
-
 
 
 @rpc(blocking=False)
@@ -27,25 +26,14 @@ def _schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[S
 autocmd("BufWritePost", "FocusGained") << f"lua {_schedule_update.name}()"
 
 
-def _change_dir(nvim: Nvim, state: State, settings: Settings, new_base: str) -> Stage:
-    index = state.index | {new_base}
-    root = new(new_base, index=index)
-    new_state = forward(state, settings=settings, root=root, index=index)
-    return Stage(new_state)
-
-
-def _refocus(nvim: Nvim, state: State, settings: Settings) -> Stage:
-    cwd: str = nvim.funcs.getcwd()
-    return _change_dir(nvim, state=state, settings=settings, new_base=cwd)
-
-
 @rpc(blocking=False, name="CHADrefocus")
 def c_changedir(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
     """
     Follow cwd update
     """
 
-    return _refocus(nvim, state=state, settings=settings)
+    cwd: str = nvim.funcs.getcwd()
+    return new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
 
 
 autocmd("DirChanged") << f"lua {c_changedir.name}()"
@@ -57,9 +45,9 @@ def a_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     Follow buffer
     """
 
-    current = find_current_buffer_name(nvim)
-    if current:
-        return _current(nvim, state=state, settings=settings, current=current)
+    curr = find_current_buffer_name(nvim)
+    if curr:
+        return current(nvim, state=state, settings=settings, current=curr)
     else:
         return None
 

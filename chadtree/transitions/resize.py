@@ -3,8 +3,10 @@ from typing import Callable
 
 from pynvim import Nvim
 
+from ..nvim.wm import resize_fm_windows
 from ..registry import rpc
 from ..settings.types import Settings
+from ..state.next import forward
 from ..state.types import State
 from .types import Stage
 

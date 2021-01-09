@@ -1,5 +1,5 @@
 from os.path import exists
-from typing import FrozenSet
+from typing import FrozenSet, Optional
 
 from pynvim import Nvim
 from pynvim_pp.lib import s_write
@@ -7,7 +7,7 @@ from std2.types import Void
 
 from ...fs.ops import ancestors, is_parent
 from ...nvim.quickfix import quickfix
-from ...nvim.wm import find_current_buffer_name
+from ...nvim.wm import find_current_buffer_name, update_buffers
 from ...registry import rpc
 from ...settings.localization import LANG
 from ...settings.types import Settings
@@ -62,3 +62,7 @@ def refresh(
 @rpc(blocking=False)
 def _refresh(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
     return refresh(nvim, state=state, settings=settings, write_out=True)
+
+
+def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
+    update_buffers(nvim, state=state, focus=focus)
