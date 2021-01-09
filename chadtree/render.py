@@ -9,21 +9,18 @@ from pynvim_pp.highlight import HLgroup
 from std2.functools import constantly
 from std2.types import never
 
+from .fs.types import Mode
+from .settings.types import Settings
 from .types import (
-    Badge,
     Derived,
     FilterPattern,
-    Highlight,
     Index,
-    Mode,
     Node,
     QuickFix,
-    Render,
     Selection,
-    Settings,
-    Sortby,
     VCStatus,
 )
+from .view.types import Badge, Highlight, Render, Sortby
 
 
 class CompVals(IntEnum):

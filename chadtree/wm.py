@@ -20,7 +20,9 @@ from std2.contextlib import nil_manager
 
 from .consts import FM_FILETYPE, FM_NAMESPACE
 from .fs.ops import is_parent
-from .types import Badge, ClickType, Highlight, OpenArgs, Settings, State
+from .settings.types import Settings
+from .types import ClickType, OpenArgs, State
+from .view.types import Badge, Highlight
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:

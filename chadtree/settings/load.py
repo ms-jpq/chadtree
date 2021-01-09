@@ -22,18 +22,14 @@ from ..consts import (
 from ..da import load_json
 from ..highlight import gen_hl
 from ..ls_colours import parse_ls_colours
-from ..types import (
-    MimetypeOptions,
-    Settings,
+from ..view.types import (
     Sortby,
     UserColourMapping,
     UserHighlights,
     UserHLGroups,
     UserIcons,
-    UserIgnore,
-    VersionCtlOpts,
-    ViewOptions,
 )
+from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
 
 
 @dataclass(frozen=True)

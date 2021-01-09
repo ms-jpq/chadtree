@@ -22,8 +22,8 @@ from pynvim.api.window import Window
 from pynvim_pp.lib import s_write
 from std2.types import Void
 
-from .fs.cartographer import new as new_root
 from .da import human_readable_size
+from .fs.cartographer import new as new_root
 from .fs.ops import (
     ancestors,
     copy,
@@ -36,6 +36,7 @@ from .fs.ops import (
     rename,
     unify_ancestors,
 )
+from .fs.types import Mode, Node
 from .git import status
 from .localization import LANG
 from .nvim import getcwd
@@ -43,22 +44,12 @@ from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
 from .registry import autocmd, rpc
 from .search import search
+from .settings.types import Settings
 from .state import dump_session, forward
 from .state import index as state_index
 from .state import is_dir
 from .system import SystemIntegrationError, open_gui, trash
-from .types import (
-    ClickType,
-    FilterPattern,
-    Index,
-    Mode,
-    Node,
-    Selection,
-    Settings,
-    Stage,
-    State,
-    VCStatus,
-)
+from .types import ClickType, FilterPattern, Selection, Stage, State, VCStatus
 from .wm import (
     find_current_buffer_name,
     is_fm_buffer,
@@ -887,9 +878,7 @@ def _operation(
             )
 
             question = f"{op_name}{linesep}{msg}?"
-            resp = nvim.funcs.confirm(
-                question, LANG("ask_yesno", linesep=linesep), 2
-            )
+            resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
             ans = resp == 1
 
             if ans:
