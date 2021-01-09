@@ -2,6 +2,7 @@ from os import linesep
 from typing import FrozenSet, Optional
 
 from pynvim import Nvim
+from pynvim_pp.lib import s_write
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -23,7 +24,7 @@ def c_new_search(
 
     cwd = state.root.path
     pattern: Optional[str] = nvim.funcs.input("new_search", "")
-    results = search(pattern or "", cwd=cwd, sep=linesep)
+    results = _search(pattern or "", cwd=cwd, sep=linesep)
     s_write(nvim, results)
 
     return Stage(state)

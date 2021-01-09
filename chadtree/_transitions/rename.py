@@ -1,10 +1,18 @@
+from os.path import dirname, exists, join, relpath
 from typing import Optional
 
 from pynvim import Nvim
+from pynvim_pp.lib import s_write
 
+from ..fs.ops import ancestors, rename
+from ..nvim.wm import kill_buffers
 from ..registry import rpc
+from ..settings.localization import LANG
 from ..settings.types import Settings
+from ..state.next import forward
+from ..state.ops import index
 from ..state.types import State
+from .shared.refresh import refresh
 from .types import Stage
 
 
@@ -16,7 +24,7 @@ def c_rename(
     rename file / folder
     """
 
-    node = _index(nvim, state=state)
+    node = index(nvim, state=state)
     if node:
         prev_name = node.path
         parent = state.root.path
@@ -34,12 +42,12 @@ def c_rename(
                     rename(prev_name, new_name)
                 except Exception as e:
                     s_write(nvim, e, error=True)
-                    return _refresh(nvim, state=state, settings=settings)
+                    return refresh(nvim, state=state, settings=settings)
                 else:
                     paths = frozenset((parent, new_parent, *ancestors(new_parent)))
-                    index = state.index | paths
+                    _index = state.index | paths
                     new_state = forward(
-                        state, settings=settings, index=index, paths=paths
+                        state, settings=settings, index=_index, paths=paths
                     )
                     kill_buffers(nvim, paths=(prev_name,))
                     return Stage(new_state)

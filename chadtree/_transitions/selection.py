@@ -5,6 +5,7 @@ from pynvim import Nvim
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.next import forward
+from ..state.ops import indices
 from ..state.types import State
 from .types import Stage
 
@@ -29,7 +30,7 @@ def c_select(
     Folder / File -> select
     """
 
-    nodes = iter(_indices(nvim, state=state, is_visual=is_visual))
+    nodes = iter(indices(nvim, state=state, is_visual=is_visual))
     if is_visual:
         selection = state.selection ^ {n.path for n in nodes}
         new_state = forward(state, settings=settings, selection=selection)

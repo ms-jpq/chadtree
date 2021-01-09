@@ -17,7 +17,7 @@ from ..state.next import forward
 from ..state.ops import indices
 from ..state.types import State
 from ..view.ops import display_path
-from .refresh import refresh
+from .shared.refresh import refresh
 from .types import Stage, SysError
 
 
