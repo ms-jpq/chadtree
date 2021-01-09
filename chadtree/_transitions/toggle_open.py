@@ -4,7 +4,7 @@ from typing import NoReturn, Optional, Sequence
 
 
 @dataclass(frozen=True)
-class _OpenArgs:
+class OpenArgs:
     focus: bool
 
 class _ArgparseError(Exception):
@@ -20,10 +20,37 @@ class _Argparse(ArgumentParser):
         raise _ArgparseError(msg)
 
 
-def _parse_args(args: Sequence[str]) -> _OpenArgs:
+def _parse_args(args: Sequence[str]) -> OpenArgs:
     parser = _Argparse()
     parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
 
     ns = parser.parse_args(args=args)
-    opts = _OpenArgs(focus=ns.focus)
+    opts = OpenArgs(focus=ns.focus)
     return opts
+
+
+
+@rpc(blocking=False, name="CHADopen")
+def c_open(
+    nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
+) -> Optional[Stage]:
+    """
+    Toggle sidebar
+    """
+
+    try:
+        opts = parse_args(args)
+    except ArgparseError as e:
+        s_write(nvim, e, error=True)
+        return None
+    else:
+        current = find_current_buffer_name(nvim)
+        toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
+
+        stage = _current(nvim, state=state, settings=settings, current=current)
+        if stage:
+            return stage
+        else:
+            return Stage(state)
+
+

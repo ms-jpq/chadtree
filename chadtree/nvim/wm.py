@@ -18,12 +18,12 @@ from pynvim_pp.hold import hold_win_pos
 from pynvim_pp.keymap import Keymap
 from std2.contextlib import nil_manager
 
+from .._transitions.click import ClickType
+from .._transitions.toggle_open import OpenArgs
 from ..consts import FM_FILETYPE, FM_NAMESPACE
 from ..fs.ops import is_parent
-from ..opts import OpenArgs
 from ..settings.types import Settings
 from ..state.types import State
-from ..transitions import ClickType
 from ..view.types import Badge, Highlight
 
 
