@@ -10,7 +10,7 @@ from .fs.cartographer import new, update
 from .consts import SESSION_DIR
 from .da import dump_json, load_json
 from .git import status
-from .quickfix import quickfix
+from .nvim.quickfix import quickfix
 from .view.render import render
 from .types import (
     FilterPattern,

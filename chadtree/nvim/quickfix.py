@@ -5,7 +5,7 @@ from typing import Iterator
 
 from pynvim import Nvim
 
-from .fs.ops import ancestors
+from ..fs.ops import ancestors
 from .types import QuickFix
 
 

@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from itertools import chain
 from locale import strxfrm
 from mimetypes import guess_type
@@ -39,17 +40,8 @@ from .fs.ops import (
 from .fs.types import Mode, Node
 from .git import status
 from .localization import LANG
-from .opts import ArgparseError, parse_args
-from .quickfix import quickfix
-from .registry import autocmd, rpc
-from .search import search
-from .settings.types import Settings
-from .state import dump_session, forward
-from .state import index as state_index
-from .state import is_dir
-from .system import SystemIntegrationError, open_gui, trash
-from .types import ClickType, FilterPattern, Selection, Stage, State, VCStatus
-from .wm import (
+from .nvim.quickfix import quickfix
+from .nvim.wm import (
     find_current_buffer_name,
     is_fm_buffer,
     kill_buffers,
@@ -59,6 +51,23 @@ from .wm import (
     toggle_fm_window,
     update_buffers,
 )
+from .opts import ArgparseError, parse_args
+from .registry import autocmd, rpc
+from .search import search
+from .settings.types import Settings
+from .state import dump_session, forward
+from .state import index as state_index
+from .state import is_dir
+from .system import SystemIntegrationError, open_gui, trash
+from .types import FilterPattern, Selection, Stage, State, VCStatus
+
+
+class ClickType(Enum):
+    primary = auto()
+    secondary = auto()
+    tertiary = auto()
+    v_split = auto()
+    h_split = auto()
 
 
 def _index(nvim: Nvim, state: State) -> Optional[Node]:

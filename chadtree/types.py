@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum, auto
+
+
 from typing import FrozenSet, Mapping, Optional
 
 from .fs.types import Node
 from .view.types import Derived
+from .nvim.types import QuickFix
 
 Index = FrozenSet[str]
 Selection = FrozenSet[str]
@@ -20,10 +22,6 @@ class OpenArgs:
 class FilterPattern:
     pattern: str
 
-
-@dataclass(frozen=True)
-class QuickFix:
-    locations: Mapping[str, int]
 
 
 @dataclass(frozen=True)
@@ -52,11 +50,3 @@ class State:
 class Stage:
     state: State
     focus: Optional[str] = None
-
-
-class ClickType(Enum):
-    primary = auto()
-    secondary = auto()
-    tertiary = auto()
-    v_split = auto()
-    h_split = auto()
