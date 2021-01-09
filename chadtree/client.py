@@ -7,13 +7,14 @@ from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call
 from pynvim_pp.rpc import RpcMsg, nil_handler
 
-from .settings.localization import init as init_locale
 from .registry import autocmd, rpc
 from .settings.load import initial as initial_settings
+from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
-from .transitions import redraw
-from .state.types import Stage, State
+from .state.types import State
+from .transitions.shared.refresh import redraw
+from .transitions.types import Stage
 
 
 class ChadClient(BasicClient):

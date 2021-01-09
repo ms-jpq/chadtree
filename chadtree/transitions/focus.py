@@ -1,10 +1,14 @@
+from os.path import dirname
 from typing import Optional
 
 from pynvim import Nvim
 
+from ..fs.cartographer import is_dir
 from ..registry import rpc
 from ..settings.types import Settings
+from ..state.ops import index
 from ..state.types import State
+from .shared.current import new_cwd
 from .types import Stage
 
 
@@ -16,10 +20,10 @@ def c_change_focus(
     Refocus root directory
     """
 
-    node = _index(nvim, state=state)
+    node = index(nvim, state=state)
     if node:
-        new_base = node.path if Mode.folder in node.mode else dirname(node.path)
-        return _change_dir(nvim, state=state, settings=settings, new_base=new_base)
+        new_base = node.path if is_dir(node) else dirname(node.path)
+        return new_cwd(nvim, state=state, settings=settings, new_cwd=new_base)
     else:
         return None
 
@@ -35,6 +39,6 @@ def c_change_focus_up(
     c_root = state.root.path
     parent = dirname(c_root)
     if parent and parent != c_root:
-        return _change_dir(nvim, state=state, settings=settings, new_base=parent)
+        return new_cwd(nvim, state=state, settings=settings, new_cwd=parent)
     else:
         return None
