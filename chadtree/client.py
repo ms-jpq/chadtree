@@ -45,5 +45,5 @@ class ChadClient(BasicClient):
             init_locale(self._settings.lang)
 
         threadsafe_call(nvim, cont)
-        sleep(inf)
+        sleep(1000000)
         return 1
