@@ -1,4 +1,3 @@
-from asyncio import gather
 from hashlib import sha1
 from pathlib import Path
 from typing import FrozenSet, Optional, Union, cast
@@ -48,17 +47,17 @@ def dump_session(state: State) -> None:
     dump_json(load_path, encode(json))
 
 
-async def initial(nvim: Nvim, settings: Settings) -> State:
+def initial(nvim: Nvim, settings: Settings) -> State:
     version_ctl = settings.version_ctl
-    cwd = await getcwd(nvim)
+    cwd = getcwd(nvim)
 
     session = load_session(cwd)
     index = session.index if settings.session else frozenset((cwd,))
     show_hidden = session.show_hidden if settings.session else settings.show_hidden
 
     selection: Selection = frozenset()
-    node, qf = await gather(new(cwd, index=index), quickfix(nvim))
-    vc = VCStatus() if not version_ctl.enable or version_ctl.defer else await status()
+    node, qf = new(cwd, index=index), quickfix(nvim)
+    vc = VCStatus() if not version_ctl.enable or version_ctl.defer else status()
 
     current = None
     filter_pattern = None
@@ -92,7 +91,7 @@ async def initial(nvim: Nvim, settings: Settings) -> State:
     return state
 
 
-async def forward(
+def forward(
     state: State,
     *,
     settings: Settings,
@@ -117,7 +116,7 @@ async def forward(
         Node,
         root
         or (
-            await update(state.root, index=new_index, paths=cast(FrozenSet[str], paths))
+            update(state.root, index=new_index, paths=cast(FrozenSet[str], paths))
             if paths
             else state.root
         ),

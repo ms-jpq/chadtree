@@ -13,7 +13,6 @@ from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
 from typing import FrozenSet, Iterable, Iterator, Mapping, Optional
 
-from std2.asyncio import run_in_executor
 
 from .consts import FILE_MODE, FOLDER_MODE
 
@@ -39,11 +38,8 @@ def unify_ancestors(paths: FrozenSet[str]) -> Iterator[str]:
             yield path
 
 
-async def fs_exists(path: str) -> bool:
-    def cont() -> bool:
-        return exists(path)
-
-    return await run_in_executor(cont)
+def fs_exists(path: str) -> bool:
+    return exists(path)
 
 
 @dataclass(frozen=True)
@@ -58,10 +54,10 @@ class FSstat:
 
 if os_name == "nt":
 
-    def get_username(uid: int) -> str:
+    def _get_username(uid: int) -> str:
         return str(uid)
 
-    def get_groupname(gid: int) -> str:
+    def _get_groupname(gid: int) -> str:
         return str(gid)
 
 
@@ -69,24 +65,24 @@ else:
     from grp import getgrgid
     from pwd import getpwuid
 
-    def get_username(uid: int) -> str:
+    def _get_username(uid: int) -> str:
         try:
             return getpwuid(uid).pw_name
         except KeyError:
             return str(uid)
 
-    def get_groupname(gid: int) -> str:
+    def _get_groupname(gid: int) -> str:
         try:
             return getgrgid(gid).gr_name
         except KeyError:
             return str(gid)
 
 
-def _fs_stat(path: str) -> FSstat:
+def fs_stat(path: str) -> FSstat:
     stats = stat(path, follow_symlinks=False)
     permissions = filemode(stats.st_mode)
-    user = get_username(stats.st_uid)
-    group = get_groupname(stats.st_gid)
+    user = _get_username(stats.st_uid)
+    group = _get_groupname(stats.st_gid)
     date_mod = datetime.fromtimestamp(stats.st_mtime)
     size = stats.st_size
     link = readlink(path) if S_ISLNK(stats.st_mode) else None
@@ -101,14 +97,7 @@ def _fs_stat(path: str) -> FSstat:
     return fs_stat
 
 
-async def fs_stat(path: str) -> FSstat:
-    def cont() -> FSstat:
-        return _fs_stat(path)
-
-    return await run_in_executor(cont)
-
-
-def _new(dest: str) -> None:
+def new(dest: str) -> None:
     if dest.endswith(sep):
         makedirs(dest, mode=FOLDER_MODE, exist_ok=True)
     else:
@@ -117,65 +106,30 @@ def _new(dest: str) -> None:
         Path(dest).touch(mode=FILE_MODE, exist_ok=True)
 
 
-async def new(dest: str) -> None:
-    def cont() -> None:
-        _new(dest)
-
-    await run_in_executor(cont)
-
-
-def _rename(src: str, dest: str) -> None:
+def rename(src: str, dest: str) -> None:
     parent = dirname(dest)
     makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
     mv(src, dest)
 
 
-async def rename(src: str, dest: str) -> None:
-    def cont() -> None:
-        _rename(src, dest)
-
-    await run_in_executor(cont)
-
-
-def _remove(src: str) -> None:
-    stats = stat(src, follow_symlinks=False)
-    if S_ISDIR(stats.st_mode):
-        rmtree(src)
-    else:
-        rm(src)
+def remove(paths: Iterable[str]) -> None:
+    for path in paths:
+        stats = stat(path, follow_symlinks=False)
+        if S_ISDIR(stats.st_mode):
+            rmtree(path)
+        else:
+            rm(path)
 
 
-async def remove(paths: Iterable[str]) -> None:
-    def cont() -> None:
-        for path in paths:
-            _remove(path)
-
-    await run_in_executor(cont)
+def cut(operations: Mapping[str, str]) -> None:
+    for src, dest in operations.items():
+        mv(src, dest)
 
 
-def _cut(src: str, dest: str) -> None:
-    mv(src, dest)
-
-
-async def cut(operations: Mapping[str, str]) -> None:
-    def cont() -> None:
-        for src, dest in operations.items():
-            _cut(src, dest)
-
-    await run_in_executor(cont)
-
-
-def _copy(src: str, dest: str) -> None:
-    stats = stat(src, follow_symlinks=False)
-    if S_ISDIR(stats.st_mode):
-        copytree(src, dest)
-    else:
-        copy2(src, dest)
-
-
-async def copy(operations: Mapping[str, str]) -> None:
-    def cont() -> None:
-        for src, dest in operations.items():
-            _copy(src, dest)
-
-    await run_in_executor(cont)
+def copy(operations: Mapping[str, str]) -> None:
+    for src, dest in operations.items():
+        stats = stat(src, follow_symlinks=False)
+        if S_ISDIR(stats.st_mode):
+            copytree(src, dest)
+        else:
+            copy2(src, dest)
