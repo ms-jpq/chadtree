@@ -13,7 +13,6 @@ from typing import (
     MutableMapping,
     Optional,
     Sequence,
-    cast,
 )
 
 from pynvim import Nvim
@@ -25,7 +24,7 @@ from std2.types import Void
 
 from .cartographer import new as new_root
 from .da import human_readable_size
-from .fs import (
+from .fs.ops import (
     ancestors,
     copy,
     cut,

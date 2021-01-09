@@ -7,7 +7,7 @@ from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
 from std2.types import freeze
 
-from .fs import ancestors
+from .fs.ops import ancestors
 from .types import VCStatus
 
 _GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain")

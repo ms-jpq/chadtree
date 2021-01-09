@@ -14,7 +14,7 @@ from stat import S_ISDIR, S_ISLNK, filemode
 from typing import FrozenSet, Iterable, Iterator, Mapping, Optional
 
 
-from .consts import FILE_MODE, FOLDER_MODE
+from ..consts import FILE_MODE, FOLDER_MODE
 
 
 def ancestors(path: str) -> Iterator[str]:

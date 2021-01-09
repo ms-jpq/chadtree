@@ -5,7 +5,7 @@ from typing import Iterator
 
 from pynvim import Nvim
 
-from .fs import ancestors
+from .fs.ops import ancestors
 from .nvim import getcwd
 from .types import QuickFix
 

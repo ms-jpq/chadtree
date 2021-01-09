@@ -19,7 +19,7 @@ from pynvim_pp.keymap import Keymap
 from std2.contextlib import nil_manager
 
 from .consts import FM_FILETYPE, FM_NAMESPACE
-from .fs import is_parent
+from .fs.ops import is_parent
 from .types import Badge, ClickType, Highlight, OpenArgs, Settings, State
 
 

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum, IntEnum, auto
+from enum import Enum,  auto
 from typing import FrozenSet, Mapping, Optional, Sequence, Union
 
 from pynvim_pp.highlight import HLgroup
-
+from .fs.types import Node, Mode
 Index = FrozenSet[str]
 Selection = FrozenSet[str]
 
@@ -14,34 +14,6 @@ Selection = FrozenSet[str]
 class OpenArgs:
     focus: bool
 
-
-class Mode(IntEnum):
-    orphan_link = auto()
-    link = auto()
-    sticky_writable = auto()
-    sticky_dir = auto()
-    folder = auto()
-    block_device = auto()
-    char_device = auto()
-    door = auto()
-    executable = auto()
-    multi_hardlink = auto()
-    other_writable = auto()
-    pipe = auto()
-    set_gid = auto()
-    set_uid = auto()
-    socket = auto()
-    file_w_capacity = auto()
-    file = auto()
-
-
-@dataclass(frozen=True)
-class Node:
-    mode: FrozenSet[Mode]
-    name: str
-    path: str
-    children: Optional[Mapping[str, Node]] = None
-    ext: Optional[str] = None
 
 
 @dataclass(frozen=True)
