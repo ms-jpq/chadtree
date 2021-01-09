@@ -5,8 +5,8 @@ from typing import Mapping, MutableMapping, Optional
 from std2.pickle.decode import decode
 from std2.tree import merge
 
-from .consts import DEFAULT_LANG, LANG_ROOT
-from .da import load_json
+from ..consts import DEFAULT_LANG, LANG_ROOT
+from ..da import load_json
 
 
 def _get_lang(code: Optional[str], fallback: str) -> str:

@@ -7,7 +7,7 @@ from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call
 from pynvim_pp.rpc import RpcMsg, nil_handler
 
-from .localization import init as init_locale
+from .settings.localization import init as init_locale
 from .registry import autocmd, rpc
 from .settings.load import initial as initial_settings
 from .settings.types import Settings

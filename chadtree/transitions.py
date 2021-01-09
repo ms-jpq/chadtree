@@ -39,7 +39,7 @@ from .fs.ops import (
 )
 from .fs.types import Mode, Node
 from .git import status
-from .localization import LANG
+from .settings.localization import LANG
 from .nvim.quickfix import quickfix
 from .nvim.wm import (
     find_current_buffer_name,

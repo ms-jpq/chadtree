@@ -2,7 +2,7 @@ from shutil import which
 from subprocess import DEVNULL, PIPE, run
 from typing import Iterable
 
-from .localization import LANG
+from .settings.localization import LANG
 
 
 class SystemIntegrationError(Exception):
