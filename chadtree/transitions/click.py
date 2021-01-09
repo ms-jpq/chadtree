@@ -13,7 +13,8 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from ..state.ops import index
+from .shared.index import index
+
 from ..state.types import State
 from .types import Stage, State
 

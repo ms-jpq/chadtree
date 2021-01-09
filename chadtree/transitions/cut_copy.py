@@ -8,17 +8,17 @@ from pynvim.api import Nvim
 from pynvim_pp.lib import s_write
 
 from ..fs.cartographer import is_dir
-from ..fs.ops import unify_ancestors, cut, copy
+from ..fs.ops import copy, cut, unify_ancestors
 from ..fs.types import Node
-from .shared.wm import kill_buffers
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from ..state.ops import index
 from ..state.types import State
 from ..view.ops import display_path
+from .shared.index import index
 from .shared.refresh import refresh
+from .shared.wm import kill_buffers
 from .types import Stage
 
 

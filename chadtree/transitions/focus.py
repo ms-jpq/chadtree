@@ -6,7 +6,8 @@ from pynvim import Nvim
 from ..fs.cartographer import is_dir
 from ..registry import rpc
 from ..settings.types import Settings
-from ..state.ops import index
+from .shared.index import index
+
 from ..state.types import State
 from .shared.current import new_cwd
 from .types import Stage

@@ -14,7 +14,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from ..state.ops import indices
+from .shared.index import indices
 from ..state.types import State
 from ..view.ops import display_path
 from .shared.refresh import refresh
