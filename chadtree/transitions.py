@@ -5,8 +5,6 @@ from operator import add, sub
 from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep, splitext
 from typing import (
-    AsyncIterator,
-    Awaitable,
     Callable,
     FrozenSet,
     Iterable,
@@ -15,7 +13,6 @@ from typing import (
     MutableMapping,
     Optional,
     Sequence,
-    Tuple,
     cast,
 )
 
@@ -23,8 +20,7 @@ from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.common import NvimError
 from pynvim.api.window import Window
-from pynvim_pp.lib import async_call, s_write
-from std2.asyncio import run_in_executor
+from pynvim_pp.lib import s_write
 from std2.types import Void
 
 from .cartographer import new as new_root
@@ -592,13 +588,8 @@ def c_new_search(
     New search params
     """
 
-    def ask() -> Optional[str]:
-        pattern = ""
-        resp: Optional[str] = nvim.funcs.input("new_search", pattern)
-        return resp
-
     cwd = state.root.path
-    pattern = async_call(nvim, ask)
+    pattern: Optional[str] = nvim.funcs.input("new_search", "")
     results = search(pattern or "", cwd=cwd, sep=linesep)
     s_write(nvim, results)
 
@@ -611,7 +602,7 @@ def c_copy_name(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -
     Copy dirname / filename
     """
 
-    def gen_paths() -> AsyncIterator[str]:
+    def gen_paths() -> Iterator[str]:
         selection = state.selection
         if is_visual or not selection:
             nodes = _indices(nvim, state=state, is_visual=is_visual)
@@ -867,7 +858,7 @@ def _operation(
     selection = state.selection
     unified = tuple(unify_ancestors(selection))
     if unified and node:
-        pre_operations = {src: _find_dest(src, cast(Node, node)) for src in unified}
+        pre_operations = {src: _find_dest(src, node) for src in unified}
         pre_existing = {s: d for s, d in pre_operations.items() if exists(d)}
         new_operations: MutableMapping[str, str] = {}
         while pre_existing:
@@ -879,8 +870,6 @@ def _operation(
                 pre_existing[source] = resp
             else:
                 new_operations[source] = resp
-
-            return pre_existing, new_operations
 
         if pre_existing:
             msg = ", ".join(
@@ -899,7 +888,7 @@ def _operation(
             )
 
             question = f"{op_name}{linesep}{msg}?"
-            resp: int = nvim.funcs.confirm(
+            resp = nvim.funcs.confirm(
                 question, LANG("ask_yesno", linesep=linesep), 2
             )
             ans = resp == 1

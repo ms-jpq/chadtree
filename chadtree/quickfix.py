@@ -11,7 +11,7 @@ from .types import QuickFix
 
 
 def quickfix(nvim: Nvim) -> QuickFix:
-    cwd = getcwd()
+    cwd = getcwd(nvim)
     ql = nvim.funcs.getqflist()
 
     def it() -> Iterator[str]:

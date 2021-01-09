@@ -41,8 +41,8 @@ class ChadClient(BasicClient):
             hl = highlight(*hl_ctx.groups)
             (atomic + autocmd.drain() + hl).commit(nvim)
 
-            self._state = initial_state(nvim, settings=cast(Settings, self._settings))
-            init_locale(cast(Settings, self._settings).lang)
+            self._state = initial_state(nvim, settings=self._settings)
+            init_locale(self._settings.lang)
 
         threadsafe_call(nvim, cont)
         sleep(inf)
