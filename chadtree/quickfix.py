@@ -10,7 +10,7 @@ from .nvim import getcwd
 from .types import QuickFix
 
 
-async def quickfix(nvim: Nvim) -> QuickFix:
+def quickfix(nvim: Nvim) -> QuickFix:
     cwd = getcwd()
     ql = nvim.funcs.getqflist()
 
