@@ -7,7 +7,7 @@ from pynvim_pp.rpc import RpcSpec
 from std2.pickle import DecodeError, decode
 from std2.tree import merge
 
-from .consts import (
+from ..consts import (
     COLOURS_JSON,
     COLOURS_VAR,
     CONFIG_JSON,
@@ -19,10 +19,10 @@ from .consts import (
     VIEW_JSON,
     VIEW_VAR,
 )
-from .da import load_json
-from .highlight import gen_hl
-from .ls_colours import parse_ls_colours
-from .types import (
+from ..da import load_json
+from ..highlight import gen_hl
+from ..ls_colours import parse_ls_colours
+from ..types import (
     MimetypeOptions,
     Settings,
     Sortby,
@@ -37,7 +37,7 @@ from .types import (
 
 
 @dataclass(frozen=True)
-class UserConfig:
+class _UserConfig:
     follow: bool
     keymap: Mapping[str, FrozenSet[str]]
     lang: Optional[str]
@@ -52,14 +52,14 @@ class UserConfig:
 
 
 @dataclass(frozen=True)
-class UserView:
+class _UserView:
     highlights: UserHLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
 
 
 @dataclass(frozen=True)
-class UserColours:
+class _UserColours:
     eight_bit: Mapping[str, UserColourMapping]
 
 
@@ -69,17 +69,17 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_ignores = nvim.vars.get(IGNORES_VAR, {})
     user_colours = nvim.vars.get(COLOURS_VAR, {})
 
-    config: UserConfig = decode(
-        UserConfig, merge(load_json(CONFIG_JSON), user_config, replace=True)
+    config: _UserConfig = decode(
+        _UserConfig, merge(load_json(CONFIG_JSON), user_config, replace=True)
     )
-    view: UserView = decode(
-        UserView, merge(load_json(VIEW_JSON), user_view, replace=True)
+    view: _UserView = decode(
+        _UserView, merge(load_json(VIEW_JSON), user_view, replace=True)
     )
     ignore: UserIgnore = decode(
         UserIgnore, merge(load_json(IGNORE_JSON), user_ignores, replace=True)
     )
-    colours: UserColours = decode(
-        UserColours, merge(load_json(CUSTOM_COLOURS_JSON), user_colours)
+    colours: _UserColours = decode(
+        _UserColours, merge(load_json(CUSTOM_COLOURS_JSON), user_colours)
     )
     icons: UserIcons = decode(UserIcons, load_json(ICON_LOOKUP[config.use_icons]))
     github_colours: Mapping[str, str] = decode(
@@ -106,7 +106,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     extra_keys = keymap.keys() - legal_keys
     if extra_keys:
         raise DecodeError(
-            path=(UserConfig, "<field 'keymap'>"),
+            path=(_UserConfig, "<field 'keymap'>"),
             actual=None,
             missing_keys=(),
             extra_keys=sorted(extra_keys, key=strxfrm),

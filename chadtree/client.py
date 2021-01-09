@@ -1,4 +1,3 @@
-from math import inf
 from time import sleep
 from typing import Any, Optional, cast
 
@@ -10,7 +9,7 @@ from pynvim_pp.rpc import RpcMsg, nil_handler
 
 from .localization import init as init_locale
 from .registry import autocmd, rpc
-from .settings import initial as initial_settings
+from .settings.load import initial as initial_settings
 from .state import initial as initial_state
 from .transitions import redraw
 from .types import Settings, Stage, State
