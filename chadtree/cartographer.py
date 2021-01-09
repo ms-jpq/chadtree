@@ -12,13 +12,11 @@ from stat import (
     S_ISVTX,
     S_IWOTH,
 )
-from typing import FrozenSet, Mapping, Iterator,  cast
-
-from std2.asyncio import run_in_executor
+from typing import FrozenSet, Iterator, Mapping, cast
 
 from .types import Index, Mode, Node
 
-FILE_MODES: Mapping[int, Mode] = {
+_FILE_MODES: Mapping[int, Mode] = {
     S_IEXEC: Mode.executable,
     S_IWOTH: Mode.other_writable,
     S_ISVTX: Mode.sticky_dir,
@@ -36,7 +34,7 @@ def _fs_modes(stat: int) -> Iterator[Mode]:
         yield Mode.pipe
     if S_ISSOCK(stat):
         yield Mode.socket
-    for bit, mode in FILE_MODES.items():
+    for bit, mode in _FILE_MODES.items():
         if stat & bit == bit:
             yield mode
 
@@ -60,7 +58,7 @@ def _fs_stat(path: str) -> FrozenSet[Mode]:
             return mode
 
 
-def _new(root: str, index: Index) -> Node:
+def new(root: str, index: Index) -> Node:
     mode = _fs_stat(root)
     name = basename(root)
     if Mode.folder not in mode:
@@ -69,7 +67,7 @@ def _new(root: str, index: Index) -> Node:
 
     elif root in index:
         children = {
-            path: _new(path, index=index)
+            path: new(path, index=index)
             for path in (join(root, d) for d in listdir(root))
         }
         return Node(path=root, mode=mode, name=name, children=children)
@@ -77,13 +75,9 @@ def _new(root: str, index: Index) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
-async def new(root: str, index: Index) -> Node:
-    return await run_in_executor(_new, root, index)
-
-
 def _update(root: Node, index: Index, paths: FrozenSet[str]) -> Node:
     if root.path in paths:
-        return _new(root.path, index=index)
+        return new(root.path, index=index)
     else:
         children = {
             k: _update(v, index=index, paths=paths)
@@ -98,8 +92,8 @@ def _update(root: Node, index: Index, paths: FrozenSet[str]) -> Node:
         )
 
 
-async def update(root: Node, *, index: Index, paths: FrozenSet[str]) -> Node:
+def update(root: Node, *, index: Index, paths: FrozenSet[str]) -> Node:
     try:
-        return await run_in_executor(_update, root, index, paths)
+        return _update(root, index=index, paths=paths)
     except FileNotFoundError:
-        return await new(root.path, index=index)
+        return new(root.path, index=index)
