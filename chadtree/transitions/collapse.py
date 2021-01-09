@@ -9,8 +9,8 @@ from ..fs.ops import is_parent
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.next import forward
-from ..state.ops import index
 from ..state.types import State
+from .shared.index import index
 from .types import Stage
 
 

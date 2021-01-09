@@ -9,7 +9,7 @@ from pynvim.api import Nvim
 from pynvim_pp.lib import s_write
 
 from ..fs.ops import remove, unify_ancestors
-from ..nvim.wm import kill_buffers
+from .shared.wm import kill_buffers
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings

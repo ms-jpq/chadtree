@@ -4,7 +4,7 @@ from pynvim import Nvim
 from pynvim.api.common import NvimError
 
 from ..nvim.quickfix import quickfix
-from ..nvim.wm import find_current_buffer_name
+from .shared.wm import find_current_buffer_name
 from ..registry import autocmd, rpc
 from ..settings.types import Settings
 from ..state.next import forward

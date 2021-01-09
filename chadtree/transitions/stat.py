@@ -5,7 +5,7 @@ from ..da import human_readable_size
 from ..fs.ops import fs_stat
 from ..registry import rpc
 from ..settings.types import Settings
-from ..state.ops import index
+from .shared.index import index
 from ..state.types import State
 from ..view.ops import display_path
 

@@ -10,7 +10,7 @@ from pynvim_pp.lib import s_write
 from ..fs.cartographer import is_dir
 from ..fs.ops import unify_ancestors, cut, copy
 from ..fs.types import Node
-from ..nvim.wm import kill_buffers
+from .shared.wm import kill_buffers
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings

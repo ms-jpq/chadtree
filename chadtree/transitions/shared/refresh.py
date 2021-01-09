@@ -7,7 +7,7 @@ from std2.types import Void
 
 from ...fs.ops import ancestors, is_parent
 from ...nvim.quickfix import quickfix
-from ...nvim.wm import find_current_buffer_name, update_buffers
+from ..shared.wm import find_current_buffer_name, update_buffers
 from ...registry import rpc
 from ...settings.localization import LANG
 from ...settings.types import Settings

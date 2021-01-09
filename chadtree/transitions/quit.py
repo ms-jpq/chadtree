@@ -3,7 +3,7 @@ from pynvim import Nvim
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
-from ..nvim.wm import kill_fm_windows
+from .shared.wm import kill_fm_windows
 
 
 @rpc(blocking=False)

@@ -18,13 +18,13 @@ from pynvim_pp.hold import hold_win_pos
 from pynvim_pp.keymap import Keymap
 from std2.contextlib import nil_manager
 
-from .._transitions.click import ClickType
-from .._transitions.toggle_open import OpenArgs
-from ..consts import FM_FILETYPE, FM_NAMESPACE
-from ..fs.ops import is_parent
-from ..settings.types import Settings
-from ..state.types import State
-from ..view.types import Badge, Highlight
+from ...consts import FM_FILETYPE, FM_NAMESPACE
+from ...fs.ops import is_parent
+from ...settings.types import Settings
+from ...state.types import State
+from ...view.types import Badge, Highlight
+from ..click import ClickType
+from ..toggle_open import OpenArgs
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:

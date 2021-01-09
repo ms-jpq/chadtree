@@ -8,7 +8,7 @@ from pynvim import Nvim
 from pynvim_pp.lib import s_write
 
 from ..fs.types import Mode
-from ..nvim.wm import show_file
+from .shared.wm import show_file
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings

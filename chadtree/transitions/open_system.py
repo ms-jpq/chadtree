@@ -7,8 +7,8 @@ from pynvim_pp.lib import s_write
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
-from ..state.ops import index
 from ..state.types import State
+from .shared.index import index
 from .types import SysError
 
 
