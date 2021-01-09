@@ -38,7 +38,7 @@ from .fs.ops import (
     unify_ancestors,
 )
 from .fs.types import Mode, Node
-from .git import status
+from .version_ctl.git import status
 from .nvim.quickfix import quickfix
 from .nvim.wm import (
     find_current_buffer_name,
@@ -55,11 +55,12 @@ from .registry import autocmd, rpc
 from .search import search
 from .settings.localization import LANG
 from .settings.types import Settings
-from .state import dump_session, forward
-from .state import index as state_index
-from .state import is_dir
+from .state.ops import dump_session
+from .state.next import forward
+from .state.ops import index as state_index
+from .fs.cartographer import is_dir
 from .system import SystemIntegrationError, open_gui, trash
-from .types import FilterPattern, Selection, Stage, State, VCStatus
+from .state.types import FilterPattern, Selection, Stage, State, VCStatus
 
 
 class ClickType(Enum):

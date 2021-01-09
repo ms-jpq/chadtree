@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from enum import IntEnum, auto
 from typing import FrozenSet, Mapping, Optional
 
+Index = FrozenSet[str]
+
 
 class Mode(IntEnum):
     orphan_link = auto()

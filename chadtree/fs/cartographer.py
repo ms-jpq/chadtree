@@ -14,8 +14,7 @@ from stat import (
 )
 from typing import FrozenSet, Iterator, Mapping, cast
 
-from ..types import Index
-from .types import Mode, Node
+from .types import Index, Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
     S_IEXEC: Mode.executable,
@@ -98,3 +97,7 @@ def update(root: Node, *, index: Index, paths: FrozenSet[str]) -> Node:
         return _update(root, index=index, paths=paths)
     except FileNotFoundError:
         return new(root.path, index=index)
+
+
+def is_dir(node: Node) -> bool:
+    return Mode.folder in node.mode

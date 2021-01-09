@@ -9,9 +9,10 @@ from pynvim_pp.highlight import HLgroup
 from std2.functools import constantly
 from std2.types import never
 
-from ..fs.types import Mode, Node
+from ..fs.types import Index, Mode, Node
 from ..settings.types import Settings
-from ..types import FilterPattern, Index, QuickFix, Selection, VCStatus
+from ..state.types import FilterPattern, QuickFix, Selection
+from ..version_ctl.types import VCStatus
 from .types import Badge, Derived, Highlight, Render, Sortby
 
 

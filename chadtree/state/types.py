@@ -1,28 +1,17 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import FrozenSet, Optional
 
+from ..fs.types import Index, Node
+from ..nvim.types import QuickFix
+from ..version_ctl.types import VCStatus
+from ..view.types import Derived
 
-from typing import FrozenSet, Mapping, Optional
-
-from .fs.types import Node
-from .view.types import Derived
-from .nvim.types import QuickFix
-
-Index = FrozenSet[str]
 Selection = FrozenSet[str]
-
-
 
 
 @dataclass(frozen=True)
 class FilterPattern:
     pattern: str
-
-
-
-@dataclass(frozen=True)
-class VCStatus:
-    ignored: FrozenSet[str] = frozenset()
-    status: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

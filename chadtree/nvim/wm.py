@@ -22,8 +22,8 @@ from ..consts import FM_FILETYPE, FM_NAMESPACE
 from ..fs.ops import is_parent
 from ..opts import OpenArgs
 from ..settings.types import Settings
+from ..state.types import State
 from ..transitions import ClickType
-from ..types import State
 from ..view.types import Badge, Highlight
 
 
