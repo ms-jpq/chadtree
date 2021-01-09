@@ -1,3 +1,12 @@
+from typing import Optional
+
+from pynvim import Nvim
+
+from ..registry import rpc
+from ..settings.types import Settings
+from ..state.types import State
+from .types import Stage
+
 
 @rpc(blocking=False, name="CHADrename")
 def c_rename(
@@ -17,7 +26,7 @@ def c_rename(
         if child:
             new_name = join(parent, child)
             new_parent = dirname(new_name)
-            if fs_exists(new_name):
+            if exists(new_name):
                 s_write(nvim, LANG("already_exists", name=new_name), error=True)
                 return Stage(state)
             else:

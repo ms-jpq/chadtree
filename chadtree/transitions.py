@@ -43,23 +43,3 @@ from .state.types import FilterPattern, Selection, State, VCStatus
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     update_buffers(nvim, state=state, focus=focus)
-
-
-def _current(
-    nvim: Nvim, state: State, settings: Settings, current: str
-) -> Optional[Stage]:
-    if is_parent(parent=state.root.path, child=current):
-        paths: FrozenSet[str] = (
-            frozenset(ancestors(current)) if state.follow else frozenset()
-        )
-        index = state.index | paths
-        new_state = forward(
-            state, settings=settings, index=index, paths=paths, current=current
-        )
-        return Stage(new_state)
-    else:
-        return None
-
-
-
-

@@ -1,3 +1,13 @@
+from operator import add, sub
+from typing import Callable
+
+from pynvim import Nvim
+
+from ..registry import rpc
+from ..settings.types import Settings
+from ..state.types import State
+from .types import Stage
+
 
 def _resize(
     nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]

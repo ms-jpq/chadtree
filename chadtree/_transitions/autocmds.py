@@ -3,11 +3,17 @@ from typing import Optional
 from pynvim import Nvim
 from pynvim.api.common import NvimError
 
+from ..fs.cartographer import new
+from ..nvim.quickfix import quickfix
+from ..nvim.wm import find_current_buffer_name
 from ..registry import autocmd, rpc
 from ..settings.types import Settings
+from ..state.next import forward
+from ..state.ops import dump_session
 from ..state.types import State
 from .refresh import refresh
 from .types import Stage
+
 
 
 @rpc(blocking=False)
@@ -21,10 +27,9 @@ def _schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[S
 autocmd("BufWritePost", "FocusGained") << f"lua {_schedule_update.name}()"
 
 
-
 def _change_dir(nvim: Nvim, state: State, settings: Settings, new_base: str) -> Stage:
     index = state.index | {new_base}
-    root = new_root(new_base, index=index)
+    root = new(new_base, index=index)
     new_state = forward(state, settings=settings, root=root, index=index)
     return Stage(new_state)
 

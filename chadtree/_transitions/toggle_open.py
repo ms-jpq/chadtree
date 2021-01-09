@@ -2,10 +2,18 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from typing import NoReturn, Optional, Sequence
 
+from pynvim import Nvim
+
+from ..registry import rpc
+from ..settings.types import Settings
+from ..state.types import State
+from .types import Stage
+
 
 @dataclass(frozen=True)
 class OpenArgs:
     focus: bool
+
 
 class _ArgparseError(Exception):
     pass
@@ -29,7 +37,6 @@ def _parse_args(args: Sequence[str]) -> OpenArgs:
     return opts
 
 
-
 @rpc(blocking=False, name="CHADopen")
 def c_open(
     nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
@@ -39,8 +46,8 @@ def c_open(
     """
 
     try:
-        opts = parse_args(args)
-    except ArgparseError as e:
+        opts = _parse_args(args)
+    except _ArgparseError as e:
         s_write(nvim, e, error=True)
         return None
     else:
@@ -52,5 +59,3 @@ def c_open(
             return stage
         else:
             return Stage(state)
-
-

@@ -1,3 +1,12 @@
+from typing import Optional
+
+from pynvim import Nvim
+
+from ..registry import rpc
+from ..settings.types import Settings
+from ..state.types import State
+from .types import Stage
+
 
 @rpc(blocking=False, name="CHADclear_selection")
 def c_clear_selection(
@@ -9,8 +18,6 @@ def c_clear_selection(
 
     new_state = forward(state, settings=settings, selection=frozenset())
     return Stage(new_state)
-
-
 
 
 @rpc(blocking=False, name="CHADselect")

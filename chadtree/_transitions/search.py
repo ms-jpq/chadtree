@@ -1,11 +1,17 @@
-from asyncio.subprocess import DEVNULL, PIPE
-from typing import Set
+from os import linesep
+from typing import FrozenSet, Optional
+
+from pynvim import Nvim
+
+from ..registry import rpc
+from ..settings.types import Settings
+from ..state.types import State
+from .types import Stage, SysError
 
 
-from .types import SysError
-
-def _search(args: str, cwd: str, sep: str) -> Set[str]:
+def _search(args: str, cwd: str, sep: str) -> FrozenSet[str]:
     raise SysError()
+
 
 @rpc(blocking=False, name="CHADsearch")
 def c_new_search(
