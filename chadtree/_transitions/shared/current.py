@@ -1,13 +1,12 @@
+from typing import FrozenSet, Optional
+
 from pynvim import Nvim
 
+from ..fs.ops import ancestors, is_parent
 from ..settings.types import Settings
-from ..state.types import State
-from ..registry import rpc
-from typing import Optional
-from .types import Stage
 from ..state.next import forward
-from typing import FrozenSet
-
+from ..state.types import State
+from .types import Stage
 
 
 def current(

@@ -5,17 +5,17 @@ from pynvim import Nvim
 from pynvim_pp.lib import s_write
 from std2.types import Void
 
-from ..fs.ops import ancestors, is_parent
-from ..nvim.quickfix import quickfix
-from ..nvim.wm import find_current_buffer_name
-from ..registry import rpc
-from ..settings.localization import LANG
-from ..settings.types import Settings
-from ..state.next import forward
-from ..state.types import Selection, State
-from ..version_ctl.git import status
-from ..version_ctl.types import VCStatus
-from .types import Stage
+from ...fs.ops import ancestors, is_parent
+from ...nvim.quickfix import quickfix
+from ...nvim.wm import find_current_buffer_name
+from ...registry import rpc
+from ...settings.localization import LANG
+from ...settings.types import Settings
+from ...state.next import forward
+from ...state.types import Selection, State
+from ...version_ctl.git import status
+from ...version_ctl.types import VCStatus
+from ..types import Stage
 
 
 def refresh(

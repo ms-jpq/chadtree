@@ -5,6 +5,7 @@ from pynvim import Nvim
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
+from .shared.current import current
 from .types import Stage
 
 
@@ -16,11 +17,11 @@ def c_jump_to_current(
     Jump to active file
     """
 
-    current = state.current
-    if current:
-        stage = _current(nvim, state=state, settings=settings, current=current)
+    curr = state.current
+    if curr:
+        stage = current(nvim, state=state, settings=settings, current=curr)
         if stage:
-            return Stage(state=stage.state, focus=current)
+            return Stage(state=stage.state, focus=curr)
         else:
             return None
     else:
