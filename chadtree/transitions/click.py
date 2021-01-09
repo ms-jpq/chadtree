@@ -1,56 +1,17 @@
-from enum import Enum, auto
-from mimetypes import guess_type
-from os import linesep
-from os.path import basename, splitext
 from typing import Optional
 
 from pynvim import Nvim
 from pynvim_pp.lib import s_write
 
 from ..fs.types import Mode
-from .shared.wm import show_file
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from .shared.index import index
-
 from ..state.types import State
-from .types import Stage, State
-
-
-class ClickType(Enum):
-    primary = auto()
-    secondary = auto()
-    tertiary = auto()
-    v_split = auto()
-    h_split = auto()
-
-
-def _open_file(
-    nvim: Nvim, state: State, settings: Settings, path: str, click_type: ClickType
-) -> Optional[Stage]:
-    name = basename(path)
-    _, ext = splitext(name)
-    mime, _ = guess_type(name, strict=False)
-    m_type, _, _ = (mime or "").partition("/")
-
-    def ask() -> bool:
-        question = LANG("mime_warn", name=name, mime=str(mime))
-        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
-        return resp == 1
-
-    ans = (
-        ask()
-        if m_type in settings.mime.warn and ext not in settings.mime.ignore_exts
-        else True
-    )
-    if ans:
-        new_state = forward(state, settings=settings, current=path)
-        show_file(nvim, state=new_state, settings=settings, click_type=click_type)
-        return Stage(new_state)
-    else:
-        return None
+from .shared.index import index
+from .shared.open_file import open_file
+from .types import ClickType, Stage, State
 
 
 def _click(
@@ -76,7 +37,7 @@ def _click(
                     )
                     return Stage(new_state)
             else:
-                nxt = _open_file(
+                nxt = open_file(
                     nvim,
                     state=state,
                     settings=settings,
