@@ -50,16 +50,12 @@ from .nvim.wm import (
     toggle_fm_window,
     update_buffers,
 )
-from .opts import ArgparseError, parse_args
 from .registry import autocmd, rpc
-from .search import search
 from .settings.localization import LANG
 from .settings.types import Settings
 from .state.ops import dump_session
 from .state.next import forward
-from .state.ops import index as state_index
 from .fs.cartographer import is_dir
-from .system import SystemIntegrationError, open_gui, trash
 from .state.types import FilterPattern, Selection, Stage, State, VCStatus
 
 
@@ -69,38 +65,6 @@ class ClickType(Enum):
     tertiary = auto()
     v_split = auto()
     h_split = auto()
-
-
-def _index(nvim: Nvim, state: State) -> Optional[Node]:
-    window: Window = nvim.api.get_current_win()
-    buffer: Buffer = nvim.api.win_get_buf(window)
-    if is_fm_buffer(nvim, buffer=buffer):
-        row, _ = nvim.api.win_get_cursor(window)
-        row = row - 1
-        return state_index(state, row)
-    else:
-        return None
-
-
-def _indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
-    def step() -> Iterator[Node]:
-        if is_visual:
-            buffer: Buffer = nvim.api.get_current_buf()
-            r1, _ = nvim.api.buf_get_mark(buffer, "<")
-            r2, _ = nvim.api.buf_get_mark(buffer, ">")
-            for row in range(r1 - 1, r2):
-                node = state_index(state, row)
-                if node:
-                    yield node
-        else:
-            window: Window = nvim.api.get_current_win()
-            row, _ = nvim.api.win_get_cursor(window)
-            row = row - 1
-            node = state_index(state, row)
-            if node:
-                yield node
-
-    return tuple(step())
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
@@ -773,69 +737,6 @@ def c_select(
             return None
 
 
-def _delete(
-    nvim: Nvim,
-    state: State,
-    settings: Settings,
-    is_visual: bool,
-    yeet: Callable[[Iterable[str]], None],
-) -> Optional[Stage]:
-    selection = state.selection or frozenset(
-        node.path for node in _indices(nvim, state=state, is_visual=is_visual)
-    )
-    unified = tuple(unify_ancestors(selection))
-    if unified:
-        display_paths = linesep.join(
-            sorted((_display_path(path, state=state) for path in unified), key=strxfrm)
-        )
-
-        question = LANG("ask_trash", linesep=linesep, display_paths=display_paths)
-        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
-        ans = resp == 1
-        if ans:
-            try:
-                yeet(unified)
-            except Exception as e:
-                s_write(nvim, e, error=True)
-                return _refresh(nvim, state=state, settings=settings)
-            else:
-                paths = frozenset(dirname(path) for path in unified)
-                new_state = forward(
-                    state, settings=settings, selection=frozenset(), paths=paths
-                )
-
-                kill_buffers(nvim, paths=selection)
-                return Stage(new_state)
-        else:
-            return None
-    else:
-        return None
-
-
-@rpc(blocking=False, name="CHADdelete")
-def c_delete(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Delete selected
-    """
-
-    return _delete(
-        nvim, state=state, settings=settings, is_visual=is_visual, yeet=remove
-    )
-
-
-@rpc(blocking=False, name="CHADtrash")
-def c_trash(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Delete selected
-    """
-
-    return _delete(
-        nvim, state=state, settings=settings, is_visual=is_visual, yeet=trash
-    )
 
 
 def _find_dest(src: str, node: Node) -> str:
@@ -943,19 +844,3 @@ def c_copy(
     return _operation(
         nvim, state=state, settings=settings, op_name=LANG("copy"), action=copy
     )
-
-
-@rpc(blocking=False, name="CHADopen_sys")
-def c_open_system(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> None:
-    """
-    Open using finder / dolphin, etc
-    """
-
-    node = _index(nvim, state=state)
-    if node:
-        try:
-            open_gui(node.path)
-        except SystemIntegrationError as e:
-            s_write(nvim, e)

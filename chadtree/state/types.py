@@ -28,9 +28,3 @@ class State:
     show_hidden: bool
     vc: VCStatus
     width: int
-
-
-@dataclass(frozen=True)
-class Stage:
-    state: State
-    focus: Optional[str] = None
