@@ -1,11 +1,24 @@
+from locale import strxfrm
+from os import linesep
+from os.path import dirname
 from shutil import which
 from subprocess import DEVNULL, PIPE, run
-from typing import Iterable
-
-from ..settings.localization import LANG
-from .types import SysError
+from typing import Callable, Iterable, Optional
 
 from pynvim.api import Nvim
+from pynvim_pp.lib import s_write
+
+from ..fs.ops import remove, unify_ancestors
+from ..nvim.wm import kill_buffers
+from ..registry import rpc
+from ..settings.localization import LANG
+from ..settings.types import Settings
+from ..state.next import forward
+from ..state.ops import indices
+from ..state.types import State
+from ..view.ops import display_path
+from .refresh import refresh
+from .types import Stage, SysError
 
 
 def _delete(
@@ -16,12 +29,12 @@ def _delete(
     yeet: Callable[[Iterable[str]], None],
 ) -> Optional[Stage]:
     selection = state.selection or frozenset(
-        node.path for node in _indices(nvim, state=state, is_visual=is_visual)
+        node.path for node in indices(nvim, state=state, is_visual=is_visual)
     )
     unified = tuple(unify_ancestors(selection))
     if unified:
         display_paths = linesep.join(
-            sorted((_display_path(path, state=state) for path in unified), key=strxfrm)
+            sorted((display_path(path, state=state) for path in unified), key=strxfrm)
         )
 
         question = LANG("ask_trash", linesep=linesep, display_paths=display_paths)
@@ -32,7 +45,7 @@ def _delete(
                 yeet(unified)
             except Exception as e:
                 s_write(nvim, e, error=True)
-                return _refresh(nvim, state=state, settings=settings)
+                return refresh(nvim, state=state, settings=settings)
             else:
                 paths = frozenset(dirname(path) for path in unified)
                 new_state = forward(
@@ -60,6 +73,15 @@ def c_delete(
     )
 
 
+def _trash(paths: Iterable[str]) -> None:
+    if which("trash"):
+        ret = run(("trash", *paths), stdin=DEVNULL, stdout=DEVNULL, stderr=PIPE)
+        if ret.returncode != 0:
+            raise SysError(ret.stderr)
+    else:
+        raise SysError(LANG("sys_trash_err"))
+
+
 @rpc(blocking=False, name="CHADtrash")
 def c_trash(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
@@ -69,13 +91,5 @@ def c_trash(
     """
 
     return _delete(
-        nvim, state=state, settings=settings, is_visual=is_visual, yeet=trash
+        nvim, state=state, settings=settings, is_visual=is_visual, yeet=_trash
     )
-
-def _trash(paths: Iterable[str]) -> None:
-    if which("trash"):
-        ret = run(("trash", *paths), stdin=DEVNULL, stdout=DEVNULL, stderr=PIPE)
-        if ret.returncode != 0:
-            raise SysError(ret.stderr)
-    else:
-        raise SysError(LANG("sys_trash_err"))

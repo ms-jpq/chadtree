@@ -1,14 +1,12 @@
-from enum import Enum, auto
+
 from itertools import chain
 from locale import strxfrm
-from mimetypes import guess_type
 from operator import add, sub
 from os import linesep
 from os.path import basename, dirname, exists, isdir, join, relpath, sep, splitext
 from typing import (
     Callable,
     FrozenSet,
-    Iterable,
     Iterator,
     Mapping,
     MutableMapping,
@@ -17,11 +15,8 @@ from typing import (
 )
 
 from pynvim import Nvim
-from pynvim.api.buffer import Buffer
-from pynvim.api.common import NvimError
 from pynvim.api.window import Window
 from pynvim_pp.lib import s_write
-from std2.types import Void
 
 from .da import human_readable_size
 from .fs.cartographer import new as new_root
@@ -56,28 +51,15 @@ from .settings.types import Settings
 from .state.ops import dump_session
 from .state.next import forward
 from .fs.cartographer import is_dir
-from .state.types import FilterPattern, Selection, Stage, State, VCStatus
+from .state.types import FilterPattern, Selection,  State, VCStatus
 
-
-class ClickType(Enum):
-    primary = auto()
-    secondary = auto()
-    tertiary = auto()
-    v_split = auto()
-    h_split = auto()
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     update_buffers(nvim, state=state, focus=focus)
 
 
-def _display_path(path: str, state: State) -> str:
-    raw = relpath(path, start=state.root.path)
-    name = raw.replace(linesep, r"\n")
-    if isdir(path):
-        return f"{name}{sep}"
-    else:
-        return name
+
 
 
 def _current(
@@ -221,127 +203,6 @@ def c_smaller(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
     return _resize(nvim, state=state, settings=settings, direction=sub)
 
 
-def _open_file(
-    nvim: Nvim, state: State, settings: Settings, path: str, click_type: ClickType
-) -> Optional[Stage]:
-    name = basename(path)
-    _, ext = splitext(name)
-    mime, _ = guess_type(name, strict=False)
-    m_type, _, _ = (mime or "").partition("/")
-
-    def ask() -> bool:
-        question = LANG("mime_warn", name=name, mime=str(mime))
-        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
-        return resp == 1
-
-    ans = (
-        ask()
-        if m_type in settings.mime.warn and ext not in settings.mime.ignore_exts
-        else True
-    )
-    if ans:
-        new_state = forward(state, settings=settings, current=path)
-        show_file(nvim, state=new_state, settings=settings, click_type=click_type)
-        return Stage(new_state)
-    else:
-        return None
-
-
-def _click(
-    nvim: Nvim, state: State, settings: Settings, click_type: ClickType
-) -> Optional[Stage]:
-    node = _index(nvim, state=state)
-
-    if node:
-        if Mode.orphan_link in node.mode:
-            name = node.name
-            s_write(nvim, LANG("dead_link", name=name), error=True)
-            return None
-        else:
-            if Mode.folder in node.mode:
-                if state.filter_pattern:
-                    s_write(nvim, LANG("filter_click"))
-                    return None
-                else:
-                    paths = frozenset((node.path,))
-                    index = state.index ^ paths
-                    new_state = forward(
-                        state, settings=settings, index=index, paths=paths
-                    )
-                    return Stage(new_state)
-            else:
-                nxt = _open_file(
-                    nvim,
-                    state=state,
-                    settings=settings,
-                    path=node.path,
-                    click_type=click_type,
-                )
-                return nxt
-    else:
-        return None
-
-
-@rpc(blocking=False, name="CHADprimary")
-def c_primary(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Folders -> toggle
-    File -> open
-    """
-
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.primary)
-
-
-@rpc(blocking=False, name="CHADsecondary")
-def c_secondary(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Folders -> toggle
-    File -> preview
-    """
-
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.secondary)
-
-
-@rpc(blocking=False, name="CHADtertiary")
-def c_tertiary(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Folders -> toggle
-    File -> open in new tab
-    """
-
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.tertiary)
-
-
-@rpc(blocking=False, name="CHADv_split")
-def c_v_split(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Folders -> toggle
-    File -> open in vertical split
-    """
-
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.v_split)
-
-
-@rpc(blocking=False, name="CHADh_split")
-def c_h_split(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Folders -> toggle
-    File -> open in horizontal split
-    """
-
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.h_split)
-
-
 @rpc(blocking=False, name="CHADchange_focus")
 def c_change_focus(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
@@ -404,71 +265,10 @@ def c_collapse(
         return None
 
 
-def _vc_stat(enable: bool) -> VCStatus:
-    if enable:
-        return status()
-    else:
-        return VCStatus()
 
 
-def _refresh(
-    nvim: Nvim, state: State, settings: Settings, write_out: bool = False
-) -> Stage:
-    """
-    Redraw buffers
-    """
-
-    if write_out:
-        s_write(nvim, LANG("hourglass"))
-
-    current = find_current_buffer_name(nvim)
-    cwd = state.root.path
-    paths = frozenset((cwd,))
-    new_current = current if is_parent(parent=cwd, child=current) else None
-
-    index = frozenset(i for i in state.index if exists(i)) | paths
-    selection: Selection = (
-        frozenset()
-        if state.filter_pattern
-        else frozenset(s for s in state.selection if exists(s))
-    )
-    current_paths: FrozenSet[str] = (
-        frozenset(ancestors(current)) if state.follow else frozenset()
-    )
-    new_index = index if new_current else index | current_paths
-
-    qf, vc = quickfix(nvim), _vc_stat(state.enable_vc)
-    new_state = forward(
-        state,
-        settings=settings,
-        index=new_index,
-        selection=selection,
-        qf=qf,
-        vc=vc,
-        paths=paths,
-        current=new_current or Void,
-    )
-
-    if write_out:
-        s_write(nvim, LANG("ok_sym"))
-
-    return Stage(new_state)
 
 
-@rpc(blocking=False)
-def a_schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
-    try:
-        return _refresh(nvim, state=state, settings=settings, write_out=False)
-    except NvimError:
-        return None
-
-
-autocmd("BufWritePost", "FocusGained") << f"lua {a_schedule_update.name}()"
-
-
-@rpc(blocking=False, name="CHADrefresh")
-def c_refresh(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
-    return _refresh(nvim, state=state, settings=settings, write_out=True)
 
 
 @rpc(blocking=False, name="CHADjump_to_current")
@@ -585,28 +385,6 @@ def c_copy_name(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -
     s_write(nvim, LANG("copy_paths", copied_paths=copied_paths))
 
 
-@rpc(blocking=False, name="CHADstat")
-def c_stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None:
-    """
-    Print file stat to cmdline
-    """
-
-    node = _index(nvim, state=state)
-    if node:
-        try:
-            stat = fs_stat(node.path)
-        except Exception as e:
-            s_write(nvim, e, error=True)
-        else:
-            permissions = stat.permissions
-            size = human_readable_size(stat.size, truncate=2)
-            user = stat.user
-            group = stat.group
-            mtime = format(stat.date_mod, settings.view.time_fmt)
-            name = node.name + sep if Mode.folder in node.mode else node.name
-            full_name = f"{name} -> {stat.link}" if stat.link else name
-            mode_line = f"{permissions} {size} {user} {group} {mtime} {full_name}"
-            s_write(nvim, mode_line)
 
 
 @rpc(blocking=False, name="CHADnew")
