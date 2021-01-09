@@ -4,15 +4,14 @@ from os import makedirs
 from os import name as os_name
 from os import readlink
 from os import remove as rm
-from os import stat
-from os.path import dirname, exists, sep
+from os import sep, stat
+from os.path import dirname
 from pathlib import Path
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
 from typing import FrozenSet, Iterable, Iterator, Mapping, Optional
-
 
 from ..consts import FILE_MODE, FOLDER_MODE
 
@@ -36,10 +35,6 @@ def unify_ancestors(paths: FrozenSet[str]) -> Iterator[str]:
     for path in paths:
         if not any(a in paths for a in ancestors(path)):
             yield path
-
-
-def fs_exists(path: str) -> bool:
-    return exists(path)
 
 
 @dataclass(frozen=True)

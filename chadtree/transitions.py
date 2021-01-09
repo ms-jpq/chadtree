@@ -1,15 +1,12 @@
-
-from itertools import chain
 from locale import strxfrm
 from operator import add, sub
 from os import linesep
-from os.path import basename, dirname, exists, isdir, join, relpath, sep, splitext
+from os.path import dirname, join, relpath
 from typing import (
     Callable,
     FrozenSet,
     Iterator,
     Mapping,
-    MutableMapping,
     Optional,
     Sequence,
 )
@@ -18,30 +15,20 @@ from pynvim import Nvim
 from pynvim.api.window import Window
 from pynvim_pp.lib import s_write
 
-from .da import human_readable_size
 from .fs.cartographer import new as new_root
 from .fs.ops import (
     ancestors,
-    copy,
-    cut,
-    fs_exists,
-    fs_stat,
     is_parent,
     new,
-    remove,
     rename,
-    unify_ancestors,
 )
-from .fs.types import Mode, Node
-from .version_ctl.git import status
+from .fs.types import Mode
 from .nvim.quickfix import quickfix
 from .nvim.wm import (
     find_current_buffer_name,
-    is_fm_buffer,
     kill_buffers,
     kill_fm_windows,
     resize_fm_windows,
-    show_file,
     toggle_fm_window,
     update_buffers,
 )
@@ -51,15 +38,11 @@ from .settings.types import Settings
 from .state.ops import dump_session
 from .state.next import forward
 from .fs.cartographer import is_dir
-from .state.types import FilterPattern, Selection,  State, VCStatus
-
+from .state.types import FilterPattern, Selection, State, VCStatus
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     update_buffers(nvim, state=state, focus=focus)
-
-
-
 
 
 def _current(
@@ -265,12 +248,6 @@ def c_collapse(
         return None
 
 
-
-
-
-
-
-
 @rpc(blocking=False, name="CHADjump_to_current")
 def c_jump_to_current(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
@@ -383,8 +360,6 @@ def c_copy_name(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -
     nvim.funcs.setreg("+", clip)
     nvim.funcs.setreg("*", clip)
     s_write(nvim, LANG("copy_paths", copied_paths=copied_paths))
-
-
 
 
 @rpc(blocking=False, name="CHADnew")
@@ -513,112 +488,3 @@ def c_select(
             return Stage(new_state)
         else:
             return None
-
-
-
-
-def _find_dest(src: str, node: Node) -> str:
-    name = basename(src)
-    parent = node.path if is_dir(node) else dirname(node.path)
-    dst = join(parent, name)
-    return dst
-
-
-def _operation(
-    nvim: Nvim,
-    *,
-    state: State,
-    settings: Settings,
-    op_name: str,
-    action: Callable[[Mapping[str, str]], None],
-) -> Optional[Stage]:
-    node = _index(nvim, state=state)
-    selection = state.selection
-    unified = tuple(unify_ancestors(selection))
-    if unified and node:
-        pre_operations = {src: _find_dest(src, node) for src in unified}
-        pre_existing = {s: d for s, d in pre_operations.items() if exists(d)}
-        new_operations: MutableMapping[str, str] = {}
-        while pre_existing:
-            source, dest = pre_existing.popitem()
-            resp: Optional[str] = nvim.funcs.input(LANG("path_exists_err"), dest)
-            if not resp:
-                break
-            elif exists(resp):
-                pre_existing[source] = resp
-            else:
-                new_operations[source] = resp
-
-        if pre_existing:
-            msg = ", ".join(
-                f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
-                for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
-            )
-            s_write(
-                nvim, f"⚠️  -- {op_name}: path(s) already exist! :: {msg}", error=True
-            )
-            return None
-        else:
-            operations: Mapping[str, str] = {**pre_operations, **new_operations}
-            msg = linesep.join(
-                f"{_display_path(s, state=state)} -> {_display_path(d, state=state)}"
-                for s, d in sorted(operations.items(), key=lambda t: strxfrm(t[0]))
-            )
-
-            question = f"{op_name}{linesep}{msg}?"
-            resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
-            ans = resp == 1
-
-            if ans:
-                try:
-                    action(operations)
-                except Exception as e:
-                    s_write(nvim, e, error=True)
-                    return _refresh(nvim, state=state, settings=settings)
-                else:
-                    paths = frozenset(
-                        dirname(p)
-                        for p in chain(operations.keys(), operations.values())
-                    )
-                    index = state.index | paths
-                    new_state = forward(
-                        state,
-                        settings=settings,
-                        index=index,
-                        selection=frozenset(),
-                        paths=paths,
-                    )
-
-                    kill_buffers(nvim, paths=selection)
-                    return Stage(new_state)
-            else:
-                return None
-    else:
-        s_write(nvim, LANG("nothing_select"), error=True)
-        return None
-
-
-@rpc(blocking=False, name="CHADcut")
-def c_cut(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Cut selected
-    """
-
-    return _operation(
-        nvim, state=state, settings=settings, op_name=LANG("cut"), action=cut
-    )
-
-
-@rpc(blocking=False, name="CHADcopy")
-def c_copy(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Copy selected
-    """
-
-    return _operation(
-        nvim, state=state, settings=settings, op_name=LANG("copy"), action=copy
-    )
