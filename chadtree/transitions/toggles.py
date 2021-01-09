@@ -11,8 +11,8 @@ from ..version_ctl.types import VCStatus
 from .types import Stage
 
 
-@rpc(blocking=False, name="CHADtoggle_hidden")
-def c_hidden(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+@rpc(blocking=False)
+def _toggle_hidden(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
     """
     Toggle hidden
     """
@@ -21,8 +21,8 @@ def c_hidden(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
     return Stage(new_state)
 
 
-@rpc(blocking=False, name="CHADtoggle_follow")
-def c_toggle_follow(
+@rpc(blocking=False)
+def _toggle_follow(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Stage:
     """
@@ -34,8 +34,8 @@ def c_toggle_follow(
     return Stage(new_state)
 
 
-@rpc(blocking=False, name="CHADtoggle_version_control")
-def c_toggle_vc(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+@rpc(blocking=False)
+def _toggle_version_control(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
     """
     Toggle version control
     """

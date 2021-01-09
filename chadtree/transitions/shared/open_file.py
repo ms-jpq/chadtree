@@ -1,4 +1,3 @@
-from enum import Enum, auto
 from mimetypes import guess_type
 from os import linesep
 from os.path import basename, splitext

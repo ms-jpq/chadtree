@@ -57,9 +57,6 @@ def refresh(
     return Stage(new_state)
 
 
-@rpc(blocking=False)
-def _refresh(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
-    return refresh(nvim, state=state, settings=settings, write_out=True)
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
