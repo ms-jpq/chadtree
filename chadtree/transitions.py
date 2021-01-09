@@ -39,7 +39,6 @@ from .fs.ops import (
 from .fs.types import Mode, Node
 from .git import status
 from .localization import LANG
-from .nvim import getcwd
 from .opts import ArgparseError, parse_args
 from .quickfix import quickfix
 from .registry import autocmd, rpc
@@ -131,7 +130,7 @@ def _change_dir(nvim: Nvim, state: State, settings: Settings, new_base: str) -> 
 
 
 def _refocus(nvim: Nvim, state: State, settings: Settings) -> Stage:
-    cwd = getcwd(nvim)
+    cwd: str = nvim.funcs.getcwd()
     return _change_dir(nvim, state=state, settings=settings, new_base=cwd)
 
 

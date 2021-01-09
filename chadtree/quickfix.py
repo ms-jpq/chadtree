@@ -6,12 +6,11 @@ from typing import Iterator
 from pynvim import Nvim
 
 from .fs.ops import ancestors
-from .nvim import getcwd
 from .types import QuickFix
 
 
 def quickfix(nvim: Nvim) -> QuickFix:
-    cwd = getcwd(nvim)
+    cwd: str = nvim.funcs.getcwd()
     ql = nvim.funcs.getqflist()
 
     def it() -> Iterator[str]:

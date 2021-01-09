@@ -10,7 +10,6 @@ from .fs.cartographer import new, update
 from .consts import SESSION_DIR
 from .da import dump_json, load_json
 from .git import status
-from .nvim import getcwd
 from .quickfix import quickfix
 from .view.render import render
 from .types import (
@@ -52,7 +51,7 @@ def dump_session(state: State) -> None:
 
 def initial(nvim: Nvim, settings: Settings) -> State:
     version_ctl = settings.version_ctl
-    cwd = getcwd(nvim)
+    cwd: str = nvim.funcs.getcwd()
 
     session = load_session(cwd)
     index = session.index if settings.session else frozenset((cwd,))
