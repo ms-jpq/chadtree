@@ -39,7 +39,6 @@ from .fs.ops import (
 )
 from .fs.types import Mode, Node
 from .git import status
-from .settings.localization import LANG
 from .nvim.quickfix import quickfix
 from .nvim.wm import (
     find_current_buffer_name,
@@ -54,6 +53,7 @@ from .nvim.wm import (
 from .opts import ArgparseError, parse_args
 from .registry import autocmd, rpc
 from .search import search
+from .settings.localization import LANG
 from .settings.types import Settings
 from .state import dump_session, forward
 from .state import index as state_index

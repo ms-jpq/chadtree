@@ -1,8 +1,11 @@
 from argparse import ArgumentParser
+from dataclasses import dataclass
 from typing import NoReturn, Optional, Sequence
 
-from .types import OpenArgs
 
+@dataclass(frozen=True)
+class OpenArgs:
+    focus: bool
 
 class ArgparseError(Exception):
     pass

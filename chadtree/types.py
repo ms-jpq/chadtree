@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 
 
@@ -13,9 +11,6 @@ Index = FrozenSet[str]
 Selection = FrozenSet[str]
 
 
-@dataclass(frozen=True)
-class OpenArgs:
-    focus: bool
 
 
 @dataclass(frozen=True)

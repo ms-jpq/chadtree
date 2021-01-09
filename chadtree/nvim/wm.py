@@ -20,9 +20,10 @@ from std2.contextlib import nil_manager
 
 from ..consts import FM_FILETYPE, FM_NAMESPACE
 from ..fs.ops import is_parent
+from ..opts import OpenArgs
 from ..settings.types import Settings
 from ..transitions import ClickType
-from ..types import OpenArgs, State
+from ..types import State
 from ..view.types import Badge, Highlight
 
 
