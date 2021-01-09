@@ -37,7 +37,7 @@ class ChadClient(BasicClient):
         else:
             assert False
 
-    async def wait(self, nvim: Nvim) -> int:
+    def wait(self, nvim: Nvim) -> int:
         def cont() -> None:
             atomic, specs = rpc.drain(nvim.channel_id)
             self._handlers.update(specs)
@@ -46,7 +46,7 @@ class ChadClient(BasicClient):
             hl = highlight(*hl_ctx.groups)
             (atomic + autocmd.drain() + hl).commit(nvim)
 
-        await async_call(nvim, cont)
+        async_call(nvim, cont)
         self._state = await initial_state(nvim, settings=cast(Settings, self._settings))
         init_locale(cast(Settings, self._settings).lang)
         return await super().wait(nvim)
