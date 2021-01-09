@@ -14,7 +14,8 @@ from stat import (
 )
 from typing import FrozenSet, Iterator, Mapping, cast
 
-from .types import Index, Mode, Node
+from ..types import Index
+from .types import Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
     S_IEXEC: Mode.executable,

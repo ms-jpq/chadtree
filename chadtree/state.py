@@ -6,7 +6,7 @@ from pynvim import Nvim
 from std2.pickle import decode, encode
 from std2.types import Void, VoidType, or_else
 
-from .cartographer import new, update
+from .fs.cartographer import new, update
 from .consts import SESSION_DIR
 from .da import dump_json, load_json
 from .git import status

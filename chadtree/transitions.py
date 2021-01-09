@@ -22,7 +22,7 @@ from pynvim.api.window import Window
 from pynvim_pp.lib import s_write
 from std2.types import Void
 
-from .cartographer import new as new_root
+from .fs.cartographer import new as new_root
 from .da import human_readable_size
 from .fs.ops import (
     ancestors,
