@@ -17,8 +17,8 @@ from uuid import uuid4
 
 from pynvim_pp.highlight import HLgroup
 
-from .consts import FM_HL_PREFIX
-from .view.types import HLcontext, Mode, UserHighlights
+from ..consts import FM_HL_PREFIX
+from .types import HLcontext, Mode, UserHighlights
 
 
 class _Style(IntEnum):

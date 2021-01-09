@@ -21,7 +21,7 @@ from ..consts import (
 )
 from ..da import load_json
 from ..highlight import gen_hl
-from ..ls_colours import parse_ls_colours
+from ..view.ls_colours import parse_ls_colours
 from ..view.types import (
     Sortby,
     UserColourMapping,
