@@ -12,6 +12,16 @@ from .shared.index import indices
 from .types import Stage
 
 
+@rpc(blocking=False)
+def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+    """
+    Follow cwd update
+    """
+
+    cwd: str = nvim.funcs.getcwd()
+    return new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+
+
 @rpc(blocking=False, name="CHADchange_focus")
 def c_change_focus(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
