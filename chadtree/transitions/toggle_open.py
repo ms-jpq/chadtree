@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from dataclasses import dataclass
 from typing import NoReturn, Optional, Sequence
 
 from pynvim import Nvim
@@ -18,7 +19,12 @@ from .shared.wm import (
     new_window,
     resize_fm_windows,
 )
-from .types import OpenArgs, Stage
+from .types import Stage
+
+
+@dataclass(frozen=True)
+class _OpenArgs:
+    focus: bool
 
 
 class _ArgparseError(Exception):
@@ -34,12 +40,12 @@ class _Argparse(ArgumentParser):
         raise _ArgparseError(msg)
 
 
-def _parse_args(args: Sequence[str]) -> OpenArgs:
+def _parse_args(args: Sequence[str]) -> _OpenArgs:
     parser = _Argparse()
     parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
 
     ns = parser.parse_args(args=args)
-    opts = OpenArgs(focus=ns.focus)
+    opts = _OpenArgs(focus=ns.focus)
     return opts
 
 
@@ -58,7 +64,7 @@ def _ensure_side_window(
 
 
 def _toggle_fm_window(
-    nvim: Nvim, *, state: State, settings: Settings, opts: OpenArgs
+    nvim: Nvim, state: State, settings: Settings, opts: _OpenArgs
 ) -> None:
     cwin: Window = nvim.api.get_current_win()
     window = next(find_fm_windows_in_tab(nvim), None)

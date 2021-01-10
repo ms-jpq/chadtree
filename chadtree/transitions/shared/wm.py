@@ -9,10 +9,8 @@ from pynvim_pp.keymap import Keymap
 
 from ...consts import FM_FILETYPE, FM_NAMESPACE
 from ...fs.ops import ancestors
-from ...settings.types import Settings
 from ...state.types import State
 from ...view.types import Badge, Highlight
-from ..types import OpenArgs
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
