@@ -34,10 +34,8 @@ def _show_file(
         mgr = hold_win_pos(nvim) if hold else nullcontext()
         with mgr:
             non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
-            buffer: Optional[Buffer] = next(
-                find_buffers_with_file(nvim, file=path), None
-            )
-            window: Window = (
+            buffer = next(find_buffers_with_file(nvim, file=path), None)
+            window = (
                 next(find_window_with_file_in_tab(nvim, file=path), None)
                 or next(iter(non_fm_windows), None)
                 or new_window(nvim, open_left=not settings.open_left, width=state.width)
@@ -45,8 +43,6 @@ def _show_file(
 
             nvim.api.set_current_win(window)
             non_fm_count = len(non_fm_windows)
-
-            temp_buf: Optional[Buffer] = None
 
             if click_type is ClickType.v_split and non_fm_count:
                 nvim.api.command("vnew")
@@ -63,6 +59,7 @@ def _show_file(
                 nvim.command(f"edit {path}")
             else:
                 nvim.api.win_set_buf(window, buffer)
+                
             resize_fm_windows(nvim, state.width)
             nvim.api.command("filetype detect")
 
