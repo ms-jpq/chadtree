@@ -13,6 +13,10 @@ from ..types import Stage
 def current(
     nvim: Nvim, state: State, settings: Settings, current: str
 ) -> Optional[Stage]:
+    """
+    New file focused in buf
+    """
+
     if is_parent(parent=state.root.path, child=current):
         paths: FrozenSet[str] = ancestors(current) if state.follow else frozenset()
         index = state.index | paths

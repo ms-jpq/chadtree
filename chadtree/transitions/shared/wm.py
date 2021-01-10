@@ -164,7 +164,7 @@ def toggle_fm_window(
     nvim: Nvim, *, state: State, settings: Settings, opts: OpenArgs
 ) -> None:
     cwin: Window = nvim.api.get_current_win()
-    window: Optional[Window] = next(_find_fm_windows_in_tab(nvim), None)
+    window = next(_find_fm_windows_in_tab(nvim), None)
     if window:
         windows: Sequence[Window] = nvim.api.list_wins()
         if len(windows) <= 1:

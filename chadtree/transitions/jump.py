@@ -9,8 +9,8 @@ from .shared.current import current
 from .types import Stage
 
 
-@rpc(blocking=False, name="CHADjump_to_current")
-def c_jump_to_current(
+@rpc(blocking=False)
+def _jump_to_current(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
