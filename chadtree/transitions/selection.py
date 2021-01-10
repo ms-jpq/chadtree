@@ -30,9 +30,9 @@ def _select(
     Folder / File -> select
     """
 
-    nodes = iter(indices(nvim, state=state, is_visual=is_visual))
+    nodes = indices(nvim, state=state, is_visual=is_visual)
     if is_visual:
-        selection = state.selection ^ {n.path for n in nodes}
+        selection = state.selection ^ {node.path for node in nodes}
         new_state = forward(state, settings=settings, selection=selection)
         return Stage(new_state)
     else:
