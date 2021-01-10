@@ -49,7 +49,7 @@ def _rename(
                     new_state = forward(
                         state, settings=settings, index=index, paths=paths
                     )
-                    kill_buffers(nvim, paths=(prev_name,))
+                    kill_buffers(nvim, paths=frozenset((prev_name,)))
                     return Stage(new_state)
         else:
             return None

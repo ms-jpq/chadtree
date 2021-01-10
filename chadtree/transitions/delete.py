@@ -89,6 +89,6 @@ def _trash(
     Delete selected
     """
 
-    return _delete(
+    return _remove(
         nvim, state=state, settings=settings, is_visual=is_visual, yeet=_sys_trash
     )

@@ -232,7 +232,7 @@ def show_file(
             nvim.api.command("filetype detect")
 
 
-def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
+def kill_buffers(nvim: Nvim, paths: FrozenSet[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
         buf_name = nvim.api.buf_get_name(buffer)
