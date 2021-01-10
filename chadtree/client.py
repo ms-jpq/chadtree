@@ -13,7 +13,7 @@ from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
 from .state.types import State
-from .transitions.shared.refresh import redraw
+from .transitions.redraw import redraw
 from .transitions.types import Stage
 
 

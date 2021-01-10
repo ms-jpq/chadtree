@@ -1,5 +1,5 @@
 from os.path import exists
-from typing import FrozenSet, Optional
+from typing import FrozenSet
 
 from pynvim import Nvim
 from pynvim_pp.lib import s_write
@@ -7,7 +7,7 @@ from std2.types import Void
 
 from ...fs.ops import ancestors
 from ...nvim.quickfix import quickfix
-from ..shared.wm import find_current_buffer_name, update_buffers
+from ..shared.wm import find_current_buffer_name
 from ...settings.localization import LANG
 from ...settings.types import Settings
 from ...state.next import forward
@@ -54,7 +54,3 @@ def refresh(
         s_write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
-
-
-def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
-    update_buffers(nvim, state=state, focus=focus)
