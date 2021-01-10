@@ -12,6 +12,8 @@
   "name_glob": {},
   "status": {
     "active": ">",
+    "inactive": " ",
+    "not_selected": " ",
     "selected": "*"
   },
   "type": {}
