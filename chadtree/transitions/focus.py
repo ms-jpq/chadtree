@@ -22,8 +22,8 @@ def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
     return new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
 
 
-@rpc(blocking=False, name="CHADchange_focus")
-def c_change_focus(
+@rpc(blocking=False)
+def _change_focus(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
@@ -38,8 +38,8 @@ def c_change_focus(
         return None
 
 
-@rpc(blocking=False, name="CHADchange_focus_up")
-def c_change_focus_up(
+@rpc(blocking=False)
+def _change_focus_up(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """

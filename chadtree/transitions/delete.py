@@ -21,7 +21,7 @@ from .shared.refresh import refresh
 from .types import Stage, SysError
 
 
-def _delete(
+def _remove(
     nvim: Nvim,
     state: State,
     settings: Settings,
@@ -59,20 +59,20 @@ def _delete(
         return None
 
 
-@rpc(blocking=False, name="CHADdelete")
-def c_delete(
+@rpc(blocking=False)
+def _delete(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Delete selected
     """
 
-    return _delete(
+    return _remove(
         nvim, state=state, settings=settings, is_visual=is_visual, yeet=remove
     )
 
 
-def _trash(paths: Iterable[str]) -> None:
+def _sys_trash(paths: Iterable[str]) -> None:
     if which("trash"):
         ret = run(("trash", *paths), stdin=DEVNULL, stdout=DEVNULL, stderr=PIPE)
         if ret.returncode != 0:
@@ -81,8 +81,8 @@ def _trash(paths: Iterable[str]) -> None:
         raise SysError(LANG("sys_trash_err"))
 
 
-@rpc(blocking=False, name="CHADtrash")
-def c_trash(
+@rpc(blocking=False)
+def _trash(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
@@ -90,5 +90,5 @@ def c_trash(
     """
 
     return _delete(
-        nvim, state=state, settings=settings, is_visual=is_visual, yeet=_trash
+        nvim, state=state, settings=settings, is_visual=is_visual, yeet=_sys_trash
     )

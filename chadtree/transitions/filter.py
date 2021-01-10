@@ -10,8 +10,8 @@ from ..state.types import FilterPattern, State
 from .types import Stage
 
 
-@rpc(blocking=False, name="CHADclear_filter")
-def c_clear_filter(
+@rpc(blocking=False)
+def _clear_filter(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Stage:
     """
@@ -22,8 +22,8 @@ def c_clear_filter(
     return Stage(new_state)
 
 
-@rpc(blocking=False, name="CHADfilter")
-def c_new_filter(
+@rpc(blocking=False)
+def _filter(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Stage:
     """

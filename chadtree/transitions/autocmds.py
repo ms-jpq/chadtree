@@ -27,7 +27,7 @@ def _schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[S
 autocmd("BufWritePost", "FocusGained") << f"lua {_schedule_update.name}()"
 
 
-@rpc(blocking=False, name="CHADrefocus")
+@rpc(blocking=False)
 def _changedir(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
     """
     Follow cwd update

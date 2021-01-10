@@ -16,8 +16,8 @@ from .shared.refresh import refresh
 from .types import Stage
 
 
-@rpc(blocking=False, name="CHADrename")
-def c_rename(
+@rpc(blocking=False)
+def _rename(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """

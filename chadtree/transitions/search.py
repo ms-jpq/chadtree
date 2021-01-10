@@ -10,12 +10,12 @@ from ..state.types import State
 from .types import Stage, SysError
 
 
-def _search(args: str, cwd: str, sep: str) -> FrozenSet[str]:
+def _sys_search(args: str, cwd: str, sep: str) -> FrozenSet[str]:
     raise SysError()
 
 
-@rpc(blocking=False, name="CHADsearch")
-def c_new_search(
+@rpc(blocking=False)
+def _search(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Stage:
     """
@@ -24,7 +24,7 @@ def c_new_search(
 
     cwd = state.root.path
     pattern: Optional[str] = nvim.funcs.input("new_search", "")
-    results = _search(pattern or "", cwd=cwd, sep=linesep)
+    results = _sys_search(pattern or "", cwd=cwd, sep=linesep)
     s_write(nvim, results)
 
     return Stage(state)

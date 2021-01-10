@@ -10,8 +10,8 @@ from ..state.types import State
 from .types import Stage
 
 
-@rpc(blocking=False, name="CHADclear_selection")
-def c_clear_selection(
+@rpc(blocking=False)
+def _clear_selection(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Stage:
     """
@@ -22,8 +22,8 @@ def c_clear_selection(
     return Stage(new_state)
 
 
-@rpc(blocking=False, name="CHADselect")
-def c_select(
+@rpc(blocking=False)
+def _select(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
