@@ -6,6 +6,7 @@ from pynvim import Nvim
 from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call
+from pynvim_pp.logging import log
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 from std2.sched import ticker
 from std2.types import AnyFun
@@ -66,4 +67,7 @@ class ChadClient(Client):
                     self._state = stage.state
                     redraw(nvim, state=self._state, focus=stage.focus)
 
-            threadsafe_call(nvim, cont)
+            try:
+                threadsafe_call(nvim, cont)
+            except Exception as e:
+                log.exception("%s", e)
