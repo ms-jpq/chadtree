@@ -2,13 +2,22 @@ from argparse import ArgumentParser
 from typing import NoReturn, Optional, Sequence
 
 from pynvim import Nvim
+from pynvim.api import Window
 from pynvim_pp.lib import s_write
 
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
 from .shared.current import current
-from .shared.wm import find_current_buffer_name, toggle_fm_window
+from .shared.wm import (
+    find_current_buffer_name,
+    find_fm_buffers,
+    find_fm_windows_in_tab,
+    find_windows_in_tab,
+    new_fm_buffer,
+    new_window,
+    resize_fm_windows,
+)
 from .types import OpenArgs, Stage
 
 
@@ -34,6 +43,46 @@ def _parse_args(args: Sequence[str]) -> OpenArgs:
     return opts
 
 
+def _ensure_side_window(
+    nvim: Nvim, *, window: Window, state: State, settings: Settings
+) -> None:
+    open_left = settings.open_left
+    windows = tuple(find_windows_in_tab(nvim, exclude=False))
+    target = windows[0] if open_left else windows[-1]
+    if window.number != target.number:
+        if open_left:
+            nvim.api.command("wincmd H")
+        else:
+            nvim.api.command("wincmd L")
+        resize_fm_windows(nvim, state.width)
+
+
+def _toggle_fm_window(
+    nvim: Nvim, *, state: State, settings: Settings, opts: OpenArgs
+) -> None:
+    cwin: Window = nvim.api.get_current_win()
+    window = next(find_fm_windows_in_tab(nvim), None)
+    if window:
+        windows: Sequence[Window] = nvim.api.list_wins()
+        if len(windows) <= 1:
+            pass
+        else:
+            nvim.api.win_close(window, True)
+    else:
+        buffer = next(find_fm_buffers(nvim), None)
+        if buffer is None:
+            buffer = new_fm_buffer(nvim, keymap=settings.keymap)
+
+        window = new_window(nvim, open_left=settings.open_left, width=state.width)
+        for option, value in settings.win_local_opts.items():
+            nvim.api.win_set_option(window, option, value)
+        nvim.api.win_set_buf(window, buffer)
+
+        _ensure_side_window(nvim, window=window, state=state, settings=settings)
+        if not opts.focus:
+            nvim.api.set_current_win(cwin)
+
+
 @rpc(blocking=False)
 def _open(
     nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
@@ -49,7 +98,7 @@ def _open(
         return None
     else:
         curr = find_current_buffer_name(nvim)
-        toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
+        _toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
 
         stage = current(nvim, state=state, settings=settings, current=curr)
         if stage:

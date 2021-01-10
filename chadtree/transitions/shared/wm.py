@@ -20,7 +20,7 @@ def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
     return ft == FM_FILETYPE
 
 
-def _find_windows_in_tab(nvim: Nvim, exclude: bool) -> Iterator[Window]:
+def find_windows_in_tab(nvim: Nvim, exclude: bool) -> Iterator[Window]:
     def key_by(window: Window) -> Tuple[int, int]:
         row, col = nvim.api.win_get_position(window)
         return (col, row)
@@ -41,28 +41,28 @@ def _find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
 
 
 def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in _find_windows_in_tab(nvim, exclude=True):
+    for window in find_windows_in_tab(nvim, exclude=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         if is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
 def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in _find_windows_in_tab(nvim, exclude=True):
+    for window in find_windows_in_tab(nvim, exclude=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         if not is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
 def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
-    for window in _find_windows_in_tab(nvim, exclude=True):
+    for window in find_windows_in_tab(nvim, exclude=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         name = nvim.api.buf_get_name(buffer)
         if name == file:
             yield window
 
 
-def _find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
+def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
         if is_fm_buffer(nvim, buffer=buffer):
@@ -83,7 +83,7 @@ def find_current_buffer_name(nvim: Nvim) -> str:
     return name
 
 
-def _new_fm_buffer(nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]) -> Buffer:
+def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]) -> Buffer:
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
     nvim.api.buf_set_option(buffer, "filetype", FM_FILETYPE)
@@ -106,7 +106,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
     split_r = nvim.api.get_option("splitright")
 
     windows: Sequence[Window] = tuple(
-        w for w in _find_windows_in_tab(nvim, exclude=False)
+        w for w in find_windows_in_tab(nvim, exclude=False)
     )
     focus_win = windows[0] if open_left else windows[-1]
     direction = False if open_left else True
@@ -123,46 +123,6 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
 def resize_fm_windows(nvim: Nvim, width: int) -> None:
     for window in find_fm_windows_in_tab(nvim):
         nvim.api.win_set_width(window, width)
-
-
-def _ensure_side_window(
-    nvim: Nvim, *, window: Window, state: State, settings: Settings
-) -> None:
-    open_left = settings.open_left
-    windows = tuple(_find_windows_in_tab(nvim, exclude=False))
-    target = windows[0] if open_left else windows[-1]
-    if window.number != target.number:
-        if open_left:
-            nvim.api.command("wincmd H")
-        else:
-            nvim.api.command("wincmd L")
-        resize_fm_windows(nvim, state.width)
-
-
-def toggle_fm_window(
-    nvim: Nvim, *, state: State, settings: Settings, opts: OpenArgs
-) -> None:
-    cwin: Window = nvim.api.get_current_win()
-    window = next(find_fm_windows_in_tab(nvim), None)
-    if window:
-        windows: Sequence[Window] = nvim.api.list_wins()
-        if len(windows) <= 1:
-            pass
-        else:
-            nvim.api.win_close(window, True)
-    else:
-        buffer = next(_find_fm_buffers(nvim), None)
-        if buffer is None:
-            buffer = _new_fm_buffer(nvim, keymap=settings.keymap)
-
-        window = new_window(nvim, open_left=settings.open_left, width=state.width)
-        for option, value in settings.win_local_opts.items():
-            nvim.api.win_set_option(window, option, value)
-        nvim.api.win_set_buf(window, buffer)
-
-        _ensure_side_window(nvim, window=window, state=state, settings=settings)
-        if not opts.focus:
-            nvim.api.set_current_win(cwin)
 
 
 def kill_buffers(nvim: Nvim, paths: FrozenSet[str]) -> None:
