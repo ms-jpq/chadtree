@@ -17,18 +17,18 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+def schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     try:
         return refresh(nvim, state=state, settings=settings, write_out=False)
     except NvimError:
         return None
 
 
-autocmd("BufWritePost", "FocusGained") << f"lua {_schedule_update.name}()"
+autocmd("BufWritePost", "FocusGained") << f"lua {schedule_update.name}()"
 
 
 @rpc(blocking=False)
-def _changedir(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
     Follow cwd update
     """

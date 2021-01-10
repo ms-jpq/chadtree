@@ -1,3 +1,4 @@
+from asyncio import run_coroutine_threadsafe
 from queue import SimpleQueue
 from typing import Any, MutableMapping, Optional, cast
 
@@ -6,6 +7,7 @@ from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
+from std2.sched import ticker
 from std2.types import AnyFun
 
 from ._registry import ____
@@ -15,6 +17,7 @@ from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
 from .state.types import State
+from .transitions.autocmds import schedule_update
 from .transitions.redraw import redraw
 from .transitions.types import Stage
 
@@ -43,6 +46,12 @@ class ChadClient(Client):
             init_locale(self._settings.lang)
 
         threadsafe_call(nvim, cont)
+
+        async def sched() -> None:
+            async for _ in ticker(period=1, immediately=False):
+                self._q.put((schedule_update.name, ()))
+
+        run_coroutine_threadsafe(sched(), loop=nvim.loop)
 
         while True:
             msg: RpcMsg = self._q.get()

@@ -47,5 +47,6 @@
     "defer": false,
     "enable": true
   },
+  "polling_rate": 1,
   "width": 40
 }

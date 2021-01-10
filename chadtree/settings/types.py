@@ -30,6 +30,7 @@ class Settings:
     lang: Optional[str]
     mime: MimetypeOptions
     open_left: bool
+    polling_rate: float
     session: bool
     show_hidden: bool
     version_ctl: VersionCtlOpts

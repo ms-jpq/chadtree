@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from locale import strxfrm
-from typing import FrozenSet, Literal, Mapping, Optional, Sequence, Union
+from typing import FrozenSet, Literal, Mapping, Optional, Sequence, SupportsFloat, Union
 
 from pynvim.api.nvim import Nvim
 from pynvim_pp.rpc import RpcSpec
@@ -39,6 +39,7 @@ class _UserConfig:
     lang: Optional[str]
     mimetypes: MimetypeOptions
     open_left: bool
+    polling_rate: SupportsFloat
     session: bool
     show_hidden: bool
     sort_by: Sequence[Sortby]
@@ -105,7 +106,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
             path=(_UserConfig, "<field 'keymap'>"),
             actual=None,
             missing_keys=(),
-            extra_keys=sorted(extra_keys, key=strxfrm),
+            extra_keys=sorted((key[len("CHAD") :] for key in extra_keys), key=strxfrm),
         )
 
     settings = Settings(
@@ -115,6 +116,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         lang=config.lang,
         mime=config.mimetypes,
         open_left=config.open_left,
+        polling_rate=float(config.polling_rate),
         session=config.session,
         show_hidden=config.show_hidden,
         version_ctl=config.version_control,
