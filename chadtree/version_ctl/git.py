@@ -5,9 +5,11 @@ from shutil import which
 from subprocess import DEVNULL, PIPE, run
 from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
+from std2.concurrent.futures import gather
 from std2.types import freeze
 
 from ..fs.ops import ancestors
+from ..registry import pool
 from .types import VCStatus
 
 _GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain")
@@ -111,7 +113,12 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
 def status() -> VCStatus:
     if which("git"):
         try:
-            r, s_main, s_sub = _root(), _stat_main(), _stat_sub_modules()
+            ret: Tuple[str, Mapping[str, str], Mapping[str, str]] = gather(
+                pool.submit(_root),
+                pool.submit(_stat_main),
+                pool.submit(_stat_sub_modules),
+            )
+            r, s_main, s_sub = ret
             stats = {**s_sub, **s_main}
             return _parse(r, stats)
         except _GitError:

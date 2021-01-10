@@ -8,6 +8,7 @@ from pynvim_pp.lib import threadsafe_call
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 from std2.types import AnyFun
 
+from ._registry import ____
 from .registry import autocmd, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
@@ -48,14 +49,12 @@ class ChadClient(Client):
             name, args = msg
             handler = self._handlers.get(name, nil_handler(name))
 
-            stage = threadsafe_call(
-                nvim,
-                cast(AnyFun[Optional[Stage]], handler),
-                nvim,
-                self._state,
-                self._settings,
-                *args
-            )
-            if stage:
-                self._state = stage.state
-                redraw(nvim, state=self._state, focus=stage.focus)
+            def cont() -> None:
+                stage = cast(AnyFun[Optional[Stage]], handler)(
+                    nvim, self._state, self._settings, *args
+                )
+                if stage:
+                    self._state = stage.state
+                    redraw(nvim, state=self._state, focus=stage.focus)
+
+            threadsafe_call(nvim, cont)

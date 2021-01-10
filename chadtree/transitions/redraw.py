@@ -43,7 +43,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
         vtext = cast(Sequence[Sequence[Badge]], badges)
         for idx, bgs in enumerate(vtext):
             vtxt = tuple((badge.text, badge.group) for badge in bgs)
-            atomic.buf_set_virtual_text(buffer, ns, idx, vtxt)
+            atomic.buf_set_virtual_text(buffer, ns, idx, vtxt, {})
 
         hl2 = cast(Sequence[Sequence[Highlight]], highlights)
         for idx, hl in enumerate(hl2):
