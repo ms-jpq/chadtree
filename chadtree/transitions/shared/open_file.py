@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from mimetypes import guess_type
 from os import linesep
 from os.path import basename, splitext
@@ -7,7 +8,6 @@ from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 from pynvim_pp.hold import hold_win_pos
-from std2.contextlib import nullacontext
 
 from ...settings.localization import LANG
 from ...settings.types import Settings
@@ -31,7 +31,7 @@ def _show_file(
     if click_type is ClickType.tertiary:
         nvim.api.command("tabnew")
     if path:
-        mgr = hold_win_pos(nvim) if hold else nullacontext()
+        mgr = hold_win_pos(nvim) if hold else nullcontext()
         with mgr:
             non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
             buffer: Optional[Buffer] = next(
