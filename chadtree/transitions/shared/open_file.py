@@ -5,8 +5,6 @@ from os.path import basename, splitext
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim.api.buffer import Buffer
-from pynvim.api.window import Window
 from pynvim_pp.hold import hold_win_pos
 
 from ...settings.localization import LANG
@@ -26,11 +24,12 @@ from .wm import (
 def _show_file(
     nvim: Nvim, *, state: State, settings: Settings, click_type: ClickType
 ) -> None:
-    path = state.current
-    hold = click_type is ClickType.secondary
     if click_type is ClickType.tertiary:
         nvim.api.command("tabnew")
+
+    path = state.current
     if path:
+        hold = click_type is ClickType.secondary
         mgr = hold_win_pos(nvim) if hold else nullcontext()
         with mgr:
             non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
@@ -59,7 +58,7 @@ def _show_file(
                 nvim.command(f"edit {path}")
             else:
                 nvim.api.win_set_buf(window, buffer)
-                
+
             resize_fm_windows(nvim, state.width)
             nvim.api.command("filetype detect")
 
