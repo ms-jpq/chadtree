@@ -20,9 +20,6 @@ def ancestors(path: str) -> FrozenSet[str]:
     return frozenset(str(p) for p in PurePath(path).parents)
 
 
-def is_parent(*, parent: str, child: str) -> bool:
-    return parent in ancestors(child)
-
 
 def unify_ancestors(paths: FrozenSet[str]) -> FrozenSet[str]:
     return frozenset(p for p in paths if ancestors(p).isdisjoint(paths))

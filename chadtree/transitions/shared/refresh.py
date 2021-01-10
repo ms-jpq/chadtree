@@ -5,7 +5,7 @@ from pynvim import Nvim
 from pynvim_pp.lib import s_write
 from std2.types import Void
 
-from ...fs.ops import ancestors, is_parent
+from ...fs.ops import ancestors
 from ...nvim.quickfix import quickfix
 from ..shared.wm import find_current_buffer_name, update_buffers
 from ...settings.localization import LANG
@@ -26,7 +26,7 @@ def refresh(
     current = find_current_buffer_name(nvim)
     cwd = state.root.path
     paths = frozenset((cwd,))
-    new_current = current if is_parent(parent=cwd, child=current) else None
+    new_current = current if cwd in ancestors(current) else None
 
     index = frozenset(path for path in state.index if exists(path)) | paths
     selection: Selection = (

@@ -3,7 +3,7 @@ from typing import FrozenSet, Optional
 from pynvim import Nvim
 
 from ...fs.cartographer import new
-from ...fs.ops import ancestors, is_parent
+from ...fs.ops import ancestors
 from ...settings.types import Settings
 from ...state.next import forward
 from ...state.types import State
@@ -16,9 +16,9 @@ def current(
     """
     New file focused in buf
     """
-
-    if is_parent(parent=state.root.path, child=current):
-        paths: FrozenSet[str] = ancestors(current) if state.follow else frozenset()
+    parents = ancestors(current)
+    if state.root.path in parents:
+        paths: FrozenSet[str] = parents if state.follow else frozenset()
         index = state.index | paths
         new_state = forward(
             state, settings=settings, index=index, paths=paths, current=current

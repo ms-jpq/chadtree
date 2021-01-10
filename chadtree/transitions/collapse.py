@@ -5,7 +5,7 @@ from pynvim import Nvim
 from pynvim.api import Window
 
 from ..fs.cartographer import is_dir
-from ..fs.ops import is_parent
+from ..fs.ops import ancestors
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.next import forward
@@ -27,7 +27,9 @@ def _collapse(
         path = node.path if is_dir(node) else dirname(node.path)
         if path != state.root.path:
             paths = frozenset(
-                i for i in state.index if i == path or is_parent(parent=path, child=i)
+                indexed
+                for indexed in state.index
+                if path in (ancestors(indexed) | {indexed})
             )
             index = state.index - paths
             new_state = forward(state, settings=settings, index=index, paths=paths)

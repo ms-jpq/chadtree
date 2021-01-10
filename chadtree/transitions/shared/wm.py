@@ -19,7 +19,7 @@ from pynvim_pp.keymap import Keymap
 from std2.contextlib import nil_manager
 
 from ...consts import FM_FILETYPE, FM_NAMESPACE
-from ...fs.ops import is_parent
+from ...fs.ops import ancestors
 from ...settings.types import Settings
 from ...state.types import State
 from ...view.types import Badge, Highlight
@@ -235,9 +235,10 @@ def show_file(
 def kill_buffers(nvim: Nvim, paths: Iterable[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
-        name = nvim.api.buf_get_name(buffer)
-        if any(name == path or is_parent(parent=path, child=name) for path in paths):
-            nvim.command(f"bwipeout! {buffer.number}")
+        buf_name = nvim.api.buf_get_name(buffer)
+        buf_paths = ancestors(buf_name) | {buf_name}
+        if buf_paths & paths:
+            nvim.api.buf_delete(buffer, {"force": True})
 
 
 def update_buffers(nvim: Nvim, state: State, focus: Optional[str]) -> None:
