@@ -53,7 +53,7 @@ def _ensure_side_window(
     nvim: Nvim, *, window: Window, state: State, settings: Settings
 ) -> None:
     open_left = settings.open_left
-    windows = tuple(find_windows_in_tab(nvim, exclude=False))
+    windows = tuple(find_windows_in_tab(nvim, no_preview=False))
     target = windows[0] if open_left else windows[-1]
     if window.number != target.number:
         if open_left:

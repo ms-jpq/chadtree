@@ -9,21 +9,26 @@ from pynvim_pp.keymap import Keymap
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
 
+
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
     ft: str = nvim.api.buf_get_option(buffer, "filetype")
     return ft == FM_FILETYPE
 
 
-def find_windows_in_tab(nvim: Nvim, exclude: bool) -> Iterator[Window]:
+def find_windows_in_tab(nvim: Nvim, no_preview: bool) -> Iterator[Window]:
     def key_by(window: Window) -> Tuple[int, int]:
+        """
+        -> sort by row, then col
+        """
+
         row, col = nvim.api.win_get_position(window)
-        return (col, row)
+        return col, row
 
     tab: Tabpage = nvim.api.get_current_tabpage()
     windows: Sequence[Window] = nvim.api.tabpage_list_wins(tab)
 
     for window in sorted(windows, key=key_by):
-        if not exclude or not nvim.api.win_get_option(window, "previewwindow"):
+        if not no_preview or not nvim.api.win_get_option(window, "previewwindow"):
             yield window
 
 
@@ -35,21 +40,21 @@ def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
 
 
 def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim, exclude=True):
+    for window in find_windows_in_tab(nvim, no_preview=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         if is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
 def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim, exclude=True):
+    for window in find_windows_in_tab(nvim, no_preview=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         if not is_fm_buffer(nvim, buffer=buffer):
             yield window
 
 
 def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim, exclude=True):
+    for window in find_windows_in_tab(nvim, no_preview=True):
         buffer: Buffer = nvim.api.win_get_buf(window)
         name = nvim.api.buf_get_name(buffer)
         if name == file:
@@ -63,7 +68,7 @@ def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
             yield buffer
 
 
-def find_buffer_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
+def find_buffers_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
         name = nvim.api.buf_get_name(buffer)
@@ -100,7 +105,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
     split_r = nvim.api.get_option("splitright")
 
     windows: Sequence[Window] = tuple(
-        w for w in find_windows_in_tab(nvim, exclude=False)
+        w for w in find_windows_in_tab(nvim, no_preview=False)
     )
     focus_win = windows[0] if open_left else windows[-1]
     direction = False if open_left else True

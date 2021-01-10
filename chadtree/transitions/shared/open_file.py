@@ -15,7 +15,7 @@ from ...state.next import forward
 from ...state.types import State
 from ..types import ClickType, Stage, State
 from .wm import (
-    find_buffer_with_file,
+    find_buffers_with_file,
     find_non_fm_windows_in_tab,
     find_window_with_file_in_tab,
     new_window,
@@ -35,7 +35,7 @@ def _show_file(
         with mgr:
             non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
             buffer: Optional[Buffer] = next(
-                find_buffer_with_file(nvim, file=path), None
+                find_buffers_with_file(nvim, file=path), None
             )
             window: Window = (
                 next(find_window_with_file_in_tab(nvim, file=path), None)

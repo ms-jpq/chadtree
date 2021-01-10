@@ -5,8 +5,6 @@ from typing import Optional
 from ..state.types import State
 
 
-
-
 class ClickType(Enum):
     primary = auto()
     secondary = auto()
