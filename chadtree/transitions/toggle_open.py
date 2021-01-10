@@ -1,21 +1,15 @@
 from argparse import ArgumentParser
-from dataclasses import dataclass
 from typing import NoReturn, Optional, Sequence
 
 from pynvim import Nvim
 from pynvim_pp.lib import s_write
 
-from .shared.wm import find_current_buffer_name, toggle_fm_window
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
 from .shared.current import current
-from .types import Stage
-
-
-@dataclass(frozen=True)
-class OpenArgs:
-    focus: bool
+from .shared.wm import find_current_buffer_name, toggle_fm_window
+from .types import OpenArgs, Stage
 
 
 class _ArgparseError(Exception):

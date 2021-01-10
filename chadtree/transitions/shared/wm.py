@@ -1,13 +1,4 @@
-from typing import (
-    FrozenSet,
-    Iterable,
-    Iterator,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    cast,
-)
+from typing import FrozenSet, Iterator, Mapping, Optional, Sequence, Tuple, cast
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -23,8 +14,7 @@ from ...fs.ops import ancestors
 from ...settings.types import Settings
 from ...state.types import State
 from ...view.types import Badge, Highlight
-from ..click import ClickType
-from ..toggle_open import OpenArgs
+from ..types import ClickType, OpenArgs
 
 
 def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
