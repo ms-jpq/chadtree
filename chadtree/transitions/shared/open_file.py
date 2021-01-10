@@ -7,7 +7,7 @@ from pynvim import Nvim
 from pynvim.api.buffer import Buffer
 from pynvim.api.window import Window
 from pynvim_pp.hold import hold_win_pos
-from std2.contextlib import nil_manager
+from std2.contextlib import nullacontext
 
 from ...settings.localization import LANG
 from ...settings.types import Settings
@@ -31,7 +31,7 @@ def _show_file(
     if click_type is ClickType.tertiary:
         nvim.api.command("tabnew")
     if path:
-        mgr = hold_win_pos(nvim) if hold else nil_manager()
+        mgr = hold_win_pos(nvim) if hold else nullacontext()
         with mgr:
             non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
             buffer: Optional[Buffer] = next(
@@ -40,9 +40,7 @@ def _show_file(
             window: Window = (
                 next(find_window_with_file_in_tab(nvim, file=path), None)
                 or next(iter(non_fm_windows), None)
-                or new_window(
-                    nvim, open_left=not settings.open_left, width=state.width
-                )
+                or new_window(nvim, open_left=not settings.open_left, width=state.width)
             )
 
             nvim.api.set_current_win(window)
