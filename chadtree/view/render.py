@@ -9,6 +9,7 @@ from pynvim_pp.highlight import HLgroup
 from std2.functools import constantly
 from std2.types import never
 
+from ..fs.cartographer import is_dir
 from ..fs.types import Index, Mode, Node
 from ..settings.types import Settings
 from ..state.types import FilterPattern, QuickFix, Selection
@@ -26,7 +27,7 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
         def cont() -> Iterator[Any]:
             for sb in sortby:
                 if sb is Sortby.is_folder:
-                    yield _CompVals.FOLDER if Mode.folder in node.mode else _CompVals.FILE
+                    yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
                 elif sb is Sortby.ext:
                     yield strxfrm(node.ext or ""),
                 elif sb is Sortby.fname:
@@ -92,8 +93,8 @@ def _paint(
         return (depth * 2 - 1) * " "
 
     def gen_status(path: str) -> str:
-        selected = icons.status.selected if path in selection else " "
-        active = icons.status.active if path == current else " "
+        selected = icons.status.selected if path in selection else icons.status.not_selected
+        active = icons.status.active if path == current else icons.status.inactive
         return f"{selected}{active}"
 
     def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
@@ -102,7 +103,7 @@ def _paint(
 
     def gen_icon(node: Node) -> Iterator[str]:
         yield " "
-        if Mode.folder in node.mode:
+        if is_dir(node):
             yield icons.folder.open if node.path in index else icons.folder.closed
         else:
             yield (
@@ -117,7 +118,7 @@ def _paint(
 
     def gen_name(node: Node) -> Iterator[str]:
         yield node.name.replace(linesep, r"\n")
-        if not settings.view.use_icons and Mode.folder in node.mode:
+        if not settings.view.use_icons and is_dir(node):
             yield sep
 
     def gen_decor_post(node: Node) -> Iterator[str]:

@@ -5,6 +5,8 @@
   },
   "status": {
     "active": "▶",
+    "inactive": " ",
+    "not_selected": " ",
     "selected": "✸"
   }
 }

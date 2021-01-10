@@ -137,7 +137,7 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
         nvim.api.win_set_width(window, width)
 
 
-def kill_fm_windows(nvim: Nvim, *, settings: Settings) -> None:
+def kill_fm_windows(nvim: Nvim) -> None:
     windows: Sequence[Window] = nvim.api.list_wins()
     if len(windows) <= 1:
         nvim.api.command("quit")
@@ -172,13 +172,15 @@ def toggle_fm_window(
         else:
             nvim.api.win_close(window, True)
     else:
-        buffer: Optional[Buffer] = next(_find_fm_buffers(nvim), None)
+        buffer = next(_find_fm_buffers(nvim), None)
         if buffer is None:
             buffer = _new_fm_buffer(nvim, keymap=settings.keymap)
+
         window = _new_window(nvim, open_left=settings.open_left, width=state.width)
-        nvim.api.win_set_buf(window, buffer)
         for option, value in settings.win_local_opts.items():
             nvim.api.win_set_option(window, option, value)
+        nvim.api.win_set_buf(window, buffer)
+
         _ensure_side_window(nvim, window=window, state=state, settings=settings)
         if not opts.focus:
             nvim.api.set_current_win(cwin)

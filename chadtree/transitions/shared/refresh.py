@@ -28,14 +28,14 @@ def refresh(
     paths = frozenset((cwd,))
     new_current = current if is_parent(parent=cwd, child=current) else None
 
-    index = frozenset(i for i in state.index if exists(i)) | paths
+    index = frozenset(path for path in state.index if exists(path)) | paths
     selection: Selection = (
         frozenset()
         if state.filter_pattern
         else frozenset(s for s in state.selection if exists(s))
     )
-    current_paths: FrozenSet[str] = ancestors(current) if state.follow else frozenset()
-    new_index = index if new_current else index | current_paths
+    parent_paths: FrozenSet[str] = ancestors(current) if state.follow else frozenset()
+    new_index = index if new_current else index | parent_paths
 
     qf = quickfix(nvim)
     vc = status() if state.enable_vc else VCStatus()
@@ -54,8 +54,6 @@ def refresh(
         s_write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
-
-
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:

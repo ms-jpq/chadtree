@@ -28,7 +28,6 @@ def indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
             yield node
 
         if is_visual:
-            buffer: Buffer = nvim.api.get_current_buf()
             row1, _ = nvim.api.buf_get_mark(buffer, "<")
             row2, _ = nvim.api.buf_get_mark(buffer, ">")
 

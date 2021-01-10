@@ -12,4 +12,4 @@ def _quit(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
     Close sidebar
     """
 
-    kill_fm_windows(nvim, settings=settings)
+    kill_fm_windows(nvim)

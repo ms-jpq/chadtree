@@ -22,7 +22,9 @@ class UserLinkIcons:
 @dataclass(frozen=True)
 class UserStatusIcons:
     active: str
+    inactive: str
     selected: str
+    not_selected: str
 
 
 @dataclass(frozen=True)
@@ -78,7 +80,6 @@ class ViewOptions:
     sort_by: Sequence[Sortby]
     time_fmt: str
     use_icons: bool
-
 
 
 @dataclass(frozen=True)

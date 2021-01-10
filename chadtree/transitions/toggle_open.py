@@ -40,8 +40,8 @@ def _parse_args(args: Sequence[str]) -> OpenArgs:
     return opts
 
 
-@rpc(blocking=False, name="CHADopen")
-def c_open(
+@rpc(blocking=False)
+def _open(
     nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
 ) -> Optional[Stage]:
     """

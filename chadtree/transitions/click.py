@@ -3,6 +3,7 @@ from typing import Optional
 from pynvim import Nvim
 from pynvim_pp.lib import s_write
 
+from ..fs.cartographer import is_dir
 from ..fs.types import Mode
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -25,7 +26,7 @@ def _click(
             s_write(nvim, LANG("dead_link", name=name), error=True)
             return None
         else:
-            if Mode.folder in node.mode:
+            if is_dir(node):
                 if state.filter_pattern:
                     s_write(nvim, LANG("filter_click"))
                     return None
