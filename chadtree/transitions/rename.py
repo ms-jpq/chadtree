@@ -45,9 +45,9 @@ def c_rename(
                     return refresh(nvim, state=state, settings=settings)
                 else:
                     paths = frozenset((parent, new_parent, *ancestors(new_parent)))
-                    _index = state.index | paths
+                    index = state.index | paths
                     new_state = forward(
-                        state, settings=settings, index=_index, paths=paths
+                        state, settings=settings, index=index, paths=paths
                     )
                     kill_buffers(nvim, paths=(prev_name,))
                     return Stage(new_state)

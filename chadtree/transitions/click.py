@@ -32,9 +32,9 @@ def _click(
                     return None
                 else:
                     paths = frozenset((node.path,))
-                    _index = state.index ^ paths
+                    index = state.index ^ paths
                     new_state = forward(
-                        state, settings=settings, index=_index, paths=paths
+                        state, settings=settings, index=index, paths=paths
                     )
                     return Stage(new_state)
             else:

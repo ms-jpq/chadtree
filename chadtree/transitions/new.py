@@ -43,8 +43,8 @@ def _new(
                 return refresh(nvim, state=state, settings=settings)
             else:
                 paths = ancestors(path)
-                _index = state.index | paths
-                new_state = forward(state, settings=settings, index=_index, paths=paths)
+                index = state.index | paths
+                new_state = forward(state, settings=settings, index=index, paths=paths)
                 nxt = open_file(
                     nvim,
                     state=new_state,

@@ -86,11 +86,11 @@ def _operation(
                         dirname(p)
                         for p in chain(operations.keys(), operations.values())
                     )
-                    _index = state.index | paths
+                    index = state.index | paths
                     new_state = forward(
                         state,
                         settings=settings,
-                        index=_index,
+                        index=index,
                         selection=frozenset(),
                         paths=paths,
                     )

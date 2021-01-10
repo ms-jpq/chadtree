@@ -29,8 +29,8 @@ def _collapse(
             paths = frozenset(
                 i for i in state.index if i == path or is_parent(parent=path, child=i)
             )
-            _index = state.index - paths
-            new_state = forward(state, settings=settings, index=_index, paths=paths)
+            index = state.index - paths
+            new_state = forward(state, settings=settings, index=index, paths=paths)
             row = new_state.derived.paths_lookup.get(path, 0)
             if row:
                 window: Window = nvim.api.get_current_win()
