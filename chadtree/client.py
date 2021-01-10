@@ -1,11 +1,12 @@
-from time import sleep
-from typing import Any, Optional, cast
+from queue import SimpleQueue
+from typing import Any, MutableMapping, Optional, cast
 
 from pynvim import Nvim
-from pynvim_pp.client import BasicClient
+from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call
-from pynvim_pp.rpc import RpcMsg, nil_handler
+from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
+from std2.types import AnyFun
 
 from .registry import autocmd, rpc
 from .settings.load import initial as initial_settings
@@ -17,20 +18,15 @@ from .transitions.redraw import redraw
 from .transitions.types import Stage
 
 
-class ChadClient(BasicClient):
+class ChadClient(Client):
     def __init__(self) -> None:
-        super().__init__()
+        self._q: SimpleQueue = SimpleQueue()
+        self._handlers: MutableMapping[str, RpcCallable] = {}
         self._state: Optional[State] = None
         self._settings: Optional[Settings] = None
 
     def on_msg(self, nvim: Nvim, msg: RpcMsg) -> Any:
-        name, args = msg
-        handler = self._handlers.get(name, nil_handler(name))
-        stage = cast(Optional[Stage], handler(nvim, self._state, self._settings, *args))
-        if stage:
-            self._state = stage.state
-            redraw(nvim, state=self._state, focus=stage.focus)
-
+        self._q.put(msg)
         return None
 
     def wait(self, nvim: Nvim) -> int:
@@ -48,4 +44,18 @@ class ChadClient(BasicClient):
         threadsafe_call(nvim, cont)
 
         while True:
-            sleep(69)
+            msg: RpcMsg = self._q.get()
+            name, args = msg
+            handler = self._handlers.get(name, nil_handler(name))
+
+            stage = threadsafe_call(
+                nvim,
+                cast(AnyFun[Optional[Stage]], handler),
+                nvim,
+                self._state,
+                self._settings,
+                *args
+            )
+            if stage:
+                self._state = stage.state
+                redraw(nvim, state=self._state, focus=stage.focus)
