@@ -104,9 +104,7 @@ def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]) -> Buffer:
 def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
     split_r = nvim.api.get_option("splitright")
 
-    windows: Sequence[Window] = tuple(
-        w for w in find_windows_in_tab(nvim, no_preview=False)
-    )
+    windows = tuple(w for w in find_windows_in_tab(nvim, no_preview=False))
     focus_win = windows[0] if open_left else windows[-1]
     direction = False if open_left else True
 
