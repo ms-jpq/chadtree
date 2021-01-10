@@ -11,7 +11,7 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
-from .shared.index import index
+from .shared.index import indices
 from .shared.open_file import open_file
 from .shared.refresh import refresh
 from .types import ClickType, Stage
@@ -25,7 +25,7 @@ def _new(
     new file / folder
     """
 
-    node = index(nvim, state=state) or state.root
+    node = next(indices(nvim, state=state, is_visual=is_visual), None) or state.root
     parent = node.path if is_dir(node) else dirname(node.path)
 
     child: Optional[str] = nvim.funcs.input(LANG("pencil"))

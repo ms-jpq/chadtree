@@ -10,7 +10,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from .shared.index import index
+from .shared.index import indices
 from ..state.types import State
 from .shared.refresh import refresh
 from .types import Stage
@@ -24,7 +24,7 @@ def c_rename(
     rename file / folder
     """
 
-    node = index(nvim, state=state)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
     if node:
         prev_name = node.path
         parent = state.root.path

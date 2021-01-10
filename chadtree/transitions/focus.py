@@ -6,10 +6,9 @@ from pynvim import Nvim
 from ..fs.cartographer import is_dir
 from ..registry import rpc
 from ..settings.types import Settings
-from .shared.index import index
-
 from ..state.types import State
 from .shared.current import new_cwd
+from .shared.index import indices
 from .types import Stage
 
 
@@ -21,7 +20,7 @@ def c_change_focus(
     Refocus root directory
     """
 
-    node = index(nvim, state=state)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
     if node:
         new_base = node.path if is_dir(node) else dirname(node.path)
         return new_cwd(nvim, state=state, settings=settings, new_cwd=new_base)

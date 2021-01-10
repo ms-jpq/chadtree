@@ -9,15 +9,15 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
-from .shared.index import index
+from .shared.index import indices
 from .shared.open_file import open_file
 from .types import ClickType, Stage, State
 
 
 def _click(
-    nvim: Nvim, state: State, settings: Settings, click_type: ClickType
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool, click_type: ClickType
 ) -> Optional[Stage]:
-    node = index(nvim, state=state)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
 
     if node:
         if Mode.orphan_link in node.mode:
@@ -58,7 +58,13 @@ def _primary(
     File -> open
     """
 
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.primary)
+    return _click(
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        click_type=ClickType.primary,
+    )
 
 
 @rpc(blocking=False)
@@ -70,7 +76,13 @@ def _secondary(
     File -> preview
     """
 
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.secondary)
+    return _click(
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        click_type=ClickType.secondary,
+    )
 
 
 @rpc(blocking=False)
@@ -82,7 +94,13 @@ def _tertiary(
     File -> open in new tab
     """
 
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.tertiary)
+    return _click(
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        click_type=ClickType.tertiary,
+    )
 
 
 @rpc(blocking=False)
@@ -94,7 +112,13 @@ def _v_split(
     File -> open in vertical split
     """
 
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.v_split)
+    return _click(
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        click_type=ClickType.v_split,
+    )
 
 
 @rpc(blocking=False)
@@ -106,4 +130,10 @@ def _h_split(
     File -> open in horizontal split
     """
 
-    return _click(nvim, state=state, settings=settings, click_type=ClickType.h_split)
+    return _click(
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        click_type=ClickType.h_split,
+    )

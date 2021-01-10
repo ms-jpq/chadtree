@@ -39,8 +39,7 @@ def _delete(
 
         question = LANG("ask_trash", linesep=linesep, display_paths=display_paths)
         resp: int = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
-        ans = resp == 1
-        if ans:
+        if resp == 1:
             try:
                 yeet(unified)
             except Exception as e:

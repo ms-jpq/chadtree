@@ -14,19 +14,13 @@ def _row_index(state: State, row: int) -> Optional[Node]:
         return None
 
 
-def index(nvim: Nvim, state: State) -> Optional[Node]:
+def indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
     window: Window = nvim.api.get_current_win()
     buffer: Buffer = nvim.api.win_get_buf(window)
-    if is_fm_buffer(nvim, buffer=buffer):
-        row, _ = nvim.api.win_get_cursor(window)
-        row = row - 1
-        return _row_index(state, row)
-    else:
+
+    if not is_fm_buffer(nvim, buffer=buffer):
         return None
-
-
-def indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
-    def step() -> Iterator[Node]:
+    else:
         if is_visual:
             buffer: Buffer = nvim.api.get_current_buf()
             r1, _ = nvim.api.buf_get_mark(buffer, "<")
@@ -36,11 +30,8 @@ def indices(nvim: Nvim, state: State, is_visual: bool) -> Sequence[Node]:
                 if node:
                     yield node
         else:
-            window: Window = nvim.api.get_current_win()
+            window = nvim.api.get_current_win()
             row, _ = nvim.api.win_get_cursor(window)
-            row = row - 1
-            node = _row_index(state, row)
+            node = _row_index(state, row - 1)
             if node:
                 yield node
-
-    return tuple(step())

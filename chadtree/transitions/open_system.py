@@ -8,7 +8,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
-from .shared.index import index
+from .shared.index import indices
 from .types import SysError
 
 
@@ -31,7 +31,7 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
     Open using finder / dolphin, etc
     """
 
-    node = index(nvim, state=state)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
     if node:
         try:
             _open_gui(node.path)

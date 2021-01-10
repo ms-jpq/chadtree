@@ -16,7 +16,7 @@ from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path
-from .shared.index import index
+from .shared.index import indices
 from .shared.refresh import refresh
 from .shared.wm import kill_buffers
 from .types import Stage
@@ -34,10 +34,11 @@ def _operation(
     *,
     state: State,
     settings: Settings,
+    is_visual: bool,
     op_name: str,
     action: Callable[[Mapping[str, str]], None],
 ) -> Optional[Stage]:
-    node = index(nvim, state=state)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
     selection = state.selection
     unified = unify_ancestors(selection)
     if unified and node:
@@ -112,7 +113,12 @@ def _cut(
     """
 
     return _operation(
-        nvim, state=state, settings=settings, op_name=LANG("cut"), action=cut
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        op_name=LANG("cut"),
+        action=cut,
     )
 
 
@@ -125,5 +131,10 @@ def _copy(
     """
 
     return _operation(
-        nvim, state=state, settings=settings, op_name=LANG("copy"), action=copy
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        op_name=LANG("copy"),
+        action=copy,
     )

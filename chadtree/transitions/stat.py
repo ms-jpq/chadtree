@@ -5,7 +5,7 @@ from ..da import human_readable_size
 from ..fs.ops import fs_stat
 from ..registry import rpc
 from ..settings.types import Settings
-from .shared.index import index
+from .shared.index import indices
 from ..state.types import State
 from ..view.ops import display_path
 
@@ -16,7 +16,7 @@ def c_stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Non
     Print file stat to cmdline
     """
 
-    node = index(nvim, state=state)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
     if node:
         try:
             stat = fs_stat(node.path)

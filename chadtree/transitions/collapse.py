@@ -10,7 +10,7 @@ from ..registry import rpc
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
-from .shared.index import index
+from .shared.index import indices
 from .types import Stage
 
 
@@ -22,7 +22,7 @@ def _collapse(
     Collapse folder
     """
 
-    node = index(nvim, state=state)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
     if node:
         path = node.path if is_dir(node) else dirname(node.path)
         if path != state.root.path:
