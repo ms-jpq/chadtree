@@ -2,7 +2,7 @@ from os.path import dirname, exists, join, relpath
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..fs.ops import ancestors, rename
 from .shared.wm import kill_buffers
@@ -35,13 +35,13 @@ def _rename(
             new_name = join(parent, child)
             new_parent = dirname(new_name)
             if exists(new_name):
-                s_write(nvim, LANG("already_exists", name=new_name), error=True)
+                write(nvim, LANG("already_exists", name=new_name), error=True)
                 return Stage(state)
             else:
                 try:
                     rename(prev_name, new_name)
                 except Exception as e:
-                    s_write(nvim, e, error=True)
+                    write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
                     paths = frozenset((parent, new_parent, *ancestors(new_parent)))

@@ -1,5 +1,5 @@
 from pynvim import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..da import human_readable_size
 from ..fs.ops import fs_stat
@@ -21,7 +21,7 @@ def _stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
         try:
             stat = fs_stat(node.path)
         except Exception as e:
-            s_write(nvim, e, error=True)
+            write(nvim, e, error=True)
         else:
             norm_link = settings.view.icons.link.normal
             permissions = stat.permissions
@@ -32,4 +32,4 @@ def _stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
             name = display_path(node.path, state=state)
             full_name = f"{name} {norm_link} {stat.link}" if stat.link else name
             mode_line = f"{permissions} {size} {user} {group} {mtime} {full_name}"
-            s_write(nvim, mode_line)
+            write(nvim, mode_line)

@@ -4,7 +4,7 @@ from typing import NoReturn, Optional, Sequence
 
 from pynvim import Nvim
 from pynvim.api import Window
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -100,7 +100,7 @@ def _open(
     try:
         opts = _parse_args(args)
     except _ArgparseError as e:
-        s_write(nvim, e, error=True)
+        write(nvim, e, error=True)
         return None
     else:
         curr = find_current_buffer_name(nvim)

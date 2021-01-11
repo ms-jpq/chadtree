@@ -5,7 +5,7 @@ from os.path import basename, dirname, exists, join
 from typing import Callable, Mapping, MutableMapping, Optional
 
 from pynvim.api import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
 from ..fs.ops import copy, cut, unify_ancestors
@@ -60,7 +60,7 @@ def _operation(
                 f"{display_path(s, state=state)} -> {display_path(d, state=state)}"
                 for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
             )
-            s_write(
+            write(
                 nvim, f"⚠️  -- {op_name}: path(s) already exist! :: {msg}", error=True
             )
             return None
@@ -79,7 +79,7 @@ def _operation(
                 try:
                     action(operations)
                 except Exception as e:
-                    s_write(nvim, e, error=True)
+                    write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
                     paths = frozenset(
@@ -100,7 +100,7 @@ def _operation(
             else:
                 return None
     else:
-        s_write(nvim, LANG("nothing_select"), error=True)
+        write(nvim, LANG("nothing_select"), error=True)
         return None
 
 

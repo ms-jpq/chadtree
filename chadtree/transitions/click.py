@@ -1,7 +1,7 @@
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
 from ..fs.types import Mode
@@ -23,12 +23,12 @@ def _click(
     if node:
         if Mode.orphan_link in node.mode:
             name = node.name
-            s_write(nvim, LANG("dead_link", name=name), error=True)
+            write(nvim, LANG("dead_link", name=name), error=True)
             return None
         else:
             if is_dir(node):
                 if state.filter_pattern:
-                    s_write(nvim, LANG("filter_click"))
+                    write(nvim, LANG("filter_click"))
                     return None
                 else:
                     paths = frozenset((node.path,))

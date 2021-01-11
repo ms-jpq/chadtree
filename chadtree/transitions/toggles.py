@@ -1,5 +1,5 @@
 from pynvim import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -12,7 +12,9 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _toggle_hidden(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+def _toggle_hidden(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Toggle hidden
     """
@@ -30,12 +32,14 @@ def _toggle_follow(
     """
 
     new_state = forward(state, settings=settings, follow=not state.follow)
-    s_write(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
+    write(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
     return Stage(new_state)
 
 
 @rpc(blocking=False)
-def _toggle_version_control(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+def _toggle_version_control(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Stage:
     """
     Toggle version control
     """
@@ -43,5 +47,5 @@ def _toggle_version_control(nvim: Nvim, state: State, settings: Settings, is_vis
     enable_vc = not state.enable_vc
     vc = status() if enable_vc else VCStatus()
     new_state = forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
-    s_write(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
+    write(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
     return Stage(new_state)

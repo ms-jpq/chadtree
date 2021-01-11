@@ -2,7 +2,7 @@ from os.path import dirname, exists, join
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors, new
@@ -33,13 +33,13 @@ def _new(
     if child:
         path = join(parent, child)
         if exists(path):
-            s_write(nvim, LANG("already_exists", name=path), error=True)
+            write(nvim, LANG("already_exists", name=path), error=True)
             return Stage(state)
         else:
             try:
                 new(path)
             except Exception as e:
-                s_write(nvim, e, error=True)
+                write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
             else:
                 paths = ancestors(path)

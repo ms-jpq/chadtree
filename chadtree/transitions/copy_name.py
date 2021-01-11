@@ -3,7 +3,7 @@ from os import linesep
 from typing import Iterator
 
 from pynvim import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -35,4 +35,4 @@ def _copy_name(nvim: Nvim, state: State, settings: Settings, is_visual: bool) ->
 
     nvim.funcs.setreg("+", clip)
     nvim.funcs.setreg("*", clip)
-    s_write(nvim, LANG("copy_paths", copied_paths=copied_paths))
+    write(nvim, LANG("copy_paths", copied_paths=copied_paths))

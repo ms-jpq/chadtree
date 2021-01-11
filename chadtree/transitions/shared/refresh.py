@@ -2,7 +2,7 @@ from os.path import exists
 from typing import FrozenSet
 
 from pynvim import Nvim
-from pynvim_pp.lib import s_write
+from pynvim_pp.lib import write
 from std2.types import Void
 
 from ...fs.ops import ancestors
@@ -21,7 +21,7 @@ def refresh(
     nvim: Nvim, state: State, settings: Settings, write_out: bool = False
 ) -> Stage:
     if write_out:
-        s_write(nvim, LANG("hourglass"))
+        write(nvim, LANG("hourglass"))
 
     current = find_current_buffer_name(nvim)
     cwd = state.root.path
@@ -51,6 +51,6 @@ def refresh(
     )
 
     if write_out:
-        s_write(nvim, LANG("ok_sym"))
+        write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
