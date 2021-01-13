@@ -7,18 +7,31 @@ if version_info < (3, 8, 2):
     print(msg, file=stderr)
     exit(1)
 
+try:
+    import pynvim
+except ImportError:
+    exit(1)
+
+
+try:
+    import pynvim_pp
+    import std2
+except ImportError:
+    exit(1)
 
 from argparse import ArgumentParser, Namespace
+
+def parse_args() -> Namespace:
+    parser = ArgumentParser()
+    parser.add_argument("socket")
+    return parser.parse_args()
+
 
 from pynvim import attach
 from pynvim_pp.client import run_client
 from chadtree.client import ChadClient
 
 
-def parse_args() -> Namespace:
-    parser = ArgumentParser()
-    parser.add_argument("socket")
-    return parser.parse_args()
 
 
 def main() -> None:
