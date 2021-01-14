@@ -9,6 +9,13 @@ from .consts import REQUIREMENTS, RT_DIR
 if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
     print(msg, end="", file=stderr)
+    try:
+        from webbrowser import open as open_w
+    except ImportError:
+        pass
+    else:
+        uri = "https://github.com/ms-jpq/chadtree"
+        open_w(uri)
 
 
 from typing import Literal
