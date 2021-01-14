@@ -39,6 +39,7 @@ def _operation(
     action: Callable[[Mapping[str, str]], None],
 ) -> Optional[Stage]:
 
+    root = state.root.path
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
     selection = state.selection
     unified = unify_ancestors(selection)
@@ -50,14 +51,17 @@ def _operation(
         new_operations: MutableMapping[str, str] = {}
         while pre_existing:
             source, dest = pre_existing.popitem()
-            resp: Optional[str] = nvim.funcs.input(LANG("path_exists_err"), dest)
-            if not resp:
+            rel_dest = display_path(dest, state=state)
+            resp: Optional[str] = nvim.funcs.input(LANG("path_exists_err"), rel_dest)
+            new_dest = join(root, resp) if resp else None
+
+            if not new_dest:
                 pre_existing[source] = dest
                 break
-            elif exists(resp):
-                pre_existing[source] = resp
+            elif exists(new_dest):
+                pre_existing[source] = new_dest
             else:
-                new_operations[source] = resp
+                new_operations[source] = new_dest
 
         if pre_existing:
             msg = linesep.join(
@@ -78,7 +82,7 @@ def _operation(
                 for s, d in sorted(operations.items(), key=lambda t: strxfrm(t[0]))
             )
 
-            question = f"{op_name}{linesep}{msg}?"
+            question = LANG("confirm op", operation=op_name, paths=msg)
             resp = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
             ans = resp == 1
 

@@ -23,6 +23,10 @@
 "cut": |-
   ✂️
 
+"confirm op": |-
+  ${operation} ?
+  ${paths}
+
 "dead_link": |-
   ⚠️  cannot open dead link: ${name}
 
