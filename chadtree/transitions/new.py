@@ -34,7 +34,7 @@ def _new(
         path = join(parent, child)
         if exists(path):
             write(nvim, LANG("already_exists", name=path), error=True)
-            return Stage(state)
+            return None
         else:
             try:
                 new(path)
