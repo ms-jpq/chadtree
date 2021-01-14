@@ -47,11 +47,11 @@ def _show_file(
             if click_type is ClickType.v_split and non_fm_count:
                 nvim.api.command("vnew")
                 temp_buf = cur_buf(nvim)
-                buf_set_option(nvim, buf=buf, key="bufhidden", val="wipe")
+                buf_set_option(nvim, buf=temp_buf, key="bufhidden", val="wipe")
             elif click_type is ClickType.h_split and non_fm_count:
                 nvim.api.command("new")
                 temp_buf = cur_buf(nvim)
-                buf_set_option(nvim, buf=buf, key="bufhidden", val="wipe")
+                buf_set_option(nvim, buf=temp_buf, key="bufhidden", val="wipe")
 
             win = cur_win(nvim)
 
