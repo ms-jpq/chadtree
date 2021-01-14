@@ -16,7 +16,6 @@ local on_stderr = function(_, msg)
 end
 
 local top_lv = function()
-  local sep = 1 and "/" or "\\"
   local filepath = "/lua/chadtree.lua"
   local src = debug.getinfo(1).source
   local top_lv = string.sub(src, 2, #src - #filepath)
@@ -25,7 +24,12 @@ end
 
 local start = function(...)
   local cwd = top_lv()
-  local args = vim.tbl_flatten {{"python3", "-m", "chadtree"}, {...}}
+  local args =
+    vim.tbl_flatten {
+    {"python3", "-m", "chadtree"},
+    {...},
+    {"--socket", vim.fn.serverstart()}
+  }
   local params = {
     cwd = cwd,
     on_exit = on_exit,
@@ -38,33 +42,38 @@ end
 
 local POLLING_RATE = 10
 local job_id = nil
-local open_cmd = "CHADopen"
 
 chad = chad or {}
 
-chad.open_cmd = function(...)
-  local args = {...}
-
-  if not job_id then
-    job_id = start("run", "--socket", vim.fn.serverstart())
-  end
-
-  if _G[open_cmd] then
-    _G[open_cmd](args)
-  else
-    vim.defer_fn(
-      function()
-        chad.open_cmd(unpack(args))
-      end,
-      POLLING_RATE
-    )
-  end
-end
-
-vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.open_cmd(<f-args>)]]
-
 chad.deps_cmd = function()
-  start("deps", "--socket", vim.fn.serverstart())
+  start("deps")
 end
 
 vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.deps_cmd()]]
+
+local set_chad_call = function(name, cmd)
+  chad[name] = function(...)
+    local args = {...}
+
+    if not job_id then
+      job_id = start("run")
+    end
+
+    if _G[cmd] then
+      _G[cmd](args)
+    else
+      vim.defer_fn(
+        function()
+          chad[name](unpack(args))
+        end,
+        POLLING_RATE
+      )
+    end
+  end
+end
+
+set_chad_call("open_cmd", "CHADopen")
+vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.open_cmd(<f-args>)]]
+
+set_chad_call("help_cmd", "CHADhelp")
+vim.api.nvim_command [[command! -nargs=0 CHADhelp lua chad.help_cmd(<f-args>)]]

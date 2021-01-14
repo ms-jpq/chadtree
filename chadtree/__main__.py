@@ -72,8 +72,11 @@ elif command == "run":
         import yaml
     except ImportError:
         msg = """
-        Plesae install dependencies using :CHADdeps
-        Dependencies installed privately inside `chadtree/.vars`
+        Please install dependencies using :CHADdeps
+        -
+        -
+        Dependencies will be installed privately inside `chadtree/.vars`
+        `rm -rf chadtree/` will cleanly remove everything
         """
         print(dedent(msg), end="", file=stderr)
         exit(1)
