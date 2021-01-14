@@ -1,6 +1,7 @@
 from functools import partial
 from itertools import count
 from json import dump, load
+from locale import str as format_float
 from operator import pow
 from pathlib import Path
 from typing import Any, Optional
@@ -8,14 +9,14 @@ from typing import Any, Optional
 from .consts import FOLDER_MODE
 
 
-def human_readable_size(size: int, truncate: int = 3) -> str:
+def human_readable_size(size: float, precision: int = 3) -> str:
     units = ("", "K", "M", "G", "T", "P", "E", "Z", "Y")
     step = partial(pow, 10)
     steps = zip(map(step, count(step=3)), units)
     for factor, unit in steps:
         divided = size / factor
         if abs(divided) < 1000:
-            fmt = format(divided, f".{truncate}f").rstrip("0").rstrip(".")
+            fmt = format_float(round(divided, precision))
             return f"{fmt}{unit}"
 
     raise ValueError(f"unit over flow: {size}")
