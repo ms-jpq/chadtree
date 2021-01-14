@@ -3,7 +3,8 @@
   ⚠️  Exists: ${name}
 
 "paths already exist": |-
-  ⚠️  -- ${operation} : path(s) already exist! :: ${paths}
+  ⚠️  -- ${operation} : path(s) already exist! ::
+  ${paths}
 
 "ask_trash": |-
   🗑

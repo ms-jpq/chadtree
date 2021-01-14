@@ -52,6 +52,7 @@ def _operation(
             source, dest = pre_existing.popitem()
             resp: Optional[str] = nvim.funcs.input(LANG("path_exists_err"), dest)
             if not resp:
+                pre_existing[source] = dest
                 break
             elif exists(resp):
                 pre_existing[source] = resp
@@ -59,12 +60,14 @@ def _operation(
                 new_operations[source] = resp
 
         if pre_existing:
-            msg = ", ".join(
+            msg = linesep.join(
                 f"{display_path(s, state=state)} -> {display_path(d, state=state)}"
                 for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
             )
             write(
-                nvim, LANG("paths already exist", operation=op_name, paths=msg), error=True
+                nvim,
+                LANG("paths already exist", operation=op_name, paths=msg),
+                error=True,
             )
             return None
 
