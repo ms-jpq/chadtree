@@ -1,4 +1,4 @@
-from typing import FrozenSet, Optional, Union, cast
+from typing import AbstractSet, Optional, Union, cast
 
 from std2.types import Void, VoidType, or_else
 
@@ -24,7 +24,7 @@ def forward(
     qf: Union[QuickFix, VoidType] = Void,
     vc: Union[VCStatus, VoidType] = Void,
     current: Union[str, VoidType] = Void,
-    paths: Union[FrozenSet[str], VoidType] = Void,
+    paths: Union[AbstractSet[str], VoidType] = Void,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
@@ -34,7 +34,7 @@ def forward(
         Node,
         root
         or (
-            update(state.root, index=new_index, paths=cast(FrozenSet[str], paths))
+            update(state.root, index=new_index, paths=cast(AbstractSet[str], paths))
             if paths
             else state.root
         ),

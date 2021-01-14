@@ -6,7 +6,6 @@ from subprocess import DEVNULL, PIPE, run
 from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
 from std2.concurrent.futures import gather
-from std2.types import freeze
 
 from ..fs.ops import ancestors
 from ..registry import pool
@@ -107,7 +106,7 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
         symbols = sorted((s for s in syms if s != " "), key=strxfrm)
         status[directory] = "".join(symbols)
 
-    return VCStatus(ignored=freeze(ignored), status=freeze(status))
+    return VCStatus(ignored=ignored, status=status)
 
 
 def status() -> VCStatus:

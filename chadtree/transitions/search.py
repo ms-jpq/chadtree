@@ -1,5 +1,5 @@
 from os import linesep
-from typing import FrozenSet, Optional
+from typing import AbstractSet, Optional
 
 from pynvim import Nvim
 from pynvim_pp.lib import write
@@ -10,7 +10,7 @@ from ..state.types import State
 from .types import Stage, SysError
 
 
-def _sys_search(args: str, cwd: str, sep: str) -> FrozenSet[str]:
+def _sys_search(args: str, cwd: str, sep: str) -> AbstractSet[str]:
     raise SysError()
 
 

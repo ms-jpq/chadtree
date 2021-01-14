@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntEnum, auto
-from typing import FrozenSet, Mapping, Optional
+from typing import AbstractSet, Mapping, Optional
 
-Index = FrozenSet[str]
+Index = AbstractSet[str]
 
 
 class Mode(IntEnum):
@@ -29,7 +29,7 @@ class Mode(IntEnum):
 
 @dataclass(frozen=True)
 class Node:
-    mode: FrozenSet[Mode]
+    mode: AbstractSet[Mode]
     name: str
     path: str
     children: Optional[Mapping[str, Node]] = None

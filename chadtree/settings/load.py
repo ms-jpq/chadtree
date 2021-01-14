@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from locale import strxfrm
-from typing import FrozenSet, Literal, Mapping, Optional, Sequence, SupportsFloat, Union
+from typing import AbstractSet, Literal, Mapping, Optional, Sequence, SupportsFloat, Union
 
 from pynvim.api.nvim import Nvim
 from pynvim_pp.rpc import RpcSpec
@@ -35,7 +35,7 @@ from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOp
 @dataclass(frozen=True)
 class _UserConfig:
     follow: bool
-    keymap: Mapping[str, FrozenSet[str]]
+    keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]
     mimetypes: MimetypeOptions
     open_left: bool

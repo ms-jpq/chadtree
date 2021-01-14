@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import FrozenSet, Mapping, Optional, Union
+from typing import AbstractSet, Mapping, Optional, Union
 
 from ..view.types import ViewOptions
 
@@ -12,21 +12,21 @@ class VersionCtlOpts:
 
 @dataclass(frozen=True)
 class MimetypeOptions:
-    warn: FrozenSet[str]
-    ignore_exts: FrozenSet[str]
+    warn: AbstractSet[str]
+    ignore_exts: AbstractSet[str]
 
 
 @dataclass(frozen=True)
 class UserIgnore:
-    name: FrozenSet[str]
-    path: FrozenSet[str]
+    name: AbstractSet[str]
+    path: AbstractSet[str]
 
 
 @dataclass(frozen=True)
 class Settings:
     follow: bool
     ignores: UserIgnore
-    keymap: Mapping[str, FrozenSet[str]]
+    keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]
     mime: MimetypeOptions
     open_left: bool

@@ -1,5 +1,5 @@
 from os.path import exists
-from typing import FrozenSet
+from typing import AbstractSet
 
 from pynvim import Nvim
 from pynvim_pp.lib import write
@@ -34,7 +34,7 @@ def refresh(
         if state.filter_pattern
         else frozenset(s for s in state.selection if exists(s))
     )
-    parent_paths: FrozenSet[str] = ancestors(current) if state.follow else frozenset()
+    parent_paths: AbstractSet[str] = ancestors(current) if state.follow else frozenset()
     new_index = index if new_current else index | parent_paths
 
     qf = quickfix(nvim)

@@ -1,4 +1,4 @@
-from typing import FrozenSet, Iterator, Mapping, Sequence, Tuple
+from typing import AbstractSet, Iterator, Mapping, Sequence, Tuple
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
@@ -82,7 +82,7 @@ def find_current_buffer_name(nvim: Nvim) -> str:
     return name
 
 
-def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, FrozenSet[str]]) -> Buffer:
+def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, AbstractSet[str]]) -> Buffer:
     buffer: Buffer = nvim.api.create_buf(False, True)
     nvim.api.buf_set_option(buffer, "modifiable", False)
     nvim.api.buf_set_option(buffer, "filetype", FM_FILETYPE)
@@ -122,7 +122,7 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
         nvim.api.win_set_width(window, width)
 
 
-def kill_buffers(nvim: Nvim, paths: FrozenSet[str]) -> None:
+def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> None:
     buffers: Sequence[Buffer] = nvim.api.list_bufs()
     for buffer in buffers:
         buf_name = nvim.api.buf_get_name(buffer)

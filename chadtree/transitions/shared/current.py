@@ -1,4 +1,4 @@
-from typing import FrozenSet, Optional
+from typing import AbstractSet, Optional
 
 from pynvim import Nvim
 
@@ -18,7 +18,7 @@ def current(
     """
     parents = ancestors(current)
     if state.root.path in parents:
-        paths: FrozenSet[str] = parents if state.follow else frozenset()
+        paths: AbstractSet[str] = parents if state.follow else frozenset()
         index = state.index | paths
         new_state = forward(
             state, settings=settings, index=index, paths=paths, current=current

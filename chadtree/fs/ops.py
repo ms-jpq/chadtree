@@ -11,17 +11,17 @@ from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
-from typing import FrozenSet, Iterable, Mapping, Optional
+from typing import AbstractSet, Iterable, Mapping, Optional
 
 from ..consts import FILE_MODE, FOLDER_MODE
 
 
-def ancestors(path: str) -> FrozenSet[str]:
+def ancestors(path: str) -> AbstractSet[str]:
     return frozenset(str(p) for p in PurePath(path).parents)
 
 
 
-def unify_ancestors(paths: FrozenSet[str]) -> FrozenSet[str]:
+def unify_ancestors(paths: AbstractSet[str]) -> AbstractSet[str]:
     return frozenset(p for p in paths if ancestors(p).isdisjoint(paths))
 
 

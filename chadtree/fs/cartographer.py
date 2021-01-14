@@ -12,7 +12,7 @@ from stat import (
     S_ISVTX,
     S_IWOTH,
 )
-from typing import FrozenSet, Iterator, Mapping, cast
+from typing import AbstractSet, Iterator, Mapping, cast
 
 from .types import Index, Mode, Node
 
@@ -39,7 +39,7 @@ def _fs_modes(stat: int) -> Iterator[Mode]:
             yield mode
 
 
-def _fs_stat(path: str) -> FrozenSet[Mode]:
+def _fs_stat(path: str) -> AbstractSet[Mode]:
     try:
         info = stat(path, follow_symlinks=False)
     except FileNotFoundError:
@@ -75,7 +75,7 @@ def new(root: str, index: Index) -> Node:
         return Node(path=root, mode=mode, name=name)
 
 
-def _update(root: Node, index: Index, paths: FrozenSet[str]) -> Node:
+def _update(root: Node, index: Index, paths: AbstractSet[str]) -> Node:
     if root.path in paths:
         return new(root.path, index=index)
     else:
@@ -92,7 +92,7 @@ def _update(root: Node, index: Index, paths: FrozenSet[str]) -> Node:
         )
 
 
-def update(root: Node, *, index: Index, paths: FrozenSet[str]) -> Node:
+def update(root: Node, *, index: Index, paths: AbstractSet[str]) -> Node:
     try:
         return _update(root, index=index, paths=paths)
     except FileNotFoundError:
