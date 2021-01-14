@@ -2,7 +2,8 @@ from typing import Optional
 
 from pynvim import Nvim
 from pynvim.api.common import NvimError
-from pynvim_pp.api import get_cwd
+from pynvim_pp.api import get_cwd, win_close
+from pynvim_pp.float_win import list_floatwins
 
 from ..nvim.quickfix import quickfix
 from ..registry import autocmd, rpc
@@ -37,6 +38,17 @@ def save_session(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"
+
+
+@rpc(blocking=False)
+def _kill_float_wins(nvim: Nvim, state: State, settings: Settings) -> None:
+    wins = tuple(list_floatwins(nvim))
+    if len(wins) != 2:
+        for win in wins:
+            win_close(nvim, win=win)
+
+
+autocmd("WinClosed") << f"lua {_kill_float_wins.name}()"
 
 
 @rpc(blocking=False)
