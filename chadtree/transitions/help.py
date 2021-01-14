@@ -20,6 +20,8 @@ class _HelpArgs:
 def _parse_args(args: Sequence[str]) -> _HelpArgs:
     parser = ArgParser()
     parser.add_argument("area", choices=("keybind", "config"))
+    ns = parser.parse_args(args)
+
     opts = _HelpArgs()
     return opts
 
