@@ -56,7 +56,7 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
 autocmd("BufEnter") << f"lua {_update_follow.name}()"
 
 
-@rpc(blocking=True)
+@rpc(blocking=False)
 def _dump_session(nvim: Nvim, state: State, settings: Settings) -> None:
     """
     Save CHADTree state
