@@ -5,6 +5,9 @@ _TOP_LEVEL = Path(__file__).parent.parent
 _CONFIG = _TOP_LEVEL / "config"
 _ARTIFACTS = _TOP_LEVEL / "artifacts"
 
+RT_DIR = _TOP_LEVEL / ".vars" / "runtime"
+REQUIREMENTS = str(_TOP_LEVEL / "requirements.txt")
+
 SESSION_DIR = (
     Path(environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
     / "nvim"

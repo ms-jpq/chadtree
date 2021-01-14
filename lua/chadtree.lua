@@ -35,7 +35,8 @@ local POLLING_RATE = 10
 local job_id = nil
 local open_cmd = "CHADopen"
 
-chad_open_cmd = function(...)
+chad = chad or {}
+chad.open_cmd = function(...)
   local args = {...}
 
   if not job_id then
@@ -54,4 +55,4 @@ chad_open_cmd = function(...)
   end
 end
 
-vim.api.nvim_command [[command! -nargs=* CHADopen lua chad_open_cmd(<f-args>)]]
+vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.open_cmd(<f-args>)]]
