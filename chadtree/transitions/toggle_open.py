@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import NoReturn, Optional, Sequence
+from typing import Optional, Sequence
 
 from pynvim import Nvim
 from pynvim.api import Window
