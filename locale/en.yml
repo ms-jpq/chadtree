@@ -1,6 +1,6 @@
 ---
 "already_exists": |-
-  "⚠️  Exists: ${name}"
+  ⚠️  Exists: ${name}
 
 "ask_trash": |-
   🗑
@@ -11,52 +11,52 @@
   &No
 
 "copy": |-
-  "🖇"
+  🖇"
 
 "copy_paths": |-
-  "📎 ${copied_paths}"
+  📎 ${copied_paths}
 
 "cut": |-
-  "✂️"
+  ✂️"
 
 "dead_link": |-
-  "⚠️  cannot open dead link: ${name}"
+  ⚠️  cannot open dead link: ${name}
 
 "filter_click": |-
-  "⚠️  cannot click on folders while filtering"
+  ⚠️  cannot click on folders while filtering
 
 "follow_mode_indi": |-
-  "🐶 follow mode: ${follow}"
+  🐶 follow mode: ${follow}
 
 "hourglass": |-
-  "⏳...⌛️"
+  ⏳...⌛️
 
 "mime_warn": |-
-  "${name} have possible mimetype ${mime}, continue?"
+  ${name} have possible mimetype ${mime}, continue?
 
 "new_filter": |-
-  "New Filter:"
+  New Filter:
 
 "new_search": |-
-  "New Search"
+  New Search:
 
 "nothing_select": |-
-  "⚠️  -- nothing selected!"
+  ⚠️  -- nothing selected!
 
 "ok_sym": |-
-  "✅"
+  ✅
 
 "path_exists_err": |-
-  "⚠️  Path exist!!! Rename: "
+  ⚠️  Path exist!!! Rename:
 
 "pencil": |-
-  "✏️  :"
+  ✏️  :
 
 "sys_open_err": |-
-  "⚠️  Error -- cannot find system opener"
+  ⚠️  Error -- cannot find system opener
 
 "sys_trash_err": |-
-  "⚠️  Error -- cannot find trash program"
+  ⚠️  Error -- cannot find trash program
 
 "version_control_indi": |-
-  "🐶 enable version control: ${enable_vc}"
+  🐶 enable version control: ${enable_vc}

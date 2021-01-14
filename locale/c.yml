@@ -1,1 +1,62 @@
 ---
+"already_exists": |-
+  !! Exists: ${name}
+
+"ask_trash": |-
+  Trash
+  ${display_paths}?
+
+"ask_yesno": |-
+  &Yes
+  &No
+
+"copy": |-
+  Copy
+
+"copy_paths": |-
+  Copied ${copied_paths}
+
+"cut": |-
+  Cut
+
+"dead_link": |-
+  !! cannot open dead link: ${name}
+
+"filter_click": |-
+  !! cannot click on folders while filtering
+
+"follow_mode_indi": |-
+  !! follow mode: ${follow}
+
+"hourglass": |-
+  Wait...
+
+"mime_warn": |-
+  ${name} have possible mimetype ${mime}, continue?
+
+"new_filter": |-
+  New Filter:
+
+"new_search": |-
+  New Search:
+
+"nothing_select": |-
+  !! -- nothing selected!
+
+"ok_sym": |-
+  Ok
+
+"path_exists_err": |-
+  !! Path exist - Rename:
+
+"pencil": |-
+  Input:
+
+"sys_open_err": |-
+  !! Error -- cannot find system opener
+
+"sys_trash_err": |-
+  !! Error -- cannot find trash program
+
+"version_control_indi": |-
+  🐶 enable version control: ${enable_vc}
