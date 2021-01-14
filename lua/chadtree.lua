@@ -1,17 +1,22 @@
+local linesep = "\n"
+
 local on_exit = function(_, code)
-  vim.api.nvim_err_writeln(" | CHADTree EXITED - " .. code)
+  local msg = " | CHADTree EXITED - " .. code
+  if code ~= 0 then
+    vim.api.nvim_err_writeln(msg)
+  end
 end
 
 local on_stdout = function(_, msg)
-  vim.api.nvim_out_write(table.concat(msg, "\n"))
+  vim.api.nvim_out_write(table.concat(msg, linesep))
 end
 
 local on_stderr = function(_, msg)
-  vim.api.nvim_err_write(table.concat(msg, "\n"))
+  vim.api.nvim_err_write(table.concat(msg, linesep))
 end
 
 local top_lv = function()
-  local linesp = 1 and "/" or "\\"
+  local sep = 1 and "/" or "\\"
   local filepath = "/lua/chadtree.lua"
   local src = debug.getinfo(1).source
   local top_lv = string.sub(src, 2, #src - #filepath)
@@ -58,8 +63,8 @@ end
 
 vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.open_cmd(<f-args>)]]
 
-chad.deps_cmd = function ()
-  start("deps")
+chad.deps_cmd = function()
+  start("deps", "--socket", vim.fn.serverstart())
 end
 
 vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.deps_cmd()]]
