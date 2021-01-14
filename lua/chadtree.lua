@@ -18,9 +18,9 @@ local top_lv = function()
   return top_lv
 end
 
-local start = function()
+local start = function(...)
   local cwd = top_lv()
-  local args = {"python3", "-m", "chadtree", vim.fn.serverstart()}
+  local args = vim.tbl_flatten {{"python3", "-m", "chadtree"}, {...}}
   local params = {
     cwd = cwd,
     on_exit = on_exit,
@@ -36,11 +36,12 @@ local job_id = nil
 local open_cmd = "CHADopen"
 
 chad = chad or {}
+
 chad.open_cmd = function(...)
   local args = {...}
 
   if not job_id then
-    job_id = start()
+    job_id = start("run", "--socket", vim.fn.serverstart())
   end
 
   if _G[open_cmd] then
@@ -48,7 +49,7 @@ chad.open_cmd = function(...)
   else
     vim.defer_fn(
       function()
-        chad_open_cmd(unpack(args))
+        chad.open_cmd(unpack(args))
       end,
       POLLING_RATE
     )
@@ -56,3 +57,9 @@ chad.open_cmd = function(...)
 end
 
 vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.open_cmd(<f-args>)]]
+
+chad.deps_cmd = function ()
+  start("deps")
+end
+
+vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.deps_cmd()]]

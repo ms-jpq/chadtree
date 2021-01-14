@@ -31,7 +31,7 @@ def parse_args() -> Namespace:
 
 
 args = parse_args()
-command = Union[Literal["deps"], Literal["run"]]
+command: Union[Literal["deps"], Literal["run"]] = args.command
 
 if command == "deps":
     cmd = "pip3"
