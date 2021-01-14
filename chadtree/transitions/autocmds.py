@@ -1,4 +1,3 @@
-from os.path import exists
 from typing import Optional
 
 from pynvim import Nvim

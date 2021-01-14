@@ -1,7 +1,5 @@
-from typing import Sequence
-
 from pynvim import Nvim
-from pynvim.api import Window
+from pynvim_pp.api import list_wins, win_close
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -10,12 +8,12 @@ from .shared.wm import find_fm_windows_in_tab
 
 
 def _kill_fm_windows(nvim: Nvim) -> None:
-    windows: Sequence[Window] = nvim.api.list_wins()
-    if len(windows) <= 1:
+    wins = list_wins(nvim)
+    if len(wins) <= 1:
         nvim.api.command("quit")
     else:
-        for window in find_fm_windows_in_tab(nvim):
-            nvim.api.win_close(window, True)
+        for win in find_fm_windows_in_tab(nvim):
+            win_close(nvim, win=win)
 
 
 @rpc(blocking=False)

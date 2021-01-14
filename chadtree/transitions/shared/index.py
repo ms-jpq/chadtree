@@ -1,6 +1,8 @@
 from typing import Iterator, Optional
 
-from pynvim.api import Buffer, Nvim, Window
+from pynvim.api import Nvim
+from pynvim_pp.api import cur_win, win_get_buf, win_get_cursor
+from pynvim_pp.operators import operator_marks
 
 from ...fs.types import Node
 from ...state.types import State
@@ -15,22 +17,19 @@ def _row_index(state: State, row: int) -> Optional[Node]:
 
 
 def indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
-    window: Window = nvim.api.get_current_win()
-    buffer: Buffer = nvim.api.win_get_buf(window)
+    win = cur_win(nvim)
+    buf = win_get_buf(nvim, win=win)
 
-    if not is_fm_buffer(nvim, buf=buffer):
+    if not is_fm_buffer(nvim, buf=buf):
         return None
     else:
-        row, _ = nvim.api.win_get_cursor(window)
-        row = row - 1
+        row, _ = win_get_cursor(nvim, win=win)
         node = _row_index(state, row)
         if node:
             yield node
 
         if is_visual:
-            row1, _ = nvim.api.buf_get_mark(buffer, "<")
-            row2, _ = nvim.api.buf_get_mark(buffer, ">")
-
+            (row1, _), (row2, _) = operator_marks(nvim, buf=buf, visual_type=None)
             for r in range(row1 - 1, row2):
                 if r != row:
                     node = _row_index(state, r)

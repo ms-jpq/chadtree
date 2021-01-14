@@ -4,6 +4,14 @@ from typing import NoReturn, Optional, Sequence
 
 from pynvim import Nvim
 from pynvim.api import Window
+from pynvim_pp.api import (
+    cur_win,
+    list_wins,
+    set_cur_win,
+    win_close,
+    win_set_buf,
+    win_set_option,
+)
 from pynvim_pp.lib import write
 
 from ..registry import rpc
@@ -66,27 +74,27 @@ def _ensure_side_window(
 def _toggle_fm_window(
     nvim: Nvim, state: State, settings: Settings, opts: _OpenArgs
 ) -> None:
-    cwin: Window = nvim.api.get_current_win()
-    window = next(find_fm_windows_in_tab(nvim), None)
-    if window:
-        windows: Sequence[Window] = nvim.api.list_wins()
-        if len(windows) <= 1:
+    cwin = cur_win(nvim)
+    win = next(find_fm_windows_in_tab(nvim), None)
+    if win:
+        wins = list_wins(nvim)
+        if len(wins) <= 1:
             pass
         else:
-            nvim.api.win_close(window, True)
+            win_close(nvim, win=win)
     else:
-        buffer = next(find_fm_buffers(nvim), None)
-        if buffer is None:
-            buffer = new_fm_buffer(nvim, keymap=settings.keymap)
+        buf = next(find_fm_buffers(nvim), None)
+        if buf is None:
+            buf = new_fm_buffer(nvim, keymap=settings.keymap)
 
-        window = new_window(nvim, open_left=settings.open_left, width=state.width)
-        for option, value in settings.win_local_opts.items():
-            nvim.api.win_set_option(window, option, value)
-        nvim.api.win_set_buf(window, buffer)
+        win = new_window(nvim, open_left=settings.open_left, width=state.width)
+        for key, val in settings.win_local_opts.items():
+            win_set_option(nvim, win=win, key=key, val=val)
+        win_set_buf(nvim, win=win, buf=buf)
 
-        _ensure_side_window(nvim, window=window, state=state, settings=settings)
+        _ensure_side_window(nvim, window=win, state=state, settings=settings)
         if not opts.focus:
-            nvim.api.set_current_win(cwin)
+            set_cur_win(nvim, win=cwin)
 
 
 @rpc(blocking=False)

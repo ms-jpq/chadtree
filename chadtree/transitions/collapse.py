@@ -2,7 +2,6 @@ from os.path import dirname
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim.api import Window
 
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors
@@ -12,6 +11,7 @@ from ..state.next import forward
 from ..state.types import State
 from .shared.index import indices
 from .types import Stage
+from pynvim_pp.api import cur_win, win_get_cursor, win_set_cursor
 
 
 @rpc(blocking=False)
@@ -35,9 +35,9 @@ def _collapse(
             new_state = forward(state, settings=settings, index=index, paths=paths)
             row = new_state.derived.paths_lookup.get(path, 0)
             if row:
-                window: Window = nvim.api.get_current_win()
-                _, col = nvim.api.win_get_cursor(window)
-                nvim.api.win_set_cursor(window, (row + 1, col))
+                win = cur_win(nvim)
+                _, col = win_get_cursor(nvim, win=win)
+                win_set_cursor(nvim, win=win, row=row + 1, col=col)
 
             return Stage(new_state)
         else:

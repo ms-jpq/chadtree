@@ -1,6 +1,7 @@
 from typing import Optional, Sequence, cast
 
 from pynvim import Nvim
+from pynvim_pp.api import cur_win, win_get_cursor
 from pynvim_pp.atomic import Atomic
 
 from ..consts import FM_NAMESPACE
@@ -19,18 +20,18 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             for render in state.derived.rendered
         )
     )
-    cwin = nvim.api.get_current_win()
+    cwin = cur_win(nvim)
     ns = nvim.api.create_namespace(FM_NAMESPACE)
 
-    for window, buffer in find_fm_windows(nvim):
-        row, col = nvim.api.win_get_cursor(window)
+    for win, buffer in find_fm_windows(nvim):
+        row, col = win_get_cursor(nvim, win=win)
         new_row = (
-            focus_row + 1
+            focus_row
             if focus_row is not None
             else (
-                current_row + 1
-                if window.number != cwin.number and current_row is not None
-                else min(row, len(lines))
+                current_row
+                if win.number != cwin.number and current_row is not None
+                else min(row, len(lines) - 1)
             )
         )
 
@@ -50,5 +51,5 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             for h in hl:
                 atomic.buf_add_highlight(buffer, ns, h.group, idx, h.begin, h.end)
 
-        atomic.win_set_cursor(window, (new_row, col))
+        atomic.win_set_cursor(win, (new_row - 1, col))
         atomic.commit(nvim)
