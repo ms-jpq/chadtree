@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from dataclasses import dataclass
 from typing import NoReturn, Optional, Sequence
 
@@ -13,6 +12,7 @@ from pynvim_pp.api import (
     win_set_option,
 )
 from pynvim_pp.lib import write
+from std2.argparse import ArgparseError, ArgParser
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -35,21 +35,8 @@ class _OpenArgs:
     focus: bool
 
 
-class _ArgparseError(Exception):
-    pass
-
-
-class _Argparse(ArgumentParser):
-    def error(self, message: str) -> NoReturn:
-        raise _ArgparseError(message)
-
-    def exit(self, status: int = 0, message: Optional[str] = None) -> NoReturn:
-        msg = self.format_help()
-        raise _ArgparseError(msg)
-
-
 def _parse_args(args: Sequence[str]) -> _OpenArgs:
-    parser = _Argparse()
+    parser = ArgParser()
     parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
 
     ns = parser.parse_args(args=args)
@@ -107,7 +94,7 @@ def _open(
 
     try:
         opts = _parse_args(args)
-    except _ArgparseError as e:
+    except ArgparseError as e:
         write(nvim, e, error=True)
         return None
     else:
