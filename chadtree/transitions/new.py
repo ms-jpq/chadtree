@@ -25,7 +25,7 @@ def _new(
     new file / folder
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None) or state.root
+    node = next(indices(nvim, state=state, is_visual=is_visual), state.root)
     parent = node.path if is_dir(node) else dirname(node.path)
 
     child: Optional[str] = nvim.funcs.input(LANG("pencil"))
