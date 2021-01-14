@@ -18,8 +18,8 @@ def human_readable_size(size: float, precision: int = 3) -> str:
         if abs(divided) < 1000:
             fmt = format_float(round(divided, precision))
             return f"{fmt}{unit}"
-
-    raise ValueError(f"unit over flow: {size}")
+    else:
+        raise ValueError(f"unit over flow: {size}")
 
 
 def load_json(path: Path) -> Optional[Any]:
