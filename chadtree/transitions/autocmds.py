@@ -28,6 +28,18 @@ autocmd("BufWritePost", "FocusGained") << f"lua {schedule_update.name}()"
 
 
 @rpc(blocking=False)
+def dump_session(nvim: Nvim, state: State, settings: Settings) -> None:
+    """
+    Save CHADTree state
+    """
+
+    dump_session(state)
+
+
+autocmd("FocusLost", "ExitPre") << f"lua {dump_session.name}()"
+
+
+@rpc(blocking=False)
 def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
     Follow cwd update
@@ -54,18 +66,6 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
 
 
 autocmd("BufEnter") << f"lua {_update_follow.name}()"
-
-
-@rpc(blocking=False)
-def _dump_session(nvim: Nvim, state: State, settings: Settings) -> None:
-    """
-    Save CHADTree state
-    """
-
-    dump_session(state)
-
-
-autocmd("FocusLost", "ExitPre") << f"lua {_dump_session.name}()"
 
 
 @rpc(blocking=False)
