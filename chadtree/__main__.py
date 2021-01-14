@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
-
-from sys import version_info, stderr
+from sys import stderr, version_info
 
 if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
-    print(msg, file=stderr)
+    print(msg, end="", file=stderr)
     exit(1)
 
 try:
     import pynvim
 except ImportError:
+    msg = "Plesae install pynvim"
+    print(msg, end="", file=stderr)
     exit(1)
 
 
@@ -17,9 +17,12 @@ try:
     import pynvim_pp
     import std2
 except ImportError:
+    msg = "Plesae install pynvim"
+    print(msg, file=stderr)
     exit(1)
 
 from argparse import ArgumentParser, Namespace
+
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
@@ -29,9 +32,8 @@ def parse_args() -> Namespace:
 
 from pynvim import attach
 from pynvim_pp.client import run_client
-from chadtree.client import ChadClient
 
-
+from .client import ChadClient
 
 
 def main() -> None:
