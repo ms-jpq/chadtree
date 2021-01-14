@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, Namespace
-from subprocess import run
+from shutil import which
+from subprocess import DEVNULL, run
 from sys import path, stderr, version_info
 from typing import Union
 
@@ -33,21 +34,26 @@ args = parse_args()
 command = Union[Literal["deps"], Literal["run"]]
 
 if command == "deps":
-
-    proc = run(
-        (
-            "pip3",
-            "install",
-            "--upgrade",
-            "--target",
-            str(RT_DIR),
-            "--requirement",
-            REQUIREMENTS,
-        ),
-        cwd=str(RT_DIR),
-    )
-    if proc.returncode:
-        exit(proc.returncode)
+    cmd = "pip3"
+    if not which(cmd):
+        print("Cannot find pip3! Please install pip3 separately", file=stderr)
+        exit(1)
+    else:
+        proc = run(
+            (
+                cmd,
+                "install",
+                "--upgrade",
+                "--target",
+                str(RT_DIR),
+                "--requirement",
+                REQUIREMENTS,
+            ),
+            stdin=DEVNULL,
+            cwd=str(RT_DIR),
+        )
+        if proc.returncode:
+            exit(proc.returncode)
 
 elif command == "run":
     try:
