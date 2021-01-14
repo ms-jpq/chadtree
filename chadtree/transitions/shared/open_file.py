@@ -74,7 +74,7 @@ def open_file(
 
     def ask() -> bool:
         question = LANG("mime_warn", name=name, mime=str(mime))
-        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
+        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
         return resp == 1
 
     go = (

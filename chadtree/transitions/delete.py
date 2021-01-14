@@ -37,8 +37,8 @@ def _remove(
             sorted((display_path(path, state=state) for path in unified), key=strxfrm)
         )
 
-        question = LANG("ask_trash", linesep=linesep, display_paths=display_paths)
-        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
+        question = LANG("ask_trash", display_paths=display_paths)
+        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
         if resp == 1:
             try:
                 yeet(unified)

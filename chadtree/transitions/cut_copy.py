@@ -72,7 +72,7 @@ def _operation(
             )
 
             question = f"{op_name}{linesep}{msg}?"
-            resp = nvim.funcs.confirm(question, LANG("ask_yesno", linesep=linesep), 2)
+            resp = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
             ans = resp == 1
 
             if ans:
