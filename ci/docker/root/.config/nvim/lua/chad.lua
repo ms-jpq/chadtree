@@ -1,49 +1,39 @@
-local export = function (export_name)
-
-  local default_sym  = vim.g.WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
-  local folder_open  = vim.g.DevIconsDefaultFolderOpenSymbol
+local export = function(export_name)
+  local default_sym = vim.g.WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
+  local folder_open = vim.g.DevIconsDefaultFolderOpenSymbol
   local folder_close = vim.g.WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
 
-  local extensions   = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols
-  local exact        = vim.g.WebDevIconsUnicodeDecorateFileNodesExactSymbols
-  local glob         = vim.g.WebDevIconsUnicodeDecorateFileNodesPatternSymbols
+  local extensions = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols
+  local exact = vim.g.WebDevIconsUnicodeDecorateFileNodesExactSymbols
+  local glob = vim.g.WebDevIconsUnicodeDecorateFileNodesPatternSymbols
 
   local data = {
     extensions = extensions,
-    exact      = exact,
-    glob       = glob,
-    default    = default_sym,
-    folder     = {
-      open   = folder_open,
+    exact = exact,
+    glob = glob,
+    default = default_sym,
+    folder = {
+      open = folder_open,
       closed = folder_close
     }
   }
   local json = vim.fn.json_encode(data)
   vim.fn.writefile({json}, export_name)
-
 end
 
-
-local load_rtp = function (src)
-
+local load_rtp = function(src)
   for _, s in ipairs(src) do
     vim.o.runtimepath = vim.o.runtimepath .. "," .. "/root/" .. s
   end
-
 end
 
-
-local load_viml = function (src)
-
+local load_viml = function(src)
   for _, s in ipairs(src) do
     vim.api.nvim_command("source /root/" .. s)
   end
-
 end
 
-
-local init = function ()
-
+local init = function()
   local v1 = {
     "vim-devicons/plugin/webdevicons.vim"
   }
@@ -62,7 +52,6 @@ local init = function ()
   export("emoji_icons.json")
 
   os.exit(0)
-
 end
 
 return {
