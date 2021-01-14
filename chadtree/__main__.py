@@ -56,7 +56,7 @@ if command == "deps":
         if proc.returncode:
             exit(proc.returncode)
         else:
-            print("You can now use CHADTree!")
+            print("You can now use :CHADopen")
 
 elif command == "run":
     try:
