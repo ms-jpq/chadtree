@@ -1,18 +1,30 @@
 #!/usr/bin/env python3
 
+from dataclasses import dataclass
 from datetime import datetime
 from http.client import HTTPResponse
 from json import dump, load
 from locale import strxfrm
 from os import getcwd, makedirs
-from os.path import dirname, join, realpath
+from os.path import join
+from pathlib import Path
 from subprocess import PIPE, run
-from typing import Any, Mapping, Iterator, MutableMapping, cast
+from typing import (
+    AbstractSet,
+    Any,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Sequence,
+    cast,
+)
 from urllib.request import urlopen
 
+from std2.tree import merge, recur_sort
 from yaml import safe_load
 
-__dir__ = dirname(dirname(realpath(__file__)))
+__dir__ = Path(__file__).resolve().parent.parent
 TEMP = join(__dir__, "temp")
 ASSETS = join(__dir__, "assets")
 ARTIFACTS = join(__dir__, "artifacts")
@@ -29,17 +41,20 @@ TEMP_JSON = join(TEMP, "icons")
 SRC_ICONS = ("unicode_icons", "emoji_icons")
 
 
-def merge(ds1: Any, ds2: Any, replace: bool = False) -> Any:
-    if type(ds1) is dict and type(ds2) is dict:
-        append = {k: merge(ds1.get(k), v, replace) for k, v in ds2.items()}
-        return {**ds1, **append}
-    if type(ds1) is list and type(ds2) is list:
-        if replace:
-            return ds2
-        else:
-            return [*ds1, *ds2]
-    else:
-        return ds2
+@dataclass(frozen=True)
+class GithubColours:
+    extensions: Sequence[str] = ()
+    color: Optional[str] = None
+
+
+GithubSpec = Mapping[str, GithubColours]
+
+
+@dataclass(frozen=True)
+class DumpFormat:
+    type: Mapping[str, str]
+    name_exact: AbstractSet[str]
+    name_glob: AbstractSet[str]
 
 
 def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
@@ -52,15 +67,6 @@ def fetch(uri: str) -> str:
     with urlopen(uri) as resp:
         ret = cast(HTTPResponse, resp).read().decode()
         return ret
-
-
-def recur_sort(data: Any) -> Any:
-    if type(data) is dict:
-        return {k: recur_sort(data[k]) for k in sorted(data, key=strxfrm)}
-    elif type(data) is list:
-        return [recur_sort(el) for el in data]
-    else:
-        return data
 
 
 def slurp_json(path: str) -> Any:
