@@ -1,4 +1,4 @@
-from collections import Counter, defaultdict
+from collections import Counter
 from itertools import chain
 from os.path import join
 from typing import Iterator
