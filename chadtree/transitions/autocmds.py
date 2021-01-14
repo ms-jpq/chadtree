@@ -28,7 +28,7 @@ autocmd("BufWritePost", "FocusGained") << f"lua {schedule_update.name}()"
 
 
 @rpc(blocking=False)
-def dump_session(nvim: Nvim, state: State, settings: Settings) -> None:
+def save_session(nvim: Nvim, state: State, settings: Settings) -> None:
     """
     Save CHADTree state
     """
@@ -36,7 +36,7 @@ def dump_session(nvim: Nvim, state: State, settings: Settings) -> None:
     dump_session(state)
 
 
-autocmd("FocusLost", "ExitPre") << f"lua {dump_session.name}()"
+autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"
 
 
 @rpc(blocking=False)

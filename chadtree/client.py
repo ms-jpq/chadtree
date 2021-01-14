@@ -18,7 +18,7 @@ from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
 from .state.types import State
-from .transitions.autocmds import dump_session, schedule_update
+from .transitions.autocmds import save_session, schedule_update
 from .transitions.redraw import redraw
 from .transitions.types import Stage
 
@@ -49,10 +49,10 @@ class ChadClient(Client):
         threadsafe_call(nvim, cont)
 
         async def sched() -> None:
-            period = self._settings.polling_rate
+            period = cast(Settings, self._settings).polling_rate
             async for _ in ticker(period, immediately=False):
                 self._q.put((schedule_update.name, ()))
-                self._q.put((dump_session.name, ()))
+                self._q.put((save_session.name, ()))
 
         run_coroutine_threadsafe(sched(), loop=nvim.loop)
 

@@ -34,8 +34,8 @@ def forward(
         Node,
         root
         or (
-            update(state.root, index=new_index, paths=cast(AbstractSet[str], paths))
-            if paths
+            update(state.root, index=new_index, paths=paths)
+            if not isinstance(paths, VoidType)
             else state.root
         ),
     )
