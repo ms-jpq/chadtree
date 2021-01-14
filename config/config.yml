@@ -1,0 +1,99 @@
+---
+follow: true
+
+keymap:
+  bigger:
+    - +
+    - "="
+  change_focus:
+    - c
+  change_focus_up:
+    - C
+  clear_filter:
+    - F
+    - E
+  clear_selection:
+    - S
+  collapse:
+    - <s-tab>
+    - "`"
+  copy:
+    - p
+  copy_name:
+    - y
+  cut:
+    - x
+  delete:
+    - d
+  filter:
+    - f
+  h_split:
+    - W
+  jump_to_current:
+    - J
+  new:
+    - a
+  open_sys:
+    - o
+  primary:
+    - <enter>
+  quit:
+    - q
+  refocus:
+    - "~"
+  refresh:
+    - <c-r>
+  rename:
+    - r
+  search:
+    - e
+  secondary:
+    - <tab>
+    - <2-leftmouse>
+  select:
+    - s
+  smaller:
+    - "-"
+    - _
+  stat:
+    - K
+  tertiary:
+    - <m-enter>
+    - <middlemouse>
+  toggle_follow: []
+  toggle_hidden:
+    - .
+  toggle_version_control: []
+  trash:
+    - t
+  v_split:
+    - w
+
+lang: null
+
+mimetypes:
+  ignore_exts:
+    - .ts
+  warn:
+    - audio
+    - font
+    - image
+    - video
+
+open_left: true
+polling_rate: 1
+session: true
+show_hidden: false
+
+sort_by:
+  - is_folder
+  - ext
+  - fname
+
+use_icons: true
+
+version_control:
+  defer: false
+  enable: true
+
+width: 40
