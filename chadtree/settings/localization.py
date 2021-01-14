@@ -6,7 +6,7 @@ from std2.pickle.decode import decode
 from std2.tree import merge
 
 from ..consts import DEFAULT_LANG, LANG_ROOT
-from ..da import load_json
+from yaml import safe_load
 
 
 def _get_lang(code: Optional[str], fallback: str) -> str:
@@ -34,10 +34,12 @@ LANG = Lang({})
 
 def init(code: Optional[str]) -> None:
     lang = _get_lang(code, fallback=DEFAULT_LANG)
-
-    lf = (LANG_ROOT / DEFAULT_LANG).with_suffix(".json")
-    ls = (LANG_ROOT / lang).with_suffix(".json")
-    specs: Mapping[str, str] = decode(
-        Mapping[str, str], merge(load_json(lf) or {}, load_json(ls) or {})
+    lang_path = (LANG_ROOT / lang).with_suffix(".yml")
+    yml_path = (
+        lang_path
+        if lang_path.exists()
+        else (LANG_ROOT / DEFAULT_LANG).with_suffix(".yml")
     )
+
+    specs: Mapping[str, str] = decode(Mapping[str, str], safe_load(yml_path.open()))
     LANG._specs.update(specs)

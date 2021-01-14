@@ -26,12 +26,12 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     for win, buffer in find_fm_windows(nvim):
         row, col = win_get_cursor(nvim, win=win)
         new_row = (
-            focus_row
+            focus_row + 1
             if focus_row is not None
             else (
-                current_row
+                current_row + 1
                 if win.number != cwin.number and current_row is not None
-                else min(row, len(lines) - 1)
+                else min(row + 1, len(lines))
             )
         )
 
@@ -51,5 +51,5 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             for h in hl:
                 atomic.buf_add_highlight(buffer, ns, h.group, idx, h.begin, h.end)
 
-        atomic.win_set_cursor(win, (new_row - 1, col))
+        atomic.win_set_cursor(win, (new_row, col))
         atomic.commit(nvim)
