@@ -22,7 +22,6 @@ def quickfix(nvim: Nvim) -> QuickFix:
 
     filenames = tuple(it())
     parents = (ancestor for fullname in filenames for ancestor in ancestors(fullname))
-    count = Counter(chain(filenames, parents))
-    locations = defaultdict(int, count)
+    locations = Counter(chain(filenames, parents))
     qf = QuickFix(locations=locations)
     return qf
