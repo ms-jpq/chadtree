@@ -29,7 +29,7 @@ class _HelpArgs:
 def _parse_args(args: Sequence[str]) -> _HelpArgs:
     parser = ArgParser()
     parser.add_argument(
-        "-p", "--page", choices=tuple(opt.name for opt in _HelpPages), default=None
+        "page", nargs="?", choices=tuple(opt.name for opt in _HelpPages), default=None
     )
     ns = parser.parse_args(args)
     opts = _HelpArgs(page=ns.page)
