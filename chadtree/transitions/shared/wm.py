@@ -124,10 +124,12 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
 
     nvim.options["splitright"] = direction
     set_cur_win(nvim, win=focus_win)
-    nvim.command(f"{width}vsplit")
+    nvim.command(f"{width}vnew")
     nvim.options["splitright"] = split_r
 
     win = cur_win(nvim)
+    buf = win_get_buf(nvim, win)
+    buf_set_option(nvim, buf=buf, key="bufhidden", val="wipe")
     return win
 
 
