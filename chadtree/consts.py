@@ -19,24 +19,24 @@ VIEW_VAR = "chadtree_view"
 COLOURS_VAR = "chadtree_colours"
 IGNORES_VAR = "chadtree_ignores"
 
-CONFIG_JSON = _CONFIG / "config.json"
-VIEW_JSON = _CONFIG / "view.json"
-IGNORE_JSON = _CONFIG / "ignore.json"
+CONFIG_YML = _CONFIG / "config.yml"
+VIEW_YML = _CONFIG / "view.yml"
+IGNORE_YML = _CONFIG / "ignore.yml"
 
 LANG_ROOT = _TOP_LEVEL / "locale"
 DEFAULT_LANG = "en"
 
-UNICODE_ICONS_JSON = _ARTIFACTS / "unicode_icons.json"
-ASCII_ICONS_JSON = _ARTIFACTS / "ascii_icons.json"
-EMOJI_ICONS_JSON = _ARTIFACTS / "emoji_icons.json"
-ICON_LOOKUP = {
-    True: UNICODE_ICONS_JSON,
-    False: ASCII_ICONS_JSON,
-    "emoji": EMOJI_ICONS_JSON,
+_UNICODE_ICONS_JSON = _ARTIFACTS / "unicode_icons.json"
+_ASCII_ICONS_JSON = _ARTIFACTS / "ascii_icons.json"
+_EMOJI_ICONS_JSON = _ARTIFACTS / "emoji_icons.json"
+ICON_LOOKUP_JSON = {
+    True: _UNICODE_ICONS_JSON,
+    False: _ASCII_ICONS_JSON,
+    "emoji": _EMOJI_ICONS_JSON,
 }
 
 COLOURS_JSON = _ARTIFACTS / "github_colours.json"
-CUSTOM_COLOURS_JSON = _CONFIG / "colours.json"
+CUSTOM_COLOURS_YML = _CONFIG / "colours.yml"
 
 FM_FILETYPE = "CHADTree"
 FM_NAMESPACE = "chadtree_ns"

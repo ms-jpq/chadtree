@@ -1,25 +1,34 @@
 from dataclasses import dataclass
+from json import load
 from locale import strxfrm
-from typing import AbstractSet, Literal, Mapping, Optional, Sequence, SupportsFloat, Union
+from typing import (
+    AbstractSet,
+    Literal,
+    Mapping,
+    Optional,
+    Sequence,
+    SupportsFloat,
+    Union,
+)
 
 from pynvim.api.nvim import Nvim
 from pynvim_pp.rpc import RpcSpec
 from std2.pickle import DecodeError, decode
 from std2.tree import merge
+from yaml import safe_load
 
 from ..consts import (
     COLOURS_JSON,
     COLOURS_VAR,
-    CONFIG_JSON,
-    CUSTOM_COLOURS_JSON,
-    ICON_LOOKUP,
-    IGNORE_JSON,
+    CONFIG_YML,
+    CUSTOM_COLOURS_YML,
+    ICON_LOOKUP_JSON,
+    IGNORE_YML,
     IGNORES_VAR,
     SETTINGS_VAR,
-    VIEW_JSON,
     VIEW_VAR,
+    VIEW_YML,
 )
-from ..da import load_json
 from ..view.highlight import gen_hl
 from ..view.ls_colours import parse_ls_colours
 from ..view.types import (
@@ -67,20 +76,24 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_colours = nvim.vars.get(COLOURS_VAR, {})
 
     config: _UserConfig = decode(
-        _UserConfig, merge(load_json(CONFIG_JSON), user_config, replace=True)
+        _UserConfig,
+        merge(safe_load(CONFIG_YML.read_bytes()), user_config, replace=True),
     )
     view: _UserView = decode(
-        _UserView, merge(load_json(VIEW_JSON), user_view, replace=True)
+        _UserView, merge(safe_load(VIEW_YML.read_bytes()), user_view, replace=True)
     )
     ignore: UserIgnore = decode(
-        UserIgnore, merge(load_json(IGNORE_JSON), user_ignores, replace=True)
+        UserIgnore,
+        merge(safe_load(IGNORE_YML.read_bytes()), user_ignores, replace=True),
     )
     colours: _UserColours = decode(
-        _UserColours, merge(load_json(CUSTOM_COLOURS_JSON), user_colours)
+        _UserColours, merge(safe_load(CUSTOM_COLOURS_YML.read_bytes()), user_colours)
     )
-    icons: UserIcons = decode(UserIcons, load_json(ICON_LOOKUP[config.use_icons]))
+    icons: UserIcons = decode(
+        UserIcons, load(ICON_LOOKUP_JSON[config.use_icons].open())
+    )
     github_colours: Mapping[str, str] = decode(
-        Mapping[str, str], load_json(COLOURS_JSON)
+        Mapping[str, str], load(COLOURS_JSON.open())
     )
 
     ext_colours = gen_hl("github", mapping=github_colours)
