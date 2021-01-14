@@ -38,7 +38,11 @@ def _show_file(
             win = (
                 next(find_window_with_file_in_tab(nvim, file=path), None)
                 or next(iter(non_fm_windows), None)
-                or new_window(nvim, open_left=not settings.open_left, width=state.width)
+                or new_window(
+                    nvim,
+                    open_left=not settings.open_left,
+                    width=nvim.options["columns"] - state.width - 1,
+                )
             )
 
             set_cur_win(nvim, win=win)
