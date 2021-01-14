@@ -63,7 +63,12 @@ def call(prog: str, *args: str, cwd: Union[str, PathLike] = getcwd()) -> None:
 
 def fetch(uri: str) -> str:
     resp = urlopen(uri)
-    return resp.read().decode()
+    code = resp.getcode()
+    body = resp.read()
+    if code != 200:
+        raise Exception(resp.headers, body)
+    else:
+        return body.decode()
 
 
 def slurp_json(path: Path) -> Any:
