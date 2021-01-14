@@ -31,6 +31,7 @@ def _parse_args(args: Sequence[str]) -> _HelpArgs:
     parser.add_argument(
         "page", nargs="?", choices=tuple(opt.name for opt in _HelpPages), default=None
     )
+    parser.add_argument("-w", "--web", action="store_true", default=False)
     ns = parser.parse_args(args)
     opts = _HelpArgs(page=ns.page)
     return opts
