@@ -1,7 +1,7 @@
 from argparse import ArgumentParser, Namespace
 from shutil import which
 from subprocess import DEVNULL, run
-from sys import path, stderr, version_info
+from sys import path, stderr, stdout, version_info
 from typing import Union
 
 from .consts import REQUIREMENTS, RT_DIR
@@ -51,12 +51,14 @@ if command == "deps":
                 REQUIREMENTS,
             ),
             stdin=DEVNULL,
+            stderr=stdout,
             cwd=str(RT_DIR),
         )
         if proc.returncode:
+            print("Installation failed, check :message", file=stderr)
             exit(proc.returncode)
         else:
-            print("You can now use :CHADopen")
+            print("You can now use :CHADopen", file=stderr)
 
 elif command == "run":
     try:
