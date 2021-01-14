@@ -113,14 +113,14 @@ def devicons() -> None:
 
         json = slurp_json(TEMP_JSON)
         parsed = process_json(json)
-        basic = slurp_json((ASSETS / icon).with_suffix(".base.json"))
+        basic = safe_load((ASSETS / icon).with_suffix(".base.yml").read_bytes())
         merged = merge(parsed, basic)
 
         dest = (ARTIFACTS / icon).with_suffix(".json")
         spit_json(dest, merged)
 
     ascii_json = "ascii_icons"
-    json = slurp_json((ASSETS / ascii_json).with_suffix(".base.json"))
+    json = safe_load((ASSETS / ascii_json).with_suffix(".base.yml").read_bytes())
     spit_json((ARTIFACTS / ascii_json).with_suffix(".json"), json)
     call("docker", "rm", container)
 

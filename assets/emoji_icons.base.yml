@@ -1,0 +1,9 @@
+---
+link:
+  broken: 
+  normal: 
+status:
+  active: ▶
+  inactive: ' '
+  not_selected: ' '
+  selected: ✸

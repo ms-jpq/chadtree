@@ -1,0 +1,16 @@
+---
+default_icon: ●
+folder:
+  closed: ▶
+  open: ▼
+link:
+  broken: -/->
+  normal: ->
+name_exact: {}
+name_glob: {}
+status:
+  active: '>'
+  inactive: ' '
+  not_selected: ' '
+  selected: '*'
+type: {}
