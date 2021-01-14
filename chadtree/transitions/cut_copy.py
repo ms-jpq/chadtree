@@ -98,11 +98,12 @@ def _operation(
                         for p in chain(operations.keys(), operations.values())
                     )
                     index = state.index | paths
+                    new_selection = frozenset(operations.values())
                     new_state = forward(
                         state,
                         settings=settings,
                         index=index,
-                        selection=frozenset(),
+                        selection=new_selection,
                         paths=paths,
                     )
 
