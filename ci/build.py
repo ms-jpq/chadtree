@@ -62,9 +62,9 @@ def call(prog: str, *args: str, cwd: Union[str, PathLike] = getcwd()) -> None:
 
 
 def fetch(uri: str) -> str:
-    resp = urlopen(uri)
-    code = resp.getcode()
-    body = resp.read()
+    with urlopen(uri) as resp:
+        code = resp.getcode()
+        body = resp.read()
     if code != 200:
         raise Exception(resp.headers, body)
     else:
