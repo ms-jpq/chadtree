@@ -38,12 +38,15 @@ def _operation(
     op_name: str,
     action: Callable[[Mapping[str, str]], None],
 ) -> Optional[Stage]:
+
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
     selection = state.selection
     unified = unify_ancestors(selection)
+
     if unified and node:
         pre_operations = {src: _find_dest(src, node) for src in unified}
         pre_existing = {s: d for s, d in pre_operations.items() if exists(d)}
+
         new_operations: MutableMapping[str, str] = {}
         while pre_existing:
             source, dest = pre_existing.popitem()
@@ -61,9 +64,10 @@ def _operation(
                 for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
             )
             write(
-                nvim, f"⚠️  -- {op_name}: path(s) already exist! :: {msg}", error=True
+                nvim, LANG("paths already exist", operation=op_name, paths=msg), error=True
             )
             return None
+
         else:
             operations: Mapping[str, str] = {**pre_operations, **new_operations}
             msg = linesep.join(

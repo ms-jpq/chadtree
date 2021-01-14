@@ -2,6 +2,9 @@
 "already_exists": |-
   !! Exists: ${name}
 
+"paths already exist": |-
+  !! -- ${operation}: path(s) already exist! :: ${paths}
+
 "ask_trash": |-
   Trash
   ${display_paths}?

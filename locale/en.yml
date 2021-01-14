@@ -2,6 +2,9 @@
 "already_exists": |-
   ⚠️  Exists: ${name}
 
+"paths already exist": |-
+  ⚠️  -- ${operation} : path(s) already exist! :: ${paths}
+
 "ask_trash": |-
   🗑
   ${display_paths}?
@@ -11,13 +14,13 @@
   &No
 
 "copy": |-
-  🖇"
+  🖇
 
 "copy_paths": |-
   📎 ${copied_paths}
 
 "cut": |-
-  ✂️"
+  ✂️
 
 "dead_link": |-
   ⚠️  cannot open dead link: ${name}
