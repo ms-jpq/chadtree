@@ -1,14 +1,12 @@
 from dataclasses import dataclass
 from hashlib import sha1
 from pathlib import Path
-from typing import Iterator, Optional, Sequence
 
-from pynvim.api import Buffer, Nvim, Window
 from std2.pickle import decode, encode
 
 from ..consts import SESSION_DIR
 from ..da import dump_json, load_json
-from ..fs.types import Index, Node
+from ..fs.types import Index
 from .types import State
 
 
