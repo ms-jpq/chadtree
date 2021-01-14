@@ -37,7 +37,7 @@ def _collapse(
             if row:
                 win = cur_win(nvim)
                 _, col = win_get_cursor(nvim, win=win)
-                win_set_cursor(nvim, win=win, row=row + 1, col=col)
+                win_set_cursor(nvim, win=win, row=row, col=col)
 
             return Stage(new_state)
         else:

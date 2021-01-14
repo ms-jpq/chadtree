@@ -16,6 +16,7 @@ def current(
     """
     New file focused in buf
     """
+
     parents = ancestors(current)
     if state.root.path in parents:
         paths: AbstractSet[str] = parents if state.follow else frozenset()
