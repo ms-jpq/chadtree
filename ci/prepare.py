@@ -2,7 +2,10 @@
 
 from os import environ, getcwd
 from os.path import isdir
+from pathlib import Path
 from subprocess import run
+
+_TOP_LV = Path(__file__).resolve().parent.parent
 
 
 def call(prog: str, *args: str, cwd: str = getcwd()) -> None:
@@ -29,7 +32,8 @@ def git_clone(name: str) -> None:
 
 
 def build(cwd: str) -> None:
-    call("./ci/build.py", cwd=cwd)
+    script = str(_TOP_LV / "ci" / "build.py")
+    call(script, cwd=cwd)
 
 
 def main() -> None:

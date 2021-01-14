@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from asyncio import run as aio_run
 from dataclasses import dataclass
 from datetime import datetime
 from json import dump, load
@@ -34,8 +33,8 @@ LANG_COLOURS = """
 https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
 """
 
-LANG_COLOURS_JSON = ARTIFACTS / "github_colours"
-TEMP_JSON = TEMP / "icons"
+LANG_COLOURS_JSON = (ARTIFACTS / "github_colours").with_suffix(".json")
+TEMP_JSON = (TEMP / "icons").with_suffix(".json")
 
 SRC_ICONS = ("unicode_icons", "emoji_icons")
 
@@ -63,19 +62,19 @@ def call(prog: str, *args: str, cwd: Union[str, PathLike] = getcwd()) -> None:
 
 
 def fetch(uri: str) -> str:
-    resp = aio_run(urlopen(uri))
+    resp = urlopen(uri)
     return resp.read().decode()
 
 
 def slurp_json(path: Path) -> Any:
-    with path.with_suffix(".json").open() as fd:
+    with path.open() as fd:
         return load(fd)
 
 
 def spit_json(path: Path, json: Any) -> None:
     path.parent.mkdir(exist_ok=True, parents=True)
     sorted_json = recur_sort(json)
-    with path.with_suffix(".json").open("w") as fd:
+    with path.open("w") as fd:
         dump(sorted_json, fd, ensure_ascii=False, check_circular=False, indent=2)
 
 
@@ -105,20 +104,19 @@ def devicons() -> None:
 
     for icon in SRC_ICONS:
         src = f"{container}:/root/{icon}.json"
-        dest = str(TEMP_JSON.with_suffix(".json"))
-        call("docker", "cp", src, dest)
+        call("docker", "cp", src, str(TEMP_JSON))
 
         json = slurp_json(TEMP_JSON)
-        basic = slurp_json(ASSETS / f"{icon}.base")
         parsed = process_json(json)
+        basic = slurp_json((ASSETS / icon).with_suffix(".base.json"))
         merged = merge(parsed, basic)
 
-        final_dest = ARTIFACTS / icon
-        spit_json(final_dest, merged)
+        dest = (ARTIFACTS / icon).with_suffix(".json")
+        spit_json(dest, merged)
 
     ascii_json = "ascii_icons"
-    json = slurp_json(ASSETS / f"{ascii_json}.base")
-    spit_json(ARTIFACTS / ascii_json, json)
+    json = slurp_json((ASSETS / ascii_json).with_suffix(".base.json"))
+    spit_json((ARTIFACTS / ascii_json).with_suffix(".json"), json)
     call("docker", "rm", container)
 
 
