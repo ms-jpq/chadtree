@@ -30,7 +30,8 @@ def indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
 
         if is_visual:
             (row1, _), (row2, _) = operator_marks(nvim, buf=buf, visual_type=None)
-            for r in range(row1 - 1, row2):
+
+            for r in range(row1, row2 + 1):
                 if r != row:
                     node = _row_index(state, r)
                     if node:
