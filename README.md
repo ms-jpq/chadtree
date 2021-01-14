@@ -78,13 +78,9 @@ Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vun
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
 ```
 
-**Minimum version**: `python`: 3.7, `nvim`: `0.4.3`
+**Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`
 
 ## Documentation
-
-**important:** if you get a missing function error or see a new feature here but can't use yet, it means I added a feature and you need to run `:UpdateRemotePlugins` to see the new function.
-
-This is a Neovim limitation.
 
 To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
 

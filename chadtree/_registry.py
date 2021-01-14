@@ -7,6 +7,7 @@ from .transitions import (
     delete,
     filter,
     focus,
+    help,
     jump,
     new,
     open_system,
