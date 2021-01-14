@@ -2,20 +2,17 @@ from argparse import ArgumentParser, Namespace
 from shutil import which
 from subprocess import DEVNULL, run
 from sys import path, stderr, stdout, version_info
+from textwrap import dedent
 from typing import Union
+from webbrowser import open as open_w
 
 from .consts import REQUIREMENTS, RT_DIR
 
 if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
+    uri = "https://github.com/ms-jpq/chadtree"
     print(msg, end="", file=stderr)
-    try:
-        from webbrowser import open as open_w
-    except ImportError:
-        pass
-    else:
-        uri = "https://github.com/ms-jpq/chadtree"
-        open_w(uri)
+    open_w(uri)
 
 
 from typing import Literal
@@ -74,8 +71,11 @@ elif command == "run":
         import std2
         import yaml
     except ImportError:
-        msg = "Plesae install dependencies locally using :CHADdeps"
-        print(msg, end="", file=stderr)
+        msg = """
+        Plesae install dependencies using :CHADdeps
+        Dependencies installed privately inside `chadtree/.vars`
+        """
+        print(dedent(msg), end="", file=stderr)
         exit(1)
 
     else:
