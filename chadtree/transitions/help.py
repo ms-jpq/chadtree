@@ -41,6 +41,7 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
     """
     Open help doc
     """
+
     try:
         opts = _parse_args(args)
     except ArgparseError as e:
