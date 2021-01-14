@@ -66,19 +66,13 @@ File Manager for Neovim, Better than NERDTree.
 
 ## Install
 
-Requires pyvim (as all python plugins do)
-
-```sh
-pip3 install pynvim
-```
+**Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`
 
 Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
 
 ```VimL
-Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
+Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 ```
-
-**Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`
 
 ## Documentation
 

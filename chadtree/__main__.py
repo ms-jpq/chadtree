@@ -6,13 +6,12 @@ from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
 
-from .consts import REQUIREMENTS, RT_DIR
+from .consts import MIGRATION_URI, REQUIREMENTS, RT_DIR
 
 if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
-    uri = "https://github.com/ms-jpq/chadtree"
     print(msg, end="", file=stderr)
-    open_w(uri)
+    open_w(MIGRATION_URI)
 
 
 from typing import Literal
