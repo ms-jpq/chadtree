@@ -2,90 +2,104 @@ from typing import AbstractSet, Iterator, Mapping, Sequence, Tuple
 
 from pynvim import Nvim
 from pynvim.api.buffer import Buffer
-from pynvim.api.tabpage import Tabpage
 from pynvim.api.window import Window
+from pynvim_pp.api import (
+    buf_close,
+    buf_filetype,
+    buf_name,
+    buf_set_option,
+    create_buf,
+    cur_buf,
+    cur_tab,
+    cur_win,
+    list_bufs,
+    list_wins,
+    set_cur_win,
+    tab_list_wins,
+    win_get_buf,
+    win_get_cursor,
+    win_get_option,
+)
 from pynvim_pp.keymap import Keymap
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
 
 
-def is_fm_buffer(nvim: Nvim, buffer: Buffer) -> bool:
-    ft: str = nvim.api.buf_get_option(buffer, "filetype")
+def is_fm_buffer(nvim: Nvim, buf: Buffer) -> bool:
+    ft = buf_filetype(nvim, buf=buf)
     return ft == FM_FILETYPE
 
 
 def find_windows_in_tab(nvim: Nvim, no_preview: bool) -> Iterator[Window]:
-    def key_by(window: Window) -> Tuple[int, int]:
+    def key_by(win: Window) -> Tuple[int, int]:
         """
         -> sort by row, then col
         """
 
-        row, col = nvim.api.win_get_position(window)
+        row, col = win_get_cursor(nvim, win=win)
         return col, row
 
-    tab: Tabpage = nvim.api.get_current_tabpage()
-    windows: Sequence[Window] = nvim.api.tabpage_list_wins(tab)
+    tab = cur_tab(nvim)
+    wins = tab_list_wins(nvim, tab=tab)
 
-    for window in sorted(windows, key=key_by):
-        if not no_preview or not nvim.api.win_get_option(window, "previewwindow"):
-            yield window
+    for win in sorted(wins, key=key_by):
+        if not no_preview or not win_get_option(nvim, win=win, key="previewwindow"):
+            yield win
 
 
 def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
-    for window in nvim.api.list_wins():
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        if is_fm_buffer(nvim, buffer=buffer):
-            yield window, buffer
+    for win in list_wins(nvim):
+        buf = win_get_buf(nvim, win=win)
+        if is_fm_buffer(nvim, buf=buf):
+            yield win, buf
 
 
 def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim, no_preview=True):
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        if is_fm_buffer(nvim, buffer=buffer):
-            yield window
+    for win in find_windows_in_tab(nvim, no_preview=True):
+        buf = win_get_buf(nvim, win=win)
+        if is_fm_buffer(nvim, buf=buf):
+            yield win
 
 
 def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim, no_preview=True):
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        if not is_fm_buffer(nvim, buffer=buffer):
-            yield window
+    for win in find_windows_in_tab(nvim, no_preview=True):
+        buf = win_get_buf(nvim, win=win)
+        if not is_fm_buffer(nvim, buf=buf):
+            yield win
 
 
 def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
-    for window in find_windows_in_tab(nvim, no_preview=True):
-        buffer: Buffer = nvim.api.win_get_buf(window)
-        name = nvim.api.buf_get_name(buffer)
+    for win in find_windows_in_tab(nvim, no_preview=True):
+        buf = win_get_buf(nvim, win=win)
+        name = buf_name(nvim, buf=buf)
         if name == file:
-            yield window
+            yield win
 
 
 def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
-    for buffer in buffers:
-        if is_fm_buffer(nvim, buffer=buffer):
-            yield buffer
+    for buf in list_bufs(nvim):
+        if is_fm_buffer(nvim, buf=buf):
+            yield buf
 
 
 def find_buffers_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
-    for buffer in buffers:
-        name = nvim.api.buf_get_name(buffer)
+    for buf in list_bufs(nvim):
+        name = buf_name(nvim, buf=buf)
         if name == file:
-            yield buffer
+            yield buf
 
 
 def find_current_buffer_name(nvim: Nvim) -> str:
-    buffer: Buffer = nvim.api.get_current_buf()
-    name: str = nvim.api.buf_get_name(buffer)
+    buf = cur_buf(nvim)
+    name = buf_name(nvim, buf=buf)
     return name
 
 
 def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, AbstractSet[str]]) -> Buffer:
-    buffer: Buffer = nvim.api.create_buf(False, True)
-    nvim.api.buf_set_option(buffer, "modifiable", False)
-    nvim.api.buf_set_option(buffer, "filetype", FM_FILETYPE)
+    buf = create_buf(nvim, listed=False, scratch=True, wipe=False, nofile=True)
+    buf_set_option(nvim, buf=buf, key="modifiable", val=False)
+    buf_set_option(nvim, buf=buf, key="filetype", val=FM_FILETYPE)
 
     km = Keymap()
     for function, mappings in keymap.items():
@@ -97,24 +111,24 @@ def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, AbstractSet[str]]) -> Buffer:
                 mapping, noremap=True, silent=True, nowait=True
             ) << f"<cmd>lua {function}(true)<cr>"
 
-    km.drain(buf=buffer).commit(nvim)
-    return buffer
+    km.drain(buf=buf).commit(nvim)
+    return buf
 
 
 def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
-    split_r = nvim.api.get_option("splitright")
+    split_r = nvim.options["splitright"]
 
     windows = tuple(w for w in find_windows_in_tab(nvim, no_preview=False))
     focus_win = windows[0] if open_left else windows[-1]
     direction = False if open_left else True
 
-    nvim.api.set_option("splitright", direction)
-    nvim.api.set_current_win(focus_win)
+    nvim.options["splitright"] = direction
+    set_cur_win(nvim, win=focus_win)
     nvim.command(f"{width}vsplit")
-    nvim.api.set_option("splitright", split_r)
+    nvim.options["splitright"] = split_r
 
-    window: Window = nvim.api.get_current_win()
-    return window
+    win = cur_win(nvim)
+    return win
 
 
 def resize_fm_windows(nvim: Nvim, width: int) -> None:
@@ -123,9 +137,8 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
 
 
 def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> None:
-    buffers: Sequence[Buffer] = nvim.api.list_bufs()
-    for buffer in buffers:
-        buf_name = nvim.api.buf_get_name(buffer)
-        buf_paths = ancestors(buf_name) | {buf_name}
-        if buf_paths & paths:
-            nvim.api.buf_delete(buffer, {"force": True})
+    for buf in list_bufs(nvim):
+        name = buf_name(nvim, buf=buf)
+        buf_paths = ancestors(name) | {name}
+        if not buf_paths.isdisjoint(paths):
+            buf_close(nvim, buf=buf)

@@ -4,13 +4,14 @@ from os.path import join
 from typing import Iterator
 
 from pynvim import Nvim
+from pynvim_pp.api import get_cwd
 
 from ..fs.ops import ancestors
 from .types import QuickFix
 
 
 def quickfix(nvim: Nvim) -> QuickFix:
-    cwd: str = nvim.funcs.getcwd()
+    cwd = get_cwd(nvim)
     ql = nvim.funcs.getqflist()
 
     def it() -> Iterator[str]:

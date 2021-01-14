@@ -18,7 +18,7 @@ def indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
     window: Window = nvim.api.get_current_win()
     buffer: Buffer = nvim.api.win_get_buf(window)
 
-    if not is_fm_buffer(nvim, buffer=buffer):
+    if not is_fm_buffer(nvim, buf=buffer):
         return None
     else:
         row, _ = nvim.api.win_get_cursor(window)
