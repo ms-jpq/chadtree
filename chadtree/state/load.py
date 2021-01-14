@@ -1,4 +1,5 @@
 from pynvim import Nvim
+from pynvim_pp.api import get_cwd
 
 from ..fs.cartographer import new
 from ..nvim.quickfix import quickfix
@@ -11,7 +12,7 @@ from .types import Selection, State, VCStatus
 
 def initial(nvim: Nvim, settings: Settings) -> State:
     version_ctl = settings.version_ctl
-    cwd: str = nvim.funcs.getcwd()
+    cwd = get_cwd(nvim)
 
     session = load_session(cwd)
     index = session.index if settings.session else frozenset((cwd,))

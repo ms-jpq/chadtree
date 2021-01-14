@@ -2,6 +2,7 @@ from typing import Optional
 
 from pynvim import Nvim
 from pynvim.api.common import NvimError
+from pynvim_pp.api import get_cwd
 
 from ..nvim.quickfix import quickfix
 from ..registry import autocmd, rpc
@@ -32,7 +33,7 @@ def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     Follow cwd update
     """
 
-    cwd: str = nvim.funcs.getcwd()
+    cwd = get_cwd(nvim)
     return new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
 
 
