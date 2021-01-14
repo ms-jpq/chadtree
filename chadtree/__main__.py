@@ -30,7 +30,6 @@ def parse_args() -> Namespace:
     s_run.add_argument("--socket", required=True)
 
     s_deps = sub_parsers.add_parser("deps")
-    s_deps.add_argument("--socket", required=True)
 
     return parser.parse_args()
 

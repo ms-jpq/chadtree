@@ -27,8 +27,7 @@ local start = function(...)
   local args =
     vim.tbl_flatten {
     {"python3", "-m", "chadtree"},
-    {...},
-    {"--socket", vim.fn.serverstart()}
+    {...}
   }
   local params = {
     cwd = cwd,
@@ -56,7 +55,7 @@ local set_chad_call = function(name, cmd)
     local args = {...}
 
     if not job_id then
-      job_id = start("run")
+      job_id = start("run", "--socket", vim.fn.serverstart())
     end
 
     if _G[cmd] then
