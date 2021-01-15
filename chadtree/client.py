@@ -20,6 +20,7 @@ from .state.types import State
 from .transitions.autocmds import save_session, schedule_update
 from .transitions.redraw import redraw
 from .transitions.types import Stage
+from .transitions.version_ctl import vc_refresh
 
 
 class ChadClient(Client):
@@ -53,6 +54,7 @@ class ChadClient(Client):
             period = cast(Settings, self._settings).polling_rate
             for _ in ticker(period, immediately=False):
                 enqueue_event(schedule_update)
+                enqueue_event(vc_refresh)
                 enqueue_event(save_session)
 
         pool.submit(sched)

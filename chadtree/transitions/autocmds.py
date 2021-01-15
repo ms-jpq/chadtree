@@ -1,3 +1,4 @@
+from os import chdir
 from typing import Optional
 
 from pynvim import Nvim
@@ -20,7 +21,7 @@ from .types import Stage
 @rpc(blocking=False)
 def schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     try:
-        return refresh(nvim, state=state, settings=settings, write_out=False)
+        return refresh(nvim, state=state, settings=settings, manual=False)
     except NvimError:
         return None
 
@@ -58,6 +59,7 @@ def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
 
     cwd = get_cwd(nvim)
+    chdir(cwd)
     new_state = new_root(nvim, state=state, settings=settings, new_cwd=cwd)
     return Stage(new_state)
 

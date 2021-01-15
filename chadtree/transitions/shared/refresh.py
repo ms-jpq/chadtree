@@ -16,9 +16,9 @@ from ..types import Stage
 
 
 def refresh(
-    nvim: Nvim, state: State, settings: Settings, write_out: bool = False
+    nvim: Nvim, state: State, settings: Settings, manual: bool = False
 ) -> Stage:
-    if write_out:
+    if manual:
         write(nvim, LANG("hourglass"))
 
     current = find_current_buffer_name(nvim)
@@ -44,7 +44,7 @@ def refresh(
         current=new_current or Void,
     )
 
-    if write_out:
+    if manual:
         write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)
