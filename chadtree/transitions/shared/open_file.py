@@ -89,6 +89,6 @@ def open_file(
     if go:
         new_state = forward(state, settings=settings, current=path)
         _show_file(nvim, state=new_state, settings=settings, click_type=click_type)
-        return Stage(new_state)
+        return Stage(new_state, focus=path)
     else:
         return None
