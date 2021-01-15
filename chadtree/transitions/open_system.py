@@ -3,6 +3,7 @@ from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
 from typing import cast
 
 from pynvim import Nvim
+from pynvim_pp.api import get_cwd
 from pynvim_pp.lib import awrite
 from pynvim_pp.logging import log
 
@@ -14,13 +15,13 @@ from ..state.types import State
 from .shared.index import indices
 
 
-def _open_gui(path: str) -> None:
+def _open_gui(path: str, cwd: str) -> None:
     if which("open"):
         command = ("open", "--", path)
-        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
+        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     elif which("xdg-open"):
         command = ("xdg-open", "--", path)
-        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
+        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     else:
         raise LookupError(LANG("sys_open_err"))
 
@@ -35,10 +36,11 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
     if not node:
         return None
     else:
+        cwd = get_cwd(nvim)
 
         def cont() -> None:
             try:
-                _open_gui(cast(Node, node).path)
+                _open_gui(cast(Node, node).path, cwd=cwd)
             except (CalledProcessError, LookupError) as e:
                 awrite(nvim, e)
             except Exception as e:
