@@ -2,7 +2,7 @@ from locale import strxfrm
 from os import environ, linesep
 from os.path import join, sep
 from shutil import which
-from subprocess import DEVNULL, PIPE, run
+from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
 from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
 from std2.concurrent.futures import gather
@@ -16,75 +16,58 @@ _GIT_SUBMODULE_MARKER = "Entering "
 _GIT_ENV = {"LC_ALL": "C"}
 
 
-class _GitError(Exception):
-    pass
-
-
 def _root() -> str:
-    ret = run(
+    stdout = check_output(
         ("git", "rev-parse", "--show-toplevel"),
-        stdin=DEVNULL,
-        stdout=PIPE,
         stderr=PIPE,
         text=True,
     )
-    if ret.returncode != 0:
-        raise _GitError(ret.stderr)
-    else:
-        return ret.stdout.rstrip()
+    return stdout.rstrip()
 
 
 def _stat_main() -> Mapping[str, str]:
-    ret = run(
+    stdout = check_output(
         tuple((*_GIT_LIST_CMD, "-z")),
         stdin=DEVNULL,
-        stdout=PIPE,
         stderr=PIPE,
         text=True,
     )
-    if ret.returncode != 0:
-        raise _GitError(ret.stderr)
-    else:
-        it = iter(ret.stdout.split("\0"))
+    it = iter(stdout.split("\0"))
 
-        def cont() -> Iterator[Tuple[str, str]]:
-            for line in it:
-                prefix, file = line[:2], line[3:]
-                yield prefix, file.rstrip(sep)
-                if "R" in prefix:
-                    next(it, None)
+    def cont() -> Iterator[Tuple[str, str]]:
+        for line in it:
+            prefix, file = line[:2], line[3:]
+            yield prefix, file.rstrip(sep)
+            if "R" in prefix:
+                next(it, None)
 
-        entries = {file: prefix for prefix, file in cont()}
-        return entries
+    entries = {file: prefix for prefix, file in cont()}
+    return entries
 
 
 def _stat_sub_modules() -> Mapping[str, str]:
-    ret = run(
+    stdout = check_output(
         ("git", "submodule", "foreach", "--recursive", " ".join(_GIT_LIST_CMD)),
         env={**environ, **_GIT_ENV},
         stdin=DEVNULL,
-        stdout=PIPE,
         stderr=PIPE,
         text=True,
     )
-    if ret.returncode != 0:
-        raise _GitError(ret.stderr)
-    else:
-        it = iter(ret.stdout.split(linesep))
+    it = iter(stdout.split(linesep))
 
-        def cont() -> Iterator[Tuple[str, str]]:
-            root = ""
-            for line in it:
-                if line.startswith(_GIT_SUBMODULE_MARKER):
-                    root = line[len(_GIT_SUBMODULE_MARKER) + 1 : -1].rstrip(linesep)
-                else:
-                    prefix, file = line[:2], line[3:]
-                    yield prefix, join(root, file.rstrip(sep))
-                    if "R" in prefix:
-                        next(it, None)
+    def cont() -> Iterator[Tuple[str, str]]:
+        root = ""
+        for line in it:
+            if line.startswith(_GIT_SUBMODULE_MARKER):
+                root = line[len(_GIT_SUBMODULE_MARKER) + 1 : -1].rstrip(linesep)
+            else:
+                prefix, file = line[:2], line[3:]
+                yield prefix, join(root, file.rstrip(sep))
+                if "R" in prefix:
+                    next(it, None)
 
-        entries = {file: prefix for prefix, file in cont()}
-        return entries
+    entries = {file: prefix for prefix, file in cont()}
+    return entries
 
 
 def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
@@ -120,7 +103,7 @@ def status() -> VCStatus:
             r, s_main, s_sub = ret
             stats = {**s_sub, **s_main}
             return _parse(r, stats)
-        except _GitError:
+        except CalledProcessError:
             return VCStatus()
     else:
         return VCStatus()

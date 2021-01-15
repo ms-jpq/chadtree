@@ -1,5 +1,5 @@
 from shutil import which
-from subprocess import DEVNULL, PIPE, CalledProcessError, run
+from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
 
 from pynvim import Nvim
 from pynvim_pp.lib import write
@@ -14,24 +14,10 @@ from .shared.index import indices
 def _open_gui(path: str) -> None:
     if which("open"):
         command = ("open", "--", path)
-        proc = run(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
-        if proc.returncode != 0:
-            raise CalledProcessError(
-                cmd=command,
-                returncode=proc.returncode,
-                output=proc.stdout,
-                stderr=proc.stderr,
-            )
+        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
     elif which("xdg-open"):
         command = ("xdg-open", "--", path)
-        proc = run(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
-        if proc.returncode != 0:
-            raise CalledProcessError(
-                cmd=command,
-                returncode=proc.returncode,
-                output=proc.stdout,
-                stderr=proc.stderr,
-            )
+        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
     else:
         raise LookupError(LANG("sys_open_err"))
 

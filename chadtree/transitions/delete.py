@@ -2,7 +2,7 @@ from locale import strxfrm
 from os import linesep
 from os.path import dirname
 from shutil import which
-from subprocess import DEVNULL, PIPE, CalledProcessError, run
+from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
 from typing import Callable, Iterable, Optional
 
 from pynvim.api import Nvim
@@ -42,7 +42,7 @@ def _remove(
         if resp == 1:
             try:
                 yeet(unified)
-            except Exception as e:
+            except (CalledProcessError, PermissionError) as e:
                 write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
             else:
@@ -76,14 +76,7 @@ def _sys_trash(paths: Iterable[str]) -> None:
     cmd = "trash"
     if which(cmd):
         command = (cmd, "--", *paths)
-        proc = run(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
-        if proc.returncode != 0:
-            raise CalledProcessError(
-                cmd=command,
-                returncode=proc.returncode,
-                output=proc.stdout,
-                stderr=proc.stderr,
-            )
+        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
     else:
         raise LookupError(LANG("sys_trash_err"))
 
