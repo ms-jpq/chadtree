@@ -7,7 +7,7 @@ from typing import Callable, Iterable, Optional
 
 from pynvim.api import Nvim
 from pynvim_pp.api import get_cwd
-from pynvim_pp.lib import awrite, write
+from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 
 from ..fs.ops import ancestors, remove, unify_ancestors
@@ -99,11 +99,11 @@ def _sys_trash(nvim: Nvim) -> Callable[[Iterable[str]], None]:
             try:
                 c1()
             except (CalledProcessError, LookupError) as e:
-                awrite(nvim, e)
+                threadsafe_call(nvim, write, nvim, e, error=True)
             except Exception as e:
                 log.exception("%s", e)
             else:
-                enqueue_event(refresh)
+                enqueue_event(refresh, True)
 
         pool.submit(c2)
 

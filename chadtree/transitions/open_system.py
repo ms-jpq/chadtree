@@ -4,7 +4,7 @@ from typing import cast
 
 from pynvim import Nvim
 from pynvim_pp.api import get_cwd
-from pynvim_pp.lib import awrite
+from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 
 from ..fs.types import Node
@@ -42,7 +42,7 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
             try:
                 _open_gui(cast(Node, node).path, cwd=cwd)
             except (CalledProcessError, LookupError) as e:
-                awrite(nvim, e)
+                threadsafe_call(nvim, write, nvim, e, error=True)
             except Exception as e:
                 log.exception("%s", e)
 
