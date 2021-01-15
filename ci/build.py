@@ -71,11 +71,6 @@ def fetch(uri: str) -> str:
         return body.decode()
 
 
-def slurp_json(path: Path) -> Any:
-    with path.open() as fd:
-        return load(fd)
-
-
 def spit_json(path: Path, json: Any) -> None:
     path.parent.mkdir(exist_ok=True, parents=True)
     sorted_json = recur_sort(json)
@@ -111,8 +106,7 @@ def devicons() -> None:
         src = f"{container}:/root/{icon}.json"
         call("docker", "cp", src, str(TEMP_JSON))
 
-        json = slurp_json(TEMP_JSON)
-        parsed = process_json(json)
+        parsed = process_json(load(TEMP_JSON.open()))
         basic = safe_load((ASSETS / icon).with_suffix(".base.yml").read_bytes())
         merged = merge(parsed, basic)
 

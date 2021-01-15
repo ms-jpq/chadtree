@@ -56,8 +56,10 @@ FM_HL_PREFIX = "chadtree"
 
 
 MIGRATION_URI = "https://github.com/ms-jpq/chadtree/blob/chad/docs/MIGRATION.md"
+
 _DOCS_DIR = _TOP_LEVEL / "docs"
 README_MD = _DOCS_DIR / "README.md"
 FEATURES_MD = _DOCS_DIR / "FEATURES.md"
 KEYBIND_MD = _DOCS_DIR / "KEYBIND.md"
 CONFIGURATION_MD = _DOCS_DIR / "CONFIGURATION.md"
+THEME_MD = _DOCS_DIR / "THEME.md"

@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from hashlib import sha1
+from json import dump
 from pathlib import Path
 
 from std2.pickle import decode, encode
 
-from ..consts import SESSION_DIR
-from ..da import dump_json, load_json
+from ..consts import SESSION_DIR, FOLDER_MODE
+from ..da import load_json
 from ..fs.types import Index
 from .types import State
 
@@ -31,6 +32,9 @@ def load_session(cwd: str) -> _Session:
 
 
 def dump_session(state: State) -> None:
-    load_path = _session_path(state.root.path)
-    json = _Session(index=state.index, show_hidden=state.show_hidden)
-    dump_json(load_path, encode(json))
+    json = encode(_Session(index=state.index, show_hidden=state.show_hidden))
+
+    path = _session_path(state.root.path)
+    path.parent.mkdir(mode=FOLDER_MODE, parents=True, exist_ok=True)
+    with path.open("w") as fd:
+        dump(json, fd, ensure_ascii=False, check_circular=False, indent=2)

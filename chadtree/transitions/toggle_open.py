@@ -31,16 +31,16 @@ from .types import Stage
 
 
 @dataclass(frozen=True)
-class _OpenArgs:
+class _Args:
     focus: bool
 
 
-def _parse_args(args: Sequence[str]) -> _OpenArgs:
+def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
     parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
 
     ns = parser.parse_args(args=args)
-    opts = _OpenArgs(focus=ns.focus)
+    opts = _Args(focus=ns.focus)
     return opts
 
 
@@ -59,7 +59,7 @@ def _ensure_side_window(
 
 
 def _toggle_fm_window(
-    nvim: Nvim, state: State, settings: Settings, opts: _OpenArgs
+    nvim: Nvim, state: State, settings: Settings, opts: _Args
 ) -> None:
     cwin = cur_win(nvim)
     win = next(find_fm_windows_in_tab(nvim), None)

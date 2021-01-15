@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Optional, Sequence
+from pathlib import Path
+from typing import Optional, Sequence, Tuple
+from webbrowser import open as open_w
 
 from pynvim import Nvim
 from pynvim_pp.api import buf_set_lines, buf_set_option, create_buf
@@ -9,31 +11,51 @@ from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
 from std2.types import never
 
-from ..consts import CONFIGURATION_MD, FEATURES_MD, KEYBIND_MD, README_MD
+from ..consts import CONFIGURATION_MD, FEATURES_MD, KEYBIND_MD, README_MD, THEME_MD
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
 
 
-class _HelpPages(Enum):
+class _Pages(Enum):
     features = auto()
     keybind = auto()
     config = auto()
+    theme = auto()
 
 
 @dataclass(frozen=True)
-class _HelpArgs:
-    page: Optional[_HelpPages]
+class _Args:
+    page: Optional[_Pages]
+    use_web: bool
 
 
-def _parse_args(args: Sequence[str]) -> _HelpArgs:
+def _directory(page: Optional[_Pages]) -> Tuple[Path, str]:
+    if page is None:
+        return README_MD, ""
+    elif page is _Pages.features:
+        return FEATURES_MD, ""
+    elif page is _Pages.keybind:
+        return KEYBIND_MD, ""
+    elif page is _Pages.config:
+        return CONFIGURATION_MD, ""
+    elif page is _Pages.theme:
+        return THEME_MD, ""
+    else:
+        never(page)
+
+
+def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
     parser.add_argument(
-        "page", nargs="?", choices=tuple(opt.name for opt in _HelpPages), default=None
+        "page",
+        nargs="?",
+        choices=tuple(p.name for p in _Pages),
+        default=None,
     )
     parser.add_argument("-w", "--web", action="store_true", default=False)
     ns = parser.parse_args(args)
-    opts = _HelpArgs(page=ns.page)
+    opts = _Args(page=_Pages[ns.page], use_web=ns.web)
     return opts
 
 
@@ -48,20 +70,13 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
     except ArgparseError as e:
         write(nvim, e, error=True)
     else:
-        if opts.page is None:
-            md = README_MD
-        elif opts.page is _HelpPages.features:
-            md = FEATURES_MD
-        elif opts.page is _HelpPages.keybind:
-            md = KEYBIND_MD
-        elif opts.page is _HelpPages.config:
-            md = CONFIGURATION_MD
+        md, uri = _directory(opts.page)
+        if opts.use_web:
+            open_w(uri)
         else:
-            never(opts.page)
-
-        lines = md.read_text().splitlines()
-        buf = create_buf(nvim, listed=False, scratch=True, wipe=True, nofile=True)
-        buf_set_lines(nvim, buf=buf, lo=0, hi=-1, lines=lines)
-        buf_set_option(nvim, buf=buf, key="modifiable", val=False)
-        buf_set_option(nvim, buf=buf, key="filetype", val="markdown")
-        open_float_win(nvim, margin=0, relsize=0.95, buf=buf)
+            lines = md.read_text().splitlines()
+            buf = create_buf(nvim, listed=False, scratch=True, wipe=True, nofile=True)
+            buf_set_lines(nvim, buf=buf, lo=0, hi=-1, lines=lines)
+            buf_set_option(nvim, buf=buf, key="modifiable", val=False)
+            buf_set_option(nvim, buf=buf, key="filetype", val="markdown")
+            open_float_win(nvim, margin=0, relsize=0.95, buf=buf)
