@@ -17,6 +17,7 @@ from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path
+from .refresh import refresh as _refresh
 from .shared.index import indices
 from .shared.refresh import refresh
 from .shared.wm import kill_buffers
@@ -103,7 +104,7 @@ def _sys_trash(nvim: Nvim) -> Callable[[Iterable[str]], None]:
             except Exception as e:
                 log.exception("%s", e)
             else:
-                enqueue_event(refresh, True)
+                enqueue_event(_refresh, True)
 
         pool.submit(c2)
 
