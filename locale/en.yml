@@ -6,6 +6,9 @@
   ⚠️  -- ${operation} : path(s) already exist! ::
   ${paths}
 
+"new cwd": |-
+  🏠 =${cwd}
+
 "ask_trash": |-
   🗑
   ${display_paths}?

@@ -6,6 +6,9 @@
   !! -- ${operation}: path(s) already exist! ::
   ${paths}
 
+"new cwd": |-
+  $$PWD=${cwd}
+
 "ask_trash": |-
   Trash
   ${display_paths}?
