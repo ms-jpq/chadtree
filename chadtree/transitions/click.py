@@ -29,7 +29,9 @@ def _click(
             return None
         else:
             if is_dir(node):
-                if state.filter_pattern:
+                if node.path == state.root.path:
+                    return None
+                elif state.filter_pattern:
                     write(nvim, LANG("filter_click"))
                     return None
                 else:
