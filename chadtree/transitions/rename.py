@@ -56,4 +56,4 @@ def _rename(
                         state, settings=settings, index=index, paths=paths
                     )
                     kill_buffers(nvim, paths={prev_name})
-                    return Stage(new_state)
+                    return Stage(new_state, focus=new_name)
