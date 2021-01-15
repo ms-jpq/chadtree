@@ -12,8 +12,9 @@ from stat import (
     S_ISVTX,
     S_IWOTH,
 )
-from typing import AbstractSet, Iterator, Mapping, cast
+from typing import AbstractSet, Iterator, Mapping, Tuple, cast
 
+from ..registry import pool
 from ..state.types import Index
 from .types import Mode, Node
 
@@ -67,9 +68,13 @@ def new(root: str, index: Index) -> Node:
         return Node(path=root, mode=mode, name=name, ext=ext)
 
     elif root in index:
+
+        def p_new(path: str) -> Tuple[str, Node]:
+            return path, new(path, index=index)
+
         children = {
-            path: new(path, index=index)
-            for path in (join(root, d) for d in listdir(root))
+            path: node
+            for path, node in pool.map(p_new, (join(root, d) for d in listdir(root)))
         }
         return Node(path=root, mode=mode, name=name, children=children)
     else:

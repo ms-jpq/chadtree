@@ -5,8 +5,6 @@ from enum import IntEnum, auto
 from typing import AbstractSet, Mapping, Optional
 
 
-
-
 class Mode(IntEnum):
     orphan_link = auto()
     link = auto()
