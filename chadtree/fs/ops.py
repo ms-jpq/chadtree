@@ -20,7 +20,6 @@ def ancestors(path: str) -> AbstractSet[str]:
     return {str(p) for p in PurePath(path).parents}
 
 
-
 def unify_ancestors(paths: AbstractSet[str]) -> AbstractSet[str]:
     return {p for p in paths if ancestors(p).isdisjoint(paths)}
 
@@ -89,10 +88,11 @@ def new(dest: str) -> None:
         Path(dest).touch(mode=FILE_MODE, exist_ok=True)
 
 
-def rename(src: str, dest: str) -> None:
-    parent = dirname(dest)
-    makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
-    mv(src, dest)
+def rename(operations: Mapping[str, str]) -> None:
+    for src, dest in operations.items():
+        parent = dirname(dest)
+        makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
+        mv(src, dest)
 
 
 def remove(paths: Iterable[str]) -> None:

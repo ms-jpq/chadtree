@@ -45,7 +45,7 @@ def _rename(
                 return None
             else:
                 try:
-                    rename(prev_name, new_name)
+                    rename({prev_name: new_name})
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
