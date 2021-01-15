@@ -24,6 +24,22 @@ def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
 
 
 @rpc(blocking=False)
+def _change_dir(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
+    """
+    Change root directory
+    """
+
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    if not node:
+        return None
+    else:
+        cwd = node.path
+        return new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+
+
+@rpc(blocking=False)
 def _change_focus(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:

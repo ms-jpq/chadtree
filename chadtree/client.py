@@ -1,4 +1,5 @@
 from asyncio import run_coroutine_threadsafe
+from asyncio.events import AbstractEventLoop
 from queue import SimpleQueue
 from typing import Any, MutableMapping, Optional, cast
 
@@ -12,7 +13,7 @@ from std2.sched import ticker
 from std2.types import AnyFun
 
 from ._registry import ____
-from .registry import autocmd, rpc
+from .registry import autocmd, pool, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
 from .settings.types import Settings
@@ -36,6 +37,9 @@ class ChadClient(Client):
 
     def wait(self, nvim: Nvim) -> int:
         def cont() -> None:
+            if isinstance(nvim.loop, AbstractEventLoop):
+                nvim.loop.set_default_executor(pool)
+
             atomic, specs = rpc.drain(nvim.channel_id)
             self._handlers.update(specs)
             self._settings = initial_settings(nvim, specs)

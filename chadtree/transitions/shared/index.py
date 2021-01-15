@@ -10,7 +10,7 @@ from .wm import is_fm_buffer
 
 
 def _row_index(state: State, row: int) -> Optional[Node]:
-    if (row > 0) and (row < len(state.derived.lookup)):
+    if (row >= 0) and (row < len(state.derived.lookup)):
         return state.derived.lookup[row]
     else:
         return None

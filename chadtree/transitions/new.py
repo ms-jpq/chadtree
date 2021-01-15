@@ -25,33 +25,38 @@ def _new(
     new file / folder
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), state.root)
-    parent = node.path if is_dir(node) else dirname(node.path)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    if not node:
+        return None
+    else:
+        parent = node.path if is_dir(node) else dirname(node.path)
 
-    child: Optional[str] = nvim.funcs.input(LANG("pencil"))
+        child: Optional[str] = nvim.funcs.input(LANG("pencil"))
 
-    if child:
-        path = join(parent, child)
-        if exists(path):
-            write(nvim, LANG("already_exists", name=path), error=True)
+        if not child:
             return None
         else:
-            try:
-                new(path)
-            except Exception as e:
-                write(nvim, e, error=True)
-                return refresh(nvim, state=state, settings=settings)
+            path = join(parent, child)
+            if exists(path):
+                write(nvim, LANG("already_exists", name=path), error=True)
+                return None
             else:
-                paths = ancestors(path)
-                index = state.index | paths
-                new_state = forward(state, settings=settings, index=index, paths=paths)
-                nxt = open_file(
-                    nvim,
-                    state=new_state,
-                    settings=settings,
-                    path=path,
-                    click_type=ClickType.secondary,
-                )
-                return nxt
-    else:
-        return None
+                try:
+                    new(path)
+                except Exception as e:
+                    write(nvim, e, error=True)
+                    return refresh(nvim, state=state, settings=settings)
+                else:
+                    paths = ancestors(path)
+                    index = state.index | paths
+                    new_state = forward(
+                        state, settings=settings, index=index, paths=paths
+                    )
+                    nxt = open_file(
+                        nvim,
+                        state=new_state,
+                        settings=settings,
+                        path=path,
+                        click_type=ClickType.secondary,
+                    )
+                    return nxt

@@ -5,6 +5,8 @@ keymap:
   bigger:
     - +
     - "="
+  change_dir:
+    - z
   change_focus:
     - c
   change_focus_up:
