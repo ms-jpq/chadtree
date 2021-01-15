@@ -20,7 +20,9 @@ def _click(
 ) -> Optional[Stage]:
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
 
-    if node:
+    if not node:
+        return None
+    else:
         if Mode.orphan_link in node.mode:
             name = node.name
             write(nvim, LANG("dead_link", name=name), error=True)
@@ -46,8 +48,6 @@ def _click(
                     click_type=click_type,
                 )
                 return nxt
-    else:
-        return None
 
 
 @rpc(blocking=False)

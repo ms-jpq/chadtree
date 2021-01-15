@@ -29,7 +29,9 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
     """
 
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
-    if node:
+    if not node:
+        return None
+    else:
         try:
             _open_gui(node.path)
         except (CalledProcessError, LookupError) as e:

@@ -17,7 +17,9 @@ def _stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
     """
 
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
-    if node:
+    if not node:
+        return None
+    else:
         try:
             stat = fs_stat(node.path)
         except Exception as e:

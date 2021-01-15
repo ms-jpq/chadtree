@@ -25,18 +25,23 @@ def _rename(
     """
 
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
-    if node:
+    if not node:
+        return None
+    else:
         prev_name = node.path
         parent = state.root.path
         rel_path = relpath(prev_name, start=parent)
 
         child: Optional[str] = nvim.funcs.input(LANG("pencil"), rel_path)
-        if child:
+        if not child:
+            return None
+        else:
             new_name = join(parent, child)
             new_parent = dirname(new_name)
+
             if exists(new_name):
                 write(nvim, LANG("already_exists", name=new_name), error=True)
-                return Stage(state)
+                return None
             else:
                 try:
                     rename(prev_name, new_name)
@@ -51,7 +56,3 @@ def _rename(
                     )
                     kill_buffers(nvim, paths=frozenset((prev_name,)))
                     return Stage(new_state)
-        else:
-            return None
-    else:
-        return None

@@ -18,11 +18,11 @@ def _jump_to_current(
     """
 
     curr = state.current
-    if curr:
-        stage = current(nvim, state=state, settings=settings, current=curr)
-        if stage:
-            return Stage(state=stage.state, focus=curr)
-        else:
-            return None
-    else:
+    if not curr:
         return None
+    else:
+        stage = current(nvim, state=state, settings=settings, current=curr)
+        if not stage:
+            return None
+        else:
+            return Stage(state=stage.state, focus=curr)
