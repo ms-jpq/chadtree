@@ -27,7 +27,7 @@ def _root() -> str:
 
 def _stat_main() -> Mapping[str, str]:
     stdout = check_output(
-        tuple((*_GIT_LIST_CMD, "-z")),
+        (*_GIT_LIST_CMD, "-z"),
         stdin=DEVNULL,
         stderr=PIPE,
         text=True,

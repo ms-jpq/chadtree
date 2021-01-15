@@ -15,7 +15,6 @@ from .transitions import (
     refresh,
     rename,
     resize,
-    search,
     selection,
     stat,
     toggle_open,

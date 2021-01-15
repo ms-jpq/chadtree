@@ -45,8 +45,6 @@ keymap:
     - <c-r>
   rename:
     - r
-  search:
-    - e
   secondary:
     - <tab>
     - <2-leftmouse>
