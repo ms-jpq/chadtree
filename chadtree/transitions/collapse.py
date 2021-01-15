@@ -30,11 +30,11 @@ def _collapse(
         if path == state.root.path:
             return None
         else:
-            paths = frozenset(
+            paths = {
                 indexed
                 for indexed in state.index
                 if path in (ancestors(indexed) | {indexed})
-            )
+            }
             index = state.index - paths
             new_state = forward(state, settings=settings, index=index, paths=paths)
             row = new_state.derived.paths_lookup.get(path, 0)

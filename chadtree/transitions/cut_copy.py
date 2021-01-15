@@ -98,12 +98,12 @@ def _operation(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
-                    paths = frozenset(
+                    paths = {
                         dirname(p)
                         for p in chain(operations.keys(), operations.values())
-                    )
+                    }
                     index = state.index | paths
-                    new_selection = frozenset(operations.values())
+                    new_selection = {*operations.values()}
                     new_state = forward(
                         state,
                         settings=settings,

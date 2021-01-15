@@ -19,7 +19,7 @@ def current(
 
     parents = ancestors(current)
     if state.root.path in parents:
-        paths: AbstractSet[str] = parents if state.follow else frozenset()
+        paths: AbstractSet[str] = parents if state.follow else set()
         index = state.index | paths
         new_state = forward(
             state, settings=settings, index=index, paths=paths, current=current

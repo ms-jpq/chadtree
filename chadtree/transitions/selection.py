@@ -16,7 +16,7 @@ def _clear_selection(
     Clear selected
     """
 
-    new_state = forward(state, settings=settings, selection=frozenset())
+    new_state = forward(state, settings=settings, selection=set())
     return Stage(new_state)
 
 

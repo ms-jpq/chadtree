@@ -28,9 +28,9 @@ def _remove(
     is_visual: bool,
     yeet: Callable[[Iterable[str]], None],
 ) -> Optional[Stage]:
-    selection = state.selection or frozenset(
+    selection = state.selection or {
         node.path for node in indices(nvim, state=state, is_visual=is_visual)
-    )
+    }
     unified = unify_ancestors(selection)
     if not unified:
         return None
@@ -52,9 +52,9 @@ def _remove(
                 write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
             else:
-                paths = frozenset(dirname(path) for path in unified)
+                paths = {dirname(path) for path in unified}
                 new_state = forward(
-                    state, settings=settings, selection=frozenset(), paths=paths
+                    state, settings=settings, selection=set(), paths=paths
                 )
 
                 kill_buffers(nvim, paths=selection)

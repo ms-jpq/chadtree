@@ -4,8 +4,8 @@ from itertools import chain, repeat
 from os import environ
 from typing import (
     Callable,
-    Mapping,
     Iterator,
+    Mapping,
     MutableMapping,
     Optional,
     Set,
@@ -234,11 +234,11 @@ def _parseHLGroup(styling: _Styling, colours: UserHighlights) -> HLgroup:
     bit8_mapping = colours.eight_bit
     fg, bg = styling.foreground, styling.background
     name = f"{FM_HL_PREFIX}_ls_{uuid4().hex}"
-    cterm = frozenset(
+    cterm = {
         style
         for style in (_HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
-    )
+    }
     ansifg = (
         bit8_mapping[cast(_AnsiColour, fg).name] if type(fg) is _AnsiColour else None
     )

@@ -25,16 +25,14 @@ def refresh(
 
     current = find_current_buffer_name(nvim)
     cwd = state.root.path
-    paths = frozenset((cwd,))
+    paths = {cwd}
     new_current = current if cwd in ancestors(current) else None
 
-    index = frozenset(path for path in state.index if exists(path)) | paths
+    index = {path for path in state.index if exists(path)} | paths
     selection: Selection = (
-        frozenset()
-        if state.filter_pattern
-        else frozenset(s for s in state.selection if exists(s))
+        set() if state.filter_pattern else {s for s in state.selection if exists(s)}
     )
-    parent_paths: AbstractSet[str] = ancestors(current) if state.follow else frozenset()
+    parent_paths: AbstractSet[str] = ancestors(current) if state.follow else set()
     new_index = index if new_current else index | parent_paths
 
     qf = quickfix(nvim)

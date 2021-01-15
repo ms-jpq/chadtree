@@ -43,18 +43,18 @@ def _fs_stat(path: str) -> AbstractSet[Mode]:
     try:
         info = stat(path, follow_symlinks=False)
     except FileNotFoundError:
-        return frozenset((Mode.orphan_link,))
+        return {Mode.orphan_link}
     else:
         if S_ISLNK(info.st_mode):
             try:
                 link_info = stat(path, follow_symlinks=True)
             except FileNotFoundError:
-                return frozenset((Mode.orphan_link,))
+                return {Mode.orphan_link}
             else:
-                mode = frozenset(_fs_modes(link_info.st_mode))
+                mode = {*_fs_modes(link_info.st_mode)}
                 return mode | {Mode.link}
         else:
-            mode = frozenset(_fs_modes(info.st_mode))
+            mode = {*_fs_modes(info.st_mode)}
             return mode
 
 

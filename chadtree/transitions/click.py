@@ -33,7 +33,7 @@ def _click(
                     write(nvim, LANG("filter_click"))
                     return None
                 else:
-                    paths = frozenset((node.path,))
+                    paths = {node.path}
                     index = state.index ^ paths
                     new_state = forward(
                         state, settings=settings, index=index, paths=paths

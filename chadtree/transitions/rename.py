@@ -1,3 +1,4 @@
+from itertools import chain
 from os.path import dirname, exists, join, relpath
 from typing import Optional
 
@@ -5,14 +6,14 @@ from pynvim import Nvim
 from pynvim_pp.lib import write
 
 from ..fs.ops import ancestors, rename
-from .shared.wm import kill_buffers
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from .shared.index import indices
 from ..state.types import State
+from .shared.index import indices
 from .shared.refresh import refresh
+from .shared.wm import kill_buffers
 from .types import Stage
 
 
@@ -49,10 +50,10 @@ def _rename(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
-                    paths = frozenset((parent, new_parent, *ancestors(new_parent)))
+                    paths = {*chain((parent,), (new_parent,), ancestors(new_parent))}
                     index = state.index | paths
                     new_state = forward(
                         state, settings=settings, index=index, paths=paths
                     )
-                    kill_buffers(nvim, paths=frozenset((prev_name,)))
+                    kill_buffers(nvim, paths={prev_name})
                     return Stage(new_state)

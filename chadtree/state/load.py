@@ -15,7 +15,7 @@ def initial(nvim: Nvim, settings: Settings) -> State:
     cwd = get_cwd(nvim)
 
     session = load_session(cwd)
-    index = session.index if settings.session else frozenset((cwd,))
+    index = session.index if settings.session else {cwd}
     show_hidden = session.show_hidden if settings.session else settings.show_hidden
 
     selection: Selection = frozenset()

@@ -28,7 +28,7 @@ def load_session(cwd: str) -> _Session:
     try:
         return decode(_Session, load_json(load_path))
     except Exception:
-        return _Session(index=frozenset((cwd,)), show_hidden=False)
+        return _Session(index={cwd}, show_hidden=False)
 
 
 def dump_session(state: State) -> None:

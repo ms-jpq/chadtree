@@ -34,6 +34,6 @@ def _filter(
     pattern: Optional[str] = nvim.funcs.input(LANG("new_filter"), old_p)
     filter_pattern = FilterPattern(pattern=pattern) if pattern else None
     new_state = forward(
-        state, settings=settings, selection=frozenset(), filter_pattern=filter_pattern
+        state, settings=settings, selection=set(), filter_pattern=filter_pattern
     )
     return Stage(new_state)

@@ -112,7 +112,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
 
     keymap = {f"CHAD{k}": v for k, v in config.keymap.items()}
-    legal_keys = frozenset(name for name, _ in specs)
+    legal_keys = {name for name, _ in specs}
     extra_keys = keymap.keys() - legal_keys
     if extra_keys:
         raise DecodeError(

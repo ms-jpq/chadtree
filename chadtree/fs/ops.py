@@ -17,12 +17,12 @@ from ..consts import FILE_MODE, FOLDER_MODE
 
 
 def ancestors(path: str) -> AbstractSet[str]:
-    return frozenset(str(p) for p in PurePath(path).parents)
+    return {str(p) for p in PurePath(path).parents}
 
 
 
 def unify_ancestors(paths: AbstractSet[str]) -> AbstractSet[str]:
-    return frozenset(p for p in paths if ancestors(p).isdisjoint(paths))
+    return {p for p in paths if ancestors(p).isdisjoint(paths)}
 
 
 @dataclass(frozen=True)
