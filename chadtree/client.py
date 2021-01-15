@@ -1,4 +1,3 @@
-from asyncio import run_coroutine_threadsafe
 from asyncio.events import AbstractEventLoop
 from typing import Any, MutableMapping, Optional, cast
 
@@ -50,13 +49,13 @@ class ChadClient(Client):
 
         threadsafe_call(nvim, cont)
 
-        async def sched() -> None:
+        def sched() -> None:
             period = cast(Settings, self._settings).polling_rate
-            async for _ in ticker(period, immediately=False):
+            for _ in ticker(period, immediately=False):
                 enqueue_event(schedule_update)
                 enqueue_event(save_session)
 
-        run_coroutine_threadsafe(sched(), loop=nvim.loop)
+        pool.submit(sched)
 
         while True:
             msg: RpcMsg = event_queue.get()
