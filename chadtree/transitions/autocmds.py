@@ -58,7 +58,8 @@ def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
 
     cwd = get_cwd(nvim)
-    return new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+    new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+    return Stage(new_state)
 
 
 autocmd("DirChanged") << f"lua {_changedir.name}()"

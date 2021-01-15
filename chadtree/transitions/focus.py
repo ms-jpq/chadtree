@@ -22,7 +22,9 @@ def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
     """
 
     cwd = get_cwd(nvim)
-    return new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+    new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+    focus = new_state.root.path
+    return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
@@ -38,10 +40,10 @@ def _change_dir(
         return None
     else:
         cwd = node.path if is_dir(node) else dirname(node.path)
-        stage = new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
-        _new_cwd = stage.state.root.path
-        write(nvim, LANG("new cwd", cwd=_new_cwd))
-        return stage
+        new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+        focus = new_state.root.path
+        write(nvim, LANG("new cwd", cwd=focus))
+        return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
@@ -57,20 +59,21 @@ def _change_focus(
         return None
     else:
         new_base = node.path if is_dir(node) else dirname(node.path)
-        return new_cwd(nvim, state=state, settings=settings, new_cwd=new_base)
+        new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=new_base)
+        focus = new_state.root.path
+        return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
 def _change_focus_up(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+) -> Stage:
     """
     Refocus root directory up
     """
 
-    c_root = state.root.path
-    parent = dirname(c_root)
-    if parent and parent != c_root:
-        return None
-    else:
-        return new_cwd(nvim, state=state, settings=settings, new_cwd=parent)
+    root = state.root.path
+    parent = dirname(root)
+    new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=parent)
+    focus = new_state.root.path
+    return Stage(new_state, focus=focus)

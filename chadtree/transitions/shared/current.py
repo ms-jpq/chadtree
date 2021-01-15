@@ -29,8 +29,7 @@ def current(
         return None
 
 
-def new_cwd(nvim: Nvim, state: State, settings: Settings, new_cwd: str) -> Stage:
+def new_cwd(nvim: Nvim, state: State, settings: Settings, new_cwd: str) -> State:
     index = state.index | {new_cwd}
     root = new(new_cwd, index=index)
-    new_state = forward(state, settings=settings, root=root, index=index)
-    return Stage(new_state)
+    return forward(state, settings=settings, root=root, index=index)
