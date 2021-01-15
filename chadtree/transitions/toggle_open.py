@@ -17,7 +17,7 @@ from std2.argparse import ArgparseError, ArgParser
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
-from .shared.current import current
+from .shared.current import new_current_file
 from .shared.wm import (
     find_current_buffer_name,
     find_fm_buffers,
@@ -101,7 +101,7 @@ def _open(
         curr = find_current_buffer_name(nvim)
         _toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
 
-        stage = current(nvim, state=state, settings=settings, current=curr)
+        stage = new_current_file(nvim, state=state, settings=settings, current=curr)
         if stage:
             return stage
         else:

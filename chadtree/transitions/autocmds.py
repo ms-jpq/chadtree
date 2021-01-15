@@ -11,7 +11,7 @@ from ..settings.types import Settings
 from ..state.next import forward
 from ..state.ops import dump_session
 from ..state.types import State
-from .shared.current import current, new_cwd
+from .shared.current import new_current_file, new_root
 from .shared.refresh import refresh
 from .shared.wm import find_current_buffer_name
 from .types import Stage
@@ -58,7 +58,7 @@ def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
 
     cwd = get_cwd(nvim)
-    new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+    new_state = new_root(nvim, state=state, settings=settings, new_cwd=cwd)
     return Stage(new_state)
 
 
@@ -73,7 +73,7 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
 
     curr = find_current_buffer_name(nvim)
     if curr:
-        return current(nvim, state=state, settings=settings, current=curr)
+        return new_current_file(nvim, state=state, settings=settings, current=curr)
     else:
         return None
 

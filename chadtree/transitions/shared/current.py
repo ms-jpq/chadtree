@@ -10,7 +10,7 @@ from ...state.types import State
 from ..types import Stage
 
 
-def current(
+def new_current_file(
     nvim: Nvim, state: State, settings: Settings, current: str
 ) -> Optional[Stage]:
     """
@@ -29,7 +29,7 @@ def current(
         return None
 
 
-def new_cwd(nvim: Nvim, state: State, settings: Settings, new_cwd: str) -> State:
+def new_root(nvim: Nvim, state: State, settings: Settings, new_cwd: str) -> State:
     index = state.index | {new_cwd}
     root = new(new_cwd, index=index)
     selection = state.selection - ancestors(root.path)

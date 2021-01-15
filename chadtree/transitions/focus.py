@@ -10,7 +10,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
-from .shared.current import current, new_cwd
+from .shared.current import new_current_file, new_root
 from .shared.index import indices
 from .types import Stage
 
@@ -27,7 +27,7 @@ def _jump_to_current(
     if not curr:
         return None
     else:
-        stage = current(nvim, state=state, settings=settings, current=curr)
+        stage = new_current_file(nvim, state=state, settings=settings, current=curr)
         if not stage:
             return None
         else:
@@ -41,7 +41,7 @@ def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
     """
 
     cwd = get_cwd(nvim)
-    new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+    new_state = new_root(nvim, state=state, settings=settings, new_cwd=cwd)
     focus = new_state.root.path
     return Stage(new_state, focus=focus)
 
@@ -59,7 +59,7 @@ def _change_dir(
         return None
     else:
         cwd = node.path if is_dir(node) else dirname(node.path)
-        new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=cwd)
+        new_state = new_root(nvim, state=state, settings=settings, new_cwd=cwd)
         focus = new_state.root.path
         write(nvim, LANG("new cwd", cwd=focus))
         return Stage(new_state, focus=focus)
@@ -78,7 +78,7 @@ def _change_focus(
         return None
     else:
         new_base = node.path if is_dir(node) else dirname(node.path)
-        new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=new_base)
+        new_state = new_root(nvim, state=state, settings=settings, new_cwd=new_base)
         focus = new_state.root.path
         return Stage(new_state, focus=focus)
 
@@ -93,6 +93,6 @@ def _change_focus_up(
 
     root = state.root.path
     parent = dirname(root)
-    new_state = new_cwd(nvim, state=state, settings=settings, new_cwd=parent)
+    new_state = new_root(nvim, state=state, settings=settings, new_cwd=parent)
     focus = new_state.root.path
     return Stage(new_state, focus=focus)
