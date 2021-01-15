@@ -7,11 +7,11 @@ from pynvim_pp.lib import write
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
-from .types import Stage, SysError
+from .types import Stage
 
 
 def _sys_search(args: str, cwd: str, sep: str) -> AbstractSet[str]:
-    raise SysError()
+    raise Exception()
 
 
 @rpc(blocking=False)

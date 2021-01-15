@@ -17,7 +17,3 @@ class ClickType(Enum):
 class Stage:
     state: State
     focus: Optional[str] = None
-
-
-class SysError(Exception):
-    ...

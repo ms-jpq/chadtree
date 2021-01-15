@@ -2,23 +2,23 @@ from locale import strxfrm
 from os import linesep
 from os.path import dirname
 from shutil import which
-from subprocess import DEVNULL, PIPE, run
+from subprocess import DEVNULL, PIPE, CalledProcessError, run
 from typing import Callable, Iterable, Optional
 
 from pynvim.api import Nvim
 from pynvim_pp.lib import write
 
 from ..fs.ops import remove, unify_ancestors
-from .shared.wm import kill_buffers
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from .shared.index import indices
 from ..state.types import State
 from ..view.ops import display_path
+from .shared.index import indices
 from .shared.refresh import refresh
-from .types import Stage, SysError
+from .shared.wm import kill_buffers
+from .types import Stage
 
 
 def _remove(
@@ -73,12 +73,19 @@ def _delete(
 
 
 def _sys_trash(paths: Iterable[str]) -> None:
-    if which("trash"):
-        ret = run(("trash", *paths), stdin=DEVNULL, stdout=DEVNULL, stderr=PIPE)
-        if ret.returncode != 0:
-            raise SysError(ret.stderr)
+    cmd = "trash"
+    if which(cmd):
+        command = (cmd, "--", *paths)
+        proc = run(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
+        if proc.returncode != 0:
+            raise CalledProcessError(
+                cmd=command,
+                returncode=proc.returncode,
+                output=proc.stdout,
+                stderr=proc.stderr,
+            )
     else:
-        raise SysError(LANG("sys_trash_err"))
+        raise LookupError(LANG("sys_trash_err"))
 
 
 @rpc(blocking=False)
