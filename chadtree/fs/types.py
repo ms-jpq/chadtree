@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import IntEnum, auto
 from typing import AbstractSet, Mapping, Optional
 
-Index = AbstractSet[str]
+
 
 
 class Mode(IntEnum):

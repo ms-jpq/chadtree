@@ -32,4 +32,7 @@ def current(
 def new_cwd(nvim: Nvim, state: State, settings: Settings, new_cwd: str) -> State:
     index = state.index | {new_cwd}
     root = new(new_cwd, index=index)
-    return forward(state, settings=settings, root=root, index=index)
+    selection = state.selection - ancestors(root.path)
+    return forward(
+        state, settings=settings, root=root, selection=selection, index=index
+    )

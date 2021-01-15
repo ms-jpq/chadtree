@@ -5,10 +5,9 @@ from pathlib import Path
 
 from std2.pickle import decode, encode
 
-from ..consts import SESSION_DIR, FOLDER_MODE
+from ..consts import FOLDER_MODE, SESSION_DIR
 from ..da import load_json
-from ..fs.types import Index
-from .types import State
+from .types import Index, State
 
 
 @dataclass(frozen=True)

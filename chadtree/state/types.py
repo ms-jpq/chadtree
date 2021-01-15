@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from typing import AbstractSet, Optional
 
-from ..fs.types import Index, Node
+from ..fs.types import Node
 from ..nvim.types import QuickFix
 from ..version_ctl.types import VCStatus
 from ..view.types import Derived
 
-Selection = AbstractSet[str]
+Index = AbstractSet[str]
+Selection = Index
 
 
 @dataclass(frozen=True)

@@ -53,8 +53,8 @@ class ChadClient(Client):
         async def sched() -> None:
             period = cast(Settings, self._settings).polling_rate
             async for _ in ticker(period, immediately=False):
-                enqueue_event(schedule_update.name)
-                enqueue_event(save_session.name)
+                enqueue_event(schedule_update)
+                enqueue_event(save_session)
 
         run_coroutine_threadsafe(sched(), loop=nvim.loop)
 

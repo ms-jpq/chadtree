@@ -1,6 +1,8 @@
+from typing import Union
+
 from pynvim import Nvim
 from pynvim_pp.lib import write
-from std2.types import Void
+from std2.types import Void, VoidType
 
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -45,7 +47,7 @@ def _toggle_version_control(
     """
 
     enable_vc = not state.enable_vc
-    vc = Void if enable_vc else VCStatus()
+    vc: Union[VoidType, VCStatus] = Void if enable_vc else VCStatus()
     new_state = forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
     write(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
     return Stage(new_state)

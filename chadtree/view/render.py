@@ -10,9 +10,9 @@ from std2.functools import constantly
 from std2.types import never
 
 from ..fs.cartographer import is_dir
-from ..fs.types import Index, Mode, Node
+from ..fs.types import Mode, Node
 from ..settings.types import Settings
-from ..state.types import FilterPattern, QuickFix, Selection
+from ..state.types import FilterPattern, Index, QuickFix, Selection
 from ..version_ctl.types import VCStatus
 from .types import Badge, Derived, Highlight, Render, Sortby
 
@@ -93,7 +93,9 @@ def _paint(
         return (depth * 2 - 1) * " "
 
     def gen_status(path: str) -> str:
-        selected = icons.status.selected if path in selection else icons.status.not_selected
+        selected = (
+            icons.status.selected if path in selection else icons.status.not_selected
+        )
         active = icons.status.active if path == current else icons.status.inactive
         return f"{selected}{active}"
 
