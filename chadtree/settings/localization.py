@@ -3,7 +3,6 @@ from string import Template
 from typing import Mapping, MutableMapping, Optional
 
 from std2.pickle.decode import decode
-from std2.tree import merge
 
 from ..consts import DEFAULT_LANG, LANG_ROOT
 from yaml import safe_load
