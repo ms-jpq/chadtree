@@ -44,7 +44,10 @@ def _operation(
     selection = state.selection
     unified = unify_ancestors(selection)
 
-    if unified and node:
+    if not unified or not node:
+        write(nvim, LANG("nothing_select"), error=True)
+        return None
+    else:
         pre_operations = {src: _find_dest(src, node) for src in unified}
         pre_existing = {s: d for s, d in pre_operations.items() if exists(d)}
 
@@ -86,7 +89,9 @@ def _operation(
             resp = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
             ans = resp == 1
 
-            if ans:
+            if not ans:
+                return None
+            else:
                 try:
                     action(operations)
                 except Exception as e:
@@ -109,11 +114,6 @@ def _operation(
 
                     kill_buffers(nvim, paths=selection)
                     return Stage(new_state)
-            else:
-                return None
-    else:
-        write(nvim, LANG("nothing_select"), error=True)
-        return None
 
 
 @rpc(blocking=False)

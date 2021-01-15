@@ -41,8 +41,9 @@ def _remove(
 
         question = LANG("ask_trash", display_paths=display_paths)
         resp: int = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
+        ans = resp == 1
 
-        if resp != 1:
+        if not ans:
             return None
         else:
             try:
