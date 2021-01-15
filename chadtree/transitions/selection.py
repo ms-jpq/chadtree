@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pynvim import Nvim
 
 from ..registry import rpc

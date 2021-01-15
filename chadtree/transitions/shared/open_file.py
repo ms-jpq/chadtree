@@ -1,6 +1,5 @@
 from contextlib import nullcontext
 from mimetypes import guess_type
-from os import linesep
 from os.path import basename, splitext
 from typing import Optional
 

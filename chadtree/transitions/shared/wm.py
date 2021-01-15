@@ -1,8 +1,6 @@
-from typing import AbstractSet, Iterator, Mapping, Sequence, Tuple
+from typing import AbstractSet, Iterator, Mapping, Tuple
 
-from pynvim import Nvim
-from pynvim.api.buffer import Buffer
-from pynvim.api.window import Window
+from pynvim.api import Buffer, Nvim, Window
 from pynvim_pp.api import (
     buf_close,
     buf_filetype,
