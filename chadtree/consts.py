@@ -14,11 +14,9 @@ RT_DIR = _TOP_LEVEL / ".vars" / "runtime"
 REQUIREMENTS = str(_TOP_LEVEL / "requirements.txt")
 
 
-SESSION_DIR = (
-    Path(environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
-    / "nvim"
-    / "chadtree"
-)
+FM_FILETYPE = "CHADTree"
+FM_NAMESPACE = "chadtree_ns"
+FM_HL_PREFIX = "chadtree"
 
 
 SETTINGS_VAR = "chadtree_settings"
@@ -50,16 +48,34 @@ COLOURS_JSON = _ARTIFACTS / "github_colours.json"
 CUSTOM_COLOURS_YML = _CONFIG / "colours.yml"
 
 
-FM_FILETYPE = "CHADTree"
-FM_NAMESPACE = "chadtree_ns"
-FM_HL_PREFIX = "chadtree"
+SESSION_DIR = (
+    Path(environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
+    / "nvim"
+    / "chadtree"
+)
 
 
-MIGRATION_URI = "https://github.com/ms-jpq/chadtree/blob/chad/docs/MIGRATION.md"
-
+_DOCS_URI_BASE = "https://github.com/ms-jpq/chadtree/blob/future2/docs"
 _DOCS_DIR = _TOP_LEVEL / "docs"
-README_MD = _DOCS_DIR / "README.md"
-FEATURES_MD = _DOCS_DIR / "FEATURES.md"
-KEYBIND_MD = _DOCS_DIR / "KEYBIND.md"
-CONFIGURATION_MD = _DOCS_DIR / "CONFIGURATION.md"
-THEME_MD = _DOCS_DIR / "THEME.md"
+
+MIGRATION_URI = f"{_DOCS_URI_BASE}/MIGRATION.md"
+
+_README_md = "README.md"
+README_MD = _DOCS_DIR / _README_md
+README_URI = f"{_DOCS_URI_BASE}/{_README_md}"
+
+_FEATURES_md = "FEATURES.md"
+FEATURES_MD = _DOCS_DIR / _FEATURES_md
+FEATURES_URI = f"{_DOCS_URI_BASE}/{_FEATURES_md}"
+
+_KEYBIND_md = "KEYBIND.md"
+KEYBIND_MD = _DOCS_DIR / _KEYBIND_md
+KEYBIND_URI = f"{_DOCS_URI_BASE}/{_KEYBIND_md}"
+
+_CONFIGURATION_md = "CONFIGURATION.md"
+CONFIGURATION_MD = _DOCS_DIR / _CONFIGURATION_md
+CONFIGURATION_URI = f"{_DOCS_URI_BASE}/{_CONFIGURATION_md}"
+
+_THEME_md = "THEME.md"
+THEME_MD = _DOCS_DIR / _THEME_md
+THEME_URI = f"{_DOCS_URI_BASE}/{_THEME_md}"

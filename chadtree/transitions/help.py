@@ -11,7 +11,18 @@ from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
 from std2.types import never
 
-from ..consts import CONFIGURATION_MD, FEATURES_MD, KEYBIND_MD, README_MD, THEME_MD
+from ..consts import (
+    CONFIGURATION_MD,
+    CONFIGURATION_URI,
+    FEATURES_MD,
+    FEATURES_URI,
+    KEYBIND_MD,
+    KEYBIND_URI,
+    README_MD,
+    README_URI,
+    THEME_MD,
+    THEME_URI,
+)
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.types import State
@@ -32,15 +43,15 @@ class _Args:
 
 def _directory(page: Optional[_Pages]) -> Tuple[Path, str]:
     if page is None:
-        return README_MD, ""
+        return README_MD, CONFIGURATION_URI
     elif page is _Pages.features:
-        return FEATURES_MD, ""
+        return FEATURES_MD, FEATURES_URI
     elif page is _Pages.keybind:
-        return KEYBIND_MD, ""
+        return KEYBIND_MD, KEYBIND_URI
     elif page is _Pages.config:
-        return CONFIGURATION_MD, ""
+        return CONFIGURATION_MD, README_URI
     elif page is _Pages.theme:
-        return THEME_MD, ""
+        return THEME_MD, THEME_URI
     else:
         never(page)
 
