@@ -2,13 +2,14 @@ from itertools import chain
 from locale import strxfrm
 from os import linesep
 from os.path import basename, dirname, exists, join
-from typing import Callable, Mapping, MutableMapping, Optional
+from typing import AbstractSet, Callable, Mapping, MutableMapping, Optional
 
 from pynvim.api import Nvim
+from pynvim_pp.api import get_cwd
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
-from ..fs.ops import copy, cut, unify_ancestors
+from ..fs.ops import ancestors, copy, cut, unify_ancestors
 from ..fs.types import Node
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -35,6 +36,7 @@ def _operation(
     state: State,
     settings: Settings,
     is_visual: bool,
+    nono: AbstractSet[str],
     op_name: str,
     action: Callable[[Mapping[str, str]], None],
 ) -> Optional[Stage]:
@@ -46,6 +48,9 @@ def _operation(
 
     if not unified or not node:
         write(nvim, LANG("nothing_select"), error=True)
+        return None
+    elif not unified.isdisjoint(nono):
+        write(nvim, LANG("operation not permitted on root"), error=True)
         return None
     else:
         pre_operations = {src: _find_dest(src, node) for src in unified}
@@ -124,11 +129,14 @@ def _cut(
     Cut selected
     """
 
+    cwd, root = get_cwd(nvim), state.root.path
+    nono = {cwd, root} | ancestors(cwd) | ancestors(root)
     return _operation(
         nvim,
         state=state,
         settings=settings,
         is_visual=is_visual,
+        nono=nono,
         op_name=LANG("cut"),
         action=cut,
     )
@@ -147,6 +155,7 @@ def _copy(
         state=state,
         settings=settings,
         is_visual=is_visual,
+        nono=set(),
         op_name=LANG("copy"),
         action=copy,
     )

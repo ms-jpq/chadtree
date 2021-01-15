@@ -17,6 +17,9 @@
   &Yes
   &No
 
+"operation not permitted on root": |-
+  ⚠️  Operation not permitted on root or parent(s) of root
+
 "copy": |-
   🖇
 

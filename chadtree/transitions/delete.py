@@ -6,9 +6,10 @@ from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
 from typing import Callable, Iterable, Optional
 
 from pynvim.api import Nvim
+from pynvim_pp.api import get_cwd
 from pynvim_pp.lib import write
 
-from ..fs.ops import remove, unify_ancestors
+from ..fs.ops import ancestors, remove, unify_ancestors
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -28,11 +29,18 @@ def _remove(
     is_visual: bool,
     yeet: Callable[[Iterable[str]], None],
 ) -> Optional[Stage]:
+    cwd, root = get_cwd(nvim), state.root.path
+    nono = {cwd, root} | ancestors(cwd) | ancestors(root)
+
     selection = state.selection or {
         node.path for node in indices(nvim, state=state, is_visual=is_visual)
     }
     unified = unify_ancestors(selection)
+
     if not unified:
+        return None
+    elif not unified.isdisjoint(nono):
+        write(nvim, LANG("operation not permitted on root"), error=True)
         return None
     else:
         display_paths = linesep.join(
