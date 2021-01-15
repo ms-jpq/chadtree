@@ -8,7 +8,6 @@ from .transitions import (
     filter,
     focus,
     help,
-    jump,
     new,
     open_system,
     quit,
