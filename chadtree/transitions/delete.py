@@ -7,10 +7,11 @@ from typing import Callable, Iterable, Optional
 
 from pynvim.api import Nvim
 from pynvim_pp.api import get_cwd
-from pynvim_pp.lib import write
+from pynvim_pp.lib import awrite, write
+from pynvim_pp.logging import log
 
 from ..fs.ops import ancestors, remove, unify_ancestors
-from ..registry import rpc
+from ..registry import enqueue_event, pool, rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
@@ -56,7 +57,7 @@ def _remove(
         else:
             try:
                 yeet(unified)
-            except (CalledProcessError, PermissionError) as e:
+            except PermissionError as e:
                 write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
             else:
@@ -82,13 +83,31 @@ def _delete(
     )
 
 
-def _sys_trash(paths: Iterable[str]) -> None:
-    cmd = "trash"
-    if which(cmd):
-        command = (cmd, "--", *paths)
-        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
-    else:
-        raise LookupError(LANG("sys_trash_err"))
+def _sys_trash(nvim: Nvim) -> Callable[[Iterable[str]], None]:
+    cwd = get_cwd(nvim)
+
+    def cont(paths: Iterable[str]) -> None:
+        def c1() -> None:
+            cmd = "trash"
+            if which(cmd):
+                command = (cmd, "--", *paths)
+                check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
+            else:
+                raise LookupError(LANG("sys_trash_err"))
+
+        def c2() -> None:
+            try:
+                c1()
+            except (CalledProcessError, LookupError) as e:
+                awrite(nvim, e)
+            except Exception as e:
+                log.exception("%s", e)
+            else:
+                enqueue_event(refresh)
+
+        pool.submit(c2)
+
+    return cont
 
 
 @rpc(blocking=False)
@@ -100,5 +119,5 @@ def _trash(
     """
 
     return _remove(
-        nvim, state=state, settings=settings, is_visual=is_visual, yeet=_sys_trash
+        nvim, state=state, settings=settings, is_visual=is_visual, yeet=_sys_trash(nvim)
     )
