@@ -6,7 +6,6 @@ from ..view.types import ViewOptions
 
 @dataclass(frozen=True)
 class VersionCtlOpts:
-    defer: bool
     enable: bool
 
 

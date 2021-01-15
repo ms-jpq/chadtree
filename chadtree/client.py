@@ -1,6 +1,5 @@
 from asyncio import run_coroutine_threadsafe
 from asyncio.events import AbstractEventLoop
-from queue import SimpleQueue
 from typing import Any, MutableMapping, Optional, cast
 
 from pynvim import Nvim
@@ -13,7 +12,7 @@ from std2.sched import ticker
 from std2.types import AnyFun
 
 from ._registry import ____
-from .registry import autocmd, pool, rpc
+from .registry import autocmd, enqueue_event, event_queue, pool, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
 from .settings.types import Settings
@@ -26,13 +25,12 @@ from .transitions.types import Stage
 
 class ChadClient(Client):
     def __init__(self) -> None:
-        self._q: SimpleQueue = SimpleQueue()
         self._handlers: MutableMapping[str, RpcCallable] = {}
         self._state: Optional[State] = None
         self._settings: Optional[Settings] = None
 
     def on_msg(self, nvim: Nvim, msg: RpcMsg) -> Any:
-        self._q.put(msg)
+        event_queue.put(msg)
         return None
 
     def wait(self, nvim: Nvim) -> int:
@@ -55,13 +53,13 @@ class ChadClient(Client):
         async def sched() -> None:
             period = cast(Settings, self._settings).polling_rate
             async for _ in ticker(period, immediately=False):
-                self._q.put((schedule_update.name, ()))
-                self._q.put((save_session.name, ()))
+                enqueue_event(schedule_update.name)
+                enqueue_event(save_session.name)
 
         run_coroutine_threadsafe(sched(), loop=nvim.loop)
 
         while True:
-            msg: RpcMsg = self._q.get()
+            msg: RpcMsg = event_queue.get()
             name, args = msg
             handler = self._handlers.get(name, nil_handler(name))
 

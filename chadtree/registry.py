@@ -1,8 +1,9 @@
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, TypeVar
+from queue import SimpleQueue
+from typing import Any, Callable, TypeVar
 
 from pynvim_pp.autocmd import AutoCMD
-from pynvim_pp.rpc import RPC
+from pynvim_pp.rpc import RPC, RpcCallable, RpcMsg
 
 T = TypeVar("T")
 
@@ -12,5 +13,11 @@ def _name_gen(fn: Callable[[Callable[..., T]], str]) -> str:
 
 
 pool = ThreadPoolExecutor()
+event_queue: SimpleQueue = SimpleQueue()
 autocmd = AutoCMD()
 rpc = RPC(name_gen=_name_gen)
+
+
+def enqueue_event(event: RpcCallable, *args: Any) -> None:
+    msg: RpcMsg = (event.name, args)
+    event_queue.put(msg)

@@ -7,13 +7,11 @@ from std2.types import Void
 
 from ...fs.ops import ancestors
 from ...nvim.quickfix import quickfix
-from ..shared.wm import find_current_buffer_name
 from ...settings.localization import LANG
 from ...settings.types import Settings
 from ...state.next import forward
 from ...state.types import Selection, State
-from ...version_ctl.git import status
-from ...version_ctl.types import VCStatus
+from ..shared.wm import find_current_buffer_name
 from ..types import Stage
 
 
@@ -36,14 +34,12 @@ def refresh(
     new_index = index if new_current else index | parent_paths
 
     qf = quickfix(nvim)
-    vc = status() if state.enable_vc else VCStatus()
     new_state = forward(
         state,
         settings=settings,
         index=new_index,
         selection=selection,
         qf=qf,
-        vc=vc,
         paths=paths,
         current=new_current or Void,
     )

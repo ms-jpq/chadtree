@@ -93,7 +93,6 @@ sort_by:
 use_icons: true
 
 version_control:
-  defer: false
   enable: true
 
 width: 40
