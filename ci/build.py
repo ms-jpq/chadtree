@@ -3,9 +3,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 from json import dump, load
-from os import PathLike, getcwd
 from pathlib import Path
-from subprocess import PIPE, run
+from subprocess import check_call, check_output, run
 from typing import (
     AbstractSet,
     Any,
@@ -14,7 +13,6 @@ from typing import (
     MutableMapping,
     Optional,
     Sequence,
-    Union,
 )
 
 from std2.pickle import decode
@@ -55,12 +53,6 @@ class DumpFormat:
     name_glob: AbstractSet[str]
 
 
-def call(prog: str, *args: str, cwd: Union[str, PathLike] = getcwd()) -> None:
-    ret = run((prog, *args), cwd=cwd)
-    if ret.returncode != 0:
-        exit(ret.returncode)
-
-
 def fetch(uri: str) -> str:
     with urlopen(uri) as resp:
         code = resp.getcode()
@@ -99,12 +91,14 @@ def devicons() -> None:
     time = format(datetime.now(), "%H-%M-%S")
     container = f"{image}-{time}"
 
-    call("docker", "build", "-t", image, "-f", "Dockerfile", ".", cwd=DOCKER_PATH)
-    call("docker", "create", "--name", container, image)
+    check_call(
+        ("docker", "build", "-t", image, "-f", "Dockerfile", "."), cwd=DOCKER_PATH
+    )
+    check_call(("docker", "create", "--name", container, image))
 
     for icon in SRC_ICONS:
         src = f"{container}:/root/{icon}.json"
-        call("docker", "cp", src, str(TEMP_JSON))
+        check_call(("docker", "cp", src, str(TEMP_JSON)))
 
         parsed = process_json(load(TEMP_JSON.open()))
         basic = safe_load((ASSETS / icon).with_suffix(".base.yml").read_bytes())
@@ -116,7 +110,7 @@ def devicons() -> None:
     ascii_json = "ascii_icons"
     json = safe_load((ASSETS / ascii_json).with_suffix(".base.yml").read_bytes())
     spit_json((ARTIFACTS / ascii_json).with_suffix(".json"), json)
-    call("docker", "rm", container)
+    check_call(("docker", "rm", container))
 
 
 def github_colours() -> None:
@@ -134,8 +128,7 @@ def github_colours() -> None:
 
 def git_alert() -> None:
     prefix = "update-icons"
-    proc = run(("git", "branch", "--remotes"), stdout=PIPE, check=True)
-    remote_brs = proc.stdout.decode()
+    remote_brs = check_output(("git", "branch", "--remotes"), text=True)
 
     print("DEBUG")
     print([remote_brs])
@@ -150,17 +143,18 @@ def git_alert() -> None:
 
     refs = tuple(cont())
     print(refs)
+
     if refs:
-        call("git", "push", "--delete", "origin", *refs)
+        check_call(("git", "push", "--delete", "origin", *refs))
 
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
         time = datetime.now().strftime("%Y-%m-%d")
         brname = f"{prefix}--{time}"
-        call("git", "checkout", "-b", brname)
-        call("git", "add", ".")
-        call("git", "commit", "-m", f"update_icons: {time}")
-        call("git", "push", "--set-upstream", "origin", brname)
+        check_call(("git", "checkout", "-b", brname))
+        check_call(("git", "add", "."))
+        check_call(("git", "commit", "-m", f"update_icons: {time}"))
+        check_call(("git", "push", "--set-upstream", "origin", brname))
 
 
 def main() -> None:
