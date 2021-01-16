@@ -19,6 +19,7 @@ from yaml import safe_load
 
 from ..consts import (
     CONFIG_YML,
+    FM_HL_PREFIX,
     GITHUB_COLOURS_JSON,
     ICON_LOOKUP_JSON,
     IGNORES_VAR,
@@ -76,19 +77,13 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
-    user_ignores = nvim.vars.get(IGNORES_VAR, {})
 
     config: _UserConfig = decode(_UserConfig, safe_load(CONFIG_YML.read_bytes()))
-
     options: _UserOptions = decode(
         _UserOptions,
         merge(encode(config.options), user_config, replace=True),
     )
     view: _UserView = decode(_UserView, merge(encode(config.view), replace=True))
-    ignore: UserIgnore = decode(
-        UserIgnore,
-        merge(encode(config.ignore), user_ignores, replace=True),
-    )
     icons: UserIcons = decode(
         UserIcons, loads(ICON_LOOKUP_JSON[options.use_icons].read_text())
     )
@@ -99,11 +94,13 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         _NerdColours, merge(loads(NERD_COLOURS_JSON.read_text()))
     )
 
-    github_exts = gen_hl("github", mapping=github_colours)
-    ext_lookup = gen_hl("chad_tree", mapping=nerd_colours.type)
-    name_exact = gen_hl("chad_tree", mapping=nerd_colours.name_exact)
-    name_glob = gen_hl("chad_tree", mapping=nerd_colours.name_glob)
+    github_exts = gen_hl(FM_HL_PREFIX, mapping=github_colours)
+    ext_lookup = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.type)
+    name_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_exact)
+    name_glob = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_glob)
+
     hl_context = parse_ls_colours(
+        use_ls_colours=use_ls_colours,
         particular_mappings=view.highlights,
         ext_colours=github_exts,
         ext_lookup=ext_lookup,
@@ -133,7 +130,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
 
     settings = Settings(
         follow=options.follow,
-        ignores=ignore,
+        ignores=config.ignore,
         keymap=keymap,
         lang=options.lang,
         mime=options.mimetypes,

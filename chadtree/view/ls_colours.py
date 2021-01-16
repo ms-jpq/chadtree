@@ -75,6 +75,12 @@ class _Styling:
     background: Union[_AnsiColour, _Colour, None]
 
 
+@dataclass(frozen=True)
+class LSC:
+    mode_pre: Mapping[str, HLgroup]
+    mode_post: Mapping[str, HLgroup]
+
+
 _ANSI_RANGE = range(256)
 _RGB_RANGE = range(256)
 
@@ -261,6 +267,7 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
 
 
 def parse_ls_colours(
+    use_ls_colours: bool,
     particular_mappings: UserHLGroups,
     ext_colours: Mapping[str, HLgroup],
     ext_lookup: Mapping[str, HLgroup],
