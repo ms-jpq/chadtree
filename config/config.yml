@@ -2,6 +2,8 @@
 ignore:
   name:
   - .DS_Store
+  - .directory
+  - thumbs.db
   - .git
   path: []
 options:
