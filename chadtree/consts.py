@@ -28,7 +28,6 @@ IGNORES_VAR = "chadtree_ignores"
 
 CONFIG_YML = _CONFIG / "config.yml"
 VIEW_YML = _CONFIG / "view.yml"
-IGNORE_YML = _CONFIG / "ignore.yml"
 
 
 LANG_ROOT = _TOP_LEVEL / "locale"

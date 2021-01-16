@@ -23,7 +23,6 @@ from ..consts import (
     CONFIG_YML,
     CUSTOM_COLOURS_YML,
     ICON_LOOKUP_JSON,
-    IGNORE_YML,
     IGNORES_VAR,
     SETTINGS_VAR,
     VIEW_VAR,
@@ -85,7 +84,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
     ignore: UserIgnore = decode(
         UserIgnore,
-        merge(safe_load(IGNORE_YML.read_bytes()), user_ignores, replace=True),
+        merge({"name": (), "path": ()}, user_ignores, replace=True),
     )
     colours: _UserColours = decode(
         _UserColours, merge(safe_load(CUSTOM_COLOURS_YML.read_bytes()), user_colours)
