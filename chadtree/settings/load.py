@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from json import load
+from json import loads
 from locale import strxfrm
 from typing import (
     AbstractSet,
@@ -21,15 +21,15 @@ from ..consts import (
     COLOURS_JSON,
     COLOURS_VAR,
     CONFIG_YML,
-    CUSTOM_COLOURS_YML,
     ICON_LOOKUP_JSON,
     IGNORES_VAR,
+    NERD_COLOURS_JSON,
     SETTINGS_VAR,
     VIEW_VAR,
 )
 from ..view.highlight import gen_hl
 from ..view.ls_colours import parse_ls_colours
-from ..view.types import Sortby, UserColourMapping, UserHLGroups, UserIcons
+from ..view.types import Sortby, UserHLGroups, UserIcons
 from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
 
 
@@ -55,6 +55,7 @@ class _UserView:
     highlights: UserHLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
+    use_ls_colours: bool
 
 
 @dataclass(frozen=True)
@@ -65,8 +66,10 @@ class _UserConfig:
 
 
 @dataclass(frozen=True)
-class _UserColours:
-    eight_bit: Mapping[str, UserColourMapping]
+class _NerdColours:
+    name_exact: Mapping[str, str]
+    name_glob: Mapping[str, str]
+    type: Mapping[str, str]
 
 
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
@@ -92,19 +95,18 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         UserIgnore,
         merge(encode(config.ignore), user_ignores, replace=True),
     )
-    colours: _UserColours = decode(
-        _UserColours, merge(safe_load(CUSTOM_COLOURS_YML.read_bytes()), user_colours)
+    colours: _NerdColours = decode(
+        _NerdColours, merge(loads(NERD_COLOURS_JSON.read_text()), user_colours)
     )
     icons: UserIcons = decode(
-        UserIcons, load(ICON_LOOKUP_JSON[options.use_icons].open())
+        UserIcons, loads(ICON_LOOKUP_JSON[options.use_icons].read_text())
     )
     github_colours: Mapping[str, str] = decode(
-        Mapping[str, str], load(COLOURS_JSON.open())
+        Mapping[str, str], loads(COLOURS_JSON.read_text())
     )
 
     github_exts = gen_hl("github", mapping=github_colours)
     hl_context = parse_ls_colours(
-        bit8_mapping=colours.eight_bit,
         particular_mappings=view.highlights,
         github_exts=github_exts,
     )

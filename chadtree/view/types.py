@@ -39,12 +39,6 @@ class UserIcons:
 
 
 @dataclass(frozen=True)
-class UserColourMapping:
-    hl8: str
-    hl24: str
-
-
-@dataclass(frozen=True)
 class UserHLGroups:
     ignored: str
     quickfix: str

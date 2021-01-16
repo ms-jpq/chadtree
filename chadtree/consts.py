@@ -44,7 +44,7 @@ ICON_LOOKUP_JSON = {
 
 
 COLOURS_JSON = _ARTIFACTS / "github_colours.json"
-CUSTOM_COLOURS_YML = _CONFIG / "colours.yml"
+NERD_COLOURS_JSON = _ARTIFACTS / "colours.json"
 
 
 SESSION_DIR = (

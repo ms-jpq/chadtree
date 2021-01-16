@@ -19,7 +19,7 @@ from uuid import uuid4
 from pynvim_pp.highlight import HLgroup
 
 from ..consts import FM_HL_PREFIX
-from .types import HLcontext, Mode, UserColourMapping, UserHLGroups
+from .types import HLcontext, Mode, UserHLGroups
 
 T = TypeVar("T")
 
@@ -233,9 +233,7 @@ def _parse_styling(codes: str) -> _Styling:
     return styling
 
 
-def _parseHLGroup(
-    styling: _Styling, bit8_mapping: Mapping[str, UserColourMapping]
-) -> HLgroup:
+def _parseHLGroup(styling: _Styling) -> HLgroup:
     fg, bg = styling.foreground, styling.background
     name = f"{FM_HL_PREFIX}_ls_{uuid4().hex}"
     cterm = {
@@ -243,24 +241,10 @@ def _parseHLGroup(
         for style in (_HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ansifg = (
-        bit8_mapping[cast(_AnsiColour, fg).name] if type(fg) is _AnsiColour else None
-    )
-    ansibg = (
-        bit8_mapping[cast(_AnsiColour, bg).name] if type(bg) is _AnsiColour else None
-    )
-    ctermfg = ansifg.hl8 if ansifg else None
-    ctermbg = ansibg.hl8 if ansibg else None
-    guifg = (
-        _to_hex(cast(_Colour, fg))
-        if type(fg) is _Colour
-        else (ansifg.hl24 if ansifg else None)
-    )
-    guibg = (
-        _to_hex(cast(_Colour, bg))
-        if type(bg) is _Colour
-        else (ansibg.hl24 if ansibg else None)
-    )
+    ctermfg = fg.value if isinstance(fg, _AnsiColour) else None
+    ctermbg = bg.value if isinstance(bg, _AnsiColour) else None
+    guifg = _to_hex(fg) if isinstance(fg, _Colour) else None
+    guibg = _to_hex(bg) if isinstance(bg, _Colour) else None
     group = HLgroup(
         name=name,
         cterm=cterm,
@@ -277,13 +261,12 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
 
 
 def parse_ls_colours(
-    bit8_mapping: Mapping[str, UserColourMapping],
     particular_mappings: UserHLGroups,
     github_exts: Mapping[str, HLgroup],
 ) -> HLcontext:
     ls_colours = environ.get("LS_COLORS", "")
     hl_lookup: MutableMapping[str, HLgroup] = {
-        k: _parseHLGroup(_parse_styling(v), bit8_mapping=bit8_mapping)
+        k: _parseHLGroup(_parse_styling(v))
         for k, _, v in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")
         )

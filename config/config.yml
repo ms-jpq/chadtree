@@ -98,6 +98,7 @@ options:
     enable: true
   width: 40
 view:
+  use_ls_colours: true
   highlights:
     ignored: Comment
     quickfix: Label
