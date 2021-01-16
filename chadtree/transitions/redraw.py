@@ -48,8 +48,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             new_row = None
 
         if prev_code == new_code:
-            if new_row is not None:
-                atomic.win_set_cursor(win, (new_row, col))
+            pass
 
         else:
             (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
@@ -73,7 +72,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             atomic.call_function("setpos", ("'>", (buf.number, r2 + 1, c2 + 1, 0)))
             atomic.buf_set_var(buf, _FM_HASH_VAR, new_code)
 
-            if new_row is not None:
-                atomic.win_set_cursor(win, (new_row, col))
+        if new_row is not None:
+            atomic.win_set_cursor(win, (new_row, col))
 
-            atomic.commit(nvim)
+        atomic.commit(nvim)
