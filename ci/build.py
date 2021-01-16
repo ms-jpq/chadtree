@@ -114,12 +114,16 @@ def process_icons(json: Any) -> IconDumpFormat:
     return dump
 
 
+def process_hexcode(colours: Mapping[str, str]) -> Mapping[str, str]:
+    return {k: f"#{v}" for k, v in colours.items()}
+
+
 def process_colours(json: Any) -> ColoursDumpFormat:
     loaded: ColoursLoadFormat = decode(ColoursLoadFormat, json)
     dump = ColoursDumpFormat(
-        type=process_exts(loaded.extensions),
-        name_exact=loaded.exact,
-        name_glob=process_glob(loaded.glob),
+        type=process_hexcode(process_exts(loaded.extensions)),
+        name_exact=process_hexcode(loaded.exact),
+        name_glob=process_hexcode(process_glob(loaded.glob)),
     )
     return dump
 
@@ -207,7 +211,7 @@ def git_alert() -> None:
 def main() -> None:
     devicons()
     github_colours()
-    git_alert()
+    # git_alert()
 
 
 main()
