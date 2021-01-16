@@ -121,7 +121,7 @@ def new(root: str, index: Index) -> Node:
         while not bfs_q.empty():
             yield bfs_q.get()
 
-    _new((root,), index=index, acc=acc, bfs_q=bfs_q)
+    bfs_q.put(root)
     while not bfs_q.empty():
         tasks = (
             pool.submit(_new, roots=paths, index=index, acc=acc, bfs_q=bfs_q)
