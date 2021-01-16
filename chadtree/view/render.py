@@ -66,18 +66,18 @@ def _paint(
     context = settings.view.hl_context
     (
         particular_mappings,
-        github_exts,
+        ext_colours,
         mode_lookup_pre,
         mode_lookup_post,
         ext_lookup,
         name_lookup,
     ) = (
         context.particular_mappings,
-        context.github_exts,
-        context.mode_lookup_pre,
-        context.mode_lookup_post,
+        context.ext_colours,
+        context.mode_pre,
+        context.mode_post,
         context.ext_lookup,
-        context.name_lookup,
+        context.name_exact,
     )
 
     def search_hl(node: Node) -> Optional[str]:
@@ -155,7 +155,7 @@ def _paint(
     ) -> Iterator[Highlight]:
         begin = len(pre.encode())
         end = begin + len(icon.encode())
-        group = github_exts.get(node.ext or "")
+        group = ext_colours.get(node.ext or "")
         if group:
             hl = Highlight(group=group, begin=begin, end=end)
             yield hl

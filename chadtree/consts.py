@@ -21,8 +21,6 @@ FM_HL_PREFIX = "chadtree"
 
 
 SETTINGS_VAR = "chadtree_settings"
-VIEW_VAR = "chadtree_view"
-COLOURS_VAR = "chadtree_colours"
 IGNORES_VAR = "chadtree_ignores"
 
 
@@ -43,7 +41,7 @@ ICON_LOOKUP_JSON = {
 }
 
 
-COLOURS_JSON = _ARTIFACTS / "github_colours.json"
+GITHUB_COLOURS_JSON = _ARTIFACTS / "github_colours.json"
 NERD_COLOURS_JSON = _ARTIFACTS / "colours.json"
 
 

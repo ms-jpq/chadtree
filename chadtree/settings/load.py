@@ -18,14 +18,12 @@ from std2.tree import merge
 from yaml import safe_load
 
 from ..consts import (
-    COLOURS_JSON,
-    COLOURS_VAR,
     CONFIG_YML,
+    GITHUB_COLOURS_JSON,
     ICON_LOOKUP_JSON,
     IGNORES_VAR,
     NERD_COLOURS_JSON,
     SETTINGS_VAR,
-    VIEW_VAR,
 )
 from ..view.highlight import gen_hl
 from ..view.ls_colours import parse_ls_colours
@@ -78,9 +76,7 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
-    user_view = nvim.vars.get(VIEW_VAR, {})
     user_ignores = nvim.vars.get(IGNORES_VAR, {})
-    user_colours = nvim.vars.get(COLOURS_VAR, {})
 
     config: _UserConfig = decode(_UserConfig, safe_load(CONFIG_YML.read_bytes()))
 
@@ -88,27 +84,31 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         _UserOptions,
         merge(encode(config.options), user_config, replace=True),
     )
-    view: _UserView = decode(
-        _UserView, merge(encode(config.view), user_view, replace=True)
-    )
+    view: _UserView = decode(_UserView, merge(encode(config.view), replace=True))
     ignore: UserIgnore = decode(
         UserIgnore,
         merge(encode(config.ignore), user_ignores, replace=True),
-    )
-    colours: _NerdColours = decode(
-        _NerdColours, merge(loads(NERD_COLOURS_JSON.read_text()), user_colours)
     )
     icons: UserIcons = decode(
         UserIcons, loads(ICON_LOOKUP_JSON[options.use_icons].read_text())
     )
     github_colours: Mapping[str, str] = decode(
-        Mapping[str, str], loads(COLOURS_JSON.read_text())
+        Mapping[str, str], loads(GITHUB_COLOURS_JSON.read_text())
+    )
+    nerd_colours: _NerdColours = decode(
+        _NerdColours, merge(loads(NERD_COLOURS_JSON.read_text()))
     )
 
     github_exts = gen_hl("github", mapping=github_colours)
+    ext_lookup = gen_hl("chad_tree", mapping=nerd_colours.type)
+    name_exact = gen_hl("chad_tree", mapping=nerd_colours.name_exact)
+    name_glob = gen_hl("chad_tree", mapping=nerd_colours.name_glob)
     hl_context = parse_ls_colours(
         particular_mappings=view.highlights,
-        github_exts=github_exts,
+        ext_colours=github_exts,
+        ext_lookup=ext_lookup,
+        name_exact=name_exact,
+        name_glob=name_glob,
     )
 
     view_opts = ViewOptions(
