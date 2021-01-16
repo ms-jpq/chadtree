@@ -27,15 +27,15 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     for win, buf in find_fm_windows(nvim):
         row, col = win_get_cursor(nvim, win=win)
         (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
-        new_row = (
-            focus_row + 1
-            if focus_row is not None
-            else (
-                current_row + 1
-                if win.number != cwin.number and current_row is not None
-                else min(row + 1, len(lines))
-            )
-        )
+
+        if focus_row is not None:
+            new_row = focus_row + 1
+        elif win != cwin and current_row is not None:
+            new_row = current_row + 1
+        elif row >= len(lines) - 1:
+            new_row = len(lines)
+        else:
+            new_row = row + 1
 
         atomic = Atomic()
         atomic.buf_clear_namespace(buf, ns, 0, -1)
@@ -53,7 +53,10 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             for h in hl:
                 atomic.buf_add_highlight(buf, ns, h.group, idx, h.begin, h.end)
 
-        atomic.win_set_cursor(win, (new_row, col))
+        if new_row is not None:
+            atomic.win_set_cursor(win, (new_row, col))
+
         atomic.call_function("setpos", ("'<", (buf.number, r1 + 1, c1 + 1, 0)))
         atomic.call_function("setpos", ("'>", (buf.number, r2 + 1, c2 + 1, 0)))
+
         atomic.commit(nvim)
