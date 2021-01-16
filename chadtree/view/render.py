@@ -1,3 +1,4 @@
+from chadtree.fs.ops import ancestors
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
@@ -5,7 +6,6 @@ from os import linesep
 from os.path import sep
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
-from pynvim_pp.highlight import HLgroup
 from std2.functools import constantly
 from std2.types import never
 
@@ -82,7 +82,7 @@ def _paint(
 
     def search_hl(node: Node) -> Optional[str]:
         s_modes = sorted(node.mode)
-        if node.path in vc.ignored:
+        if not vc.ignored.isdisjoint(node.ancestors | {node.path}):
             return particular_mappings.ignored
 
         for mode in s_modes:

@@ -30,5 +30,6 @@ class Node:
     mode: AbstractSet[Mode]
     name: str
     path: str
+    ancestors: AbstractSet[str]
     children: Mapping[str, Node] = field(default_factory=dict)
     ext: Optional[str] = None

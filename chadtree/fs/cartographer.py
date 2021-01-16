@@ -29,6 +29,7 @@ from std2.itertools import chunk
 from ..consts import WALK_PARALLELISM_FACTOR
 from ..registry import pool
 from ..state.types import Index
+from .ops import ancestors
 from .types import Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
@@ -81,7 +82,8 @@ def _new(
         name = basename(root)
         _, _ext = splitext(name)
         ext = None if Mode.folder in mode else _ext
-        node = Node(path=root, mode=mode, name=name, ext=ext)
+        _ancestors = ancestors(root)
+        node = Node(path=root, mode=mode, name=name, ext=ext, ancestors=_ancestors)
         acc.put(node)
 
         if root in index:
@@ -143,6 +145,7 @@ def _update(root: Node, index: Index, paths: AbstractSet[str]) -> Node:
             path=root.path,
             mode=root.mode,
             name=root.name,
+            ancestors=root.ancestors,
             children=children,
             ext=root.ext,
         )
