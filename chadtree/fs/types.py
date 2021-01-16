@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum, auto
 from typing import AbstractSet, Mapping, Optional
 
@@ -30,5 +30,5 @@ class Node:
     mode: AbstractSet[Mode]
     name: str
     path: str
-    children: Optional[Mapping[str, Node]] = None
+    children: Mapping[str, Node] = field(default_factory=dict)
     ext: Optional[str] = None

@@ -203,7 +203,7 @@ def render(
         rend = show(node, depth)
 
         def gen_children() -> Iterator[Tuple[Node, Render]]:
-            gen = (child for child in (node.children or {}).values() if not drop(child))
+            gen = (child for child in node.children.values() if not drop(child))
             for child in sorted(gen, key=comp):
                 yield from render(child, depth=depth + 1, cleared=clear)
 

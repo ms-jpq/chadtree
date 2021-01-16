@@ -1,5 +1,6 @@
 from os import listdir, stat
-from os.path import basename, join, splitext
+from os.path import basename, dirname, join, splitext
+from queue import SimpleQueue
 from stat import (
     S_IEXEC,
     S_ISDIR,
@@ -12,7 +13,9 @@ from stat import (
     S_ISVTX,
     S_IWOTH,
 )
-from typing import AbstractSet, Iterator, Mapping, Tuple, cast
+from typing import AbstractSet, Iterator, Mapping, MutableMapping, Optional, cast
+
+from std2.concurrent.futures import gather
 
 from ..registry import pool
 from ..state.types import Index
@@ -60,25 +63,56 @@ def _fs_stat(path: str) -> AbstractSet[Mode]:
             return mode
 
 
-def new(root: str, index: Index) -> Node:
+def _new(root: str, index: Index, acc: SimpleQueue, stack: SimpleQueue) -> None:
     mode = _fs_stat(root)
     name = basename(root)
-    if Mode.folder not in mode:
-        _, ext = splitext(name)
-        return Node(path=root, mode=mode, name=name, ext=ext)
+    _, _ext = splitext(name)
+    ext = None if Mode.folder in mode else _ext
+    node = Node(path=root, mode=mode, name=name, ext=ext)
+    acc.put(node)
 
-    elif root in index:
+    if root in index:
+        for item in listdir(root):
+            path = join(root, item)
+            stack.put(path)
 
-        def p_new(path: str) -> Tuple[str, Node]:
-            return path, new(path, index=index)
 
-        children = {
-            path: node
-            for path, node in pool.map(p_new, (join(root, d) for d in listdir(root)))
-        }
-        return Node(path=root, mode=mode, name=name, children=children)
+def new(root: str, index: Index) -> Node:
+    nodes: SimpleQueue = SimpleQueue()
+    stack: SimpleQueue = SimpleQueue()
+
+    def drain() -> Iterator[str]:
+        while not stack.empty():
+            yield stack.get()
+
+    _new(root, index=index, acc=nodes, stack=stack)
+    while not stack.empty():
+        gather(
+            *(
+                pool.submit(_new, root=path, index=index, acc=nodes, stack=stack)
+                for path in drain()
+            )
+        )
+
+    root_node: Optional[Node] = None
+    acc: MutableMapping[str, Node] = {}
+    while not nodes.empty():
+        node: Node = nodes.get()
+        path = node.path
+        acc[path] = node
+
+        parent = acc.get(dirname(path))
+
+        if not parent:
+            root_node = node
+        else:
+            siblings = cast(MutableMapping[str, Node], parent.children)
+            siblings[path] = node
+
+    if not root_node:
+        assert False
     else:
-        return Node(path=root, mode=mode, name=name)
+        return root_node
 
 
 def _update(root: Node, index: Index, paths: AbstractSet[str]) -> Node:
@@ -86,8 +120,7 @@ def _update(root: Node, index: Index, paths: AbstractSet[str]) -> Node:
         return new(root.path, index=index)
     else:
         children = {
-            k: _update(v, index=index, paths=paths)
-            for k, v in (root.children or cast(Mapping[str, Node], {})).items()
+            k: _update(v, index=index, paths=paths) for k, v in root.children.items()
         }
         return Node(
             path=root.path,
