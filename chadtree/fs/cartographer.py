@@ -13,9 +13,18 @@ from stat import (
     S_ISVTX,
     S_IWOTH,
 )
-from typing import AbstractSet, Iterator, Mapping, MutableMapping, Optional, cast
+from typing import (
+    AbstractSet,
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    cast,
+)
 
 from std2.concurrent.futures import gather
+from std2.itertools import chunk
 
 from ..registry import pool
 from ..state.types import Index
@@ -63,18 +72,21 @@ def _fs_stat(path: str) -> AbstractSet[Mode]:
             return mode
 
 
-def _new(root: str, index: Index, acc: SimpleQueue, stack: SimpleQueue) -> None:
-    mode = _fs_stat(root)
-    name = basename(root)
-    _, _ext = splitext(name)
-    ext = None if Mode.folder in mode else _ext
-    node = Node(path=root, mode=mode, name=name, ext=ext)
-    acc.put(node)
+def _new(
+    roots: Iterable[str], index: Index, acc: SimpleQueue, stack: SimpleQueue
+) -> None:
+    for root in roots:
+        mode = _fs_stat(root)
+        name = basename(root)
+        _, _ext = splitext(name)
+        ext = None if Mode.folder in mode else _ext
+        node = Node(path=root, mode=mode, name=name, ext=ext)
+        acc.put(node)
 
-    if root in index:
-        for item in listdir(root):
-            path = join(root, item)
-            stack.put(path)
+        if root in index:
+            for item in listdir(root):
+                path = join(root, item)
+                stack.put(path)
 
 
 def new(root: str, index: Index) -> Node:
@@ -85,12 +97,12 @@ def new(root: str, index: Index) -> Node:
         while not stack.empty():
             yield stack.get()
 
-    _new(root, index=index, acc=nodes, stack=stack)
+    _new((root,), index=index, acc=nodes, stack=stack)
     while not stack.empty():
         gather(
             *(
-                pool.submit(_new, root=path, index=index, acc=nodes, stack=stack)
-                for path in drain()
+                pool.submit(_new, roots=paths, index=index, acc=nodes, stack=stack)
+                for paths in chunk(drain(), n=100)
             )
         )
 
