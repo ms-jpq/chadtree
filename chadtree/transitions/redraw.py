@@ -32,7 +32,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             new_row = focus_row + 1
         elif win != cwin and current_row is not None:
             new_row = current_row + 1
-        elif row >= len(lines) - 1:
+        elif row >= len(lines):
             new_row = len(lines)
         else:
             new_row = row + 1
