@@ -26,8 +26,8 @@ def parse_colours(
         _ext_colours = lsc.exts
         _mode_pre = lsc.mode_pre
         _mode_post = lsc.mode_post
-        _ext_lookup = {}
-        _name_exact = {}
+        _ext_lookup: Mapping[str, HLgroup] = {}
+        _name_exact: Mapping[str, HLgroup] = {}
         _name_glob = lsc.name_glob
     else:
         _ext_colours = ext_colours
