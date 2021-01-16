@@ -70,7 +70,8 @@ def _paint(
         mode_lookup_pre,
         mode_lookup_post,
         ext_lookup,
-        name_lookup,
+        name_exact,
+        name_glob,
     ) = (
         context.particular_mappings,
         context.ext_colours,
@@ -78,6 +79,7 @@ def _paint(
         context.mode_post,
         context.ext_lookup,
         context.name_exact,
+        context.name_glob,
     )
 
     def search_hl(node: Node) -> Optional[str]:
@@ -92,7 +94,10 @@ def _paint(
         hl = ext_lookup.get(node.ext or "")
         if hl:
             return hl
-        for pattern, group in name_lookup.items():
+        hl = name_exact.get(node.name)
+        if hl:
+            return hl
+        for pattern, group in name_glob.items():
             if fnmatch(node.name, pattern):
                 return group
         for mode in s_modes:
