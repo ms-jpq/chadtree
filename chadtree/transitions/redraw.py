@@ -31,26 +31,29 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
 
     for win, buf in find_fm_windows(nvim):
         prev_code = buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR)
+        atomic = Atomic()
+
+        count = buf_line_count(nvim, buf=buf)
+        row, col = win_get_cursor(nvim, win=win)
+
+        if focus_row is not None:
+            new_row: Optional[int] = focus_row + 1
+        elif win != cwin and current_row is not None:
+            new_row = current_row + 1
+        elif row >= len(lines):
+            new_row = len(lines)
+        elif count != len(lines):
+            new_row = row + 1
+        else:
+            new_row = None
 
         if prev_code == new_code:
-            pass
+            if new_row is not None:
+                atomic.win_set_cursor(win, (new_row, col))
+
         else:
-            count = buf_line_count(nvim, buf=buf)
-            row, col = win_get_cursor(nvim, win=win)
             (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
 
-            if focus_row is not None:
-                new_row: Optional[int] = focus_row + 1
-            elif win != cwin and current_row is not None:
-                new_row = current_row + 1
-            elif row >= len(lines):
-                new_row = len(lines)
-            elif count != len(lines):
-                new_row = row + 1
-            else:
-                new_row = None
-
-            atomic = Atomic()
             atomic.buf_clear_namespace(buf, ns, 0, -1)
             atomic.buf_set_option(buf, "modifiable", True)
             atomic.buf_set_lines(buf, 0, -1, True, lines)
@@ -66,11 +69,11 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
                 for h in hl:
                     atomic.buf_add_highlight(buf, ns, h.group, idx, h.begin, h.end)
 
-            if new_row is not None:
-                atomic.win_set_cursor(win, (new_row, col))
-
             atomic.call_function("setpos", ("'<", (buf.number, r1 + 1, c1 + 1, 0)))
             atomic.call_function("setpos", ("'>", (buf.number, r2 + 1, c2 + 1, 0)))
             atomic.buf_set_var(buf, _FM_HASH_VAR, new_code)
+
+            if new_row is not None:
+                atomic.win_set_cursor(win, (new_row, col))
 
             atomic.commit(nvim)
