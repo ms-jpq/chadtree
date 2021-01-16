@@ -1,4 +1,5 @@
 chad = chad or {}
+local linesep = "\n"
 
 if chad.loaded then
   return
@@ -6,11 +7,12 @@ else
   chad.loaded = true
   local job_id = nil
   local chad_params = {}
-  local linesep = "\n"
+  local err_exit = false
 
   local on_exit = function(_, code)
     local msg = " | CHADTree EXITED - " .. code
     if code ~= 0 then
+      err_exit = true
       vim.api.nvim_err_writeln(msg)
     end
     job_id = nil
@@ -68,12 +70,16 @@ else
         job_id = start("run", "--socket", vim.fn.serverstart())
       end
 
-      if _G[cmd] then
+      if not err_exit and _G[cmd] then
         _G[cmd](args)
       else
         vim.defer_fn(
           function()
-            chad[name](unpack(args))
+            if err_exit then
+              return
+            else
+              chad[name](unpack(args))
+            end
           end,
           POLLING_RATE
         )
