@@ -77,8 +77,10 @@ class _Styling:
 
 @dataclass(frozen=True)
 class LSC:
-    mode_pre: Mapping[str, HLgroup]
-    mode_post: Mapping[str, HLgroup]
+    mode_pre: Mapping[Mode, HLgroup]
+    mode_post: Mapping[Optional[Mode], HLgroup]
+    exts: Mapping[str, HLgroup]
+    name_glob: Mapping[str, HLgroup]
 
 
 _ANSI_RANGE = range(256)
@@ -262,33 +264,23 @@ def _parseHLGroup(styling: _Styling) -> HLgroup:
     return group
 
 
-def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
-    return {k: v.name for k, v in mapping.items()}
-
-
-def parse_ls_colours(
-    use_ls_colours: bool,
-    particular_mappings: UserHLGroups,
-    ext_colours: Mapping[str, HLgroup],
-    ext_lookup: Mapping[str, HLgroup],
-    name_exact: Mapping[str, HLgroup],
-    name_glob: Mapping[str, HLgroup],
-) -> HLcontext:
+def parse_lsc() -> LSC:
     ls_colours = environ.get("LS_COLORS", "")
-    hl_lookup: MutableMapping[str, HLgroup] = {
+
+    hl_lookup = {
         k: _parseHLGroup(_parse_styling(v))
         for k, _, v in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")
         )
     }
 
-    mode_pre: Mapping[Mode, HLgroup] = {
+    mode_pre = {
         k: v
         for k, v in ((v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_PRE_TABLE.items())
         if v
     }
 
-    mode_post: Mapping[Optional[Mode], HLgroup] = {
+    mode_post = {
         k: v
         for k, v in (
             (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_POST_TABLE.items()
@@ -296,34 +288,12 @@ def parse_ls_colours(
         if v
     }
 
-    ext_keys = tuple(
-        key for key in hl_lookup if key.startswith("*.") and key.count(".") == 1
-    )
-    _ext_lookup: Mapping[str, HLgroup] = {
-        key[1:]: hl_lookup.pop(key) for key in ext_keys
-    }
-    _name_exact = {**name_exact, **hl_lookup}
-    __ext_lookup = {**ext_lookup, **_ext_lookup}
-
-    groups = tuple(
-        chain(
-            ext_colours.values(),
-            mode_pre.values(),
-            mode_post.values(),
-            __ext_lookup.values(),
-            _name_exact.values(),
-            name_glob.values(),
+    exts = {
+        key[1:]: hl_lookup.pop(key)
+        for key in (
+            key for key in hl_lookup if key.startswith("*.") and key.count(".") == 1
         )
-    )
+    }
 
-    context = HLcontext(
-        groups=groups,
-        ext_colours=_trans(ext_colours),
-        mode_pre=_trans(mode_pre),
-        mode_post=_trans(mode_post),
-        ext_lookup=_trans(__ext_lookup),
-        name_exact=_trans(_name_exact),
-        name_glob=_trans(name_glob),
-        particular_mappings=particular_mappings,
-    )
-    return context
+    lsc = LSC(exts=exts, mode_pre=mode_pre, mode_post=mode_post, name_glob=hl_lookup)
+    return lsc
