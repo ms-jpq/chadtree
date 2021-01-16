@@ -5,17 +5,9 @@ from datetime import datetime
 from json import dump, load
 from pathlib import Path
 from subprocess import check_call, check_output, run
-from typing import (
-    AbstractSet,
-    Any,
-    Iterator,
-    Mapping,
-    MutableMapping,
-    Optional,
-    Sequence,
-)
+from typing import AbstractSet, Any, Iterator, Mapping, Optional, Sequence
 
-from std2.pickle import decode
+from std2.pickle import decode, encode
 from std2.tree import merge, recur_sort
 from std2.urllib import urlopen
 from yaml import safe_load
@@ -35,6 +27,7 @@ LANG_COLOURS_JSON = (ARTIFACTS / "github_colours").with_suffix(".json")
 TEMP_JSON = (TEMP / "icons").with_suffix(".json")
 
 SRC_ICONS = ("unicode_icons", "emoji_icons")
+SRC_COLOURS = ("colours",)
 
 
 @dataclass(frozen=True)
@@ -47,10 +40,27 @@ GithubSpec = Mapping[str, GithubColours]
 
 
 @dataclass(frozen=True)
-class DumpFormat:
+class IconFolderFormat:
+    open: str
+    closed: str
+
+
+@dataclass(frozen=True)
+class IconLoadFormat:
+    extensions: Mapping[str, str]
+    exact: Mapping[str, str]
+    glob: Mapping[str, str]
+    default: str
+    folder: IconFolderFormat
+
+
+@dataclass(frozen=True)
+class IconDumpFormat:
     type: Mapping[str, str]
     name_exact: AbstractSet[str]
     name_glob: AbstractSet[str]
+    default_icon: str
+    folder: IconFolderFormat
 
 
 def fetch(uri: str) -> str:
@@ -70,18 +80,18 @@ def spit_json(path: Path, json: Any) -> None:
         dump(sorted_json, fd, ensure_ascii=False, check_circular=False, indent=2)
 
 
-def process_json(
-    json: Mapping[str, Mapping[str, str]]
-) -> Mapping[str, Mapping[str, str]]:
-    new: MutableMapping[str, Mapping[str, str]] = {}
-    new["type"] = {f".{k}": v for k, v in json["extensions"].items()}
-    new["name_exact"] = json["exact"]
-    new["name_glob"] = {
-        k.rstrip("$").replace(r"\.", "."): v for k, v in json["glob"].items()
-    }
-    new["default_icon"] = json["default"]
-    new["folder"] = json["folder"]
-    return new
+def process_icons(json: Any) -> IconDumpFormat:
+    loaded: IconLoadFormat = decode(IconLoadFormat, json)
+    dump = IconDumpFormat(
+        type={f".{k}": v for k, v in loaded.extensions.items()},
+        name_exact=loaded.exact,
+        name_glob={
+            k.rstrip("$").replace(r"\.", "."): v for k, v in loaded.glob.items()
+        },
+        default_icon=loaded.default,
+        folder=loaded.folder,
+    )
+    return dump
 
 
 def devicons() -> None:
@@ -100,9 +110,9 @@ def devicons() -> None:
         src = f"{container}:/root/{icon}.json"
         check_call(("docker", "cp", src, str(TEMP_JSON)))
 
-        parsed = process_json(load(TEMP_JSON.open()))
+        parsed = process_icons(load(TEMP_JSON.open()))
         basic = safe_load((ASSETS / icon).with_suffix(".base.yml").read_bytes())
-        merged = merge(parsed, basic)
+        merged = merge(encode(parsed), basic)
 
         dest = (ARTIFACTS / icon).with_suffix(".json")
         spit_json(dest, merged)
@@ -110,6 +120,11 @@ def devicons() -> None:
     ascii_json = "ascii_icons"
     json = safe_load((ASSETS / ascii_json).with_suffix(".base.yml").read_bytes())
     spit_json((ARTIFACTS / ascii_json).with_suffix(".json"), json)
+
+    # for colour in SRC_COLOURS:
+    #     src = f"{container}:/root/{colour}.json"
+    #     check_call(("docker", "cp", src, str(TEMP_JSON)))
+
     check_call(("docker", "rm", container))
 
 
@@ -160,7 +175,7 @@ def git_alert() -> None:
 def main() -> None:
     devicons()
     github_colours()
-    git_alert()
+    # git_alert()
 
 
 main()

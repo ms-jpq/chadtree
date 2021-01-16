@@ -14,7 +14,7 @@ WORKDIR /root
 
 RUN git clone --depth=1 https://github.com/ryanoasis/vim-devicons.git && \
     git clone --depth=1 https://github.com/adelarsq/vim-emoji-icon-theme.git && \
-    git clone --depth=1 https://github.com/nvim-lua/lsp-status.nvim.git
+    git clone --depth=1 https://github.com/tiagofumo/vim-nerdtree-syntax-highlight.git
 
 
 COPY . /
