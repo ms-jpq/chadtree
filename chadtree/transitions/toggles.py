@@ -8,7 +8,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from ..state.types import State
+from ..state.types import Selection, State
 from ..version_ctl.types import VCStatus
 from .types import Stage
 
@@ -21,7 +21,11 @@ def _toggle_hidden(
     Toggle hidden
     """
 
-    new_state = forward(state, settings=settings, show_hidden=not state.show_hidden)
+    show_hidden = not state.show_hidden
+    selection: Selection = state.selection if show_hidden else set()
+    new_state = forward(
+        state, settings=settings, show_hidden=show_hidden, selection=selection
+    )
     return Stage(new_state)
 
 
