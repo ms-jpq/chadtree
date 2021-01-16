@@ -11,7 +11,7 @@ from ..view.types import Badge, Highlight
 from .shared.wm import find_fm_windows
 
 
-def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> float:
+def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     focus_row = state.derived.paths_lookup.get(focus) if focus else None
     current = state.current
     current_row = state.derived.paths_lookup.get(current or "")

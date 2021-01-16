@@ -83,7 +83,7 @@ mimetypes:
     - video
 
 open_left: true
-polling_rate: 1
+polling_rate: 2.0
 session: true
 show_hidden: false
 

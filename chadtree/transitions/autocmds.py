@@ -2,7 +2,6 @@ from os import chdir
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim.api.common import NvimError
 from pynvim_pp.api import get_cwd, win_close
 from pynvim_pp.float_win import list_floatwins
 
@@ -13,20 +12,8 @@ from ..state.next import forward
 from ..state.ops import dump_session
 from ..state.types import State
 from .shared.current import new_current_file, new_root
-from .shared.refresh import refresh
 from .shared.wm import find_current_buffer_name
 from .types import Stage
-
-
-@rpc(blocking=False)
-def schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
-    try:
-        return refresh(nvim, state=state, settings=settings, manual=False)
-    except NvimError:
-        return None
-
-
-autocmd("BufWritePost", "FocusGained") << f"lua {schedule_update.name}()"
 
 
 @rpc(blocking=False)

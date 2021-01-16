@@ -1,6 +1,8 @@
+from contextlib import contextmanager
 from os.path import exists
-from typing import AbstractSet
+from typing import AbstractSet, Iterator, Optional
 
+from chadtree.version_ctl.types import VCStatus
 from pynvim import Nvim
 from pynvim_pp.lib import write
 from std2.types import Void
@@ -15,12 +17,16 @@ from ..shared.wm import find_current_buffer_name
 from ..types import Stage
 
 
-def refresh(
-    nvim: Nvim, state: State, settings: Settings, manual: bool = False
-) -> Stage:
-    if manual:
-        write(nvim, LANG("hourglass"))
+@contextmanager
+def with_manual(nvim: Nvim) -> Iterator[None]:
+    write(nvim, LANG("hourglass"))
+    yield None
+    write(nvim, LANG("ok_sym"))
 
+
+def refresh(
+    nvim: Nvim, state: State, settings: Settings, vc: Optional[VCStatus] = None
+) -> Stage:
     current = find_current_buffer_name(nvim)
     cwd = state.root.path
     paths = {cwd}
@@ -43,8 +49,5 @@ def refresh(
         paths=paths,
         current=new_current or Void,
     )
-
-    if manual:
-        write(nvim, LANG("ok_sym"))
 
     return Stage(new_state)

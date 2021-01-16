@@ -20,8 +20,9 @@ from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
 from .state.types import State
-from .transitions.autocmds import save_session, schedule_update
+from .transitions.autocmds import save_session
 from .transitions.redraw import redraw
+from .transitions.schedule_update import schedule_update
 from .transitions.types import Stage
 from .transitions.version_ctl import vc_refresh
 

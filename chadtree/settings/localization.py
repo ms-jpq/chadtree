@@ -1,11 +1,11 @@
 from locale import getdefaultlocale
 from string import Template
-from typing import Mapping, MutableMapping, Optional
+from typing import Mapping, MutableMapping, Optional, Union
 
 from std2.pickle.decode import decode
+from yaml import safe_load
 
 from ..consts import DEFAULT_LANG, LANG_ROOT
-from yaml import safe_load
 
 
 def _get_lang(code: Optional[str], fallback: str) -> str:
@@ -23,7 +23,7 @@ class Lang:
     def __init__(self, specs: MutableMapping[str, str]) -> None:
         self._specs = specs
 
-    def __call__(self, key: str, **kwds: str) -> str:
+    def __call__(self, key: str, **kwds: Union[int, float, str]) -> str:
         spec = self._specs[key]
         return Template(spec).substitute(kwds)
 

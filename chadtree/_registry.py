@@ -14,10 +14,12 @@ from .transitions import (
     refresh,
     rename,
     resize,
+    schedule_update,
     selection,
     stat,
     toggle_open,
     toggles,
+    version_ctl,
 )
 
 ____ = None
