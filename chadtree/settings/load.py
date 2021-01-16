@@ -13,7 +13,7 @@ from typing import (
 
 from pynvim.api.nvim import Nvim
 from pynvim_pp.rpc import RpcSpec
-from std2.pickle import DecodeError, decode
+from std2.pickle import DecodeError, decode, encode
 from std2.tree import merge
 from yaml import safe_load
 
@@ -76,14 +76,17 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_colours = nvim.vars.get(COLOURS_VAR, {})
 
     config: _UserConfig = decode(_UserConfig, safe_load(CONFIG_YML.read_bytes()))
+    print(config, flush=True)
     options: _UserOptions = decode(
         _UserOptions,
-        merge(config.options, user_config, replace=True),
+        merge(encode(config.options), user_config, replace=True),
     )
-    view: _UserView = decode(_UserView, merge(config.view, user_view, replace=True))
+    view: _UserView = decode(
+        _UserView, merge(encode(config.view), user_view, replace=True)
+    )
     ignore: UserIgnore = decode(
         UserIgnore,
-        merge(config.ignore, user_ignores, replace=True),
+        merge(encode(config.ignore), user_ignores, replace=True),
     )
     colours: _UserColours = decode(
         _UserColours, merge(safe_load(CUSTOM_COLOURS_YML.read_bytes()), user_colours)
