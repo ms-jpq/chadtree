@@ -51,7 +51,10 @@ class ChadClient(Client):
             self._state = initial_state(nvim, settings=self._settings)
             init_locale(self._settings.lang)
 
-        threadsafe_call(nvim, cont)
+        try:
+            threadsafe_call(nvim, cont)
+        except Exception:
+            return 1
 
         def sched() -> None:
             period = cast(Settings, self._settings).polling_rate

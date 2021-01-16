@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from json import load
 from locale import strxfrm
+from sys import stderr
 from typing import (
     AbstractSet,
     Literal,
@@ -69,14 +70,14 @@ class _UserColours:
     eight_bit: Mapping[str, UserColourMapping]
 
 
-def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
+def _initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
     user_view = nvim.vars.get(VIEW_VAR, {})
     user_ignores = nvim.vars.get(IGNORES_VAR, {})
     user_colours = nvim.vars.get(COLOURS_VAR, {})
 
     config: _UserConfig = decode(_UserConfig, safe_load(CONFIG_YML.read_bytes()))
-    print(config, flush=True)
+
     options: _UserOptions = decode(
         _UserOptions,
         merge(encode(config.options), user_config, replace=True),
@@ -142,3 +143,11 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
 
     return settings
+
+
+def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
+    try:
+        return _initial(nvim, specs=specs)
+    except DecodeError as e:
+        print(e, file=stderr)
+        raise

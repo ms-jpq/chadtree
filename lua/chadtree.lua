@@ -4,13 +4,18 @@ if chad.loaded then
   return
 else
   chad.loaded = true
-
+  local job_id = nil
+  local chad_params = {}
   local linesep = "\n"
 
   local on_exit = function(_, code)
     local msg = " | CHADTree EXITED - " .. code
     if code ~= 0 then
       vim.api.nvim_err_writeln(msg)
+    end
+    job_id = nil
+    for _, param in ipairs(chad_params) do
+      chad[chad_params] = nil
     end
   end
 
@@ -47,7 +52,6 @@ else
   end
 
   local POLLING_RATE = 10
-  local job_id = nil
 
   chad.deps_cmd = function()
     start("deps")
@@ -56,6 +60,7 @@ else
   vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.deps_cmd()]]
 
   local set_chad_call = function(name, cmd)
+    table.insert(chad_params, name)
     chad[name] = function(...)
       local args = {...}
 
