@@ -99,6 +99,7 @@ options:
   width: 40
 view:
   highlights:
+    ignored: Comment
     quickfix: Label
     version_control: Comment
   time_format: '%Y-%m-%d %H:%M'

@@ -10,6 +10,7 @@ from typing import (
     Optional,
     Set,
     Tuple,
+    TypeVar,
     Union,
     cast,
 )
@@ -19,6 +20,8 @@ from pynvim_pp.highlight import HLgroup
 
 from ..consts import FM_HL_PREFIX
 from .types import HLcontext, Mode, UserColourMapping, UserHLGroups
+
+T = TypeVar("T")
 
 
 class _Style(IntEnum):
@@ -269,6 +272,10 @@ def _parseHLGroup(
     return group
 
 
+def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
+    return {k: v.name for k, v in mapping.items()}
+
+
 def parse_ls_colours(
     bit8_mapping: Mapping[str, UserColourMapping],
     particular_mappings: UserHLGroups,
@@ -303,12 +310,23 @@ def parse_ls_colours(
         key[1:]: hl_lookup.pop(key) for key in ext_keys
     }
 
+    groups = tuple(
+        chain(
+            github_exts.values(),
+            mode_lookup_pre.values(),
+            mode_lookup_post.values(),
+            ext_lookup.values(),
+            hl_lookup.values(),
+        )
+    )
+
     context = HLcontext(
-        github_exts=github_exts,
-        mode_lookup_pre=mode_lookup_pre,
-        mode_lookup_post=mode_lookup_post,
-        ext_lookup=ext_lookup,
-        name_lookup=hl_lookup,
+        groups=groups,
+        github_exts=_trans(github_exts),
+        mode_lookup_pre=_trans(mode_lookup_pre),
+        mode_lookup_post=_trans(mode_lookup_post),
+        ext_lookup=_trans(ext_lookup),
+        name_lookup=_trans(hl_lookup),
         particular_mappings=particular_mappings,
     )
     return context

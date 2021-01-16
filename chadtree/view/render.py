@@ -80,8 +80,10 @@ def _paint(
         context.name_lookup,
     )
 
-    def search_hl(node: Node) -> Optional[HLgroup]:
+    def search_hl(node: Node) -> Optional[str]:
         s_modes = sorted(node.mode)
+        if node.path in vc.ignored:
+            return particular_mappings.ignored
 
         for mode in s_modes:
             hl = mode_lookup_pre.get(mode)
@@ -155,13 +157,13 @@ def _paint(
         end = begin + len(icon.encode())
         group = github_exts.get(node.ext or "")
         if group:
-            hl = Highlight(group=group.name, begin=begin, end=end)
+            hl = Highlight(group=group, begin=begin, end=end)
             yield hl
         group = search_hl(node)
         if group:
             begin = end
             end = len(name.encode()) + begin
-            hl = Highlight(group=group.name, begin=begin, end=end)
+            hl = Highlight(group=group, begin=begin, end=end)
             yield hl
 
     def show(node: Node, depth: int) -> Render:
