@@ -18,7 +18,7 @@ from uuid import uuid4
 from pynvim_pp.highlight import HLgroup
 
 from ..consts import FM_HL_PREFIX
-from .types import HLcontext, Mode, UserHighlights
+from .types import HLcontext, Mode, UserColourMapping, UserHLGroups
 
 
 class _Style(IntEnum):
@@ -230,8 +230,9 @@ def _parse_styling(codes: str) -> _Styling:
     return styling
 
 
-def _parseHLGroup(styling: _Styling, colours: UserHighlights) -> HLgroup:
-    bit8_mapping = colours.eight_bit
+def _parseHLGroup(
+    styling: _Styling, bit8_mapping: Mapping[str, UserColourMapping]
+) -> HLgroup:
     fg, bg = styling.foreground, styling.background
     name = f"{FM_HL_PREFIX}_ls_{uuid4().hex}"
     cterm = {
@@ -268,15 +269,18 @@ def _parseHLGroup(styling: _Styling, colours: UserHighlights) -> HLgroup:
     return group
 
 
-def parse_ls_colours(colours: UserHighlights) -> HLcontext:
+def parse_ls_colours(
+    bit8_mapping: Mapping[str, UserColourMapping],
+    particular_mappings: UserHLGroups,
+    github_exts: Mapping[str, HLgroup],
+) -> HLcontext:
     ls_colours = environ.get("LS_COLORS", "")
     hl_lookup: MutableMapping[str, HLgroup] = {
-        k: _parseHLGroup(_parse_styling(v), colours=colours)
+        k: _parseHLGroup(_parse_styling(v), bit8_mapping=bit8_mapping)
         for k, _, v in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")
         )
     }
-    groups = tuple(hl_lookup.values())
 
     mode_lookup_pre: Mapping[Mode, HLgroup] = {
         k: v
@@ -300,10 +304,11 @@ def parse_ls_colours(colours: UserHighlights) -> HLcontext:
     }
 
     context = HLcontext(
-        groups=groups,
+        github_exts=github_exts,
         mode_lookup_pre=mode_lookup_pre,
         mode_lookup_post=mode_lookup_post,
         ext_lookup=ext_lookup,
         name_lookup=hl_lookup,
+        particular_mappings=particular_mappings,
     )
     return context

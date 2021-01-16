@@ -51,19 +51,13 @@ class UserHLGroups:
 
 
 @dataclass(frozen=True)
-class UserHighlights:
-    eight_bit: Mapping[str, UserColourMapping]
-    exts: Mapping[str, HLgroup]
-    groups: UserHLGroups
-
-
-@dataclass(frozen=True)
 class HLcontext:
+    github_exts: Mapping[str, HLgroup]
     ext_lookup: Mapping[str, HLgroup]
-    groups: Sequence[HLgroup]
-    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
     mode_lookup_pre: Mapping[Mode, HLgroup]
+    mode_lookup_post: Mapping[Optional[Mode], HLgroup]
     name_lookup: Mapping[str, HLgroup]
+    particular_mappings: UserHLGroups
 
 
 class Sortby(Enum):
@@ -74,7 +68,6 @@ class Sortby(Enum):
 
 @dataclass(frozen=True)
 class ViewOptions:
-    highlights: UserHighlights
     hl_context: HLcontext
     icons: UserIcons
     sort_by: Sequence[Sortby]

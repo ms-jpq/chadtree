@@ -33,7 +33,6 @@ from ..view.ls_colours import parse_ls_colours
 from ..view.types import (
     Sortby,
     UserColourMapping,
-    UserHighlights,
     UserHLGroups,
     UserIcons,
 )
@@ -96,15 +95,15 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         Mapping[str, str], load(COLOURS_JSON.open())
     )
 
-    ext_colours = gen_hl("github", mapping=github_colours)
-    highlights = UserHighlights(
-        eight_bit=colours.eight_bit, exts=ext_colours, groups=view.highlights
+    github_exts = gen_hl("github", mapping=github_colours)
+    hl_context = parse_ls_colours(
+        bit8_mapping=colours.eight_bit,
+        particular_mappings=view.highlights,
+        github_exts=github_exts,
     )
-    hl_context = parse_ls_colours(highlights)
 
     view_opts = ViewOptions(
         hl_context=hl_context,
-        highlights=highlights,
         icons=icons,
         sort_by=config.sort_by,
         use_icons=bool(config.use_icons),

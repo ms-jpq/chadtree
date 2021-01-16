@@ -50,6 +50,10 @@ def _ignore(settings: Settings) -> Callable[[Node], bool]:
     return drop
 
 
+def _gen_spacer(depth: int) -> str:
+    return (depth * 2 - 1) * " "
+
+
 def _paint(
     settings: Settings,
     index: Index,
@@ -58,14 +62,23 @@ def _paint(
     vc: VCStatus,
     current: Optional[str],
 ) -> Callable[[Node, int], Render]:
+    icons = settings.view.icons
     context = settings.view.hl_context
-    mode_lookup_pre, mode_lookup_post, ext_lookup, name_lookup = (
+    (
+        particular_mappings,
+        github_exts,
+        mode_lookup_pre,
+        mode_lookup_post,
+        ext_lookup,
+        name_lookup,
+    ) = (
+        context.particular_mappings,
+        context.github_exts,
         context.mode_lookup_pre,
         context.mode_lookup_post,
         context.ext_lookup,
         context.name_lookup,
     )
-    icons, highlights = settings.view.icons, settings.view.highlights
 
     def search_hl(node: Node) -> Optional[HLgroup]:
         s_modes = sorted(node.mode)
@@ -87,9 +100,6 @@ def _paint(
 
         return mode_lookup_post.get(None)
 
-    def gen_spacer(depth: int) -> str:
-        return (depth * 2 - 1) * " "
-
     def gen_status(path: str) -> str:
         selected = (
             icons.status.selected if path in selection else icons.status.not_selected
@@ -98,7 +108,7 @@ def _paint(
         return f"{selected}{active}"
 
     def gen_decor_pre(node: Node, depth: int) -> Iterator[str]:
-        yield gen_spacer(depth)
+        yield _gen_spacer(depth)
         yield gen_status(node.path)
 
     def gen_icon(node: Node) -> Iterator[str]:
@@ -134,16 +144,16 @@ def _paint(
         qf_count = qf.locations[path]
         stat = vc.status.get(path)
         if qf_count:
-            yield Badge(text=f"({qf_count})", group=highlights.groups.quickfix)
+            yield Badge(text=f"({qf_count})", group=particular_mappings.quickfix)
         if stat:
-            yield Badge(text=f"[{stat}]", group=highlights.groups.version_control)
+            yield Badge(text=f"[{stat}]", group=particular_mappings.version_control)
 
     def gen_highlights(
         node: Node, pre: str, icon: str, name: str
     ) -> Iterator[Highlight]:
         begin = len(pre.encode())
         end = begin + len(icon.encode())
-        group = highlights.exts.get(node.ext or "")
+        group = github_exts.get(node.ext or "")
         if group:
             hl = Highlight(group=group.name, begin=begin, end=end)
             yield hl
