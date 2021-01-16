@@ -99,12 +99,11 @@ def new(root: str, index: Index) -> Node:
 
     _new((root,), index=index, acc=nodes, stack=stack)
     while not stack.empty():
-        gather(
-            *(
-                pool.submit(_new, roots=paths, index=index, acc=nodes, stack=stack)
-                for paths in chunk(drain(), n=100)
-            )
+        tasks = (
+            pool.submit(_new, roots=paths, index=index, acc=nodes, stack=stack)
+            for paths in chunk(drain(), n=10)
         )
+        gather(*tasks)
 
     root_node: Optional[Node] = None
     acc: MutableMapping[str, Node] = {}
@@ -116,6 +115,7 @@ def new(root: str, index: Index) -> Node:
         parent = acc.get(dirname(path))
 
         if not parent:
+            assert root_node is None
             root_node = node
         else:
             siblings = cast(MutableMapping[str, Node], parent.children)
