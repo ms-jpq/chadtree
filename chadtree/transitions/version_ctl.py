@@ -1,3 +1,5 @@
+from threading import Lock
+
 from pynvim import Nvim
 from pynvim_pp.api import get_cwd
 from pynvim_pp.logging import log
@@ -9,6 +11,8 @@ from ..state.types import State
 from ..version_ctl.git import status
 from ..version_ctl.types import VCStatus
 from .types import Stage
+
+_lock = Lock()
 
 
 @rpc(blocking=False)
@@ -24,12 +28,17 @@ def vc_refresh(nvim: Nvim, state: State, settings: Settings) -> None:
     """
 
     cwd = get_cwd(nvim)
+
     def cont() -> None:
-        try:
-            vc = status(cwd)
-        except Exception as e:
-            log.exception("%s", e)
+        if _lock.locked():
+            pass
         else:
-            enqueue_event(_set_vc, vc)
+            with _lock:
+                try:
+                    vc = status(cwd)
+                except Exception as e:
+                    log.exception("%s", e)
+                else:
+                    enqueue_event(_set_vc, vc)
 
     pool.submit(cont)
