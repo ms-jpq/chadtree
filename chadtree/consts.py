@@ -1,7 +1,7 @@
 from os import environ
 from pathlib import Path
 
-WALK_PARALLELISM_FACTOR = 1000
+WALK_PARALLELISM_FACTOR = 100
 FOLDER_MODE = 0o755
 FILE_MODE = 0o644
 

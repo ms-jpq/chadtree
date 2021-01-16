@@ -90,31 +90,16 @@ def _new(
                 stack.put(path)
 
 
-def new(root: str, index: Index) -> Node:
-    nodes: SimpleQueue = SimpleQueue()
-    stack: SimpleQueue = SimpleQueue()
-
-    def drain() -> Iterator[str]:
-        while not stack.empty():
-            yield stack.get()
-
-    _new((root,), index=index, acc=nodes, stack=stack)
-    while not stack.empty():
-        tasks = (
-            pool.submit(_new, roots=paths, index=index, acc=nodes, stack=stack)
-            for paths in chunk(drain(), n=WALK_PARALLELISM_FACTOR)
-        )
-        gather(*tasks)
-
+def _join(nodes: SimpleQueue) -> Node:
     root_node: Optional[Node] = None
     acc: MutableMapping[str, Node] = {}
+
     while not nodes.empty():
         node: Node = nodes.get()
         path = node.path
         acc[path] = node
 
         parent = acc.get(dirname(path))
-
         if not parent:
             assert root_node is None
             root_node = node
@@ -126,6 +111,25 @@ def new(root: str, index: Index) -> Node:
         assert False
     else:
         return root_node
+
+
+def new(root: str, index: Index) -> Node:
+    acc: SimpleQueue = SimpleQueue()
+    stack: SimpleQueue = SimpleQueue()
+
+    def drain() -> Iterator[str]:
+        while not stack.empty():
+            yield stack.get()
+
+    _new((root,), index=index, acc=acc, stack=stack)
+    while not stack.empty():
+        tasks = (
+            pool.submit(_new, roots=paths, index=index, acc=acc, stack=stack)
+            for paths in chunk(drain(), n=WALK_PARALLELISM_FACTOR)
+        )
+        gather(*tasks)
+
+    return _join(acc)
 
 
 def _update(root: Node, index: Index, paths: AbstractSet[str]) -> Node:
