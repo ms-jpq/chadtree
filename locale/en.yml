@@ -20,6 +20,9 @@
 "operation not permitted on root": |-
   ⚠️  Operation not permitted on root or parent(s) of root
 
+"render time warning": |-
+  ⚠️  Warning: Render time is slow @${duration}s, consider closing some folders
+
 "copy": |-
   🖇
 
