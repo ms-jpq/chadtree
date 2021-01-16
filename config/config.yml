@@ -1,100 +1,109 @@
 ---
-follow: true
-
-page_increment: 5
-
-keymap:
-  bigger:
+ignore:
+  name:
+  - .DS_Store
+  - .git
+  path: []
+options:
+  follow: true
+  keymap:
+    bigger:
     - +
-    - "="
-  change_dir:
+    - '='
+    change_dir:
     - b
-  change_focus:
+    change_focus:
     - c
-  change_focus_up:
+    change_focus_up:
     - C
-  clear_filter:
+    clear_filter:
     - F
     - E
-  clear_selection:
+    clear_selection:
     - S
-  collapse:
+    collapse:
     - <s-tab>
-    - "`"
-  copy:
+    - '`'
+    copy:
     - p
-  copy_name:
+    copy_name:
     - y
-  cut:
+    cut:
     - x
-  delete:
+    delete:
     - d
-  filter:
+    filter:
     - f
-  h_split:
+    h_split:
     - W
-  jump_to_current:
+    jump_to_current:
     - J
-  new:
+    new:
     - a
-  open_sys:
+    open_sys:
     - o
-  primary:
+    primary:
     - <enter>
-  quit:
+    quit:
     - q
-  refocus:
-    - "~"
-  refresh:
+    refocus:
+    - '~'
+    refresh:
     - <c-r>
-  rename:
+    rename:
     - r
-  secondary:
+    secondary:
     - <tab>
     - <2-leftmouse>
-  select:
+    select:
     - s
-  smaller:
-    - "-"
+    smaller:
+    - '-'
     - _
-  stat:
+    stat:
     - K
-  tertiary:
+    tertiary:
     - <m-enter>
     - <middlemouse>
-  toggle_follow: []
-  toggle_hidden:
+    toggle_follow: []
+    toggle_hidden:
     - .
-  toggle_version_control: []
-  trash:
+    toggle_version_control: []
+    trash:
     - t
-  v_split:
+    v_split:
     - w
-
-lang: null
-
-mimetypes:
-  ignore_exts:
+  lang: null
+  mimetypes:
+    ignore_exts:
     - .ts
-  warn:
+    warn:
     - audio
     - font
     - image
     - video
-
-open_left: true
-polling_rate: 2.0
-session: true
-show_hidden: false
-
-sort_by:
+  open_left: true
+  page_increment: 5
+  polling_rate: 2.0
+  session: true
+  show_hidden: false
+  sort_by:
   - is_folder
   - ext
   - fname
-
-use_icons: true
-
-version_control:
-  enable: true
-
-width: 40
+  use_icons: true
+  version_control:
+    enable: true
+  width: 40
+view:
+  highlights:
+    quickfix: Label
+    version_control: Comment
+  time_format: '%Y-%m-%d %H:%M'
+  window_options:
+    cursorline: true
+    number: false
+    relativenumber: false
+    signcolumn: 'no'
+    winfixwidth: true
+    wrap: false

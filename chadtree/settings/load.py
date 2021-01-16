@@ -26,21 +26,15 @@ from ..consts import (
     IGNORES_VAR,
     SETTINGS_VAR,
     VIEW_VAR,
-    VIEW_YML,
 )
 from ..view.highlight import gen_hl
 from ..view.ls_colours import parse_ls_colours
-from ..view.types import (
-    Sortby,
-    UserColourMapping,
-    UserHLGroups,
-    UserIcons,
-)
+from ..view.types import Sortby, UserColourMapping, UserHLGroups, UserIcons
 from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
 
 
 @dataclass(frozen=True)
-class _UserConfig:
+class _UserOptions:
     follow: bool
     keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]
@@ -64,6 +58,13 @@ class _UserView:
 
 
 @dataclass(frozen=True)
+class _UserConfig:
+    view: _UserView
+    options: _UserOptions
+    ignore: UserIgnore
+
+
+@dataclass(frozen=True)
 class _UserColours:
     eight_bit: Mapping[str, UserColourMapping]
 
@@ -74,22 +75,21 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_ignores = nvim.vars.get(IGNORES_VAR, {})
     user_colours = nvim.vars.get(COLOURS_VAR, {})
 
-    config: _UserConfig = decode(
-        _UserConfig,
-        merge(safe_load(CONFIG_YML.read_bytes()), user_config, replace=True),
+    config: _UserConfig = decode(_UserConfig, safe_load(CONFIG_YML.read_bytes()))
+    options: _UserOptions = decode(
+        _UserOptions,
+        merge(config.options, user_config, replace=True),
     )
-    view: _UserView = decode(
-        _UserView, merge(safe_load(VIEW_YML.read_bytes()), user_view, replace=True)
-    )
+    view: _UserView = decode(_UserView, merge(config.view, user_view, replace=True))
     ignore: UserIgnore = decode(
         UserIgnore,
-        merge({"name": (), "path": ()}, user_ignores, replace=True),
+        merge(config.ignore, user_ignores, replace=True),
     )
     colours: _UserColours = decode(
         _UserColours, merge(safe_load(CUSTOM_COLOURS_YML.read_bytes()), user_colours)
     )
     icons: UserIcons = decode(
-        UserIcons, load(ICON_LOOKUP_JSON[config.use_icons].open())
+        UserIcons, load(ICON_LOOKUP_JSON[options.use_icons].open())
     )
     github_colours: Mapping[str, str] = decode(
         Mapping[str, str], load(COLOURS_JSON.open())
@@ -105,36 +105,36 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     view_opts = ViewOptions(
         hl_context=hl_context,
         icons=icons,
-        sort_by=config.sort_by,
-        use_icons=bool(config.use_icons),
+        sort_by=options.sort_by,
+        use_icons=bool(options.use_icons),
         time_fmt=view.time_format,
     )
 
-    keymap = {f"CHAD{k}": v for k, v in config.keymap.items()}
+    keymap = {f"CHAD{k}": v for k, v in options.keymap.items()}
     legal_keys = {name for name, _ in specs}
     extra_keys = keymap.keys() - legal_keys
     if extra_keys:
         raise DecodeError(
-            path=(_UserConfig, "<field 'keymap'>"),
+            path=(_UserOptions, "<field 'keymap'>"),
             actual=None,
             missing_keys=(),
             extra_keys=sorted((key[len("CHAD") :] for key in extra_keys), key=strxfrm),
         )
 
     settings = Settings(
-        follow=config.follow,
+        follow=options.follow,
         ignores=ignore,
         keymap=keymap,
-        lang=config.lang,
-        mime=config.mimetypes,
-        open_left=config.open_left,
-        page_increment=config.page_increment,
-        polling_rate=float(config.polling_rate),
-        session=config.session,
-        show_hidden=config.show_hidden,
-        version_ctl=config.version_control,
+        lang=options.lang,
+        mime=options.mimetypes,
+        open_left=options.open_left,
+        page_increment=options.page_increment,
+        polling_rate=float(options.polling_rate),
+        session=options.session,
+        show_hidden=options.show_hidden,
+        version_ctl=options.version_control,
         view=view_opts,
-        width=config.width,
+        width=options.width,
         win_local_opts=view.window_options,
     )
 
