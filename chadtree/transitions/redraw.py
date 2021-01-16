@@ -1,15 +1,15 @@
 from typing import Optional, Sequence, cast
 
 from pynvim import Nvim
-from pynvim_pp.api import cur_win, win_get_cursor, buf_line_count
+from pynvim_pp.api import buf_line_count, cur_win, win_get_cursor
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.operators import operator_marks
+from std2.timeit import timeit
 
 from ..consts import FM_NAMESPACE
 from ..state.types import State
 from ..view.types import Badge, Highlight
 from .shared.wm import find_fm_windows
-from std2.timeit import timeit
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> float:
