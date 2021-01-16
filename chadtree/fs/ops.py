@@ -14,6 +14,7 @@ from stat import S_ISDIR, S_ISLNK, filemode
 from typing import AbstractSet, Iterable, Mapping, Optional
 
 from ..consts import FILE_MODE, FOLDER_MODE
+from ..registry import pool
 
 
 def ancestors(path: str) -> AbstractSet[str]:
@@ -79,40 +80,59 @@ def fs_stat(path: str) -> FSstat:
     return fs_stat
 
 
-def new(dest: str) -> None:
-    if dest.endswith(sep):
-        makedirs(dest, mode=FOLDER_MODE, exist_ok=True)
+def _new(path: str) -> None:
+    if path.endswith(sep):
+        makedirs(path, mode=FOLDER_MODE, exist_ok=True)
     else:
-        parent = dirname(dest)
+        parent = dirname(path)
         makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
-        Path(dest).touch(mode=FILE_MODE, exist_ok=True)
+        Path(path).touch(mode=FILE_MODE, exist_ok=True)
+
+
+def new(paths: Iterable[str]) -> None:
+    pool.map(_new, paths)
+
+
+def _rename(src: str, dest: str) -> None:
+    parent = dirname(dest)
+    makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
+    mv(src, dest)
 
 
 def rename(operations: Mapping[str, str]) -> None:
-    for src, dest in operations.items():
-        parent = dirname(dest)
-        makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
-        mv(src, dest)
+    _op = lambda op: _rename(*op)
+    pool.map(_op, operations.items())
+
+
+def _remove(path: str) -> None:
+    stats = stat(path, follow_symlinks=False)
+    if S_ISDIR(stats.st_mode):
+        rmtree(path)
+    else:
+        rm(path)
 
 
 def remove(paths: Iterable[str]) -> None:
-    for path in paths:
-        stats = stat(path, follow_symlinks=False)
-        if S_ISDIR(stats.st_mode):
-            rmtree(path)
-        else:
-            rm(path)
+    pool.map(_remove, paths)
+
+
+def _cut(src: str, dest: str) -> None:
+    mv(src, dest)
 
 
 def cut(operations: Mapping[str, str]) -> None:
-    for src, dest in operations.items():
-        mv(src, dest)
+    _op = lambda op: _cut(*op)
+    pool.map(_op, operations.items())
+
+
+def _copy(src: str, dest: str) -> None:
+    stats = stat(src, follow_symlinks=False)
+    if S_ISDIR(stats.st_mode):
+        copytree(src, dest)
+    else:
+        copy2(src, dest)
 
 
 def copy(operations: Mapping[str, str]) -> None:
-    for src, dest in operations.items():
-        stats = stat(src, follow_symlinks=False)
-        if S_ISDIR(stats.st_mode):
-            copytree(src, dest)
-        else:
-            copy2(src, dest)
+    _op = lambda op: _copy(*op)
+    pool.map(_op, operations.items())

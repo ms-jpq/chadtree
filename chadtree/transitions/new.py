@@ -42,7 +42,7 @@ def _new(
                 return None
             else:
                 try:
-                    new(path)
+                    new((path,))
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
