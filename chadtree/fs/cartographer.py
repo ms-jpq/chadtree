@@ -26,6 +26,7 @@ from typing import (
 from std2.concurrent.futures import gather
 from std2.itertools import chunk
 
+from ..consts import WALK_PARALLELISM_FACTOR
 from ..registry import pool
 from ..state.types import Index
 from .types import Mode, Node
@@ -101,7 +102,7 @@ def new(root: str, index: Index) -> Node:
     while not stack.empty():
         tasks = (
             pool.submit(_new, roots=paths, index=index, acc=nodes, stack=stack)
-            for paths in chunk(drain(), n=10)
+            for paths in chunk(drain(), n=WALK_PARALLELISM_FACTOR)
         )
         gather(*tasks)
 
