@@ -69,6 +69,10 @@ class _UserColours:
     eight_bit: Mapping[str, UserColourMapping]
 
 
+def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
+    return sorted((key[len("CHAD") :] for key in keys), key=strxfrm)
+
+
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
     user_view = nvim.vars.get(VIEW_VAR, {})
@@ -116,12 +120,13 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     keymap = {f"CHAD{k}": v for k, v in options.keymap.items()}
     legal_keys = {name for name, _ in specs}
     extra_keys = keymap.keys() - legal_keys
+
     if extra_keys:
         raise DecodeError(
-            path=(_UserOptions, "<field 'keymap'>"),
+            path=(_UserOptions, _key_sort(legal_keys)),
             actual=None,
             missing_keys=(),
-            extra_keys=sorted((key[len("CHAD") :] for key in extra_keys), key=strxfrm),
+            extra_keys=_key_sort(extra_keys),
         )
 
     settings = Settings(
