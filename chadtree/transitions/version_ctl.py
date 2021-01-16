@@ -27,18 +27,19 @@ def vc_refresh(nvim: Nvim, state: State, settings: Settings) -> None:
     VC Refresh
     """
 
-    cwd = get_cwd(nvim)
+    if state.enable_vc:
+        cwd = get_cwd(nvim)
 
-    def cont() -> None:
-        if _lock.locked():
-            pass
-        else:
-            with _lock:
-                try:
-                    vc = status(cwd)
-                except Exception as e:
-                    log.exception("%s", e)
-                else:
-                    enqueue_event(_set_vc, vc)
+        def cont() -> None:
+            if _lock.locked():
+                pass
+            else:
+                with _lock:
+                    try:
+                        vc = status(cwd)
+                    except Exception as e:
+                        log.exception("%s", e)
+                    else:
+                        enqueue_event(_set_vc, vc)
 
-    pool.submit(cont)
+        pool.submit(cont)
