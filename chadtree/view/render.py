@@ -40,13 +40,11 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     return comp
 
 
-def _ignore(settings: Settings, vc: VCStatus) -> Callable[[Node], bool]:
+def _ignore(settings: Settings) -> Callable[[Node], bool]:
     def drop(node: Node) -> bool:
-        ignore = (
-            node.path in vc.ignored
-            or any(fnmatch(node.name, pattern) for pattern in settings.ignores.name)
-            or any(fnmatch(node.path, pattern) for pattern in settings.ignores.path)
-        )
+        ignore = any(
+            fnmatch(node.name, pattern) for pattern in settings.ignores.name
+        ) or any(fnmatch(node.path, pattern) for pattern in settings.ignores.path)
         return ignore
 
     return drop
@@ -186,7 +184,7 @@ def render(
     drop = (
         cast(Callable[[Node], bool], constantly(False))
         if show_hidden
-        else _ignore(settings, vc=vc)
+        else _ignore(settings)
     )
     show = _paint(
         settings, index=index, selection=selection, qf=qf, vc=vc, current=current
