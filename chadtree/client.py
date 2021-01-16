@@ -2,9 +2,7 @@ from asyncio.events import AbstractEventLoop
 from typing import Any, MutableMapping, Optional, cast
 
 from pynvim import Nvim
-from pynvim_pp.atomic import Atomic
 from pynvim_pp.client import Client
-from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
@@ -26,17 +24,7 @@ from .transitions.redraw import redraw
 from .transitions.schedule_update import schedule_update
 from .transitions.types import Stage
 from .transitions.version_ctl import vc_refresh
-from .view.types import HLcontext
-
-
-def _higlight(ctx: HLcontext) -> Atomic:
-    return highlight(
-        *ctx.github_exts.values(),
-        *ctx.ext_lookup.values(),
-        *ctx.mode_lookup_pre.values(),
-        *ctx.mode_lookup_post.values(),
-        *ctx.name_lookup.values()
-    )
+from .view.highlight import hl_instructions
 
 
 class ChadClient(Client):
@@ -57,7 +45,7 @@ class ChadClient(Client):
             atomic, specs = rpc.drain(nvim.channel_id)
             self._handlers.update(specs)
             self._settings = initial_settings(nvim, specs)
-            hl = _higlight(self._settings.view.hl_context)
+            hl = hl_instructions(self._settings.view.hl_context)
             (atomic + autocmd.drain() + hl).commit(nvim)
 
             self._state = initial_state(nvim, settings=self._settings)
