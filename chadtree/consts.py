@@ -21,7 +21,6 @@ FM_HL_PREFIX = "chadtree"
 
 
 SETTINGS_VAR = "chadtree_settings"
-IGNORES_VAR = "chadtree_ignores"
 
 
 CONFIG_YML = _CONFIG / "config.yml"

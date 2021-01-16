@@ -10,7 +10,6 @@ from typing import (
     Optional,
     Set,
     Tuple,
-    TypeVar,
     Union,
     cast,
 )
@@ -19,9 +18,7 @@ from uuid import uuid4
 from pynvim_pp.highlight import HLgroup
 
 from ..consts import FM_HL_PREFIX
-from .types import HLcontext, Mode, UserHLGroups
-
-T = TypeVar("T")
+from .types import Mode
 
 
 class _Style(IntEnum):
@@ -268,32 +265,32 @@ def parse_lsc() -> LSC:
     ls_colours = environ.get("LS_COLORS", "")
 
     hl_lookup = {
-        k: _parseHLGroup(_parse_styling(v))
-        for k, _, v in (
+        key: _parseHLGroup(_parse_styling(val))
+        for key, _, val in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")
         )
     }
 
     mode_pre = {
-        k: v
-        for k, v in ((v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_PRE_TABLE.items())
-        if v
+        key: val
+        for key, val in (
+            (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_PRE_TABLE.items()
+        )
+        if val
     }
 
     mode_post = {
-        k: v
-        for k, v in (
+        key: val
+        for key, val in (
             (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_POST_TABLE.items()
         )
-        if v
+        if val
     }
 
-    exts = {
-        key[1:]: hl_lookup.pop(key)
-        for key in (
-            key for key in hl_lookup if key.startswith("*.") and key.count(".") == 1
-        )
-    }
+    _ext_keys = tuple(
+        key for key in hl_lookup if key.startswith("*.") and key.count(".") == 1
+    )
+    exts = {key[1:]: hl_lookup.pop(key) for key in _ext_keys}
 
     lsc = LSC(exts=exts, mode_pre=mode_pre, mode_post=mode_post, name_glob=hl_lookup)
     return lsc

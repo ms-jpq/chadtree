@@ -13,7 +13,7 @@ from typing import (
 
 from pynvim.api.nvim import Nvim
 from pynvim_pp.rpc import RpcSpec
-from std2.pickle import DecodeError, decode, encode
+from std2.pickle import DecodeError, decode
 from std2.tree import merge
 from yaml import safe_load
 
@@ -22,12 +22,11 @@ from ..consts import (
     FM_HL_PREFIX,
     GITHUB_COLOURS_JSON,
     ICON_LOOKUP_JSON,
-    IGNORES_VAR,
     NERD_COLOURS_JSON,
     SETTINGS_VAR,
 )
 from ..view.highlight import gen_hl
-from ..view.ls_colours import parse_ls_colours
+from ..view.parse_colours import parse_colours
 from ..view.types import Sortby, UserHLGroups, UserIcons
 from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
 
@@ -78,12 +77,12 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
 
-    config: _UserConfig = decode(_UserConfig, safe_load(CONFIG_YML.read_bytes()))
-    options: _UserOptions = decode(
-        _UserOptions,
-        merge(encode(config.options), user_config, replace=True),
+    config: _UserConfig = decode(
+        _UserConfig,
+        merge(safe_load(CONFIG_YML.read_bytes()), user_config, replace=True),
     )
-    view: _UserView = decode(_UserView, merge(encode(config.view), replace=True))
+    options, view = config.options, config.view
+
     icons: UserIcons = decode(
         UserIcons, loads(ICON_LOOKUP_JSON[options.use_icons].read_text())
     )
@@ -99,8 +98,8 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     name_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_exact)
     name_glob = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_glob)
 
-    hl_context = parse_ls_colours(
-        use_ls_colours=use_ls_colours,
+    hl_context = parse_colours(
+        use_ls_colours=view.use_ls_colours,
         particular_mappings=view.highlights,
         ext_colours=github_exts,
         ext_lookup=ext_lookup,
