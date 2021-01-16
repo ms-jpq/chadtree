@@ -64,6 +64,7 @@ class ChadClient(Client):
 
         def sched() -> None:
             period = cast(Settings, self._settings).polling_rate
+            enqueue_event(vc_refresh)
             for _ in ticker(period, immediately=False):
                 enqueue_event(schedule_update)
                 enqueue_event(vc_refresh)
