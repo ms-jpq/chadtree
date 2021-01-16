@@ -1,4 +1,5 @@
 from asyncio.events import AbstractEventLoop
+from sys import stderr
 from typing import Any, MutableMapping, Optional, cast
 
 from pynvim import Nvim
@@ -6,6 +7,7 @@ from pynvim_pp.client import Client
 from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
+from std2.pickle import DecodeError
 from std2.sched import ticker
 from std2.timeit import timeit
 from std2.types import AnyFun
@@ -53,7 +55,11 @@ class ChadClient(Client):
 
         try:
             threadsafe_call(nvim, cont)
-        except Exception:
+        except DecodeError as e:
+            print(e, file=stderr)
+            return 1
+        except Exception as e:
+            log.exception("%s", e)
             return 1
 
         def sched() -> None:
