@@ -5,7 +5,7 @@ from datetime import datetime
 from json import dump, load
 from pathlib import Path
 from subprocess import check_call, check_output, run
-from typing import AbstractSet, Any, Iterator, Mapping, Optional, Sequence
+from typing import Any, Iterator, Mapping, Optional, Sequence
 
 from std2.pickle import decode, encode
 from std2.tree import merge, recur_sort
@@ -27,7 +27,7 @@ LANG_COLOURS_JSON = (ARTIFACTS / "github_colours").with_suffix(".json")
 TEMP_JSON = (TEMP / "icons").with_suffix(".json")
 
 SRC_ICONS = ("unicode_icons", "emoji_icons")
-SRC_COLOURS = ("colours",)
+SRC_COLOUR = "colours"
 
 
 @dataclass(frozen=True)
@@ -57,10 +57,24 @@ class IconLoadFormat:
 @dataclass(frozen=True)
 class IconDumpFormat:
     type: Mapping[str, str]
-    name_exact: AbstractSet[str]
-    name_glob: AbstractSet[str]
+    name_exact: Mapping[str, str]
+    name_glob: Mapping[str, str]
     default_icon: str
     folder: IconFolderFormat
+
+
+@dataclass(frozen=True)
+class ColoursLoadFormat:
+    extensions: Mapping[str, str]
+    exact: Mapping[str, str]
+    glob: Mapping[str, str]
+
+
+@dataclass(frozen=True)
+class ColoursDumpFormat:
+    type: Mapping[str, str]
+    name_exact: Mapping[str, str]
+    name_glob: Mapping[str, str]
 
 
 def fetch(uri: str) -> str:
@@ -80,16 +94,32 @@ def spit_json(path: Path, json: Any) -> None:
         dump(sorted_json, fd, ensure_ascii=False, check_circular=False, indent=2)
 
 
+def process_exts(exts: Mapping[str, str]) -> Mapping[str, str]:
+    return {f".{k}": v for k, v in exts.items()}
+
+
+def process_glob(glob: Mapping[str, str]) -> Mapping[str, str]:
+    return {k.rstrip("$").replace(r"\.", "."): v for k, v in glob.items()}
+
+
 def process_icons(json: Any) -> IconDumpFormat:
     loaded: IconLoadFormat = decode(IconLoadFormat, json)
     dump = IconDumpFormat(
-        type={f".{k}": v for k, v in loaded.extensions.items()},
+        type=process_exts(loaded.extensions),
         name_exact=loaded.exact,
-        name_glob={
-            k.rstrip("$").replace(r"\.", "."): v for k, v in loaded.glob.items()
-        },
+        name_glob=process_glob(loaded.glob),
         default_icon=loaded.default,
         folder=loaded.folder,
+    )
+    return dump
+
+
+def process_colours(json: Any) -> ColoursDumpFormat:
+    loaded: ColoursLoadFormat = decode(ColoursLoadFormat, json)
+    dump = ColoursDumpFormat(
+        type=process_exts(loaded.extensions),
+        name_exact=loaded.exact,
+        name_glob=process_glob(loaded.glob),
     )
     return dump
 
@@ -121,9 +151,11 @@ def devicons() -> None:
     json = safe_load((ASSETS / ascii_json).with_suffix(".base.yml").read_bytes())
     spit_json((ARTIFACTS / ascii_json).with_suffix(".json"), json)
 
-    # for colour in SRC_COLOURS:
-    #     src = f"{container}:/root/{colour}.json"
-    #     check_call(("docker", "cp", src, str(TEMP_JSON)))
+    src = f"{container}:/root/{SRC_COLOUR}.json"
+    dest = (ARTIFACTS / SRC_COLOUR).with_suffix(".json")
+    check_call(("docker", "cp", src, str(TEMP_JSON)))
+    parsed2 = process_colours(load(TEMP_JSON.open()))
+    spit_json(dest, encode(parsed2))
 
     check_call(("docker", "rm", container))
 
@@ -175,7 +207,7 @@ def git_alert() -> None:
 def main() -> None:
     devicons()
     github_colours()
-    # git_alert()
+    git_alert()
 
 
 main()

@@ -27,9 +27,9 @@ local export_colours = function(export_name)
   local glob = vim.g.NERDTreePatternMatchHighlightColor
 
   local data = {
-    extensions,
-    exact,
-    glob
+    extensions = extensions,
+    exact = exact,
+    glob = glob
   }
   local json = vim.fn.json_encode(data)
   vim.fn.writefile({json}, export_name)
