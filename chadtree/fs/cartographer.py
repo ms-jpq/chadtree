@@ -74,7 +74,7 @@ def _fs_stat(path: str) -> AbstractSet[Mode]:
 
 
 def _new(
-    roots: Iterable[str], index: Index, acc: SimpleQueue, stack: SimpleQueue
+    roots: Iterable[str], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
 ) -> None:
     for root in roots:
         mode = _fs_stat(root)
@@ -87,7 +87,7 @@ def _new(
         if root in index:
             for item in listdir(root):
                 path = join(root, item)
-                stack.put(path)
+                bfs_q.put(path)
 
 
 def _join(nodes: SimpleQueue) -> Node:
@@ -115,16 +115,16 @@ def _join(nodes: SimpleQueue) -> Node:
 
 def new(root: str, index: Index) -> Node:
     acc: SimpleQueue = SimpleQueue()
-    stack: SimpleQueue = SimpleQueue()
+    bfs_q: SimpleQueue = SimpleQueue()
 
     def drain() -> Iterator[str]:
-        while not stack.empty():
-            yield stack.get()
+        while not bfs_q.empty():
+            yield bfs_q.get()
 
-    _new((root,), index=index, acc=acc, stack=stack)
-    while not stack.empty():
+    _new((root,), index=index, acc=acc, bfs_q=bfs_q)
+    while not bfs_q.empty():
         tasks = (
-            pool.submit(_new, roots=paths, index=index, acc=acc, stack=stack)
+            pool.submit(_new, roots=paths, index=index, acc=acc, bfs_q=bfs_q)
             for paths in chunk(drain(), n=WALK_PARALLELISM_FACTOR)
         )
         gather(*tasks)
