@@ -1,27 +1,17 @@
-from contextlib import contextmanager
 from os.path import exists
-from typing import AbstractSet, Iterator, Optional
+from typing import AbstractSet, Optional
 
-from chadtree.version_ctl.types import VCStatus
 from pynvim import Nvim
-from pynvim_pp.lib import write
 from std2.types import Void
 
 from ...fs.ops import ancestors
 from ...nvim.quickfix import quickfix
-from ...settings.localization import LANG
 from ...settings.types import Settings
 from ...state.next import forward
 from ...state.types import Selection, State
+from ...version_ctl.types import VCStatus
 from ..shared.wm import find_current_buffer_name
 from ..types import Stage
-
-
-@contextmanager
-def with_manual(nvim: Nvim) -> Iterator[None]:
-    write(nvim, LANG("hourglass"))
-    yield None
-    write(nvim, LANG("ok_sym"))
 
 
 def refresh(
