@@ -1,7 +1,7 @@
 from typing import Optional, Sequence, cast
 
 from pynvim import Nvim
-from pynvim_pp.api import cur_win, win_get_cursor
+from pynvim_pp.api import cur_win, win_get_cursor, buf_line_count
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.operators import operator_marks
 
@@ -25,6 +25,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     ns = nvim.api.create_namespace(FM_NAMESPACE)
 
     for win, buf in find_fm_windows(nvim):
+        count = buf_line_count(nvim, buf=buf)
         row, col = win_get_cursor(nvim, win=win)
         (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
 
@@ -34,8 +35,10 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             new_row = current_row + 1
         elif row >= len(lines):
             new_row = len(lines)
-        else:
+        elif count != len(lines):
             new_row = row + 1
+        else:
+            new_row = None
 
         atomic = Atomic()
         atomic.buf_clear_namespace(buf, ns, 0, -1)
