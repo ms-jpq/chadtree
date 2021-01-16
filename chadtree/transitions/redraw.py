@@ -30,7 +30,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
         (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
 
         if focus_row is not None:
-            new_row = focus_row + 1
+            new_row: Optional[int] = focus_row + 1
         elif win != cwin and current_row is not None:
             new_row = current_row + 1
         elif row >= len(lines):

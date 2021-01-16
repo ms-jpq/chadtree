@@ -1,12 +1,14 @@
 ---
 follow: true
 
+page_increment: 5
+
 keymap:
   bigger:
     - +
     - "="
   change_dir:
-    - z
+    - b
   change_focus:
     - c
   change_focus_up:

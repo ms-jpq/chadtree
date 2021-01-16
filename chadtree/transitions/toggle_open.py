@@ -72,7 +72,7 @@ def _toggle_fm_window(
     else:
         buf = next(find_fm_buffers(nvim), None)
         if buf is None:
-            buf = new_fm_buffer(nvim, keymap=settings.keymap)
+            buf = new_fm_buffer(nvim, settings=settings)
 
         win = new_window(nvim, open_left=settings.open_left, width=state.width)
         for key, val in settings.win_local_opts.items():

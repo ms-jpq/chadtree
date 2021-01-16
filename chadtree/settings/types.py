@@ -25,6 +25,7 @@ class UserIgnore:
 class Settings:
     follow: bool
     ignores: UserIgnore
+    page_increment: int
     keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]
     mime: MimetypeOptions

@@ -1,4 +1,4 @@
-from typing import AbstractSet, Iterator, Mapping, Tuple
+from typing import AbstractSet, Iterator, Tuple
 
 from pynvim.api import Buffer, Nvim, Window
 from pynvim_pp.api import (
@@ -22,6 +22,7 @@ from pynvim_pp.keymap import Keymap
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
+from ...settings.types import Settings
 
 
 def is_fm_buffer(nvim: Nvim, buf: Buffer) -> bool:
@@ -94,13 +95,15 @@ def find_current_buffer_name(nvim: Nvim) -> str:
     return name
 
 
-def new_fm_buffer(nvim: Nvim, keymap: Mapping[str, AbstractSet[str]]) -> Buffer:
+def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
     buf = create_buf(nvim, listed=False, scratch=True, wipe=False, nofile=True)
     buf_set_option(nvim, buf=buf, key="modifiable", val=False)
     buf_set_option(nvim, buf=buf, key="filetype", val=FM_FILETYPE)
 
     km = Keymap()
-    for function, mappings in keymap.items():
+    km.n("{") << f"{settings.page_increment}<up>"
+    km.n("}") << f"{settings.page_increment}<down>"
+    for function, mappings in settings.keymap.items():
         for mapping in mappings:
             km.n(
                 mapping, noremap=True, silent=True, nowait=True

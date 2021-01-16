@@ -48,6 +48,7 @@ class _UserConfig:
     lang: Optional[str]
     mimetypes: MimetypeOptions
     open_left: bool
+    page_increment: int
     polling_rate: SupportsFloat
     session: bool
     show_hidden: bool
@@ -129,6 +130,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         lang=config.lang,
         mime=config.mimetypes,
         open_left=config.open_left,
+        page_increment=config.page_increment,
         polling_rate=float(config.polling_rate),
         session=config.session,
         show_hidden=config.show_hidden,
