@@ -158,7 +158,7 @@ def _paint(
         if qf_count:
             yield Badge(text=f"({qf_count})", group=particular_mappings.quickfix)
         if stat:
-            yield Badge(text=f"[{stat}]", group=particular_mappings.version_control)
+            yield Badge(text=f" [{stat}]", group=particular_mappings.version_control)
 
     def gen_highlights(
         node: Node, pre: str, icon: str, name: str, ignored: bool

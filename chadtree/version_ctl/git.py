@@ -6,16 +6,7 @@ from shlex import join as sh_join
 from shutil import which
 from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
-from typing import (
-    Iterable,
-    Iterator,
-    Mapping,
-    MutableMapping,
-    MutableSequence,
-    Sequence,
-    Set,
-    Tuple,
-)
+from typing import Iterable, Iterator, MutableMapping, MutableSequence, Set, Tuple
 
 from std2.concurrent.futures import gather
 from std2.string import removeprefix, removesuffix
@@ -28,6 +19,8 @@ _WHITE_SPACES = {*whitespace}
 _GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain", "-z")
 _GIT_SUBMODULE_MARKER = "Entering "
 _GIT_ENV = {"LC_ALL": "C"}
+_SUBMODULE_MARKER = "S"
+_IGNORED_MARKER = "I"
 
 
 def _root(cwd: str) -> str:
@@ -88,7 +81,7 @@ def _stat_sub_modules(cwd: str) -> Iterator[Tuple[str, str]]:
                         sub_module = removesuffix(
                             removeprefix(quoted, prefix="'"), suffix="'"
                         )
-                        yield "S", sub_module
+                        yield _SUBMODULE_MARKER, sub_module
 
             elif char == "\0":
                 line = "".join(acc)
@@ -110,7 +103,7 @@ def _stat_sub_modules(cwd: str) -> Iterator[Tuple[str, str]]:
 
 def _stat_name(stat: str) -> str:
     if stat == "!!":
-        return "I"
+        return _IGNORED_MARKER
     else:
         return stat
 
@@ -127,8 +120,9 @@ def _parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
             ignored.add(path)
         else:
             for ancestor in ancestors(path):
-                aggregate = directories.setdefault(ancestor, set())
-                aggregate.update(stat)
+                parents = directories.setdefault(ancestor, set())
+                if stat != _SUBMODULE_MARKER:
+                    parents.update(stat)
 
     for directory, syms in directories.items():
         pre_existing = {*status.get(directory, "")}
