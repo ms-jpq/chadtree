@@ -1,98 +1,98 @@
 ---
 ignore:
   name:
-  - .DS_Store
-  - .directory
-  - thumbs.db
-  - .git
+    - .DS_Store
+    - .directory
+    - thumbs.db
+    - .git
   path: []
 options:
   follow: true
   keymap:
     bigger:
-    - +
-    - '='
+      - +
+      - "="
     change_dir:
-    - b
+      - b
     change_focus:
-    - c
+      - c
     change_focus_up:
-    - C
+      - C
     clear_filter:
-    - F
-    - E
+      - F
+      - E
     clear_selection:
-    - S
+      - S
     collapse:
-    - <s-tab>
-    - '`'
+      - <s-tab>
+      - "`"
     copy:
-    - p
+      - p
     copy_name:
-    - y
+      - y
     cut:
-    - x
+      - x
     delete:
-    - d
+      - d
     filter:
-    - f
+      - f
     h_split:
-    - W
+      - W
     jump_to_current:
-    - J
+      - J
     new:
-    - a
+      - a
     open_sys:
-    - o
+      - o
     primary:
-    - <enter>
+      - <enter>
     quit:
-    - q
+      - q
     refocus:
-    - '~'
+      - "~"
     refresh:
-    - <c-r>
+      - <c-r>
     rename:
-    - r
+      - r
     secondary:
-    - <tab>
-    - <2-leftmouse>
+      - <tab>
+      - <2-leftmouse>
     select:
-    - s
+      - s
     smaller:
-    - '-'
-    - _
+      - "-"
+      - _
     stat:
-    - K
+      - K
     tertiary:
-    - <m-enter>
-    - <middlemouse>
+      - <m-enter>
+      - <middlemouse>
     toggle_follow: []
     toggle_hidden:
-    - .
+      - .
     toggle_version_control: []
     trash:
-    - t
+      - t
     v_split:
-    - w
+      - w
   lang: null
   mimetypes:
     ignore_exts:
-    - .ts
+      - .ts
     warn:
-    - audio
-    - font
-    - image
-    - video
+      - audio
+      - font
+      - image
+      - video
   open_left: true
   page_increment: 5
   polling_rate: 2.0
   session: true
   show_hidden: false
   sort_by:
-  - is_folder
-  - ext
-  - fname
+    - is_folder
+    - ext
+    - fname
   use_icons: true
   version_control:
     enable: true
@@ -103,11 +103,11 @@ view:
     ignored: Comment
     quickfix: Label
     version_control: Comment
-  time_format: '%Y-%m-%d %H:%M'
+  time_format: "%Y-%m-%d %H:%M"
   window_options:
     cursorline: true
     number: false
     relativenumber: false
-    signcolumn: 'no'
+    signcolumn: "no"
     winfixwidth: true
     wrap: false
