@@ -10,10 +10,10 @@ from .shared.refresh import refresh
 from .types import Stage
 
 
-
 @rpc(blocking=False)
 def schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     try:
-        return refresh(nvim, state=state, settings=settings)
+        stage = refresh(nvim, state=state, settings=settings)
+        return Stage(stage.state, focus=stage.focus)
     except NvimError:
         return None

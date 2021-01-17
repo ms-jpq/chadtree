@@ -1,8 +1,10 @@
 from asyncio.events import AbstractEventLoop
+from contextlib import nullcontext, suppress
 from sys import stderr
 from typing import Any, MutableMapping, Optional, cast
 
 from pynvim import Nvim
+from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call, write
@@ -83,7 +85,8 @@ class ChadClient(Client):
                 )
                 if stage:
                     self._state = stage.state
-                    with timeit() as t:
+                    mgr = suppress(NvimError) if stage.silent else nullcontext()
+                    with mgr, timeit() as t:
                         redraw(nvim, state=self._state, focus=stage.focus)
                     duration = t()
                     if duration >= WARN_DURATION:
