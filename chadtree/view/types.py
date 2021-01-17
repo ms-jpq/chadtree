@@ -7,6 +7,11 @@ from pynvim_pp.highlight import HLgroup
 from ..fs.types import Mode, Node
 
 
+class ColourChoice(Enum):
+    ls_colours = auto()
+    nerd_tree = auto()
+
+
 @dataclass(frozen=True)
 class NerdColours:
     name_exact: Mapping[str, str]

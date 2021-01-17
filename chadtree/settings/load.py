@@ -25,7 +25,14 @@ from ..consts import (
     SETTINGS_VAR,
 )
 from ..view.parse_colours import parse_colours
-from ..view.types import NerdColours, Sortby, UserHLGroups, UserIcons, GithubColours
+from ..view.types import (
+    ColourChoice,
+    GithubColours,
+    NerdColours,
+    Sortby,
+    UserHLGroups,
+    UserIcons,
+)
 from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
 
 
@@ -48,10 +55,10 @@ class _UserOptions:
 
 @dataclass(frozen=True)
 class _UserView:
+    colours: ColourChoice
     highlights: UserHLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
-    use_ls_colours: bool
 
 
 @dataclass(frozen=True)
@@ -87,7 +94,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
 
     hl_context = parse_colours(
-        use_ls_colours=view.use_ls_colours,
+        colours=view.colours,
         light_theme=light_theme,
         particular_mappings=view.highlights,
         github_colours=github_colours,

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
 from itertools import chain, repeat
-from os import environ
 from typing import (
     Callable,
     Iterator,
@@ -257,9 +256,7 @@ def _parseHLGroup(styling: _Styling) -> HLgroup:
     return group
 
 
-def parse_lsc() -> LSC:
-    ls_colours = environ.get("LS_COLORS", "")
-
+def parse_lsc(ls_colours: str) -> LSC:
     hl_lookup = {
         key: _parseHLGroup(_parse_styling(val))
         for key, _, val in (

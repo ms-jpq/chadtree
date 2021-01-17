@@ -4,11 +4,13 @@ from typing import Callable, Mapping, TypeVar, cast
 from pynvim_pp.highlight import HLgroup
 from std2.coloursys import hex_inverse
 from std2.functools import identity
+from std2.types import never
 
 from ..consts import FM_HL_PREFIX
 from .highlight import gen_hl
 from .ls_colours import parse_lsc
-from .types import GithubColours, HLcontext, NerdColours, UserHLGroups
+from .types import ColourChoice, GithubColours, HLcontext, NerdColours, UserHLGroups
+from os import environ
 
 T = TypeVar("T")
 
@@ -25,31 +27,37 @@ def _trans_inverse(inverse: bool, mapping: Mapping[str, str]) -> Mapping[str, HL
 
 
 def parse_colours(
-    use_ls_colours: bool,
+    colours: ColourChoice,
     light_theme: bool,
     particular_mappings: UserHLGroups,
     github_colours: GithubColours,
     nerd_colours: NerdColours,
 ) -> HLcontext:
-    github_exts = gen_hl(FM_HL_PREFIX, mapping=github_colours)
+    ls_colours = environ.get("LS_COLORS", "")
+    if not ls_colours:
+        colours = ColourChoice.nerd_tree
 
-    if use_ls_colours:
-        lsc = parse_lsc()
+    if colours is ColourChoice.ls_colours:
+        lsc = parse_lsc(ls_colours)
         mode_pre = lsc.mode_pre
         mode_post = lsc.mode_post
         ext_exact = lsc.exts
         name_exact: Mapping[str, HLgroup] = {}
         name_glob = lsc.name_glob
-    else:
+    elif colours is ColourChoice.nerd_tree:
         mode_pre = {}
         mode_post = {}
         ext_exact = _trans_inverse(light_theme, mapping=nerd_colours.type)
         name_exact = _trans_inverse(light_theme, mapping=nerd_colours.name_exact)
         name_glob = _trans_inverse(light_theme, mapping=nerd_colours.name_glob)
+    else:
+        never(colours)
+
+    icon_exts = gen_hl(FM_HL_PREFIX, mapping=github_colours)
 
     groups = tuple(
         chain(
-            github_exts.values(),
+            icon_exts.values(),
             mode_pre.values(),
             mode_post.values(),
             ext_exact.values(),
@@ -60,7 +68,7 @@ def parse_colours(
 
     context = HLcontext(
         groups=groups,
-        icon_exts=_trans(github_exts),
+        icon_exts=_trans(icon_exts),
         mode_pre=_trans(mode_pre),
         mode_post=_trans(mode_post),
         ext_exact=_trans(ext_exact),
