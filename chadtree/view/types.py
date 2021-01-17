@@ -58,12 +58,12 @@ class UserHLGroups:
 @dataclass(frozen=True)
 class HLcontext:
     groups: Sequence[HLgroup]
-    ext_colours: Mapping[str, str]
-    ext_lookup: Mapping[str, str]
+    github_exts: Mapping[str, str]
     mode_pre: Mapping[Mode, str]
     mode_post: Mapping[Optional[Mode], str]
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
+    ext_exact: Mapping[str, str]
     particular_mappings: UserHLGroups
 
 

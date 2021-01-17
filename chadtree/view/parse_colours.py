@@ -31,46 +31,41 @@ def parse_colours(
     github_colours: GithubColours,
     nerd_colours: NerdColours,
 ) -> HLcontext:
-    ext_colours = gen_hl(FM_HL_PREFIX, mapping=github_colours)
+    github_exts = gen_hl(FM_HL_PREFIX, mapping=github_colours)
 
     if use_ls_colours:
         lsc = parse_lsc()
-        _ext_colours = ext_colours
-        _mode_pre = lsc.mode_pre
-        _mode_post = lsc.mode_post
-        _ext_lookup = lsc.exts
-        _name_exact: Mapping[str, HLgroup] = {}
-        _name_glob = lsc.name_glob
+        mode_pre = lsc.mode_pre
+        mode_post = lsc.mode_post
+        ext_exact = lsc.exts
+        name_exact: Mapping[str, HLgroup] = {}
+        name_glob = lsc.name_glob
     else:
-        ext_lookup = _trans_inverse(light_theme, mapping=nerd_colours.type)
+        mode_pre = {}
+        mode_post = {}
+        ext_exact = _trans_inverse(light_theme, mapping=nerd_colours.type)
         name_exact = _trans_inverse(light_theme, mapping=nerd_colours.name_exact)
         name_glob = _trans_inverse(light_theme, mapping=nerd_colours.name_glob)
-        _ext_colours = ext_colours
-        _mode_pre = {}
-        _mode_post = {}
-        _ext_lookup = ext_lookup
-        _name_exact = name_exact
-        _name_glob = name_glob
 
     groups = tuple(
         chain(
-            _ext_colours.values(),
-            _mode_pre.values(),
-            _mode_post.values(),
-            _ext_lookup.values(),
-            _name_exact.values(),
-            _name_glob.values(),
+            github_exts.values(),
+            mode_pre.values(),
+            mode_post.values(),
+            ext_exact.values(),
+            name_exact.values(),
+            name_glob.values(),
         ),
     )
 
     context = HLcontext(
         groups=groups,
-        ext_colours=_trans(_ext_colours),
-        mode_pre=_trans(_mode_pre),
-        mode_post=_trans(_mode_post),
-        ext_lookup=_trans(_ext_lookup),
-        name_exact=_trans(_name_exact),
-        name_glob=_trans(_name_glob),
+        github_exts=_trans(github_exts),
+        mode_pre=_trans(mode_pre),
+        mode_post=_trans(mode_post),
+        ext_exact=_trans(ext_exact),
+        name_exact=_trans(name_exact),
+        name_glob=_trans(name_glob),
         particular_mappings=particular_mappings,
     )
     return context
