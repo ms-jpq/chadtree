@@ -3,8 +3,10 @@ from typing import Mapping, TypeVar
 
 from pynvim_pp.highlight import HLgroup
 
+from ..consts import FM_HL_PREFIX
+from .highlight import gen_hl
 from .ls_colours import parse_lsc
-from .types import HLcontext, UserHLGroups
+from .types import HLcontext, NerdColours, UserHLGroups, GithubColours
 
 T = TypeVar("T")
 
@@ -15,12 +17,13 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
 
 def parse_colours(
     use_ls_colours: bool,
+    light_theme: bool,
     particular_mappings: UserHLGroups,
-    ext_colours: Mapping[str, HLgroup],
-    ext_lookup: Mapping[str, HLgroup],
-    name_exact: Mapping[str, HLgroup],
-    name_glob: Mapping[str, HLgroup],
+    github_colours: GithubColours,
+    nerd_colours: NerdColours,
 ) -> HLcontext:
+    ext_colours = gen_hl(FM_HL_PREFIX, mapping=github_colours)
+
     if use_ls_colours:
         lsc = parse_lsc()
         _ext_colours = lsc.exts
@@ -30,6 +33,9 @@ def parse_colours(
         _name_exact: Mapping[str, HLgroup] = {}
         _name_glob = lsc.name_glob
     else:
+        ext_lookup = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.type)
+        name_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_exact)
+        name_glob = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_glob)
         _ext_colours = ext_colours
         _mode_pre = {}
         _mode_post = {}

@@ -19,15 +19,13 @@ from yaml import safe_load
 
 from ..consts import (
     CONFIG_YML,
-    FM_HL_PREFIX,
     GITHUB_COLOURS_JSON,
     ICON_LOOKUP_JSON,
     NERD_COLOURS_JSON,
     SETTINGS_VAR,
 )
-from ..view.highlight import gen_hl
 from ..view.parse_colours import parse_colours
-from ..view.types import Sortby, UserHLGroups, UserIcons
+from ..view.types import NerdColours, Sortby, UserHLGroups, UserIcons, GithubColours
 from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
 
 
@@ -63,19 +61,13 @@ class _UserConfig:
     ignore: UserIgnore
 
 
-@dataclass(frozen=True)
-class _NerdColours:
-    name_exact: Mapping[str, str]
-    name_glob: Mapping[str, str]
-    type: Mapping[str, str]
-
-
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
     return sorted((key[len("CHAD") :] for key in keys), key=strxfrm)
 
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
+    light_theme = nvim.options["background"] == "light"
 
     config: _UserConfig = decode(
         _UserConfig,
@@ -86,25 +78,20 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     icons: UserIcons = decode(
         UserIcons, loads(ICON_LOOKUP_JSON[options.use_icons].read_text())
     )
-    github_colours: Mapping[str, str] = decode(
-        Mapping[str, str], loads(GITHUB_COLOURS_JSON.read_text())
-    )
-    nerd_colours: _NerdColours = decode(
-        _NerdColours, merge(loads(NERD_COLOURS_JSON.read_text()))
-    )
 
-    github_exts = gen_hl(FM_HL_PREFIX, mapping=github_colours)
-    ext_lookup = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.type)
-    name_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_exact)
-    name_glob = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_glob)
+    github_colours: GithubColours = decode(
+        GithubColours, loads(GITHUB_COLOURS_JSON.read_text())
+    )
+    nerd_colours: NerdColours = decode(
+        NerdColours, merge(loads(NERD_COLOURS_JSON.read_text()))
+    )
 
     hl_context = parse_colours(
         use_ls_colours=view.use_ls_colours,
+        light_theme=light_theme,
         particular_mappings=view.highlights,
-        ext_colours=github_exts,
-        ext_lookup=ext_lookup,
-        name_exact=name_exact,
-        name_glob=name_glob,
+        github_colours=github_colours,
+        nerd_colours=nerd_colours,
     )
 
     view_opts = ViewOptions(

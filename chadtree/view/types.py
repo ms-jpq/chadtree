@@ -8,6 +8,13 @@ from ..fs.types import Mode, Node
 
 
 @dataclass(frozen=True)
+class NerdColours:
+    name_exact: Mapping[str, str]
+    name_glob: Mapping[str, str]
+    type: Mapping[str, str]
+
+
+@dataclass(frozen=True)
 class UserFolderIcons:
     open: str
     closed: str
@@ -36,6 +43,9 @@ class UserIcons:
     name_glob: Mapping[str, str]
     status: UserStatusIcons
     type: Mapping[str, str]
+
+
+GithubColours = Mapping[str, str]
 
 
 @dataclass(frozen=True)
