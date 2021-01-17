@@ -1,10 +1,11 @@
 from locale import strxfrm
 from os import environ, linesep
 from os.path import join, sep
+from shlex import join as sh_join
 from shutil import which
 from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
-from typing import Iterator, Mapping, MutableMapping, Set, Tuple
+from typing import Iterator, Mapping, MutableMapping, MutableSequence, Set, Tuple
 
 from std2.concurrent.futures import gather
 
@@ -13,7 +14,7 @@ from ..registry import pool
 from .types import VCStatus
 
 _WHITE_SPACES = {*whitespace}
-_GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain")
+_GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain", "-z")
 _GIT_SUBMODULE_MARKER = "Entering "
 _GIT_ENV = {"LC_ALL": "C"}
 
@@ -26,9 +27,7 @@ def _root(cwd: str) -> str:
 
 
 def _stat_main(cwd: str) -> Mapping[str, str]:
-    stdout = check_output(
-        (*_GIT_LIST_CMD, "-z"), stdin=DEVNULL, stderr=PIPE, text=True, cwd=cwd
-    )
+    stdout = check_output(_GIT_LIST_CMD, stdin=DEVNULL, stderr=PIPE, text=True, cwd=cwd)
 
     def cont() -> Iterator[Tuple[str, str]]:
         it = iter(stdout.split("\0"))
@@ -44,7 +43,13 @@ def _stat_main(cwd: str) -> Mapping[str, str]:
 
 def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
     stdout = check_output(
-        ("git", "submodule", "foreach", "--recursive", " ".join(_GIT_LIST_CMD)),
+        (
+            "git",
+            "submodule",
+            "foreach",
+            "--recursive",
+            sh_join(_GIT_LIST_CMD),
+        ),
         env={**environ, **_GIT_ENV},
         stdin=DEVNULL,
         stderr=PIPE,
@@ -53,16 +58,33 @@ def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
     )
 
     def cont() -> Iterator[Tuple[str, str]]:
-        it = iter(stdout.split(linesep))
+        it = iter(stdout)
         root = ""
-        for line in it:
-            if line.startswith(_GIT_SUBMODULE_MARKER):
-                root = line[len(_GIT_SUBMODULE_MARKER) + 1 : -1].rstrip(linesep)
+        acc: MutableSequence[str] = []
+
+        for char in it:
+            if char == linesep:
+                line = "".join(acc)
+                acc.clear()
+
+                if not line.startswith(_GIT_SUBMODULE_MARKER):
+                    raise ValueError(stdout)
+                else:
+                    root = line[len(_GIT_SUBMODULE_MARKER) + 1 : -1]
+
+            elif char == "\0":
+                line = "".join(acc)
+                acc.clear()
+
+                if not root:
+                    raise ValueError(stdout)
+                else:
+                    prefix, file = line[:2], line[3:]
+                    yield prefix, join(root, file.rstrip(sep))
+                    if "R" in prefix:
+                        next(it, None)
             else:
-                prefix, file = line[:2], line[3:]
-                yield prefix, join(root, file.rstrip(sep))
-                if "R" in prefix:
-                    next(it, None)
+                acc.append(char)
 
     entries = {file: prefix for prefix, file in cont()}
     return entries
