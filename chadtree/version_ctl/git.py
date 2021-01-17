@@ -29,9 +29,9 @@ def _stat_main(cwd: str) -> Mapping[str, str]:
     stdout = check_output(
         (*_GIT_LIST_CMD, "-z"), stdin=DEVNULL, stderr=PIPE, text=True, cwd=cwd
     )
-    it = iter(stdout.split("\0"))
 
     def cont() -> Iterator[Tuple[str, str]]:
+        it = iter(stdout.split("\0"))
         for line in it:
             prefix, file = line[:2], line[3:]
             yield prefix, file.rstrip(sep)
@@ -51,9 +51,9 @@ def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
         text=True,
         cwd=cwd,
     )
-    it = iter(stdout.split(linesep))
 
     def cont() -> Iterator[Tuple[str, str]]:
+        it = iter(stdout.split(linesep))
         root = ""
         for line in it:
             if line.startswith(_GIT_SUBMODULE_MARKER):
@@ -91,7 +91,7 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
                 aggregate.update(stat)
 
     for directory, syms in directories.items():
-        symbols = sorted((syms - _WHITE_SPACES), key=strxfrm)
+        symbols = sorted(syms - _WHITE_SPACES, key=strxfrm)
         status[directory] = "".join(symbols)
 
     return VCStatus(ignored=ignored, status=status)
