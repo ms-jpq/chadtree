@@ -1,4 +1,3 @@
-from chadtree.fs.ops import ancestors
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
@@ -6,7 +5,6 @@ from os import linesep
 from os.path import sep
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
-from std2.functools import constantly
 from std2.types import never
 
 from ..fs.cartographer import is_dir
@@ -40,14 +38,14 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     return comp
 
 
-def _ignore(settings: Settings) -> Callable[[Node], bool]:
-    def drop(node: Node) -> bool:
-        ignore = any(
-            fnmatch(node.name, pattern) for pattern in settings.ignores.name
-        ) or any(fnmatch(node.path, pattern) for pattern in settings.ignores.path)
-        return ignore
+def _user_ignored(node: Node, settings: Settings) -> bool:
+    return any(fnmatch(node.name, pattern) for pattern in settings.ignores.name) or any(
+        fnmatch(node.path, pattern) for pattern in settings.ignores.path
+    )
 
-    return drop
+
+def _vc_ignored(node: Node, vc: VCStatus) -> bool:
+    return not vc.ignored.isdisjoint(node.ancestors | {node.path})
 
 
 def _gen_spacer(depth: int) -> str:
@@ -60,8 +58,9 @@ def _paint(
     selection: Selection,
     qf: QuickFix,
     vc: VCStatus,
+    show_hidden: bool,
     current: Optional[str],
-) -> Callable[[Node, int], Render]:
+) -> Callable[[Node, int], Optional[Render]]:
     icons = settings.view.icons
     context = settings.view.hl_context
     (
@@ -82,8 +81,8 @@ def _paint(
         context.name_glob,
     )
 
-    def search_hl(node: Node) -> Optional[str]:
-        if not vc.ignored.isdisjoint(node.ancestors | {node.path}):
+    def search_hl(node: Node, ignored: bool) -> Optional[str]:
+        if ignored:
             return particular_mappings.ignored
 
         s_modes = sorted(node.mode)
@@ -160,32 +159,47 @@ def _paint(
             yield Badge(text=f"[{stat}]", group=particular_mappings.version_control)
 
     def gen_highlights(
-        node: Node, pre: str, icon: str, name: str
+        node: Node, pre: str, icon: str, name: str, ignored: bool
     ) -> Iterator[Highlight]:
         begin = len(pre.encode())
         end = begin + len(icon.encode())
-        group = icon_exts.get(node.ext or "")
-        if group:
-            hl = Highlight(group=group, begin=begin, end=end)
+
+        if ignored:
+            hl = Highlight(group=particular_mappings.ignored, begin=begin, end=end)
             yield hl
-        group = search_hl(node)
+        else:
+            group = icon_exts.get(node.ext or "")
+            if group:
+                hl = Highlight(group=group, begin=begin, end=end)
+                yield hl
+
+        group = search_hl(node, ignored=ignored)
         if group:
             begin = end
             end = len(name.encode()) + begin
             hl = Highlight(group=group, begin=begin, end=end)
             yield hl
 
-    def show(node: Node, depth: int) -> Render:
-        pre = "".join(gen_decor_pre(node, depth=depth))
-        icon = "".join(gen_icon(node))
-        name = "".join(gen_name(node))
-        post = "".join(gen_decor_post(node))
+    def show(node: Node, depth: int) -> Optional[Render]:
+        vc_ignored = _vc_ignored(node, vc=vc)
+        user_ignored = _user_ignored(node, settings=settings)
+        ignored = vc_ignored or user_ignored
 
-        line = f"{pre}{icon}{name}{post}"
-        badges = tuple(gen_badges(node.path))
-        highlights = tuple(gen_highlights(node, pre=pre, icon=icon, name=name))
-        render = Render(line=line, badges=badges, highlights=highlights)
-        return render
+        if user_ignored and not show_hidden:
+            return None
+        else:
+            pre = "".join(gen_decor_pre(node, depth=depth))
+            icon = "".join(gen_icon(node))
+            name = "".join(gen_name(node))
+            post = "".join(gen_decor_post(node))
+
+            line = f"{pre}{icon}{name}{post}"
+            badges = tuple(gen_badges(node.path))
+            highlights = tuple(
+                gen_highlights(node, pre=pre, icon=icon, name=name, ignored=ignored)
+            )
+            render = Render(line=line, badges=badges, highlights=highlights)
+            return render
 
     return show
 
@@ -202,13 +216,14 @@ def render(
     show_hidden: bool,
     current: Optional[str],
 ) -> Derived:
-    drop = (
-        cast(Callable[[Node], bool], constantly(False))
-        if show_hidden
-        else _ignore(settings)
-    )
     show = _paint(
-        settings, index=index, selection=selection, qf=qf, vc=vc, current=current
+        settings,
+        index=index,
+        selection=selection,
+        qf=qf,
+        vc=vc,
+        show_hidden=show_hidden,
+        current=current,
     )
     comp = _gen_comp(settings.view.sort_by)
     keep_open = {node.path}
@@ -221,15 +236,16 @@ def render(
         )
         rend = show(node, depth)
 
-        def gen_children() -> Iterator[Tuple[Node, Render]]:
-            gen = (child for child in node.children.values() if not drop(child))
-            for child in sorted(gen, key=comp):
-                yield from render(child, depth=depth + 1, cleared=clear)
+        if rend:
 
-        children = tuple(gen_children())
-        if clear or children or node.path in keep_open:
-            yield node, rend
-        yield from iter(children)
+            def gen_children() -> Iterator[Tuple[Node, Render]]:
+                for child in sorted(node.children.values(), key=comp):
+                    yield from render(child, depth=depth + 1, cleared=clear)
+
+            children = tuple(gen_children())
+            if clear or children or node.path in keep_open:
+                yield node, rend
+            yield from iter(children)
 
     _lookup, _rendered = zip(*render(node, depth=0, cleared=False))
     lookup = cast(Sequence[Node], _lookup)

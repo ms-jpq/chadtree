@@ -10,10 +10,12 @@ I am very sorry about this, but I am doing this in order to support more awesome
 
 ### User Experience
 
-#### AAA
+#### AA
 
 ### Architectural
 
 #### Isolated Process
+
+CHADTree now runs inside an isolated process
 
 #### Dependencies
