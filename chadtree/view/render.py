@@ -66,7 +66,7 @@ def _paint(
     context = settings.view.hl_context
     (
         particular_mappings,
-        github_exts,
+        icon_exts,
         mode_pre,
         mode_post,
         ext_exact,
@@ -74,7 +74,7 @@ def _paint(
         name_glob,
     ) = (
         context.particular_mappings,
-        context.github_exts,
+        context.icon_exts,
         context.mode_pre,
         context.mode_post,
         context.ext_exact,
@@ -83,29 +83,33 @@ def _paint(
     )
 
     def search_hl(node: Node) -> Optional[str]:
-        s_modes = sorted(node.mode)
         if not vc.ignored.isdisjoint(node.ancestors | {node.path}):
             return particular_mappings.ignored
 
+        s_modes = sorted(node.mode)
         for mode in s_modes:
             hl = mode_pre.get(mode)
             if hl:
                 return hl
+
         hl = name_exact.get(node.name)
         if hl:
             return hl
-        for pattern, group in name_glob.items():
+
+        for pattern, hl in name_glob.items():
             if fnmatch(node.name, pattern):
-                return group
+                return hl
+
         hl = ext_exact.get(node.ext or "")
         if hl:
             return hl
+
         for mode in s_modes:
             hl = mode_post.get(mode)
             if hl:
                 return hl
-
-        return mode_post.get(None)
+        else:
+            return mode_post.get(None)
 
     def gen_status(path: str) -> str:
         selected = (
@@ -160,7 +164,7 @@ def _paint(
     ) -> Iterator[Highlight]:
         begin = len(pre.encode())
         end = begin + len(icon.encode())
-        group = github_exts.get(node.ext or "")
+        group = icon_exts.get(node.ext or "")
         if group:
             hl = Highlight(group=group, begin=begin, end=end)
             yield hl

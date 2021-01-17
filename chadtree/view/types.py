@@ -58,7 +58,7 @@ class UserHLGroups:
 @dataclass(frozen=True)
 class HLcontext:
     groups: Sequence[HLgroup]
-    github_exts: Mapping[str, str]
+    icon_exts: GithubColours
     mode_pre: Mapping[Mode, str]
     mode_post: Mapping[Optional[Mode], str]
     name_exact: Mapping[str, str]

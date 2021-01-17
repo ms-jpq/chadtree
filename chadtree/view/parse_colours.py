@@ -60,7 +60,7 @@ def parse_colours(
 
     context = HLcontext(
         groups=groups,
-        github_exts=_trans(github_exts),
+        icon_exts=_trans(github_exts),
         mode_pre=_trans(mode_pre),
         mode_post=_trans(mode_post),
         ext_exact=_trans(ext_exact),
