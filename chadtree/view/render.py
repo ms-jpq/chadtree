@@ -9,7 +9,7 @@ from std2.types import never
 
 from ..fs.cartographer import is_dir
 from ..fs.types import Mode, Node
-from ..settings.types import Settings
+from ..settings.types import Settings, UserIgnore
 from ..state.types import FilterPattern, Index, QuickFix, Selection
 from ..version_ctl.types import VCStatus
 from .types import Badge, Derived, Highlight, Render, Sortby
@@ -38,9 +38,11 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     return comp
 
 
-def _user_ignored(node: Node, settings: Settings) -> bool:
-    return any(fnmatch(node.name, pattern) for pattern in settings.ignores.name) or any(
-        fnmatch(node.path, pattern) for pattern in settings.ignores.path
+def _user_ignored(node: Node, ignores: UserIgnore) -> bool:
+    return (
+        node.name in ignores.name_exact
+        or any(fnmatch(node.name, pattern) for pattern in ignores.name_glob)
+        or any(fnmatch(node.path, pattern) for pattern in ignores.path_glob)
     )
 
 
@@ -182,7 +184,7 @@ def _paint(
 
     def show(node: Node, depth: int) -> Optional[Render]:
         vc_ignored = _vc_ignored(node, vc=vc)
-        user_ignored = _user_ignored(node, settings=settings)
+        user_ignored = _user_ignored(node, ignores=settings.ignores)
         ignored = vc_ignored or user_ignored
 
         if user_ignored and not show_hidden:

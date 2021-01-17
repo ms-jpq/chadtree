@@ -39,7 +39,6 @@ from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOp
 @dataclass(frozen=True)
 class _UserOptions:
     follow: bool
-    keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]
     mimetypes: MimetypeOptions
     open_left: bool
@@ -63,8 +62,9 @@ class _UserView:
 
 @dataclass(frozen=True)
 class _UserConfig:
-    view: _UserView
+    keymap: Mapping[str, AbstractSet[str]]
     options: _UserOptions
+    view: _UserView
     ignore: UserIgnore
 
 
@@ -109,7 +109,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         time_fmt=view.time_format,
     )
 
-    keymap = {f"CHAD{k}": v for k, v in options.keymap.items()}
+    keymap = {f"CHAD{k}": v for k, v in config.keymap.items()}
     legal_keys = {name for name, _ in specs}
     extra_keys = keymap.keys() - legal_keys
 

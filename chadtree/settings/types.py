@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import AbstractSet, Mapping, Optional, Union
+from typing import AbstractSet, Mapping, Optional, Sequence, Union
 
 from ..view.types import ViewOptions
 
@@ -17,8 +17,9 @@ class MimetypeOptions:
 
 @dataclass(frozen=True)
 class UserIgnore:
-    name: AbstractSet[str]
-    path: AbstractSet[str]
+    name_exact: AbstractSet[str]
+    name_glob: Sequence[str]
+    path_glob: Sequence[str]
 
 
 @dataclass(frozen=True)
