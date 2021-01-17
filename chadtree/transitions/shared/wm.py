@@ -30,6 +30,11 @@ def is_fm_buffer(nvim: Nvim, buf: Buffer) -> bool:
     return ft == FM_FILETYPE
 
 
+def is_fm_window(nvim: Nvim, win: Window) -> bool:
+    buf = win_get_buf(nvim, win=win)
+    return is_fm_buffer(nvim, buf=buf)
+
+
 def find_windows_in_tab(nvim: Nvim, no_preview: bool) -> Iterator[Window]:
     def key_by(win: Window) -> Tuple[int, int]:
         """
@@ -96,7 +101,7 @@ def find_current_buffer_name(nvim: Nvim) -> str:
 
 
 def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
-    buf = create_buf(nvim, listed=False, scratch=True, wipe=False, nofile=True)
+    buf = create_buf(nvim, listed=False, scratch=True, wipe=True, nofile=True)
     buf_set_option(nvim, buf=buf, key="modifiable", val=False)
     buf_set_option(nvim, buf=buf, key="filetype", val=FM_FILETYPE)
 

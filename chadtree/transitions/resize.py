@@ -8,7 +8,7 @@ from ..registry import rpc
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
-from .shared.wm import resize_fm_windows, is_fm_buffer
+from .shared.wm import is_fm_window, resize_fm_windows
 from .types import Stage
 
 
@@ -16,9 +16,7 @@ def _resize(
     nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]
 ) -> Optional[Stage]:
     win = cur_win(nvim)
-    buf = win_get_buf(nvim, win=win)
-
-    if not is_fm_buffer(nvim, buf=buf):
+    if not is_fm_window(nvim, win=win):
         return None
     else:
         w_width = win.width
@@ -29,7 +27,9 @@ def _resize(
 
 
 @rpc(blocking=False)
-def _bigger(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+def _bigger(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Bigger sidebar
     """
@@ -38,7 +38,9 @@ def _bigger(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Op
 
 
 @rpc(blocking=False)
-def _smaller(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+def _smaller(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Smaller sidebar
     """
