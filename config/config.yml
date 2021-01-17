@@ -1,80 +1,81 @@
 ---
 ignore:
-  name:
+  name_exact:
     - .DS_Store
     - .directory
     - thumbs.db
     - .git
-  path: []
+  name_glob: []
+  path_glob: []
+keymap:
+  bigger:
+    - +
+    - "="
+  change_dir:
+    - b
+  change_focus:
+    - c
+  change_focus_up:
+    - C
+  clear_filter:
+    - F
+    - E
+  clear_selection:
+    - S
+  collapse:
+    - <s-tab>
+    - "`"
+  copy:
+    - p
+  copy_name:
+    - y
+  cut:
+    - x
+  delete:
+    - d
+  filter:
+    - f
+  h_split:
+    - W
+  jump_to_current:
+    - J
+  new:
+    - a
+  open_sys:
+    - o
+  primary:
+    - <enter>
+  quit:
+    - q
+  refocus:
+    - "~"
+  refresh:
+    - <c-r>
+  rename:
+    - r
+  secondary:
+    - <tab>
+    - <2-leftmouse>
+  select:
+    - s
+  smaller:
+    - "-"
+    - _
+  stat:
+    - K
+  tertiary:
+    - <m-enter>
+    - <middlemouse>
+  toggle_follow: []
+  toggle_hidden:
+    - .
+  toggle_version_control: []
+  trash:
+    - t
+  v_split:
+    - w
 options:
   follow: true
-  keymap:
-    bigger:
-      - +
-      - "="
-    change_dir:
-      - b
-    change_focus:
-      - c
-    change_focus_up:
-      - C
-    clear_filter:
-      - F
-      - E
-    clear_selection:
-      - S
-    collapse:
-      - <s-tab>
-      - "`"
-    copy:
-      - p
-    copy_name:
-      - y
-    cut:
-      - x
-    delete:
-      - d
-    filter:
-      - f
-    h_split:
-      - W
-    jump_to_current:
-      - J
-    new:
-      - a
-    open_sys:
-      - o
-    primary:
-      - <enter>
-    quit:
-      - q
-    refocus:
-      - "~"
-    refresh:
-      - <c-r>
-    rename:
-      - r
-    secondary:
-      - <tab>
-      - <2-leftmouse>
-    select:
-      - s
-    smaller:
-      - "-"
-      - _
-    stat:
-      - K
-    tertiary:
-      - <m-enter>
-      - <middlemouse>
-    toggle_follow: []
-    toggle_hidden:
-      - .
-    toggle_version_control: []
-    trash:
-      - t
-    v_split:
-      - w
   lang: null
   mimetypes:
     ignore_exts:
