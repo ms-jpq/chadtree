@@ -136,7 +136,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
 
 def resize_fm_windows(nvim: Nvim, width: int) -> None:
     for window in find_fm_windows_in_tab(nvim):
-        nvim.api.win_set_width(window, width)
+        window.width = width
 
 
 def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> None:

@@ -6,7 +6,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
-from ..state.types import FilterPattern, State
+from ..state.types import FilterPattern, Selection, State
 from .types import Stage
 
 
@@ -23,9 +23,7 @@ def _clear_filter(
 
 
 @rpc(blocking=False)
-def _filter(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Stage:
+def _filter(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
     """
     Update filter
     """
@@ -33,7 +31,8 @@ def _filter(
     old_p = state.filter_pattern.pattern if state.filter_pattern else ""
     pattern: Optional[str] = nvim.funcs.input(LANG("new_filter"), old_p)
     filter_pattern = FilterPattern(pattern=pattern) if pattern else None
+    selection: Selection = state.selection if filter_pattern else set()
     new_state = forward(
-        state, settings=settings, selection=set(), filter_pattern=filter_pattern
+        state, settings=settings, selection=selection, filter_pattern=filter_pattern
     )
     return Stage(new_state)
