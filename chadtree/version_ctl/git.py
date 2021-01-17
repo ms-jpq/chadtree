@@ -6,7 +6,7 @@ from shutil import which
 from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
 from typing import Iterator, Mapping, MutableMapping, MutableSequence, Set, Tuple
-
+from std2.string import removeprefix, removesuffix
 from std2.concurrent.futures import gather
 
 from ..fs.ops import ancestors
@@ -70,7 +70,13 @@ def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
                 if not line.startswith(_GIT_SUBMODULE_MARKER):
                     raise ValueError(stdout)
                 else:
-                    root = line[len(_GIT_SUBMODULE_MARKER) + 1 : -1]
+                    quoted = removeprefix(line, prefix=_GIT_SUBMODULE_MARKER)
+                    if not (quoted.startswith("'") and quoted.endswith("'")):
+                        raise ValueError(stdout)
+                    else:
+                        root = removesuffix(
+                            removeprefix(quoted, prefix="'"), suffix="'"
+                        )
 
             elif char == "\0":
                 line = "".join(acc)
