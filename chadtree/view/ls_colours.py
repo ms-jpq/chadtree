@@ -16,6 +16,7 @@ from typing import (
 from uuid import uuid4
 
 from pynvim_pp.highlight import HLgroup
+from std2.coloursys import rgb_to_hex
 
 from ..consts import FM_HL_PREFIX
 from .types import Mode
@@ -215,11 +216,6 @@ def _parse_codes(
                     yield ground, colour
 
 
-def _to_hex(colour: _Colour) -> str:
-    r, g, b = format(colour.r, "02x"), format(colour.g, "02x"), format(colour.b, "02x")
-    return f"#{r}{g}{b}"
-
-
 def _parse_styling(codes: str) -> _Styling:
     styles: Set[_Style] = set()
     colours: MutableMapping[_Ground, Union[_AnsiColour, _Colour]] = {}
@@ -248,8 +244,8 @@ def _parseHLGroup(styling: _Styling) -> HLgroup:
     }
     ctermfg = fg.value if isinstance(fg, _AnsiColour) else None
     ctermbg = bg.value if isinstance(bg, _AnsiColour) else None
-    guifg = _to_hex(fg) if isinstance(fg, _Colour) else None
-    guibg = _to_hex(bg) if isinstance(bg, _Colour) else None
+    guifg = rgb_to_hex(fg.r, fg.g, fg.b) if isinstance(fg, _Colour) else None
+    guibg = rgb_to_hex(bg.r, bg.g, bg.b) if isinstance(bg, _Colour) else None
     group = HLgroup(
         name=name,
         cterm=cterm,

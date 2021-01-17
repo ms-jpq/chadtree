@@ -1,18 +1,27 @@
 from itertools import chain
-from typing import Mapping, TypeVar
+from typing import Callable, Mapping, TypeVar, cast
 
 from pynvim_pp.highlight import HLgroup
+from std2.coloursys import hex_inverse
+from std2.functools import identity
 
 from ..consts import FM_HL_PREFIX
 from .highlight import gen_hl
 from .ls_colours import parse_lsc
-from .types import HLcontext, NerdColours, UserHLGroups, GithubColours
+from .types import GithubColours, HLcontext, NerdColours, UserHLGroups
 
 T = TypeVar("T")
 
 
 def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
     return {k: v.name for k, v in mapping.items()}
+
+
+def _trans_inverse(inverse: bool, mapping: Mapping[str, str]) -> Mapping[str, HLgroup]:
+    trans = hex_inverse if inverse else cast(Callable[[str], str], identity)
+    return gen_hl(
+        FM_HL_PREFIX, mapping={key: trans(val) for key, val in mapping.items()}
+    )
 
 
 def parse_colours(
@@ -33,9 +42,9 @@ def parse_colours(
         _name_exact: Mapping[str, HLgroup] = {}
         _name_glob = lsc.name_glob
     else:
-        ext_lookup = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.type)
-        name_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_exact)
-        name_glob = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_glob)
+        ext_lookup = _trans_inverse(light_theme, mapping=nerd_colours.type)
+        name_exact = _trans_inverse(light_theme, mapping=nerd_colours.name_exact)
+        name_glob = _trans_inverse(light_theme, mapping=nerd_colours.name_glob)
         _ext_colours = ext_colours
         _mode_pre = {}
         _mode_post = {}
