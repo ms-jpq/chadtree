@@ -1,3 +1,4 @@
+from itertools import chain
 from locale import strxfrm
 from os import environ, linesep
 from os.path import join, sep
@@ -5,9 +6,19 @@ from shlex import join as sh_join
 from shutil import which
 from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
-from typing import Iterator, Mapping, MutableMapping, MutableSequence, Set, Tuple
-from std2.string import removeprefix, removesuffix
+from typing import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+    Set,
+    Tuple,
+)
+
 from std2.concurrent.futures import gather
+from std2.string import removeprefix, removesuffix
 
 from ..fs.ops import ancestors
 from ..registry import pool
@@ -26,7 +37,7 @@ def _root(cwd: str) -> str:
     return stdout.rstrip()
 
 
-def _stat_main(cwd: str) -> Mapping[str, str]:
+def _stat_main(cwd: str) -> Iterator[Tuple[str, str]]:
     stdout = check_output(_GIT_LIST_CMD, stdin=DEVNULL, stderr=PIPE, text=True, cwd=cwd)
 
     def cont() -> Iterator[Tuple[str, str]]:
@@ -34,14 +45,14 @@ def _stat_main(cwd: str) -> Mapping[str, str]:
         for line in it:
             prefix, file = line[:2], line[3:]
             yield prefix, file.rstrip(sep)
+
             if "R" in prefix:
                 next(it, None)
 
-    entries = {file: prefix for prefix, file in cont()}
-    return entries
+    return cont()
 
 
-def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
+def _stat_sub_modules(cwd: str) -> Iterator[Tuple[str, str]]:
     stdout = check_output(
         (
             "git",
@@ -59,7 +70,7 @@ def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
 
     def cont() -> Iterator[Tuple[str, str]]:
         it = iter(stdout)
-        root = ""
+        sub_module = ""
         acc: MutableSequence[str] = []
 
         for char in it:
@@ -74,26 +85,27 @@ def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
                     if not (quoted.startswith("'") and quoted.endswith("'")):
                         raise ValueError(stdout)
                     else:
-                        root = removesuffix(
+                        sub_module = removesuffix(
                             removeprefix(quoted, prefix="'"), suffix="'"
                         )
+                        yield "S", sub_module
 
             elif char == "\0":
                 line = "".join(acc)
                 acc.clear()
 
-                if not root:
+                if not sub_module:
                     raise ValueError(stdout)
                 else:
                     prefix, file = line[:2], line[3:]
-                    yield prefix, join(root, file.rstrip(sep))
+                    yield prefix, join(sub_module, file.rstrip(sep))
+
                     if "R" in prefix:
                         next(it, None)
             else:
                 acc.append(char)
 
-    entries = {file: prefix for prefix, file in cont()}
-    return entries
+    return cont()
 
 
 def _stat_name(stat: str) -> str:
@@ -103,12 +115,12 @@ def _stat_name(stat: str) -> str:
         return stat
 
 
-def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
+def _parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
     ignored: Set[str] = set()
     status: MutableMapping[str, str] = {}
     directories: MutableMapping[str, Set[str]] = {}
 
-    for name, stat in stats.items():
+    for stat, name in stats:
         path = join(root, name)
         status[path] = _stat_name(stat)
         if "!" in stat:
@@ -119,8 +131,10 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
                 aggregate.update(stat)
 
     for directory, syms in directories.items():
-        symbols = sorted(syms - _WHITE_SPACES, key=strxfrm)
-        status[directory] = "".join(symbols)
+        pre_existing = {*status.get(directory, "")}
+        symbols = pre_existing | syms - _WHITE_SPACES
+        consoildated = sorted(symbols, key=strxfrm)
+        status[directory] = "".join(consoildated)
 
     return VCStatus(ignored=ignored, status=status)
 
@@ -128,14 +142,15 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
 def status(cwd: str) -> VCStatus:
     if which("git"):
         try:
-            ret: Tuple[str, Mapping[str, str], Mapping[str, str]] = gather(
+            ret: Tuple[
+                str, Iterator[Tuple[str, str]], Iterator[Tuple[str, str]]
+            ] = gather(
                 pool.submit(_root, cwd=cwd),
                 pool.submit(_stat_main, cwd=cwd),
                 pool.submit(_stat_sub_modules, cwd=cwd),
             )
             r, s_main, s_sub = ret
-            stats = {**s_sub, **s_main}
-            return _parse(r, stats)
+            return _parse(r, stats=chain(s_main, s_sub))
         except CalledProcessError:
             return VCStatus()
     else:
