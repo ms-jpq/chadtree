@@ -187,7 +187,7 @@ def _paint(
         user_ignored = _user_ignored(node, ignores=settings.ignores)
         ignored = vc_ignored or user_ignored
 
-        if user_ignored and not show_hidden:
+        if depth and user_ignored and not show_hidden:
             return None
         else:
             pre = "".join(gen_decor_pre(node, depth=depth))

@@ -2,6 +2,7 @@ from locale import strxfrm
 from os import environ, linesep
 from os.path import join, sep
 from shutil import which
+from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
 from typing import Iterator, Mapping, MutableMapping, Set, Tuple
 
@@ -11,6 +12,7 @@ from ..fs.ops import ancestors
 from ..registry import pool
 from .types import VCStatus
 
+_WHITE_SPACES = {*whitespace}
 _GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain")
 _GIT_SUBMODULE_MARKER = "Entering "
 _GIT_ENV = {"LC_ALL": "C"}
@@ -66,6 +68,13 @@ def _stat_sub_modules(cwd: str) -> Mapping[str, str]:
     return entries
 
 
+def _stat_name(stat: str) -> str:
+    if stat == "!!":
+        return "I"
+    else:
+        return stat
+
+
 def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
     ignored: Set[str] = set()
     status: MutableMapping[str, str] = {}
@@ -73,7 +82,7 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
 
     for name, stat in stats.items():
         path = join(root, name)
-        status[path] = stat
+        status[path] = _stat_name(stat)
         if "!" in stat:
             ignored.add(path)
         else:
@@ -82,7 +91,7 @@ def _parse(root: str, stats: Mapping[str, str]) -> VCStatus:
                 aggregate.update(stat)
 
     for directory, syms in directories.items():
-        symbols = sorted((s for s in syms if s != " "), key=strxfrm)
+        symbols = sorted((syms - _WHITE_SPACES), key=strxfrm)
         status[directory] = "".join(symbols)
 
     return VCStatus(ignored=ignored, status=status)
