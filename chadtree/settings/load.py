@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum, auto
 from json import loads
 from locale import strxfrm
 from typing import (
@@ -24,6 +25,11 @@ from ..view.types import ColourChoice, HLGroups, Icons, Sortby
 from .types import IgnoreOpts, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
 
 
+class _OpenDirection(Enum):
+    left = auto()
+    right = auto()
+
+
 @dataclass(frozen=True)
 class _UserOptions:
     follow: bool
@@ -38,7 +44,7 @@ class _UserOptions:
 
 @dataclass(frozen=True)
 class _UserView:
-    open_left: bool
+    open_direction: _OpenDirection
     width: int
     sort_by: Sequence[Sortby]
     use_icons: Union[bool, Literal["emoji"]]
@@ -102,7 +108,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         keymap=keymap,
         lang=options.lang,
         mime=options.mimetypes,
-        open_left=view.open_left,
+        open_left=view.open_direction is _OpenDirection.left,
         page_increment=options.page_increment,
         polling_rate=float(options.polling_rate),
         session=options.session,

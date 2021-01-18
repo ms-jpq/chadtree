@@ -155,7 +155,7 @@ false
 
 #### `chadtree_settings.options.version_control`
 
-#### `chadtree_settings.options.version_control.enable`
+##### `chadtree_settings.options.version_control.enable`
 
 Enable version control. This can also be toggled. But unlike `show_hidden`, does not have a default keybind.
 
@@ -200,3 +200,21 @@ Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/
 ```json
 []
 ```
+
+### `chadtree_settings.view`
+
+#### `chadtree_settings.view.colours`
+
+#### `chadtree_settings.view.highlights`
+
+#### `chadtree_settings.view.open_direction`
+
+#### `chadtree_settings.view.sort_by`
+
+#### `chadtree_settings.view.time_format`
+
+#### `chadtree_settings.view.use_icons`
+
+#### `chadtree_settings.view.width`
+
+#### `chadtree_settings.view.window_options`

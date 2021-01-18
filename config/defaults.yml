@@ -97,7 +97,7 @@ view:
     ignored: Comment
     quickfix: Label
     version_control: Comment
-  open_left: true
+  open_direction: left
   sort_by:
     - is_folder
     - ext
