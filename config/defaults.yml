@@ -94,7 +94,7 @@ options:
 view:
   colours: ls_colours
   highlights:
-    directory: normal
+    directory: Text
     ignored: Comment
     quickfix: Label
     version_control: Comment
