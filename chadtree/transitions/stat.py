@@ -30,7 +30,7 @@ def _stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
             size = human_readable_size(stat.size, precision=2)
             user = stat.user
             group = stat.group
-            mtime = format(stat.date_mod, settings.view.time_fmt)
+            mtime = stat.date_mod.strftime(settings.view.time_fmt)
             name = display_path(node.path, state=state)
             full_name = f"{name} {norm_link} {stat.link}" if stat.link else name
             mode_line = f"{permissions} {size}b {user} {group} {mtime} {full_name}"

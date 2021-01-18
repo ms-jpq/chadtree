@@ -15,6 +15,8 @@ local chad_settings = { ... }
 vim.api.nvim_set_var("chadtree_settings", chad_settings)
 ```
 
+---
+
 ## Shorthand
 
 Dictionary keys will be automatically expanded with the `.` notation. This works recursively.
@@ -35,6 +37,8 @@ Note in lua, you will need to quote your keys like so:
 { ["dog.puppy"] = 2 }
 ```
 
+---
+
 ## Validation
 
 Variables will be validated against a schema.
@@ -49,7 +53,9 @@ Will give you the following error message:
 
 ![schema error.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/schema_error.png)
 
-### Specifics
+---
+
+## Specifics
 
 The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/blob/chad/config/defaults.yml)
 
@@ -105,4 +111,93 @@ Skip warning for these extensions
 [".ts"]
 ```
 
+#### `chadtree_settings.options.page_increment`
+
+Change how many lines `{` and `}` scroll
+
+**default:**
+
+```json
+5
+```
+
+#### `chadtree_settings.options.polling_rate`
+
+CHADTree's background refresh rate
+
+**default:**
+
+```json
+2.0
+```
+
+#### `chadtree_settings.options.session`
+
+Save & restore currently open folders
+
+**default:**
+
+```json
+true
+```
+
+#### `chadtree_settings.options.show_hidden`
+
+Hide some files and folders by default. By default this can be toggled using the `.` key.
+
+see `chadtree_settings.ignore` for more details
+
+**default:**
+
+```json
+false
+```
+
+#### `chadtree_settings.options.version_control`
+
+#### `chadtree_settings.options.version_control.enable`
+
+Enable version control. This can also be toggled. But unlike `show_hidden`, does not have a default keybind.
+
+**default:**
+
+```json
+true
+```
+
+
 ### `chadtree_settings.ignore`
+
+CHADTree can ignore showing some files. This is toggable by default using the `.` key.
+
+#### `chadtree_settings.ignore.name_exact`
+
+Files whose name match these exactly will be ignored.
+
+**default:**
+
+```json
+[".DS_Store", ".directory", "thumbs.db", ".git"]
+```
+
+#### `chadtree_settings.ignore.name_glob`
+
+Files whose name match these [glob patterns](https://en.wikipedia.org/wiki/Glob_%28programming%29) will be ignored.
+
+ie. `*.py` will match all python files
+
+**default:**
+
+```json
+[]
+```
+
+#### `chadtree_settings.ignore.path_glob`
+
+Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/Glob_%28programming%29) will be ignored.
+
+**default:**
+
+```json
+[]
+```
