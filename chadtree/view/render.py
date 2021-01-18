@@ -83,7 +83,15 @@ def _paint(
         context.name_glob,
     )
 
-    def search_hl(node: Node, ignored: bool) -> Optional[str]:
+    def search_icon_hl(node: Node, ignored: bool) -> Optional[str]:
+        if ignored:
+            return particular_mappings.ignored
+        elif is_dir(node):
+            return particular_mappings.directory
+        else:
+            return icon_exts.get(node.ext or "")
+
+    def search_text_hl(node: Node, ignored: bool) -> Optional[str]:
         if ignored:
             return particular_mappings.ignored
 
@@ -163,23 +171,19 @@ def _paint(
     def gen_highlights(
         node: Node, pre: str, icon: str, name: str, ignored: bool
     ) -> Iterator[Highlight]:
-        begin = len(pre.encode())
-        end = begin + len(icon.encode())
+        icon_begin = len(pre.encode())
+        icon_end = icon_begin + len(icon.encode())
+        text_begin = icon_end
+        text_end = len(name.encode()) + text_begin
 
-        if ignored:
-            hl = Highlight(group=particular_mappings.ignored, begin=begin, end=end)
+        icon_group = search_icon_hl(node, ignored=ignored)
+        if icon_group:
+            hl = Highlight(group=icon_group, begin=icon_begin, end=icon_end)
             yield hl
-        else:
-            group = icon_exts.get(node.ext or "")
-            if group:
-                hl = Highlight(group=group, begin=begin, end=end)
-                yield hl
 
-        group = search_hl(node, ignored=ignored)
-        if group:
-            begin = end
-            end = len(name.encode()) + begin
-            hl = Highlight(group=group, begin=begin, end=end)
+        text_group = search_text_hl(node, ignored=ignored)
+        if text_group:
+            hl = Highlight(group=text_group, begin=text_begin, end=text_end)
             yield hl
 
     def show(node: Node, depth: int) -> Optional[Render]:
