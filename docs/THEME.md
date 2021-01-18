@@ -52,14 +52,14 @@ There are three options to `chadtree_settings.view.icon_set`:
 
 Imported from [vim-devicons](https://github.com/ryanoasis/vim-devicons)
 
-![devicons.png](https://github.com/ms-jpq/chadtree/tree/future2/docs/img/icons_devicons.png)
+![devicons.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/icons_devicons.png)
 
 **emoji:**
 
 Imported from [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme)
 
-![emojicons.png](https://github.com/ms-jpq/chadtree/tree/future2/docs/img/icons_emoji.png)
+![emojicons.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/icons_emoji.png)
 
 **ascii:**
 
-![asciicons.png](https://github.com/ms-jpq/chadtree/tree/future2/docs/img/icons_ascii.png)
+![asciicons.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/icons_ascii.png)
