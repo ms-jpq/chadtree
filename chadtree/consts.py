@@ -41,7 +41,7 @@ ICON_LOOKUP_JSON = {
 
 
 GITHUB_COLOURS_JSON = _ARTIFACTS / "github_colours.json"
-NERD_COLOURS_JSON = _ARTIFACTS / "colours.json"
+NERD_COLOURS_JSON = _ARTIFACTS / "colours_night.json"
 
 
 SESSION_DIR = (

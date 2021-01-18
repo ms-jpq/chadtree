@@ -57,7 +57,7 @@ class _IconLoadFormat:
 
 @dataclass(frozen=True)
 class _IconDumpFormat:
-    type: Mapping[str, str]
+    ext_exact: Mapping[str, str]
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
     default_icon: str
@@ -73,7 +73,7 @@ class _ColoursLoadFormat:
 
 @dataclass(frozen=True)
 class _ColoursDumpFormat:
-    type: Mapping[str, str]
+    ext_exact: Mapping[str, str]
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
 
@@ -106,7 +106,7 @@ def _process_glob(glob: Mapping[str, str]) -> Mapping[str, str]:
 def _process_icons(json: Any) -> _IconDumpFormat:
     loaded: _IconLoadFormat = decode(_IconLoadFormat, json)
     dump = _IconDumpFormat(
-        type=_process_exts(loaded.extensions),
+        ext_exact=_process_exts(loaded.extensions),
         name_exact=loaded.exact,
         name_glob=_process_glob(loaded.glob),
         default_icon=loaded.default,
@@ -122,7 +122,7 @@ def _process_hexcode(colours: Mapping[str, str]) -> Mapping[str, str]:
 def _process_colours(json: Any) -> _ColoursDumpFormat:
     loaded: _ColoursLoadFormat = decode(_ColoursLoadFormat, json)
     dump = _ColoursDumpFormat(
-        type=_process_hexcode(_process_exts(loaded.extensions)),
+        ext_exact=_process_hexcode(_process_exts(loaded.extensions)),
         name_exact=_process_hexcode(loaded.exact),
         name_glob=_process_hexcode(_process_glob(loaded.glob)),
     )
@@ -135,7 +135,7 @@ def _trans_inverse(mapping: Mapping[str, str]) -> Mapping[str, str]:
 
 def _invert_nightmode(night_mode: _ColoursDumpFormat) -> _ColoursDumpFormat:
     dump = _ColoursDumpFormat(
-        type=_trans_inverse(night_mode.type),
+        ext_exact=_trans_inverse(night_mode.ext_exact),
         name_exact=_trans_inverse(night_mode.name_exact),
         name_glob=_trans_inverse(night_mode.name_glob),
     )

@@ -130,7 +130,7 @@ def _paint(
         else:
             yield (
                 icons.name_exact.get(node.name, "")
-                or icons.type.get(node.ext or "", "")
+                or icons.ext_exact.get(node.ext or "", "")
                 or next(
                     (v for k, v in icons.name_glob.items() if fnmatch(node.name, k)),
                     icons.default_icon,

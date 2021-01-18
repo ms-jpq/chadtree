@@ -17,22 +17,9 @@ from std2.pickle import DecodeError, decode
 from std2.tree import merge
 from yaml import safe_load
 
-from ..consts import (
-    CONFIG_YML,
-    GITHUB_COLOURS_JSON,
-    ICON_LOOKUP_JSON,
-    NERD_COLOURS_JSON,
-    SETTINGS_VAR,
-)
-from ..view.parse_colours import parse_colours
-from ..view.types import (
-    ColourChoice,
-    GithubColours,
-    NerdColours,
-    Sortby,
-    UserHLGroups,
-    UserIcons,
-)
+from ..consts import CONFIG_YML, ICON_LOOKUP_JSON, SETTINGS_VAR
+from ..view.parse_colours import load_colours
+from ..view.types import ColourChoice, Sortby, UserHLGroups, UserIcons
 from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
 
 
@@ -74,7 +61,6 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
-    light_theme = nvim.options["background"] == "light"
 
     config: _UserConfig = decode(
         _UserConfig,
@@ -85,20 +71,10 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     icons: UserIcons = decode(
         UserIcons, loads(ICON_LOOKUP_JSON[options.use_icons].read_text())
     )
-
-    github_colours: GithubColours = decode(
-        GithubColours, loads(GITHUB_COLOURS_JSON.read_text())
-    )
-    nerd_colours: NerdColours = decode(
-        NerdColours, merge(loads(NERD_COLOURS_JSON.read_text()))
-    )
-
-    hl_context = parse_colours(
+    hl_context = load_colours(
+        nvim,
         colours=view.colours,
-        light_theme=light_theme,
         particular_mappings=view.highlights,
-        github_colours=github_colours,
-        nerd_colours=nerd_colours,
     )
 
     view_opts = ViewOptions(

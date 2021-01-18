@@ -42,7 +42,7 @@
     ".*vimrc.*": "#8FAA54",
     "Vagrantfile": "#689FB6"
   },
-  "type": {
+  "ext_exact": {
     ".ai": "#F16529",
     ".awk": "#FFFFFF",
     ".bash": "#834F79",

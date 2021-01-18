@@ -2,7 +2,7 @@ from operator import add, sub
 from typing import Callable, Optional
 
 from pynvim import Nvim
-from pynvim_pp.api import cur_win, win_get_buf
+from pynvim_pp.api import cur_win
 
 from ..registry import rpc
 from ..settings.types import Settings

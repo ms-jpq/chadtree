@@ -14,9 +14,9 @@ class ColourChoice(Enum):
 
 @dataclass(frozen=True)
 class NerdColours:
+    ext_exact: Mapping[str, str]
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
-    type: Mapping[str, str]
 
 
 @dataclass(frozen=True)
@@ -41,13 +41,13 @@ class UserStatusIcons:
 
 @dataclass(frozen=True)
 class UserIcons:
+    ext_exact: Mapping[str, str]
     default_icon: str
     folder: UserFolderIcons
     link: UserLinkIcons
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
     status: UserStatusIcons
-    type: Mapping[str, str]
 
 
 GithubColours = Mapping[str, str]

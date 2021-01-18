@@ -1,16 +1,17 @@
 from itertools import chain
-from typing import Callable, Mapping, TypeVar, cast
+from json import loads
+from os import environ
+from typing import Mapping, TypeVar
 
+from pynvim.api.nvim import Nvim
 from pynvim_pp.highlight import HLgroup
-from std2.coloursys import hex_inverse
-from std2.functools import identity
+from std2.pickle import decode
 from std2.types import never
 
-from ..consts import FM_HL_PREFIX
+from ..consts import FM_HL_PREFIX, GITHUB_COLOURS_JSON, NERD_COLOURS_JSON
 from .highlight import gen_hl
 from .ls_colours import parse_lsc
 from .types import ColourChoice, GithubColours, HLcontext, NerdColours, UserHLGroups
-from os import environ
 
 T = TypeVar("T")
 
@@ -19,21 +20,21 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
     return {k: v.name for k, v in mapping.items()}
 
 
-def _trans_inverse(inverse: bool, mapping: Mapping[str, str]) -> Mapping[str, HLgroup]:
-    trans = hex_inverse if inverse else cast(Callable[[str], str], identity)
-    return gen_hl(
-        FM_HL_PREFIX, mapping={key: trans(val) for key, val in mapping.items()}
+def load_colours(
+    nvim: Nvim,
+    colours: ColourChoice,
+    particular_mappings: UserHLGroups,
+) -> HLcontext:
+    light_theme = nvim.options["background"] == "light"
+    ls_colours = environ.get("LS_COLORS", "")
+
+    github_colours: GithubColours = decode(
+        GithubColours, loads(GITHUB_COLOURS_JSON.read_text())
+    )
+    nerd_colours: NerdColours = decode(
+        NerdColours, loads(NERD_COLOURS_JSON.read_text())
     )
 
-
-def parse_colours(
-    colours: ColourChoice,
-    light_theme: bool,
-    particular_mappings: UserHLGroups,
-    github_colours: GithubColours,
-    nerd_colours: NerdColours,
-) -> HLcontext:
-    ls_colours = environ.get("LS_COLORS", "")
     if not ls_colours:
         colours = ColourChoice.nerd_tree
 
@@ -47,9 +48,9 @@ def parse_colours(
     elif colours is ColourChoice.nerd_tree:
         mode_pre = {}
         mode_post = {}
-        ext_exact = _trans_inverse(light_theme, mapping=nerd_colours.type)
-        name_exact = _trans_inverse(light_theme, mapping=nerd_colours.name_exact)
-        name_glob = _trans_inverse(light_theme, mapping=nerd_colours.name_glob)
+        ext_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.ext_exact)
+        name_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_exact)
+        name_glob = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_glob)
     else:
         never(colours)
 

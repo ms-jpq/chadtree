@@ -105,7 +105,7 @@
     "not_selected": " ",
     "selected": "✸"
   },
-  "type": {
+  "ext_exact": {
     ".3ds": "🦖",
     ".7z": "📦",
     ".aar": "📦",

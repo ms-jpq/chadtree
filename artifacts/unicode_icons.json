@@ -61,7 +61,7 @@
     "not_selected": " ",
     "selected": "✸"
   },
-  "type": {
+  "ext_exact": {
     ".ai": "",
     ".awk": "",
     ".bash": "",
