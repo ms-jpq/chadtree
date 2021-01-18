@@ -165,7 +165,6 @@ Enable version control. This can also be toggled. But unlike `show_hidden`, does
 true
 ```
 
-
 ### `chadtree_settings.ignore`
 
 CHADTree can ignore showing some files. This is toggable by default using the `.` key.
