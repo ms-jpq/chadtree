@@ -174,8 +174,8 @@ def _devicons() -> None:
     night_mode = _process_colours(load(TEMP_JSON.open()))
     day_mode = _invert_nightmode(night_mode)
 
-    night_dest = (ARTIFACTS / f"{SRC_ICONS}_night").with_suffix(".json")
-    day_dest = (ARTIFACTS / f"{SRC_ICONS}_day").with_suffix(".json")
+    night_dest = (ARTIFACTS / f"{SRC_COLOUR}_night").with_suffix(".json")
+    day_dest = (ARTIFACTS / f"{SRC_COLOUR}_day").with_suffix(".json")
 
     _spit_json(night_dest, encode(night_mode))
     _spit_json(day_dest, encode(day_mode))
@@ -229,7 +229,7 @@ def _git_alert() -> None:
 def main() -> None:
     _devicons()
     _github_colours()
-    _git_alert()
+    # _git_alert()
 
 
 main()

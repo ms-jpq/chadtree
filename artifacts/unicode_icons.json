@@ -1,66 +1,5 @@
 {
   "default_icon": "",
-  "folder": {
-    "closed": "",
-    "open": ""
-  },
-  "link": {
-    "broken": "",
-    "normal": ""
-  },
-  "name_exact": {
-    ".bashprofile": "",
-    ".bashrc": "",
-    ".ds_store": "",
-    ".gitattributes": "",
-    ".gitconfig": "",
-    ".gitignore": "",
-    ".gitlab-ci.yml": "",
-    ".gvimrc": "",
-    ".vimrc": "",
-    ".zshrc": "",
-    "_gvimrc": "",
-    "_vimrc": "",
-    "cmakelists.txt": "",
-    "config.ru": "",
-    "docker-compose.yml": "",
-    "dockerfile": "",
-    "dropbox": "",
-    "exact-match-case-sensitive-1.txt": "1",
-    "exact-match-case-sensitive-2": "2",
-    "favicon.ico": "",
-    "gemfile": "",
-    "gruntfile.coffee": "",
-    "gruntfile.js": "",
-    "gruntfile.ls": "",
-    "gulpfile.coffee": "",
-    "gulpfile.js": "",
-    "gulpfile.ls": "",
-    "license": "",
-    "makefile": "",
-    "mix.lock": "",
-    "node_modules": "",
-    "procfile": "",
-    "rakefile": "",
-    "react.jsx": ""
-  },
-  "name_glob": {
-    ".*angular.*.js": "",
-    ".*backbone.*.js": "",
-    ".*jquery.*.js": "",
-    ".*materialize.*.css": "",
-    ".*materialize.*.js": "",
-    ".*mootools.*.js": "",
-    ".*require.*.js": "",
-    ".*vimrc.*": "",
-    "Vagrantfile": ""
-  },
-  "status": {
-    "active": "▶",
-    "inactive": " ",
-    "not_selected": " ",
-    "selected": "✸"
-  },
   "ext_exact": {
     ".ai": "",
     ".awk": "",
@@ -179,5 +118,66 @@
     ".yaml": "",
     ".yml": "",
     ".zsh": ""
+  },
+  "folder": {
+    "closed": "",
+    "open": ""
+  },
+  "link": {
+    "broken": "",
+    "normal": ""
+  },
+  "name_exact": {
+    ".bashprofile": "",
+    ".bashrc": "",
+    ".ds_store": "",
+    ".gitattributes": "",
+    ".gitconfig": "",
+    ".gitignore": "",
+    ".gitlab-ci.yml": "",
+    ".gvimrc": "",
+    ".vimrc": "",
+    ".zshrc": "",
+    "_gvimrc": "",
+    "_vimrc": "",
+    "cmakelists.txt": "",
+    "config.ru": "",
+    "docker-compose.yml": "",
+    "dockerfile": "",
+    "dropbox": "",
+    "exact-match-case-sensitive-1.txt": "1",
+    "exact-match-case-sensitive-2": "2",
+    "favicon.ico": "",
+    "gemfile": "",
+    "gruntfile.coffee": "",
+    "gruntfile.js": "",
+    "gruntfile.ls": "",
+    "gulpfile.coffee": "",
+    "gulpfile.js": "",
+    "gulpfile.ls": "",
+    "license": "",
+    "makefile": "",
+    "mix.lock": "",
+    "node_modules": "",
+    "procfile": "",
+    "rakefile": "",
+    "react.jsx": ""
+  },
+  "name_glob": {
+    ".*angular.*.js": "",
+    ".*backbone.*.js": "",
+    ".*jquery.*.js": "",
+    ".*materialize.*.css": "",
+    ".*materialize.*.js": "",
+    ".*mootools.*.js": "",
+    ".*require.*.js": "",
+    ".*vimrc.*": "",
+    "Vagrantfile": ""
+  },
+  "status": {
+    "active": "▶",
+    "inactive": " ",
+    "not_selected": " ",
+    "selected": "✸"
   }
 }
