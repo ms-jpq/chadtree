@@ -43,13 +43,13 @@ class _Args:
 
 def _directory(page: Optional[_Pages]) -> Tuple[Path, str]:
     if page is None:
-        return README_MD, CONFIGURATION_URI
+        return README_MD, README_URI
     elif page is _Pages.features:
         return FEATURES_MD, FEATURES_URI
     elif page is _Pages.keybind:
         return KEYBIND_MD, KEYBIND_URI
     elif page is _Pages.config:
-        return CONFIGURATION_MD, README_URI
+        return CONFIGURATION_MD, CONFIGURATION_URI
     elif page is _Pages.theme:
         return THEME_MD, THEME_URI
     else:
@@ -66,7 +66,7 @@ def _parse_args(args: Sequence[str]) -> _Args:
     )
     parser.add_argument("-w", "--web", action="store_true", default=False)
     ns = parser.parse_args(args)
-    opts = _Args(page=_Pages[ns.page], use_web=ns.web)
+    opts = _Args(page=_Pages[ns.page] if ns.page else None, use_web=ns.web)
     return opts
 
 
