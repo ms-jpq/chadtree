@@ -1,4 +1,5 @@
 from os import chdir
+from os.path import isfile
 from typing import Optional
 
 from pynvim import Nvim
@@ -61,7 +62,7 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
     """
 
     curr = find_current_buffer_name(nvim)
-    if curr:
+    if isfile(curr):
         return new_current_file(nvim, state=state, settings=settings, current=curr)
     else:
         return None
