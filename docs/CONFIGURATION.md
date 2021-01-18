@@ -83,5 +83,26 @@ I only wrote localization for `en`. `zh` will be coming, and maybe `fr` if I can
 
 #### `chadtree_settings.options.mimetypes`
 
+CHADTree will attempt to warn you when you try to open say an image. This is done via the [Internet Assigned Numbers Authority](https://www.iana.org/assignments/media-types/media-types.xhtml)'s mimetype database.
+
+##### `chadtree_settings.options.mimetypes.warn`
+
+Show a warning before opening these datatypes
+
+**default:**
+
+```json
+["audio", "font", "image", "video"]
+```
+
+##### `chadtree_settings.options.mimetypes.allow_exts`
+
+Skip warning for these extensions
+
+**default:**
+
+```json
+[".ts"]
+```
 
 ### `chadtree_settings.ignore`
