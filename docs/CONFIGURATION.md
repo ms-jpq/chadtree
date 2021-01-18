@@ -59,7 +59,7 @@ Will give you the following error message:
 
 The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/blob/chad/config/defaults.yml)
 
-### `chadtree_settings.options`
+### chadtree_settings.options
 
 #### `chadtree_settings.options.follow`
 
@@ -165,7 +165,7 @@ Enable version control. This can also be toggled. But unlike `show_hidden`, does
 true
 ```
 
-### `chadtree_settings.ignore`
+### chadtree_settings.ignore
 
 CHADTree can ignore showing some files. This is toggable by default using the `.` key.
 
@@ -201,7 +201,7 @@ Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/
 []
 ```
 
-### `chadtree_settings.view`
+### chadtree_settings.view
 
 Some options to change CHADTree's apperance
 
