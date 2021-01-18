@@ -90,21 +90,21 @@ options:
   polling_rate: 2.0
   session: true
   show_hidden: false
-  sort_by:
-    - is_folder
-    - ext
-    - fname
-  use_icons: true
   version_control:
     enable: true
-  width: 40
 view:
   colours: ls_colours
   highlights:
     ignored: Comment
     quickfix: Label
     version_control: Comment
+  sort_by:
+    - is_folder
+    - ext
+    - fname
   time_format: "%Y-%m-%d %H:%M"
+  use_icons: true
+  width: 40
   window_options:
     cursorline: true
     number: false

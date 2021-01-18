@@ -16,7 +16,7 @@ class MimetypeOptions:
 
 
 @dataclass(frozen=True)
-class UserIgnore:
+class IgnoreOpts:
     name_exact: AbstractSet[str]
     name_glob: Sequence[str]
     path_glob: Sequence[str]
@@ -25,7 +25,7 @@ class UserIgnore:
 @dataclass(frozen=True)
 class Settings:
     follow: bool
-    ignores: UserIgnore
+    ignores: IgnoreOpts
     page_increment: int
     keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]

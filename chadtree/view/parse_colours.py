@@ -16,7 +16,7 @@ from ..consts import (
 )
 from .highlight import gen_hl
 from .ls_colours import parse_lsc
-from .types import ColourChoice, GithubColours, HLcontext, NerdColours, UserHLGroups
+from .types import ColourChoice, GithubColours, HLcontext, HLGroups, NerdColours
 
 T = TypeVar("T")
 
@@ -28,7 +28,7 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
 def load_colours(
     nvim: Nvim,
     colours: ColourChoice,
-    particular_mappings: UserHLGroups,
+    particular_mappings: HLGroups,
 ) -> HLcontext:
     ls_colours = environ.get("LS_COLORS", "")
     if not ls_colours:

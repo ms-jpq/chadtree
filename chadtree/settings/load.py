@@ -13,14 +13,15 @@ from typing import (
 
 from pynvim.api.nvim import Nvim
 from pynvim_pp.rpc import RpcSpec
+from std2.configparser import hydrate
 from std2.pickle import DecodeError, decode
 from std2.tree import merge
 from yaml import safe_load
 
 from ..consts import CONFIG_YML, ICON_LOOKUP_JSON, SETTINGS_VAR
 from ..view.parse_colours import load_colours
-from ..view.types import ColourChoice, Sortby, UserHLGroups, UserIcons
-from .types import MimetypeOptions, Settings, UserIgnore, VersionCtlOpts, ViewOptions
+from ..view.types import ColourChoice, HLGroups, Icons, Sortby
+from .types import IgnoreOpts, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
 
 
 @dataclass(frozen=True)
@@ -33,16 +34,16 @@ class _UserOptions:
     polling_rate: SupportsFloat
     session: bool
     show_hidden: bool
-    sort_by: Sequence[Sortby]
-    use_icons: Union[bool, Literal["emoji"]]
     version_control: VersionCtlOpts
-    width: int
 
 
 @dataclass(frozen=True)
 class _UserView:
+    width: int
+    sort_by: Sequence[Sortby]
+    use_icons: Union[bool, Literal["emoji"]]
     colours: ColourChoice
-    highlights: UserHLGroups
+    highlights: HLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
 
@@ -52,7 +53,7 @@ class _UserConfig:
     keymap: Mapping[str, AbstractSet[str]]
     options: _UserOptions
     view: _UserView
-    ignore: UserIgnore
+    ignore: IgnoreOpts
 
 
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
@@ -64,13 +65,11 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
 
     config: _UserConfig = decode(
         _UserConfig,
-        merge(safe_load(CONFIG_YML.read_bytes()), user_config, replace=True),
+        merge(safe_load(CONFIG_YML.read_bytes()), hydrate(user_config), replace=True),
     )
     options, view = config.options, config.view
 
-    icons: UserIcons = decode(
-        UserIcons, loads(ICON_LOOKUP_JSON[options.use_icons].read_text())
-    )
+    icons: Icons = decode(Icons, loads(ICON_LOOKUP_JSON[view.use_icons].read_text()))
     hl_context = load_colours(
         nvim,
         colours=view.colours,
@@ -80,8 +79,8 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     view_opts = ViewOptions(
         hl_context=hl_context,
         icons=icons,
-        sort_by=options.sort_by,
-        use_icons=bool(options.use_icons),
+        sort_by=view.sort_by,
+        use_icons=bool(view.use_icons),
         time_fmt=view.time_format,
     )
 
@@ -110,7 +109,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         show_hidden=options.show_hidden,
         version_ctl=options.version_control,
         view=view_opts,
-        width=options.width,
+        width=view.width,
         win_local_opts=view.window_options,
     )
 

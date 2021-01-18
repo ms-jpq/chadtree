@@ -9,7 +9,7 @@ from std2.types import never
 
 from ..fs.cartographer import is_dir
 from ..fs.types import Mode, Node
-from ..settings.types import Settings, UserIgnore
+from ..settings.types import IgnoreOpts, Settings
 from ..state.types import FilterPattern, Index, QuickFix, Selection
 from ..version_ctl.types import VCStatus
 from .types import Badge, Derived, Highlight, Render, Sortby
@@ -38,7 +38,7 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     return comp
 
 
-def _user_ignored(node: Node, ignores: UserIgnore) -> bool:
+def _user_ignored(node: Node, ignores: IgnoreOpts) -> bool:
     return (
         node.name in ignores.name_exact
         or any(fnmatch(node.name, pattern) for pattern in ignores.name_glob)

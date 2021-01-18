@@ -20,19 +20,19 @@ class NerdColours:
 
 
 @dataclass(frozen=True)
-class UserFolderIcons:
+class FolderIcons:
     open: str
     closed: str
 
 
 @dataclass(frozen=True)
-class UserLinkIcons:
+class LinkIcons:
     normal: str
     broken: str
 
 
 @dataclass(frozen=True)
-class UserStatusIcons:
+class StatusIcons:
     active: str
     inactive: str
     selected: str
@@ -40,21 +40,21 @@ class UserStatusIcons:
 
 
 @dataclass(frozen=True)
-class UserIcons:
+class Icons:
     ext_exact: Mapping[str, str]
     default_icon: str
-    folder: UserFolderIcons
-    link: UserLinkIcons
+    folder: FolderIcons
+    link: LinkIcons
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
-    status: UserStatusIcons
+    status: StatusIcons
 
 
 GithubColours = Mapping[str, str]
 
 
 @dataclass(frozen=True)
-class UserHLGroups:
+class HLGroups:
     ignored: str
     quickfix: str
     version_control: str
@@ -69,7 +69,7 @@ class HLcontext:
     name_exact: Mapping[str, str]
     name_glob: Mapping[str, str]
     ext_exact: Mapping[str, str]
-    particular_mappings: UserHLGroups
+    particular_mappings: HLGroups
 
 
 class Sortby(Enum):
@@ -81,7 +81,7 @@ class Sortby(Enum):
 @dataclass(frozen=True)
 class ViewOptions:
     hl_context: HLcontext
-    icons: UserIcons
+    icons: Icons
     sort_by: Sequence[Sortby]
     time_fmt: str
     use_icons: bool
