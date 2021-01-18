@@ -101,7 +101,7 @@ view:
   sort_by:
     - is_folder
     - ext
-    - fname
+    - name
   time_format: "%Y-%m-%d %H:%M"
   use_icons: true
   width: 40

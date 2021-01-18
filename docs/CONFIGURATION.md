@@ -203,18 +203,133 @@ Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/
 
 ### `chadtree_settings.view`
 
+Some options to change CHADTree's apperance
+
 #### `chadtree_settings.view.colours`
+
+See the [doc on theme]() for more details.
+
+**legal keys: one of**
+
+```json
+["ls_colours", "nerd_tree"]
+```
+
+**default:**
+
+```json
+"ls_colours"
+```
 
 #### `chadtree_settings.view.highlights`
 
+Vim [highlight groups](https://www.sbf5.com/~cduan/technical/vi/vi-4.shtml) to use for various parts of CHADTree
+
+##### `chadtree_settings.view.highlights.ignored`
+
+Used for hidden files and files ignored by `git`
+
+**default:**
+
+```json
+"Comment"
+```
+
+##### `chadtree_settings.view.highlights.quickfix`
+
+Used to colour annotations for files inside the `quickfix` list
+
+**default:**
+
+```json
+"Label"
+```
+
+##### `chadtree_settings.view.highlights.version_control`
+
+Used to colour annotations for `git` status
+
+**default:**
+
+```json
+"Comment"
+```
+
 #### `chadtree_settings.view.open_direction`
+
+Which way does CHADTree open?
+
+**legal keys: one of**
+
+```json
+["left", "right"]
+```
+
+**default:**
+
+```json
+"left"
+```
 
 #### `chadtree_settings.view.sort_by`
 
-#### `chadtree_settings.view.time_format`
+CHADTree can sort by the following criterion. Reorder them if you want a different sorting order.
 
-#### `chadtree_settings.view.use_icons`
+**legal keys: some of**
+
+```json
+["is_folder", "ext", "name"]
+```
+
+**default:**
+
+```json
+["is_folder", "ext", "name"]
+```
+
+#### `chadtree_settings.view.icon_set`
+
+Which icon set to use. Note some of these might require additional fonts and or terminal support.
+
+See the [doc on theme]() for more details.
+
+**default:**
+
+**legal keys: one of**
+
+```json
+["ascii", "devicons", "emoji"]
+```
+
+**default:**
+
+```json
+"devicons"
+```
 
 #### `chadtree_settings.view.width`
 
+How big is CHADTree when initially opened?
+
+**default:**
+
+```json
+40
+```
+
 #### `chadtree_settings.view.window_options`
+
+Set of window local options to for CHADTree windows
+
+**default:**
+
+```json
+{
+  "cursorline": true,
+  "number": false,
+  "relativenumber": false,
+  "signcolumn": "no",
+  "winfixwidth": true,
+  "wrap": false
+}
+```
