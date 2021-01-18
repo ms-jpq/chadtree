@@ -57,7 +57,7 @@ Will give you the following error message:
 
 ## Specifics
 
-The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/blob/chad/config/defaults.yml)
+The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/blob/future2/config/defaults.yml)
 
 ### chadtree_settings.options
 
@@ -207,7 +207,7 @@ Some options to change CHADTree's apperance
 
 #### `chadtree_settings.view.colours`
 
-See the [doc on theme]() for more details.
+See the [doc on theme](https://github.com/ms-jpq/chadtree/blob/future2/docs/THEME.md) for more details.
 
 **legal keys: one of**
 
@@ -225,7 +225,7 @@ See the [doc on theme]() for more details.
 
 Which icon set to use. Note some of these might require additional fonts and or terminal support.
 
-See the [doc on theme]() for more details.
+See the [doc on theme](https://github.com/ms-jpq/chadtree/blob/future2/docs/THEME.md) for more details.
 
 **default:**
 

@@ -84,7 +84,7 @@ nnoremap <leader>v <cmd>CHADopen<cr>
 
 Use `:CHADopen --nofocus` to open but not focus on the sidebar.
 
-Check out [config.json](https://github.com/ms-jpq/chadtree/blob/chad/config/config.json) before you proceed for an overview of options.
+Check out [config.json](https://github.com/ms-jpq/chadtree/blob/future2/config/config.json) before you proceed for an overview of options.
 
 Set a dictionary with same keys to `g:chadtree_settings` to overwrite any options. You dont need to provide every key, just the ones you want to overwrite.
 
@@ -129,7 +129,7 @@ Set a dictionary with same keys to `g:chadtree_settings` to overwrite any option
 
 **important:** if you are not seeing Icons, you are probably missing the [correct font](https://github.com/ryanoasis/nerd-fonts).
 
-Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/chad/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/chad/config/ignore.json) accordingly.
+Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/future2/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/future2/config/ignore.json) accordingly.
 
 | option | usage                       |
 | ------ | --------------------------- |
@@ -152,7 +152,7 @@ lua vim.api.nvim_set_var("chadtree_settings", { use_icons = "emoji" })
 
 Where to get `LS_COLORS`? Lots of places,such as [here](https://github.com/seebi/dircolors-solarized) or [here](https://github.com/trapd00r/LS_COLORS).
 
-Set `g:chadtree_colours` to customize colour mappings for `8bit` -> `24bit` [mappings](https://github.com/ms-jpq/chadtree/blob/chad/config/colours.json).
+Set `g:chadtree_colours` to customize colour mappings for `8bit` -> `24bit` [mappings](https://github.com/ms-jpq/chadtree/blob/future2/config/colours.json).
 
 Vaild values for `hl24` include hexcodes such as `#FFFFF`
 
