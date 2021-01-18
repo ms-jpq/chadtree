@@ -23,7 +23,7 @@ FM_HL_PREFIX = "chadtree"
 SETTINGS_VAR = "chadtree_settings"
 
 
-CONFIG_YML = _CONFIG / "config.yml"
+CONFIG_YML = _CONFIG / "defaults.yml"
 
 
 LANG_ROOT = _TOP_LEVEL / "locale"
