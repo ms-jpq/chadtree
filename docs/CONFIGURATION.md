@@ -245,6 +245,8 @@ See the [doc on theme]() for more details.
 
 Vim [highlight groups](https://www.sbf5.com/~cduan/technical/vi/vi-4.shtml) to use for various parts of CHADTree
 
+see `:help highlight-groups`
+
 ##### `chadtree_settings.view.highlights.ignored`
 
 Used for hidden files and files ignored by `git`

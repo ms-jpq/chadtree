@@ -55,7 +55,6 @@ GithubColours = Mapping[str, str]
 
 @dataclass(frozen=True)
 class HLGroups:
-    directory: str
     ignored: str
     quickfix: str
     version_control: str

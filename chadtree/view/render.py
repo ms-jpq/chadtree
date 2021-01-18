@@ -86,8 +86,6 @@ def _paint(
     def search_icon_hl(node: Node, ignored: bool) -> Optional[str]:
         if ignored:
             return particular_mappings.ignored
-        elif is_dir(node):
-            return particular_mappings.directory
         else:
             return icon_exts.get(node.ext or "")
 
