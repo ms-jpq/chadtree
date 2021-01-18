@@ -12,7 +12,7 @@ class VersionCtlOpts:
 @dataclass(frozen=True)
 class MimetypeOptions:
     warn: AbstractSet[str]
-    ignore_exts: AbstractSet[str]
+    allow_exts: AbstractSet[str]
 
 
 @dataclass(frozen=True)

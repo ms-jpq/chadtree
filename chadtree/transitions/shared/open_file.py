@@ -82,7 +82,7 @@ def open_file(
 
     go = (
         ask()
-        if m_type in settings.mime.warn and ext not in settings.mime.ignore_exts
+        if m_type in settings.mime.warn and ext not in settings.mime.allow_exts
         else True
     )
 

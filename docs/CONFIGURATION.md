@@ -22,11 +22,11 @@ Dictionary keys will be automatically expanded with the `.` notation. This works
 ie. The following are equivalent
 
 ```json
-{"dog.puppy": 2}
+{ "dog.puppy": 2 }
 ```
 
 ```json
-{"dog": {"puppy": 2}}
+{ "dog": { "puppy": 2 } }
 ```
 
 Note in lua, you will need to quote your keys like so:
@@ -59,7 +59,7 @@ The default configuration can be found under an [`yaml` file](https://github.com
 
 CHADTree will highlight currently open file.
 
-default:
+**default:**
 
 ```json
 true
@@ -67,9 +67,21 @@ true
 
 #### `chadtree_settings.options.lang`
 
-default:
+CHADTree will guess your locale from [unix environmental variables](https://pubs.opengroup.org/onlinepubs/7908799/xbd/envvar.html).
+
+Set to `c` to disable emojis.
+
+**default:**
+
 ```json
 null
 ```
+
+**note:**
+
+I only wrote localization for `en`. `zh` will be coming, and maybe `fr` if I can get my girlfriend to help.
+
+#### `chadtree_settings.options.mimetypes`
+
 
 ### `chadtree_settings.ignore`

@@ -78,7 +78,7 @@ options:
   follow: true
   lang: null
   mimetypes:
-    ignore_exts:
+    allow_exts:
       - .ts
     warn:
       - audio
