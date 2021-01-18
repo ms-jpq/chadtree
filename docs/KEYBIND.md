@@ -258,16 +258,6 @@ Rename file under cursor.
 ["r"]
 ```
 
-### `chadtree_settings.keymap.rename`
-
-Rename file under cursor.
-
-**default:**
-
-```json
-["r"]
-```
-
 ### `chadtree_settings.keymap.copy`
 
 Copy the selected files to location under cursor.
