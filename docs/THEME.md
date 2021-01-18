@@ -26,11 +26,11 @@ If you do not like whatever `LS_COLORS` came with your machine, or perhaps you d
 
 There are lots of options online, see:
 
-[https://github.com/seebi/dircolors-solarized](https://github.com/seebi/dircolors-solarized)
+[dircolors-solarized](https://github.com/seebi/dircolors-solarized)
 
-[https://github.com/arcticicestudio/nord-dircolors](https://github.com/arcticicestudio/nord-dircolors)
+[nord-dircolors](https://github.com/arcticicestudio/nord-dircolors)
 
-[https://github.com/trapd00r/LS_COLORS](https://github.com/trapd00r/LS_COLORS)
+[LS_COLORS](https://github.com/trapd00r/LS_COLORS)
 
 ### NerdTree Colours
 
@@ -52,14 +52,14 @@ There are three options to `chadtree_settings.view.icon_set`:
 
 Imported from [vim-devicons](https://github.com/ryanoasis/vim-devicons)
 
-![]()
+![devicons.png](https://github.com/ms-jpq/chadtree/tree/future2/docs/img/icons_devicons.png)
 
 **emoji:**
 
 Imported from [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme)
 
-![]()
+![emojicons.png](https://github.com/ms-jpq/chadtree/tree/future2/docs/img/icons_emoji.png)
 
 **ascii:**
 
-![]()
+![asciicons.png](https://github.com/ms-jpq/chadtree/tree/future2/docs/img/icons_ascii.png)
