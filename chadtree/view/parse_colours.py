@@ -8,7 +8,12 @@ from pynvim_pp.highlight import HLgroup
 from std2.pickle import decode
 from std2.types import never
 
-from ..consts import FM_HL_PREFIX, GITHUB_COLOURS_JSON, NERD_COLOURS_JSON
+from ..consts import (
+    FM_HL_PREFIX,
+    GITHUB_COLOURS_JSON,
+    NERD_COLOURS_DARK_JSON,
+    NERD_COLOURS_LIGHT_JSON,
+)
 from .highlight import gen_hl
 from .ls_colours import parse_lsc
 from .types import ColourChoice, GithubColours, HLcontext, NerdColours, UserHLGroups
@@ -25,18 +30,13 @@ def load_colours(
     colours: ColourChoice,
     particular_mappings: UserHLGroups,
 ) -> HLcontext:
-    light_theme = nvim.options["background"] == "light"
     ls_colours = environ.get("LS_COLORS", "")
+    if not ls_colours:
+        colours = ColourChoice.nerd_tree
 
     github_colours: GithubColours = decode(
         GithubColours, loads(GITHUB_COLOURS_JSON.read_text())
     )
-    nerd_colours: NerdColours = decode(
-        NerdColours, loads(NERD_COLOURS_JSON.read_text())
-    )
-
-    if not ls_colours:
-        colours = ColourChoice.nerd_tree
 
     if colours is ColourChoice.ls_colours:
         lsc = parse_lsc(ls_colours)
@@ -46,6 +46,9 @@ def load_colours(
         name_exact: Mapping[str, HLgroup] = {}
         name_glob = lsc.name_glob
     elif colours is ColourChoice.nerd_tree:
+        light_theme = nvim.options["background"] == "light"
+        target = NERD_COLOURS_LIGHT_JSON if light_theme else NERD_COLOURS_DARK_JSON
+        nerd_colours: NerdColours = decode(NerdColours, loads(target.read_text()))
         mode_pre = {}
         mode_post = {}
         ext_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.ext_exact)
