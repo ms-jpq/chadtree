@@ -30,14 +30,10 @@ LANG_ROOT = _TOP_LEVEL / "locale"
 DEFAULT_LANG = "en"
 
 
-_UNICODE_ICONS_JSON = _ARTIFACTS / "unicode_icons.json"
-_ASCII_ICONS_JSON = _ARTIFACTS / "ascii_icons.json"
-_EMOJI_ICONS_JSON = _ARTIFACTS / "emoji_icons.json"
-ICON_LOOKUP_JSON = {
-    True: _UNICODE_ICONS_JSON,
-    False: _ASCII_ICONS_JSON,
-    "emoji": _EMOJI_ICONS_JSON,
-}
+ASCII_ICONS_JSON = _ARTIFACTS / "ascii_icons.json"
+EMOJI_ICONS_JSON = _ARTIFACTS / "emoji_icons.json"
+DEVI_ICONS_JSON = _ARTIFACTS / "unicode_icons.json"
+
 
 
 GITHUB_COLOURS_JSON = _ARTIFACTS / "github_colours.json"

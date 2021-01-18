@@ -97,13 +97,13 @@ view:
     ignored: Comment
     quickfix: Label
     version_control: Comment
+  icon_set: devicons
   open_direction: left
   sort_by:
     - is_folder
     - ext
-    - name
+    - file_name
   time_format: "%Y-%m-%d %H:%M"
-  use_icons: true
   width: 40
   window_options:
     cursorline: true

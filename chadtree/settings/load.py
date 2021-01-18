@@ -4,7 +4,6 @@ from json import loads
 from locale import strxfrm
 from typing import (
     AbstractSet,
-    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -17,9 +16,16 @@ from pynvim_pp.rpc import RpcSpec
 from std2.configparser import hydrate
 from std2.pickle import DecodeError, decode
 from std2.tree import merge
+from std2.types import never
 from yaml import safe_load
 
-from ..consts import CONFIG_YML, ICON_LOOKUP_JSON, SETTINGS_VAR
+from ..consts import (
+    ASCII_ICONS_JSON,
+    CONFIG_YML,
+    DEVI_ICONS_JSON,
+    EMOJI_ICONS_JSON,
+    SETTINGS_VAR,
+)
 from ..view.parse_colours import load_colours
 from ..view.types import ColourChoice, HLGroups, Icons, Sortby
 from .types import IgnoreOpts, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
@@ -28,6 +34,12 @@ from .types import IgnoreOpts, MimetypeOptions, Settings, VersionCtlOpts, ViewOp
 class _OpenDirection(Enum):
     left = auto()
     right = auto()
+
+
+class _IconSet(Enum):
+    ascii = auto()
+    emoji = auto()
+    devicons = auto()
 
 
 @dataclass(frozen=True)
@@ -47,7 +59,7 @@ class _UserView:
     open_direction: _OpenDirection
     width: int
     sort_by: Sequence[Sortby]
-    use_icons: Union[bool, Literal["emoji"]]
+    icon_set: _IconSet
     colours: ColourChoice
     highlights: HLGroups
     time_format: str
@@ -75,7 +87,16 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
     options, view = config.options, config.view
 
-    icons: Icons = decode(Icons, loads(ICON_LOOKUP_JSON[view.use_icons].read_text()))
+    if view.icon_set is _IconSet.ascii:
+        icons_spec = ASCII_ICONS_JSON
+    elif view.icon_set is _IconSet.emoji:
+        icons_spec = EMOJI_ICONS_JSON
+    elif view.icon_set is _IconSet.devicons:
+        icons_spec = DEVI_ICONS_JSON
+    else:
+        never(view.icon_set)
+
+    icons: Icons = decode(Icons, loads(icons_spec.read_text()))
     hl_context = load_colours(
         nvim,
         colours=view.colours,
@@ -86,7 +107,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         hl_context=hl_context,
         icons=icons,
         sort_by=view.sort_by,
-        use_icons=bool(view.use_icons),
+        use_icons=view.icon_set is not _IconSet.ascii,
         time_fmt=view.time_format,
     )
 

@@ -28,7 +28,7 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
                     yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
                 elif sb is Sortby.ext:
                     yield strxfrm(node.ext or ""),
-                elif sb is Sortby.name:
+                elif sb is Sortby.file_name:
                     yield strxfrm(node.name)
                 else:
                     never(sb)

@@ -221,6 +221,26 @@ See the [doc on theme]() for more details.
 "ls_colours"
 ```
 
+#### `chadtree_settings.view.icon_set`
+
+Which icon set to use. Note some of these might require additional fonts and or terminal support.
+
+See the [doc on theme]() for more details.
+
+**default:**
+
+**legal keys: one of**
+
+```json
+["ascii", "devicons", "emoji"]
+```
+
+**default:**
+
+```json
+"devicons"
+```
+
 #### `chadtree_settings.view.highlights`
 
 Vim [highlight groups](https://www.sbf5.com/~cduan/technical/vi/vi-4.shtml) to use for various parts of CHADTree
@@ -278,33 +298,13 @@ CHADTree can sort by the following criterion. Reorder them if you want a differe
 **legal keys: some of**
 
 ```json
-["is_folder", "ext", "name"]
+["is_folder", "ext", "file_name"]
 ```
 
 **default:**
 
 ```json
-["is_folder", "ext", "name"]
-```
-
-#### `chadtree_settings.view.icon_set`
-
-Which icon set to use. Note some of these might require additional fonts and or terminal support.
-
-See the [doc on theme]() for more details.
-
-**default:**
-
-**legal keys: one of**
-
-```json
-["ascii", "devicons", "emoji"]
-```
-
-**default:**
-
-```json
-"devicons"
+["is_folder", "ext", "file_name"]
 ```
 
 #### `chadtree_settings.view.width`

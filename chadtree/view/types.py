@@ -75,7 +75,7 @@ class HLcontext:
 class Sortby(Enum):
     is_folder = auto()
     ext = auto()
-    name = auto()
+    file_name = auto()
 
 
 @dataclass(frozen=True)
