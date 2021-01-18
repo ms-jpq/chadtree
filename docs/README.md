@@ -8,10 +8,10 @@ Use `:CHADhelp -w` or `:CHADhelp --web` to open help pages in a browser window.
 
 Use `:CHADhelp {page}` to visit a sub page of help
 
-- [:CHADhelp features](https://github.com/ms-jpq/chadtree/blob/future2/docs/FEATURES.md)
+- [:CHADhelp features](https://github.com/ms-jpq/chadtree/tree/future2/docs/FEATURES.md)
 
-- [:CHADhelp keybind](https://github.com/ms-jpq/chadtree/blob/future2/docs/KEYBIND.md)
+- [:CHADhelp keybind](https://github.com/ms-jpq/chadtree/tree/future2/docs/KEYBIND.md)
 
-- [:CHADhelp config](https://github.com/ms-jpq/chadtree/blob/future2/docs/CONFIGURATION.md)
+- [:CHADhelp config](https://github.com/ms-jpq/chadtree/tree/future2/docs/CONFIGURATION.md)
 
-- [:CHADhelp theme](https://github.com/ms-jpq/chadtree/blob/future2/docs/THEME.md)
+- [:CHADhelp theme](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md)
