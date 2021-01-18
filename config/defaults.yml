@@ -19,7 +19,6 @@ keymap:
     - C
   clear_filter:
     - F
-    - E
   clear_selection:
     - S
   collapse:

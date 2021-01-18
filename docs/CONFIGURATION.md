@@ -69,7 +69,7 @@ See help docs on [keybind](https://github.com/ms-jpq/chadtree/tree/future2/docs/
 
 #### `chadtree_settings.options.follow`
 
-CHADTree will highlight currently open file.
+CHADTree will highlight currently open file, and open all its parents.
 
 **default:**
 
