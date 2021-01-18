@@ -29,7 +29,6 @@ class _UserOptions:
     follow: bool
     lang: Optional[str]
     mimetypes: MimetypeOptions
-    open_left: bool
     page_increment: int
     polling_rate: SupportsFloat
     session: bool
@@ -39,6 +38,7 @@ class _UserOptions:
 
 @dataclass(frozen=True)
 class _UserView:
+    open_left: bool
     width: int
     sort_by: Sequence[Sortby]
     use_icons: Union[bool, Literal["emoji"]]
@@ -102,7 +102,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         keymap=keymap,
         lang=options.lang,
         mime=options.mimetypes,
-        open_left=options.open_left,
+        open_left=view.open_left,
         page_increment=options.page_increment,
         polling_rate=float(options.polling_rate),
         session=options.session,
