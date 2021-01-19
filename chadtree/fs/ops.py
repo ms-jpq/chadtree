@@ -90,7 +90,7 @@ def _new(path: str) -> None:
 
 
 def new(paths: Iterable[str]) -> None:
-    pool.map(_new, paths)
+    tuple(pool.map(_new, paths))
 
 
 def _rename(src: str, dest: str) -> None:
@@ -101,7 +101,7 @@ def _rename(src: str, dest: str) -> None:
 
 def rename(operations: Mapping[str, str]) -> None:
     _op = lambda op: _rename(*op)
-    pool.map(_op, operations.items())
+    tuple(pool.map(_op, operations.items()))
 
 
 def _remove(path: str) -> None:
@@ -113,7 +113,7 @@ def _remove(path: str) -> None:
 
 
 def remove(paths: Iterable[str]) -> None:
-    pool.map(_remove, paths)
+    tuple(pool.map(_remove, paths))
 
 
 def _cut(src: str, dest: str) -> None:
@@ -122,7 +122,7 @@ def _cut(src: str, dest: str) -> None:
 
 def cut(operations: Mapping[str, str]) -> None:
     _op = lambda op: _cut(*op)
-    pool.map(_op, operations.items())
+    tuple(pool.map(_op, operations.items()))
 
 
 def _copy(src: str, dest: str) -> None:
@@ -135,4 +135,4 @@ def _copy(src: str, dest: str) -> None:
 
 def copy(operations: Mapping[str, str]) -> None:
     _op = lambda op: _copy(*op)
-    pool.map(_op, operations.items())
+    tuple(pool.map(_op, operations.items()))
