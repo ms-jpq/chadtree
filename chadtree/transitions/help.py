@@ -83,8 +83,10 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
     else:
         md, uri = _directory(opts.topic)
         if opts.use_web:
-            open_w(uri)
+            web_d = open_w(uri)
         else:
+            web_d = False
+        if not web_d:
             lines = md.read_text().splitlines()
             buf = create_buf(nvim, listed=False, scratch=True, wipe=True, nofile=True)
             buf_set_lines(nvim, buf=buf, lo=0, hi=-1, lines=lines)

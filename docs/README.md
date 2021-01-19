@@ -4,7 +4,7 @@ Use `:CHADhelp` to open up a list of help pages!
 
 Help docs are written in `markdown` because a picture is worth a thousand words.
 
-Use `:CHADhelp -w` or `:CHADhelp --web` to open help pages in a browser window.
+Use `:CHADhelp -w` or `:CHADhelp --web` to open help pages in a browser window if possible.
 
 Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic for more information
 

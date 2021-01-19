@@ -28,7 +28,6 @@ def _copy_name(nvim: Nvim, state: State, settings: Settings, is_visual: bool) ->
             yield from selection
 
     paths = sorted(gen_paths(), key=strxfrm)
-
     clip = linesep.join(paths)
     copied_paths = ", ".join(paths)
 
