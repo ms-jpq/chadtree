@@ -28,7 +28,7 @@ from ..settings.types import Settings
 from ..state.types import State
 
 
-class _Pages(Enum):
+class _Topics(Enum):
     features = auto()
     keybind = auto()
     config = auto()
@@ -37,36 +37,36 @@ class _Pages(Enum):
 
 @dataclass(frozen=True)
 class _Args:
-    page: Optional[_Pages]
+    topic: Optional[_Topics]
     use_web: bool
 
 
-def _directory(page: Optional[_Pages]) -> Tuple[Path, str]:
-    if page is None:
+def _directory(topic: Optional[_Topics]) -> Tuple[Path, str]:
+    if topic is None:
         return README_MD, README_URI
-    elif page is _Pages.features:
+    elif topic is _Topics.features:
         return FEATURES_MD, FEATURES_URI
-    elif page is _Pages.keybind:
+    elif topic is _Topics.keybind:
         return KEYBIND_MD, KEYBIND_URI
-    elif page is _Pages.config:
+    elif topic is _Topics.config:
         return CONFIGURATION_MD, CONFIGURATION_URI
-    elif page is _Pages.theme:
+    elif topic is _Topics.theme:
         return THEME_MD, THEME_URI
     else:
-        never(page)
+        never(topic)
 
 
 def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
     parser.add_argument(
-        "page",
+        "topic",
         nargs="?",
-        choices=tuple(p.name for p in _Pages),
+        choices=tuple(topic.name for topic in _Topics),
         default=None,
     )
     parser.add_argument("-w", "--web", action="store_true", default=False)
     ns = parser.parse_args(args)
-    opts = _Args(page=_Pages[ns.page] if ns.page else None, use_web=ns.web)
+    opts = _Args(topic=_Topics[ns.topic] if ns.topic else None, use_web=ns.web)
     return opts
 
 
@@ -81,7 +81,7 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
     except ArgparseError as e:
         write(nvim, e, error=True)
     else:
-        md, uri = _directory(opts.page)
+        md, uri = _directory(opts.topic)
         if opts.use_web:
             open_w(uri)
         else:

@@ -6,7 +6,7 @@ Help docs are written in `markdown` because a picture is worth a thousand words.
 
 Use `:CHADhelp -w` or `:CHADhelp --web` to open help pages in a browser window.
 
-Use `:CHADhelp {page}` or `:CHADhelp {page} --web` to visit a sub page of help
+Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic for more information
 
 - [:CHADhelp features](https://github.com/ms-jpq/chadtree/tree/future2/docs/FEATURES.md)
 
