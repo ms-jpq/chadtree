@@ -106,7 +106,7 @@ def _join(nodes: SimpleQueue) -> Node:
         acc[path] = node
 
         parent = acc.get(dirname(path))
-        if not parent:
+        if not parent or parent.path == node.path:
             assert root_node is None
             root_node = node
         else:
