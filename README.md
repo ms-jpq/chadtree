@@ -4,15 +4,17 @@ File Manager for Neovim, Better than NERDTree.
 
 ## Features Illustrated
 
-**See full list of screen captures [here](https://github.com/ms-jpq/chadtree/tree/chad/preview)**
+**See full list of screen captures [here](https://github.com/ms-jpq/chadtree/tree/future2/docs/FEATURES.md)**
 
 ### I like speed
 
-- Incremental file system scan
+- **Parallel** Filesystem Scan
 
-- None blocking
+- **Virtual Rendering** engine (React Like)
 
-- Literally every FS call is async.
+- **Never** blocks
+
+*You can read more about my [performance optimization](https://github.com/ms-jpq/chadtree/tree/future2/docs/ARCHITECTURE.md) here.*
 
 ### I like power
 
@@ -63,6 +65,8 @@ File Manager for Neovim, Better than NERDTree.
 ![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
 
 ![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
+
+### I like polish
 
 ## Install
 
