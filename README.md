@@ -120,4 +120,6 @@ Also check out
 
 > The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
 
+> The fallback colours are imported from the [vim-nerdtree-syntax-highlight](https://github.com/tiagofumo/vim-nerdtree-syntax-highlight) project
+
 > All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme) project by [adelarsq](https://github.com/adelarsq)
