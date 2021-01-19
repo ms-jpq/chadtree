@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from hashlib import sha1
 from json import dump
 from pathlib import Path
