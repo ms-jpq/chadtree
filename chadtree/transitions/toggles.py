@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from pynvim import Nvim
 from pynvim_pp.lib import write
@@ -10,23 +10,29 @@ from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import Selection, State
 from ..version_ctl.types import VCStatus
+from .shared.index import indices
 from .types import Stage
 
 
 @rpc(blocking=False)
 def _toggle_hidden(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Stage:
+) -> Optional[Stage]:
     """
     Toggle hidden
     """
 
-    show_hidden = not state.show_hidden
-    selection: Selection = state.selection if show_hidden else set()
-    new_state = forward(
-        state, settings=settings, show_hidden=show_hidden, selection=selection
-    )
-    return Stage(new_state)
+    node = next(indices(nvim, state=state, is_visual=is_visual))
+    if not node:
+        return None
+    else:
+        focus = node.path
+        show_hidden = not state.show_hidden
+        selection: Selection = state.selection if show_hidden else set()
+        new_state = forward(
+            state, settings=settings, show_hidden=show_hidden, selection=selection
+        )
+        return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)

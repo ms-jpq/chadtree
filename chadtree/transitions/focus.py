@@ -87,7 +87,7 @@ def _change_focus(
 @rpc(blocking=False)
 def _change_focus_up(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Stage:
+) -> Optional[Stage]:
     """
     Refocus root directory up
     """
