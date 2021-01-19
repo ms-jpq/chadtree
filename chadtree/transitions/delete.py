@@ -58,7 +58,7 @@ def _remove(
         else:
             try:
                 yeet(unified)
-            except PermissionError as e:
+            except Exception as e:
                 write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
             else:
