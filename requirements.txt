@@ -1,4 +1,4 @@
-git+https://github.com/ms-jpq/std2.git
-git+https://github.com/ms-jpq/pynvim_pp.git
+git+https://github.com/ms-jpq/std2.git@b6284cf8e53b9f3873fe5b831bba41190df905d1
+git+https://github.com/ms-jpq/pynvim_pp.git@8bd334fbfaa0eb3a054eaecc16f9a8565a582e1a
 pynvim
 pyyaml
