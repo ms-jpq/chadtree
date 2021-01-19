@@ -1,3 +1,4 @@
+from os import sep
 from os.path import abspath, dirname, exists, join
 from typing import Optional
 
@@ -37,6 +38,9 @@ def _new(
             return None
         else:
             path = abspath(join(parent, child))
+            if child.endswith(sep):
+                path = path + sep
+
             if exists(path):
                 write(nvim, LANG("already_exists", name=path), error=True)
                 return None
