@@ -40,8 +40,6 @@ File Manager for Neovim, Better than NERDTree.
 
 - Correct! handling of symlinks
 
-- Mimetype warning (so you don't accidently open an image)
-
 ![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/filtering.gif)
 
 ### I like version control
@@ -64,11 +62,15 @@ File Manager for Neovim, Better than NERDTree.
 
 ![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/github_colours.png)
 
-### I like polish
+### I like refinement
 
-- Move cursor to new file upon creation / renaming
+- Automatically move cursor to new file upon creation / renaming
 
-- Vaildating config parser
+- Maintain selection when copying, moving files
+
+- Mimetype warning (so you don't accidently open an image)
+
+- Vaildating config parser (notice, I added an extra `dog` param)
 
 ![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
 
