@@ -1,5 +1,6 @@
 chad = chad or {}
 local linesep = "\n"
+local POLLING_RATE = 10
 
 if chad.loaded then
   return
@@ -9,7 +10,22 @@ else
   local chad_params = {}
   local err_exit = false
 
-  local on_exit = function(_, code)
+  local function defer(timeout, callback)
+    local timer = vim.loop.new_timer()
+    timer:start(
+      timeout,
+      0,
+      function()
+        timer:stop()
+        timer:close()
+        vim.schedule(callback)
+      end
+    )
+    return timer
+  end
+
+  chad.on_exit = function(args)
+    local code = unpack(args)
     local msg = " | CHADTree EXITED - " .. code
     if code ~= 0 then
       err_exit = true
@@ -21,11 +37,13 @@ else
     end
   end
 
-  local on_stdout = function(_, msg)
+  chad.on_stdout = function(args)
+    local msg = unpack(args)
     vim.api.nvim_out_write(table.concat(msg, linesep))
   end
 
-  local on_stderr = function(_, msg)
+  chad.on_stderr = function(args)
+    local msg = unpack(args)
     vim.api.nvim_err_write(table.concat(msg, linesep))
   end
 
@@ -45,15 +63,13 @@ else
     }
     local params = {
       cwd = cwd,
-      on_exit = on_exit,
-      on_stdout = on_stdout,
-      on_stderr = on_stderr
+      on_exit = "CHADon_exit",
+      on_stdout = "CHADon_stdout",
+      on_stderr = "CHADon_stderr"
     }
-    local job_id = vim.fn.jobstart(args, params)
+    local job_id = vim.api.nvim_call_function("jobstart", {args, params})
     return job_id
   end
-
-  local POLLING_RATE = 10
 
   chad.deps_cmd = function()
     start("deps")
@@ -67,21 +83,22 @@ else
       local args = {...}
 
       if not job_id then
-        job_id = start("run", "--socket", vim.fn.serverstart())
+        local server = vim.api.nvim_call_function("serverstart", {})
+        job_id = start("run", "--socket", server)
       end
 
       if not err_exit and _G[cmd] then
         _G[cmd](args)
       else
-        vim.defer_fn(
+        defer(
+          POLLING_RATE,
           function()
             if err_exit then
               return
             else
               chad[name](unpack(args))
             end
-          end,
-          POLLING_RATE
+          end
         )
       end
     end
