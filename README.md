@@ -84,6 +84,10 @@ Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vun
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 ```
 
+You will have to run `:CHADdeps` when installing / updating. This will install CHADTree's depdencies locally inside `chadtree/.vars/runtime`.
+
+doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
+
 ## Documentation
 
 To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
@@ -92,11 +96,7 @@ To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
 nnoremap <leader>v <cmd>CHADopen<cr>
 ```
 
-Use `:CHADopen --nofocus` to open but not focus on the sidebar.
-
-Check out [config.json](https://github.com/ms-jpq/chadtree/blob/future2/config/config.json) before you proceed for an overview of options.
-
-Set a dictionary with same keys to `g:chadtree_settings` to overwrite any options. You dont need to provide every key, just the ones you want to overwrite.
+Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)
 
 ### Recommendations
 

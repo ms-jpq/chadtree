@@ -10,7 +10,7 @@
 
 ## Git Integrations
 
-![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/git.gif)
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/git_showcase.gif)
 
 ## Quickfix
 

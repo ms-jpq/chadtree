@@ -15,3 +15,21 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 - [:CHADhelp config](https://github.com/ms-jpq/chadtree/tree/future2/docs/CONFIGURATION.md)
 
 - [:CHADhelp theme](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md)
+
+---
+
+## Commands
+
+### `CHADopen`
+
+`:CHADopen` will toggle CHADTree open / close
+
+`:CHADopen --nofocus` will open CHADTree without giving the sidebar focus
+
+### `CHADdeps`
+
+`:CHADdeps` will install all of CHADTree's depdencies locally.
+
+Dependencies will be privately installed inside CHADTree's git root under `.vars/runtime`.
+
+Running `rm -rf` on `chadtree/` will cleanly remove everything CHADTree installs to your local system.
