@@ -82,7 +82,7 @@ Go see `:CHADhelp theme` for details.
 
 ### Even more Poilsh
 
-- When you create / rename a file, cursor will auto move to new file.
+- Maintain cursor position in many circumstances, ie. move root up / down, filtering for files, renaming, creating files, etc
 
 - Selection of hidden / invisble files no longer possible.
 

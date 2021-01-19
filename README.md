@@ -64,11 +64,9 @@ File Manager for Neovim, Better than NERDTree.
 
 ### I like refinement
 
-- Automatically move cursor to new file upon creation / renaming
+- Maintain cursor position on relevant files even when during movements.
 
 - Maintain selection when copying, moving files
-
-- Maintain cursor position when moving re-homing root view
 
 - Mimetype warning (so you don't accidently open an image)
 
