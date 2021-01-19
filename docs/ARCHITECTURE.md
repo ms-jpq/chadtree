@@ -16,7 +16,7 @@ No futher messages can be processed until the previous ones have.
 
 CHADTree uses a traditional threadpool for parallelizable operations, this includes querying for `git` status and file system walking, as well as other minor ones such as `mv` or `cp`.
 
-The fs walk is done using a native BFS strategy with a chunking step to avoid flooding the thread pool. This is not optimal since a [Fork Join](https://en.wikipedia.org/wiki/Fork%E2%80%93join_model) model should be more efficient.
+The fs walk is done using a native parallel BFS strategy with a chunking step to avoid flooding the thread pool. This is not optimal since a [Fork Join](https://en.wikipedia.org/wiki/Fork%E2%80%93join_model) model should be more efficient.
 
 However, as benchmarked, the performance bottleneck is infact not the filesystem, but text & decorations rendering.
 
@@ -33,3 +33,9 @@ Instead of Virtual DOM nodes, a hash is used for each desired line of the render
 ## Memorylessness
 
 CHADTree is designed with [Memorylessness](https://en.wikipedia.org/wiki/Memorylessness) in mind. For the most part the state transitions in CHADTree follow the Markov Property in that each successive state is independent from history.
+
+## Pipelining
+
+Broadly speaking, CHADTree has a two stage pipeline. The first stage processes messages, and generates render and cursor placement instructions for the second stage.
+
+Ideally the first stage should be referentially transparent, with zero side effects, while the second stage executes all of the side effects. However, this is too tedious, a memoryless approach is taken for the two stages instead.
