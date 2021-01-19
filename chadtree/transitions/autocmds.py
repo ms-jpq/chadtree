@@ -37,7 +37,7 @@ def _kill_float_wins(nvim: Nvim, state: State, settings: Settings) -> None:
             win_close(nvim, win=win)
 
 
-autocmd("WinClosed") << f"lua {_kill_float_wins.name}()"
+autocmd("WinEnter") << f"lua {_kill_float_wins.name}()"
 
 
 @rpc(blocking=False)
