@@ -27,7 +27,7 @@ else
   chad.on_exit = function(args)
     local code = unpack(args)
     local msg = " | CHADTree EXITED - " .. code
-    if code ~= 0 then
+    if code ~= 0 or code ~= 143 then
       err_exit = true
       vim.api.nvim_err_writeln(msg)
     end
