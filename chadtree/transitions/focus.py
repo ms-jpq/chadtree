@@ -61,6 +61,7 @@ def _change_dir(
         cwd = node.path if is_dir(node) else dirname(node.path)
         new_state = new_root(nvim, state=state, settings=settings, new_cwd=cwd)
         focus = new_state.root.path
+        nvim.command(f"chdir {focus}")
         write(nvim, LANG("new cwd", cwd=focus))
         return Stage(new_state, focus=focus)
 
