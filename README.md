@@ -72,6 +72,8 @@ File Manager for Neovim, Better than NERDTree.
 
 - Vaildating config parser (notice, I added an extra `dog` param)
 
+![mime warn.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/mimetype.png)
+
 ![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
 
 ## Install
