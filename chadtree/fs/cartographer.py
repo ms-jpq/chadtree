@@ -78,18 +78,22 @@ def _new(
     roots: Iterable[str], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
 ) -> None:
     for root in roots:
-        mode = _fs_stat(root)
-        name = basename(root)
-        _, _ext = splitext(name)
-        ext = None if Mode.folder in mode else _ext
-        _ancestors = ancestors(root)
-        node = Node(path=root, mode=mode, name=name, ext=ext, ancestors=_ancestors)
-        acc.put(node)
+        try:
+            mode = _fs_stat(root)
+            name = basename(root)
+            _, _ext = splitext(name)
+            ext = None if Mode.folder in mode else _ext
+            _ancestors = ancestors(root)
+            node = Node(path=root, mode=mode, name=name, ext=ext, ancestors=_ancestors)
+            acc.put(node)
 
-        if root in index:
-            for item in listdir(root):
-                path = join(root, item)
-                bfs_q.put(path)
+            if root in index:
+                for item in listdir(root):
+                    path = join(root, item)
+                    bfs_q.put(path)
+
+        except PermissionError:
+            pass
 
 
 def _join(nodes: SimpleQueue) -> Node:
