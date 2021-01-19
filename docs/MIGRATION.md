@@ -87,3 +87,7 @@ Go see `:CHADhelp theme` for details.
 - Retain selection when copying or moving files.
 
 - Now shows `git submodules`
+
+### Even Higher Quality Code
+
+Yes the quailty of code is a feature. The better the code, the easier it is for me and other people to add in future improvements.
