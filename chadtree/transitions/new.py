@@ -12,6 +12,7 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
+from .shared.current import new_root
 from .shared.index import indices
 from .shared.open_file import open_file
 from .shared.refresh import refresh
@@ -51,11 +52,17 @@ def _new(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
-                    paths = ancestors(path)
-                    index = state.index | paths
-                    new_state = forward(
-                        state, settings=settings, index=index, paths=paths
-                    )
+                    new_parent = dirname(parent)
+                    if new_parent in state.root.ancestors:
+                        new_state = new_root(
+                            nvim, state=state, settings=settings, new_cwd=new_parent
+                        )
+                    else:
+                        paths = ancestors(path)
+                        index = state.index | paths
+                        new_state = forward(
+                            state, settings=settings, index=index, paths=paths
+                        )
                     nxt = open_file(
                         nvim,
                         state=new_state,
