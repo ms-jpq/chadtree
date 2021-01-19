@@ -68,6 +68,8 @@ File Manager for Neovim, Better than NERDTree.
 
 - Maintain selection when copying, moving files
 
+- Maintain cursor position when moving re-homing root view
+
 - Mimetype warning (so you don't accidently open an image)
 
 - Vaildating config parser (notice, I added an extra `dog` param)
