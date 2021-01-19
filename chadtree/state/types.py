@@ -29,3 +29,10 @@ class State:
     show_hidden: bool
     vc: VCStatus
     width: int
+
+
+@dataclass(frozen=True)
+class Session:
+    index: Index
+    show_hidden: bool
+    enable_vc: bool

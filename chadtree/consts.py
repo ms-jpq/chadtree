@@ -1,4 +1,3 @@
-from os import environ
 from pathlib import Path
 
 WALK_PARALLELISM_FACTOR = 100
@@ -9,9 +8,10 @@ WARN_DURATION = 0.1
 _TOP_LEVEL = Path(__file__).parent.parent
 _CONFIG = _TOP_LEVEL / "config"
 _ARTIFACTS = _TOP_LEVEL / "artifacts"
+_VARS = _TOP_LEVEL / ".vars"
 
 
-RT_DIR = _TOP_LEVEL / ".vars" / "runtime"
+RT_DIR = _VARS / "runtime"
 REQUIREMENTS = str(_TOP_LEVEL / "requirements.txt")
 
 
@@ -35,17 +35,9 @@ EMOJI_ICONS_JSON = _ARTIFACTS / "emoji_icons.json"
 DEVI_ICONS_JSON = _ARTIFACTS / "unicode_icons.json"
 
 
-
 GITHUB_COLOURS_JSON = _ARTIFACTS / "github_colours.json"
 NERD_COLOURS_LIGHT_JSON = _ARTIFACTS / "colours_day.json"
 NERD_COLOURS_DARK_JSON = _ARTIFACTS / "colours_night.json"
-
-
-SESSION_DIR = (
-    Path(environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
-    / "nvim"
-    / "chadtree"
-)
 
 
 _DOCS_URI_BASE = "https://github.com/ms-jpq/chadtree/blob/future2/docs"
@@ -72,3 +64,6 @@ CONFIGURATION_URI = f"{_DOCS_URI_BASE}/{_CONFIGURATION_md}"
 _THEME_md = "THEME.md"
 THEME_MD = _DOCS_DIR / _THEME_md
 THEME_URI = f"{_DOCS_URI_BASE}/{_THEME_md}"
+
+
+SESSION_DIR = _VARS / "sessions"

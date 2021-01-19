@@ -7,13 +7,7 @@ from std2.pickle import decode, encode
 
 from ..consts import FOLDER_MODE, SESSION_DIR
 from ..da import load_json
-from .types import Index, State
-
-
-@dataclass(frozen=True)
-class _Session:
-    index: Index
-    show_hidden: bool
+from .types import Session, State
 
 
 def _session_path(cwd: str) -> Path:
@@ -22,16 +16,19 @@ def _session_path(cwd: str) -> Path:
     return part.with_suffix(".json")
 
 
-def load_session(cwd: str) -> _Session:
+def load_session(cwd: str) -> Session:
     load_path = _session_path(cwd)
     try:
-        return decode(_Session, load_json(load_path))
+        return decode(Session, load_json(load_path))
     except Exception:
-        return _Session(index={cwd}, show_hidden=False)
+        return Session(index={cwd}, show_hidden=False, enable_vc=True)
 
 
 def dump_session(state: State) -> None:
-    json = encode(_Session(index=state.index, show_hidden=state.show_hidden))
+    session = Session(
+        index=state.index, show_hidden=state.show_hidden, enable_vc=state.enable_vc
+    )
+    json = encode(session)
 
     path = _session_path(state.root.path)
     path.parent.mkdir(mode=FOLDER_MODE, parents=True, exist_ok=True)
