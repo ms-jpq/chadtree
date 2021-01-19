@@ -80,7 +80,7 @@ def _change_focus(
     else:
         new_base = node.path if is_dir(node) else dirname(node.path)
         new_state = new_root(nvim, state=state, settings=settings, new_cwd=new_base)
-        focus = new_state.root.path
+        focus = node.path
         return Stage(new_state, focus=focus)
 
 
@@ -92,8 +92,12 @@ def _change_focus_up(
     Refocus root directory up
     """
 
-    root = state.root.path
-    parent = dirname(root)
-    new_state = new_root(nvim, state=state, settings=settings, new_cwd=parent)
-    focus = new_state.root.path
-    return Stage(new_state, focus=focus)
+    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    if not node:
+        return None
+    else:
+        root = state.root.path
+        parent = dirname(root)
+        new_state = new_root(nvim, state=state, settings=settings, new_cwd=parent)
+        focus = node.path
+        return Stage(new_state, focus=focus)
