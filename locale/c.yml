@@ -10,8 +10,8 @@
   $$PWD=${cwd}
 
 "ask_trash": |-
-  Trash
-  ${display_paths}?
+  Trash?
+  ${display_paths}
 
 "ask_yesno": |-
   &Yes

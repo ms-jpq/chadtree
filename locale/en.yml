@@ -10,8 +10,8 @@
   🏠 =${cwd}
 
 "ask_trash": |-
-  🗑
-  ${display_paths}?
+  🗑 ?
+  ${display_paths}
 
 "ask_yesno": |-
   &Yes
