@@ -24,7 +24,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Quickfix integration
 
-![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/visual_select.gif)
+![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/visual_select.gif)
 
 ### I like 21st century
 
@@ -42,7 +42,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Mimetype warning (so you don't accidently open an image)
 
-![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/filtering.gif)
+![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/filtering.gif)
 
 ### I like version control
 
@@ -52,7 +52,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Full support for globbing ignored files
 
-![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/git_showcase.gif)
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/git_showcase.gif)
 
 ### I like colours
 
@@ -62,9 +62,9 @@ File Manager for Neovim, Better than NERDTree.
 
 - Full icon support from importing [vim-devicon](https://github.com/ryanoasis/vim-devicons)
 
-![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/ls_colours.png)
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/ls_colours.png)
 
-![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/github_colours.png)
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/github_colours.png)
 
 ### I like polish
 
