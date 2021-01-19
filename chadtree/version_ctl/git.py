@@ -109,6 +109,7 @@ def _stat_name(stat: str) -> str:
 
 
 def _parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
+    above = ancestors(root)
     ignored: Set[str] = set()
     status: MutableMapping[str, str] = {}
     directories: MutableMapping[str, Set[str]] = {}
@@ -130,7 +131,8 @@ def _parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
         consoildated = sorted(symbols, key=strxfrm)
         status[directory] = "".join(consoildated)
 
-    return VCStatus(ignored=ignored, status=status)
+    trimmed = {path: stat for path, stat in status.items() if path not in above}
+    return VCStatus(ignored=ignored, status=trimmed)
 
 
 def status(cwd: str) -> VCStatus:
