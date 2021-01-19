@@ -49,7 +49,6 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
 
         if prev_code == new_code:
             pass
-
         else:
             (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
 
