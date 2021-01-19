@@ -48,9 +48,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Asynchronous parse git status (untracked, modified, staged)
 
-- Full support for git ignore, toggle show / hide
-
-- Full support for globbing ignored files
+- Full support for git submodules
 
 ![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/git_showcase.gif)
 
@@ -67,6 +65,12 @@ File Manager for Neovim, Better than NERDTree.
 ![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/github_colours.png)
 
 ### I like polish
+
+- Move cursor to new file upon creation / renaming
+
+- Vaildating config parser
+
+![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
 
 ## Install
 

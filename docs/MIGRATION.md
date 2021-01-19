@@ -72,6 +72,8 @@ You know how React is famous because it only renders what needs to be changed?
 
 CHADTree now uses a React-like virtual rendering target. It only re-renders the minimal amount of lines. CHADTree can now handle thousands of visible files and still be reasonablly performant!
 
+*This is only visible when you have 1000+ files visible. The old ways was fast enough for most tasks.*
+
 ### Theming
 
 Yub, this is yuge. The #1 request was for more themes. They have came!
