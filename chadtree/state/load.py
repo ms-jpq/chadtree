@@ -15,6 +15,7 @@ def initial(nvim: Nvim, settings: Settings) -> State:
     session = load_session(cwd)
     index = session.index if settings.session else {cwd}
     show_hidden = session.show_hidden if settings.session else settings.show_hidden
+    enable_vc = session.enable_vc if settings.session else settings.version_ctl.enable
 
     selection: Selection = set()
     node = new(cwd, index=index)
@@ -42,7 +43,7 @@ def initial(nvim: Nvim, settings: Settings) -> State:
         filter_pattern=filter_pattern,
         show_hidden=show_hidden,
         follow=settings.follow,
-        enable_vc=settings.version_ctl.enable,
+        enable_vc=enable_vc,
         width=settings.width,
         root=node,
         qf=qf,
