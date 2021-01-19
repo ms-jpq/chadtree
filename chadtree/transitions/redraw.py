@@ -18,8 +18,8 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
     derived, current = state.derived, state.current
     new_code = hash((derived.rendered, current))
 
-    focus_row = derived.paths_lookup.get(focus) if focus else None
-    current_row = derived.paths_lookup.get(current or "")
+    focus_row = derived.path_row_lookup.get(focus) if focus else None
+    current_row = derived.path_row_lookup.get(current or "")
     lines, badges, highlights = zip(
         *(
             (render.line, render.badges, render.highlights)

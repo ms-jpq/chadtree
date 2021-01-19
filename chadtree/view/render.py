@@ -255,5 +255,5 @@ def render(
     lookup = cast(Sequence[Node], _lookup)
     rendered = cast(Sequence[Render], _rendered)
     paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
-    derived = Derived(lookup=lookup, paths_lookup=paths_lookup, rendered=rendered)
+    derived = Derived(node_row_lookup=lookup, path_row_lookup=paths_lookup, rendered=rendered)
     return derived
