@@ -1,4 +1,4 @@
-from os.path import dirname, exists, join
+from os.path import abspath, dirname, exists, join
 from typing import Optional
 
 from pynvim import Nvim
@@ -36,7 +36,7 @@ def _new(
         if not child:
             return None
         else:
-            path = join(parent, child)
+            path = abspath(join(parent, child))
             if exists(path):
                 write(nvim, LANG("already_exists", name=path), error=True)
                 return None

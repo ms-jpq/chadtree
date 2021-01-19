@@ -1,5 +1,5 @@
 from itertools import chain
-from os.path import dirname, exists, join, relpath
+from os.path import abspath, dirname, exists, join, relpath
 from typing import Optional
 
 from pynvim import Nvim
@@ -37,7 +37,7 @@ def _rename(
         if not child:
             return None
         else:
-            new_name = join(parent, child)
+            new_name = abspath(join(parent, child))
             new_parent = dirname(new_name)
 
             if exists(new_name):
