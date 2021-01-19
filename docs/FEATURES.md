@@ -2,40 +2,40 @@
 
 ## Filtering
 
-![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/filtering.gif)
+![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/filtering.gif)
 
 ## Follow Mode
 
-![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/follow.gif)
+![follow.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/follow.gif)
 
 ## Git Integrations
 
-![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/git.gif)
 
 ## Quickfix
 
-![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/quickfix.gif)
+![quickfix.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/quickfix.gif)
 
 ## Sessions
 
-![session.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/session.gif)
+![session.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/session.gif)
 
 ## Visual Select
 
-![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
+![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/visual_select.gif)
 
 ## Github Colours
 
-![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/github_colours.png)
 
 ## LS_COLORS
 
-![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/ls_colours.png)
 
 ## LS -l statistics
 
-![ls_l.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_l.png)
+![ls_l.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/ls_l.png)
 
 ## Mimetype warning
 
-![mimetype.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/mimetype.png)
+![mimetype.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/mimetype.png)
