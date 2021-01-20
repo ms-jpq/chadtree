@@ -12,10 +12,19 @@ from .types import Selection, State, VCStatus
 def initial(nvim: Nvim, settings: Settings) -> State:
     cwd = get_cwd(nvim)
 
-    session = load_session(cwd)
-    index = session.index if settings.session else {cwd}
-    show_hidden = session.show_hidden if settings.session else settings.show_hidden
-    enable_vc = session.enable_vc if settings.session else settings.version_ctl.enable
+    session = load_session(cwd) if settings.session else None
+    index = session.index if session and session.index is not None else {cwd}
+
+    show_hidden = (
+        session.show_hidden
+        if session and session.show_hidden is not None
+        else settings.show_hidden
+    )
+    enable_vc = (
+        session.enable_vc
+        if session and session.enable_vc is not None
+        else settings.version_ctl.enable
+    )
 
     selection: Selection = set()
     node = new(cwd, index=index)

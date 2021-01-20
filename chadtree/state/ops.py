@@ -20,7 +20,7 @@ def load_session(cwd: str) -> Session:
     try:
         return decode(Session, load_json(load_path))
     except Exception:
-        return Session(index={cwd}, show_hidden=False, enable_vc=True)
+        return Session(index=None, show_hidden=None, enable_vc=None)
 
 
 def dump_session(state: State) -> None:

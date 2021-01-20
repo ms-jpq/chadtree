@@ -33,6 +33,6 @@ class State:
 
 @dataclass(frozen=True)
 class Session:
-    index: Index
-    show_hidden: bool
-    enable_vc: bool
+    index: Optional[Index]
+    show_hidden: Optional[bool]
+    enable_vc: Optional[bool]
