@@ -119,6 +119,7 @@ class LSColourSet:
 class LSColoursEnum(Enum):
     ls_colour_auto = auto()
     dark_256 = auto()
+    ansi_dark = auto()
     ansi_light = auto()
     ansi_universal = auto()
 

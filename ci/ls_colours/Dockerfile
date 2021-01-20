@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends  && \
+    apt-get install -y --no-install-recommends git python && \
     rm -rf /var/lib/apt/lists/*
 
 
@@ -13,4 +13,4 @@ RUN git clone --depth=1 https://github.com/seebi/dircolors-solarized.git
 COPY . /
 
 
-ENTRYPOINT ["./lsc.sh"]
+ENTRYPOINT ["./lsc.py", "dircolors-solarized"]
