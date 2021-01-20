@@ -10,6 +10,7 @@ from std2.pickle import decode, encode
 from std2.tree import merge, recur_sort
 from std2.urllib import urlopen
 from yaml import safe_load
+from chad_types import Icons
 
 _TOP_LV = Path(__file__).resolve().parent.parent
 _CI = _TOP_LV / "ci"
@@ -20,10 +21,6 @@ _DOCKER_PATH = _CI / "docker"
 _LSC_EVAL = _CI / "lsc.sh"
 
 
-_LANG_COLOURS = """
-https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
-"""
-
 _LANG_COLOURS_JSON = (_ARTIFACTS / "github_colours").with_suffix(".json")
 _TEMP_JSON = (_TEMP / "icons").with_suffix(".json")
 
@@ -31,68 +28,11 @@ _SRC_ICONS = ("unicode_icons", "emoji_icons")
 _SRC_COLOUR = "colours"
 
 
-@dataclass(frozen=True)
-class _GithubColours:
-    extensions: Sequence[str] = ()
-    color: Optional[str] = None
-
-
-GithubSpec = Mapping[str, _GithubColours]
-
-
-@dataclass(frozen=True)
-class _IconFolderFormat:
-    open: str
-    closed: str
-
-
-@dataclass(frozen=True)
-class _IconLoadFormat:
-    extensions: Mapping[str, str]
-    exact: Mapping[str, str]
-    glob: Mapping[str, str]
-    default: str
-    folder: _IconFolderFormat
-
-
-@dataclass(frozen=True)
-class _IconDumpFormat:
-    ext_exact: Mapping[str, str]
-    name_exact: Mapping[str, str]
-    name_glob: Mapping[str, str]
-    default_icon: str
-    folder: _IconFolderFormat
-
-
-@dataclass(frozen=True)
-class _ColoursLoadFormat:
-    extensions: Mapping[str, str]
-    exact: Mapping[str, str]
-    glob: Mapping[str, str]
-
-
-@dataclass(frozen=True)
-class _ColoursDumpFormat:
-    ext_exact: Mapping[str, str]
-    name_exact: Mapping[str, str]
-    name_glob: Mapping[str, str]
-
-
-def _fetch(uri: str) -> str:
-    with urlopen(uri) as resp:
-        code = resp.getcode()
-        body = resp.read()
-    if code != 200:
-        raise Exception(resp.headers, body)
-    else:
-        return body.decode()
-
-
-def _spit_json(path: Path, json: Any) -> None:
-    path.parent.mkdir(exist_ok=True, parents=True)
-    sorted_json = recur_sort(json)
-    with path.open("w") as fd:
-        dump(sorted_json, fd, ensure_ascii=False, check_circular=False, indent=2)
+# def _spit_json(path: Path, json: Any) -> None:
+#     path.parent.mkdir(exist_ok=True, parents=True)
+#     sorted_json = recur_sort(json)
+#     with path.open("w") as fd:
+#         dump(sorted_json, fd, ensure_ascii=False, check_circular=False, indent=2)
 
 
 def _process_exts(exts: Mapping[str, str]) -> Mapping[str, str]:
@@ -181,31 +121,5 @@ def _devicons() -> None:
     _spit_json(day_dest, encode(day_mode))
     check_call(("docker", "rm", container))
 
-
-def _github_colours() -> None:
-    raw = _fetch(_LANG_COLOURS)
-    yaml: GithubSpec = decode(GithubSpec, safe_load(raw), strict=False)
-    lookup: Mapping[str, str] = {
-        ext: spec.color
-        for spec in yaml.values()
-        for ext in spec.extensions
-        if spec.color
-    }
-
     _spit_json(_LANG_COLOURS_JSON, lookup)
 
-
-def _ls_colours() -> None:
-    pass
-
-
-
-
-def main() -> None:
-    _devicons()
-    _github_colours()
-    _ls_colours()
-    # _git_alert()
-
-
-main()

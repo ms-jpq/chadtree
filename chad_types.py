@@ -69,6 +69,15 @@ Hex = str
 IconColours = Mapping[str, Hex]
 
 
+@dataclass(frozen=True)
+class IconColourSet:
+    github: IconColours
+
+
+class IconColourSetEnum(Enum):
+    github = auto()
+
+
 """
 Text Colours
 """
@@ -82,12 +91,11 @@ class TextColours:
 
 
 @dataclass(frozen=True)
-class ColourSet:
+class TextColourSet:
     nerdtree_syntax: TextColours
 
 
-@dataclass(frozen=True)
-class ColourSetEnum(Enum):
+class TextColourSetEnum(Enum):
     nerdtree_syntax = auto()
 
 
@@ -122,5 +130,5 @@ Artifact
 @dataclass(frozen=True)
 class Artifact:
     icons: IconSet
-    icon_colours: Mapping[str, Hex]
-    text_colours: ColourSet
+    icon_colours: IconColourSet
+    text_colours: TextColourSet

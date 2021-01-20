@@ -22,3 +22,4 @@ COPY . /
 
 
 RUN nvim --headless
+ENTRYPOINT ["cat", "exports.json"]
