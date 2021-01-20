@@ -91,13 +91,13 @@ options:
   version_control:
     enable: true
 theme:
+  icon_glyph_set: devicons
+  text_colour_set: env
+  icon_colour_set: github
   highlights:
     ignored: Comment
     quickfix: Label
     version_control: Comment
-  icon_glyph_set: devicons
-  icon_colour_set: github
-  text_colour_set: env
   discrete_colour_map:
     black: "#202020"
     red: "#ff4c41"
