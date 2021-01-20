@@ -16,4 +16,5 @@ COPY docker/root /
 COPY . /root/.config/nvim/plugged/chadtree/
 
 
-RUN python3 -m plugged.chadtree.chadtree deps
+WORKDIR /root/.config/nvim/plugged/chadtree
+RUN python3 -m chadtree deps
