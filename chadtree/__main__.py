@@ -14,6 +14,7 @@ if version_info < (3, 8, 2):
     open_w(MIGRATION_URI)
 
 
+from importlib.metadata import version
 from typing import Literal
 
 RT_DIR.mkdir(parents=True, exist_ok=True)
@@ -72,6 +73,10 @@ elif command == "run":
     """
 
     try:
+        versions = {
+            "std2": "0.1.10",
+            "pynvim_pp": "0.1.10",
+        }
         import pynvim
         import pynvim_pp
         import std2
@@ -81,7 +86,7 @@ elif command == "run":
         exit(1)
 
     else:
-        if std2.__version__ != (0, 1, 10) or pynvim_pp.__version__ != (0, 1, 10):
+        if any(version(lhs) != rhs for lhs, rhs in versions.items()):
             print(dedent(msg), end="", file=stderr)
             exit(1)
         else:
