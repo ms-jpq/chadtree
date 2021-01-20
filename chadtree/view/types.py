@@ -106,6 +106,6 @@ class Derived:
     highlights: Sequence[Sequence[Highlight]]
     badges: Sequence[Sequence[Badge]]
 
-    hashed: Sequence[int]
+    hashed: Sequence[str]
     node_row_lookup: Sequence[Node]
     path_row_lookup: Mapping[str, int]

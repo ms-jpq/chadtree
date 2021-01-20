@@ -18,7 +18,7 @@ _FM_HASH_VAR = f"CHAD_HASH_{uuid4()}"
 
 
 def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
-    n_hash = tuple(map(str, derived.hashed))
+    n_hash = derived.hashed
     try:
         p_hash: Sequence[str] = decode(
             Sequence[str], buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR)

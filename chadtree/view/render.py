@@ -260,7 +260,7 @@ def render(
         cast(Sequence[Sequence[Highlight]], _highlights),
         cast(Sequence[Sequence[Badge]], _badges),
     )
-    hashed = tuple(map(hash, zip(lines, highlights, badges)))
+    hashed = tuple(str(hash(zipped)) for zipped in zip(lines, highlights, badges))
     path_row_lookup = {node.path: idx for idx, node in enumerate(nodes)}
     derived = Derived(
         lines=lines,
