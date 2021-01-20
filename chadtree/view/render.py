@@ -181,11 +181,11 @@ def _paint(
             yield hl
 
     def show(node: Node, depth: int) -> Optional[_Render]:
-        user_ignored = user_ignored(node, ignores=settings.ignores)
+        _user_ignored = user_ignored(node, ignores=settings.ignores)
         vc_ignored = _vc_ignored(node, vc=vc)
-        ignored = vc_ignored or user_ignored
+        ignored = vc_ignored or _user_ignored
 
-        if depth and user_ignored and not show_hidden:
+        if depth and _user_ignored and not show_hidden:
             return None
         else:
             pre = "".join(gen_decor_pre(node, depth=depth))
