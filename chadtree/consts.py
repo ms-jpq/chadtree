@@ -11,7 +11,8 @@ _VARS = _TOP_LEVEL / ".vars"
 
 
 RT_DIR = _VARS / "runtime"
-REQUIREMENTS = str(_TOP_LEVEL / "requirements.txt")
+REQUIREMENTS = _TOP_LEVEL / "requirements.txt"
+DEPS_LOCK = _VARS / "deps.lock"
 
 
 FM_FILETYPE = "CHADTree"

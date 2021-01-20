@@ -6,7 +6,7 @@ from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
 
-from .consts import MIGRATION_URI, REQUIREMENTS, RT_DIR
+from .consts import DEPS_LOCK, MIGRATION_URI, REQUIREMENTS, RT_DIR
 
 if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
@@ -50,7 +50,7 @@ if command == "deps":
                 "--target",
                 str(RT_DIR),
                 "--requirement",
-                REQUIREMENTS,
+                str(REQUIREMENTS),
             ),
             stdin=DEVNULL,
             stderr=stdout,
@@ -60,6 +60,8 @@ if command == "deps":
             print("Installation failed, check :message", file=stderr)
             exit(proc.returncode)
         else:
+            DEPS_LOCK.parent.mkdir(parents=True, exist_ok=True)
+            DEPS_LOCK.write_bytes(REQUIREMENTS.read_bytes())
             print("You can now use :CHADopen", file=stderr)
 
 elif command == "run":
@@ -70,6 +72,7 @@ elif command == "run":
     Dependencies will be installed privately inside `chadtree/.vars`
     `rm -rf chadtree/` will cleanly remove everything
     """
+    msg = dedent(msg)
 
     try:
         import pynvim
@@ -77,18 +80,25 @@ elif command == "run":
         import std2
         import yaml
     except ImportError:
-        print(dedent(msg), end="", file=stderr)
+        print(msg, end="", file=stderr)
         exit(1)
-
     else:
-        from pynvim import attach
-        from pynvim_pp.client import run_client
+        if (
+            not DEPS_LOCK.exists()
+            or DEPS_LOCK.read_bytes() != REQUIREMENTS.read_bytes()
+        ):
+            print(msg, end="", file=stderr)
+            exit(1)
+        else:
 
-        from .client import ChadClient
+            from pynvim import attach
+            from pynvim_pp.client import run_client
 
-        nvim = attach("socket", path=args.socket)
-        code = run_client(nvim, client=ChadClient())
-        exit(code)
+            from .client import ChadClient
+
+            nvim = attach("socket", path=args.socket)
+            code = run_client(nvim, client=ChadClient())
+            exit(code)
 
 else:
     assert False
