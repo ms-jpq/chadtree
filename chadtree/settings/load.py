@@ -20,7 +20,7 @@ from std2.types import never
 from yaml import safe_load
 
 from ..consts import CONFIG_YML, SETTINGS_VAR
-from ..view.load import load_view
+from ..view.load import load_theme
 from ..view.types import HLGroups, Sortby
 from .types import Ignored, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
 
@@ -44,6 +44,7 @@ class _UserOptions:
 
 @dataclass(frozen=True)
 class _UserTheme:
+    highlights: HLGroups
     ls_colours: LSColoursEnum
     icon_set: IconSetEnum
     icon_colour_set: IconColourSetEnum
@@ -55,7 +56,6 @@ class _UserView:
     open_direction: _OpenDirection
     width: int
     sort_by: Sequence[Sortby]
-    highlights: HLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
 
@@ -83,10 +83,10 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
     options, view, theme = config.options, config.view, config.theme
 
-    icons, hl_context = load_view(
+    icons, hl_context = load_theme(
         nvim,
         artifact=artifacts,
-        particular_mappings=view.highlights,
+        particular_mappings=theme.highlights,
         ls_colours=theme.ls_colours,
         icon_set=theme.icon_set,
         icon_colour_set=theme.icon_colour_set,

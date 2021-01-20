@@ -90,13 +90,14 @@ options:
   show_hidden: false
   version_control:
     enable: true
-view:
+theme:
+  icon_set: devicons
   colours: ls_colours
   highlights:
     ignored: Comment
     quickfix: Label
     version_control: Comment
-  icon_set: devicons
+view:
   open_direction: left
   sort_by:
     - is_folder
