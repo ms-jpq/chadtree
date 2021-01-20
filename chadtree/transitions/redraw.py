@@ -24,13 +24,12 @@ def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
             Sequence[str], buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR)
         )
     except DecodeError:
-        p_hash = ()
+        p_hash = ("",)
 
     atomic = Atomic()
-
     for (i1, i2), (j1, j2) in trans_inplace(src=p_hash, dest=n_hash, unifying=10):
-        atomic.buf_clear_namespace(buf, ns, i1, i2 + 1)
-        atomic.buf_set_lines(buf, i1, i2 + 1, True, derived.lines[j1:j2])
+        atomic.buf_clear_namespace(buf, ns, i1, i2)
+        atomic.buf_set_lines(buf, i1, i2, True, derived.lines[j1:j2])
 
         for idx, highlights in enumerate(derived.highlights[j1:j2], start=i1):
             for hl in highlights:
