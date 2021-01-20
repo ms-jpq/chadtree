@@ -74,7 +74,7 @@ elif command == "run":
 
     try:
         versions = {
-            "std2": "0.1.10",
+            "std2": "0.1.0",
             "pynvim_pp": "0.1.10",
         }
         import pynvim
