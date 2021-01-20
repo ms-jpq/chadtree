@@ -28,7 +28,7 @@ from ..consts import (
 )
 from ..view.parse_colours import load_colours
 from ..view.types import ColourChoice, HLGroups, Icons, Sortby
-from .types import IgnoreOpts, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
+from .types import Ignored, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
 
 
 class _OpenDirection(Enum):
@@ -71,7 +71,7 @@ class _UserConfig:
     keymap: Mapping[str, AbstractSet[str]]
     options: _UserOptions
     view: _UserView
-    ignore: IgnoreOpts
+    ignore: Ignored
 
 
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:

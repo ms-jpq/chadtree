@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
-from typing import AbstractSet, Mapping, Optional
+from typing import AbstractSet, Mapping, Optional, Sequence
 
 
 class Mode(IntEnum):
@@ -33,3 +33,10 @@ class Node:
     ancestors: AbstractSet[str]
     children: Mapping[str, Node] = field(default_factory=dict)
     ext: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class Ignored:
+    name_exact: AbstractSet[str]
+    name_glob: Sequence[str]
+    path_glob: Sequence[str]

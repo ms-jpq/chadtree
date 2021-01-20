@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import AbstractSet, Mapping, Optional, Sequence, Union
+from typing import AbstractSet, Mapping, Optional, Union
 
+from ..fs.types import Ignored
 from ..view.types import ViewOptions
 
 
@@ -16,16 +17,9 @@ class MimetypeOptions:
 
 
 @dataclass(frozen=True)
-class IgnoreOpts:
-    name_exact: AbstractSet[str]
-    name_glob: Sequence[str]
-    path_glob: Sequence[str]
-
-
-@dataclass(frozen=True)
 class Settings:
     follow: bool
-    ignores: IgnoreOpts
+    ignores: Ignored
     page_increment: int
     keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]

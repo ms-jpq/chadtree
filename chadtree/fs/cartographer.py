@@ -1,3 +1,4 @@
+from fnmatch import fnmatch
 from os import listdir, stat
 from os.path import basename, dirname, join, splitext
 from queue import SimpleQueue
@@ -30,7 +31,7 @@ from ..consts import WALK_PARALLELISM_FACTOR
 from ..registry import pool
 from ..state.types import Index
 from .ops import ancestors
-from .types import Mode, Node
+from .types import Ignored, Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
     S_IEXEC: Mode.executable,
@@ -72,6 +73,14 @@ def _fs_stat(path: str) -> AbstractSet[Mode]:
         else:
             mode = {*_fs_modes(info.st_mode)}
             return mode
+
+
+def user_ignored(node: Node, ignores: Ignored) -> bool:
+    return (
+        node.name in ignores.name_exact
+        or any(fnmatch(node.name, pattern) for pattern in ignores.name_glob)
+        or any(fnmatch(node.path, pattern) for pattern in ignores.path_glob)
+    )
 
 
 def _new(
