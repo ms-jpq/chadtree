@@ -7,7 +7,7 @@ from chad_types import (
     ARTIFACT,
     Artifact,
     IconColourSetEnum,
-    IconSetEnum,
+    IconGlyphSetEnum,
     LSColoursEnum,
     TextColourSetEnum,
 )
@@ -16,7 +16,6 @@ from pynvim_pp.rpc import RpcSpec
 from std2.configparser import hydrate
 from std2.pickle import DecodeError, decode
 from std2.tree import merge
-from std2.types import never
 from yaml import safe_load
 
 from ..consts import CONFIG_YML, SETTINGS_VAR
@@ -46,7 +45,7 @@ class _UserOptions:
 class _UserTheme:
     highlights: HLGroups
     ls_colours: LSColoursEnum
-    icon_set: IconSetEnum
+    icon_set: IconGlyphSetEnum
     icon_colour_set: IconColourSetEnum
     text_colour_set: TextColourSetEnum
 
@@ -97,7 +96,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         hl_context=hl_context,
         icons=icons,
         sort_by=view.sort_by,
-        use_icons=theme.icon_set is not IconSetEnum.ascii,
+        use_icons=theme.icon_set is not IconGlyphSetEnum.ascii,
         time_fmt=view.time_format,
     )
 

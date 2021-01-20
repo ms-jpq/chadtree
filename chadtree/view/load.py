@@ -4,9 +4,9 @@ from typing import Mapping, Tuple, TypeVar
 
 from chad_types import (
     Artifact,
-    Icons,
+    IconGlyphs,
     IconColourSetEnum,
-    IconSetEnum,
+    IconGlyphSetEnum,
     LSColoursEnum,
     TextColourSetEnum,
 )
@@ -31,16 +31,16 @@ def load_theme(
     artifact: Artifact,
     particular_mappings: HLGroups,
     ls_colours: LSColoursEnum,
-    icon_set: IconSetEnum,
+    icon_set: IconGlyphSetEnum,
     icon_colour_set: IconColourSetEnum,
     text_colour_set: TextColourSetEnum,
-) -> Tuple[Icons, HLcontext]:
+) -> Tuple[IconGlyphs, HLcontext]:
 
-    if icon_set is IconSetEnum.ascii:
+    if icon_set is IconGlyphSetEnum.ascii:
         icons = artifact.icons.ascii
-    elif icon_set is IconSetEnum.devicons:
+    elif icon_set is IconGlyphSetEnum.devicons:
         icons = artifact.icons.devicons
-    elif icon_set is IconSetEnum.emoji:
+    elif icon_set is IconGlyphSetEnum.emoji:
         icons = artifact.icons.emoji
     else:
         never(icon_set)

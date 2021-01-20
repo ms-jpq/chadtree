@@ -37,7 +37,7 @@ class _StatusIcons:
 
 
 @dataclass(frozen=True)
-class Icons:
+class IconGlyphs:
     default_icon: Icon
     folder: _FolderIcons
     link: _LinkIcons
@@ -49,13 +49,13 @@ class Icons:
 
 
 @dataclass(frozen=True)
-class IconSet:
-    ascii: Icons
-    devicons: Icons
-    emoji: Icons
+class IconGlyphSet:
+    ascii: IconGlyphs
+    devicons: IconGlyphs
+    emoji: IconGlyphs
 
 
-class IconSetEnum(Enum):
+class IconGlyphSetEnum(Enum):
     ascii = auto()
     devicons = auto()
     emoji = auto()
@@ -134,7 +134,7 @@ Artifact
 
 @dataclass(frozen=True)
 class Artifact:
-    icons: IconSet
+    icons: IconGlyphSet
     ls_colours: LSColourSet
     icon_colours: IconColourSet
     text_colours: TextColourSet

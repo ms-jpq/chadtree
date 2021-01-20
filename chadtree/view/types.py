@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Mapping, Optional, Sequence
 
-from chad_types import Icons
+from chad_types import IconGlyphs
 from pynvim_pp.highlight import HLgroup
 
 from ..fs.types import Mode, Node
@@ -36,7 +36,7 @@ class Sortby(Enum):
 @dataclass(frozen=True)
 class ViewOptions:
     hl_context: HLcontext
-    icons: Icons
+    icons: IconGlyphs
     sort_by: Sequence[Sortby]
     time_fmt: str
     use_icons: bool

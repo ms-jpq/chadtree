@@ -2,7 +2,7 @@ from json import loads
 from pathlib import Path
 from typing import Mapping, Tuple
 
-from chad_types import ASSETS, Hex, Icons, IconSet, TextColours, TextColourSet
+from chad_types import ASSETS, Hex, IconGlyphs, IconGlyphSet, TextColours, TextColourSet
 from std2.coloursys import hex_inverse
 from std2.pickle import decode
 from std2.tree import merge
@@ -30,8 +30,8 @@ def _process_inverse(colours: Mapping[str, str]) -> Mapping[str, str]:
     return {k: hex_inverse(v) for k, v in colours.items()}
 
 
-def _process_icons(icons: Icons) -> Icons:
-    return Icons(
+def _process_icons(icons: IconGlyphs) -> IconGlyphs:
+    return IconGlyphs(
         default_icon=icons.default_icon,
         folder=icons.folder,
         link=icons.link,
@@ -58,12 +58,12 @@ def _make_lightmode(colours: TextColours) -> TextColours:
     )
 
 
-def load_text_decors() -> Tuple[IconSet, TextColourSet]:
+def load_text_decors() -> Tuple[IconGlyphSet, TextColourSet]:
     yaml = safe_load(_ICON_BASE.read_bytes())
     json = loads(docker_run(_DOCKERFILE))
     data = merge(json, yaml)
-    icon_spec: IconSet = decode(IconSet, data, strict=False)
-    icon_set = IconSet(
+    icon_spec: IconGlyphSet = decode(IconGlyphSet, data, strict=False)
+    icon_set = IconGlyphSet(
         ascii=_process_icons(icon_spec.ascii),
         devicons=_process_icons(icon_spec.devicons),
         emoji=_process_icons(icon_spec.emoji),
