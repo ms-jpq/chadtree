@@ -99,23 +99,23 @@ theme:
   icon_colour_set: github
   text_colour_set: env
   discrete_colour_map:
-    Black: Black
-    Red: Red
-    Green: Green
-    Yellow: Yellow
-    Blue: Blue
-    Magenta: Magenta
-    Cyan: Cyan
-    White: White
+    black: "#202020"
+    red: "#ff4c41"
+    green: "#96bc00"
+    yellow: "#f6a311"
+    blue: "#4eb5e0"
+    magenta: "#f587c5"
+    cyan: "#52bcaf"
+    white: "#feffff"
 
-    BrightBlack: BrightBlack
-    BrightRed: BrightRed
-    BrightGreen: BrightGreen
-    BrightYellow: BrightYellow
-    BrightBlue: BrightBlue
-    BrightMagenta: BrightMagenta
-    BrightCyan: BrightCyan
-    BrightWhite: BrightWhite
+    bright_black: "#000000"
+    bright_red: "#ff8883"
+    bright_green: "#8dc437"
+    bright_yellow: "#ffa84f"
+    bright_blue: "#58c7ff"
+    bright_magenta: "#ffa3cc"
+    bright_cyan: "#5ac8a9"
+    bright_white: "#feffff"
 view:
   open_direction: left
   sort_by:
