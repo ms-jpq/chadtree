@@ -1,5 +1,5 @@
 local export_icons = function()
-  local data = {
+  return {
     ext_exact = vim.g.WebDevIconsUnicodeDecorateFileNodesExtensionSymbols,
     name_exact = vim.g.WebDevIconsUnicodeDecorateFileNodesExactSymbols,
     name_glob = vim.g.WebDevIconsUnicodeDecorateFileNodesPatternSymbols,
@@ -9,16 +9,14 @@ local export_icons = function()
       closed = vim.g.WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
     }
   }
-  return vim.fn.json_encode(data)
 end
 
 local export_colours = function()
-  local data = {
+  return {
     ext_exact = vim.g.NERDTreeExtensionHighlightColor,
     name_exact = vim.g.NERDTreeExactMatchHighlightColor,
     name_glob = vim.g.NERDTreePatternMatchHighlightColor
   }
-  return vim.fn.json_encode(data)
 end
 
 local load_rtp = function(src)
@@ -38,12 +36,13 @@ local emoji = export_icons()
 load_viml "vim-nerdtree-syntax-highlight/after/syntax/nerdtree.vim"
 local nerdtree_syntax = export_colours()
 
-local json = {
+local exports = {
   devicons = devicons,
   emoji = emoji,
   nerdtree_syntax = nerdtree_syntax
 }
+local json = vim.fn.json_encode(exports)
 
-vim.fn.writefile({json}, "exports.json")
+vim.fn.writefile({vim.inspect(json)}, "exports.json")
 
 os.exit(0)

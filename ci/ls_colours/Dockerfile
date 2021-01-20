@@ -13,4 +13,4 @@ RUN git clone --depth=1 https://github.com/seebi/dircolors-solarized.git
 COPY . /
 
 
-RUN nvim --headless
+ENTRYPOINT ["./lsc.sh"]
