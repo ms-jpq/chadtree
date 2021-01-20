@@ -10,10 +10,14 @@ from .text_decorations import load_text_decors
 
 
 def main() -> None:
+    ls_colours = load_ls_colours()
     icon_colours = load_icon_colours()
     icons, text_colours = load_text_decors()
     artifact = Artifact(
-        icons=icons, icon_colours=icon_colours, text_colours=text_colours
+        icons=icons,
+        ls_colours=ls_colours,
+        icon_colours=icon_colours,
+        text_colours=text_colours,
     )
 
     json = recur_sort(encode(artifact))
@@ -21,5 +25,4 @@ def main() -> None:
         dump(json, fd, ensure_ascii=False, check_circular=False, indent=2)
 
 
-# main()
-load_ls_colours()
+main()

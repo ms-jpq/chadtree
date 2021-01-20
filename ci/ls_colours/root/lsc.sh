@@ -5,5 +5,6 @@ set -o pipefail
 
 
 FILE="$1"
-printf '%s' "$(dircolors -b "$PWD/$FILE")"
-# printf '%s' "$LS_COLORS"
+export TERM=xterm-256color
+eval "$(dircolors -b "$PWD/$FILE")"
+printf '%s' "$LS_COLORS"

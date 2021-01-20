@@ -47,7 +47,7 @@ def _process_colours(colours: TextColours) -> TextColours:
 
 def load_text_decors() -> Tuple[IconSet, TextColourSet]:
     yaml = safe_load(_ICON_BASE.read_bytes())
-    json = loads(docker_run(_DOCKERFILE).strip())
+    json = loads(docker_run(_DOCKERFILE))
     data = merge(json, yaml)
     icon_spec: IconSet = decode(IconSet, data, strict=False)
     icon_set = IconSet(

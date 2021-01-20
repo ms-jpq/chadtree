@@ -132,5 +132,6 @@ Artifact
 @dataclass(frozen=True)
 class Artifact:
     icons: IconSet
+    ls_colours: LSColourSet
     icon_colours: IconColourSet
     text_colours: TextColourSet
