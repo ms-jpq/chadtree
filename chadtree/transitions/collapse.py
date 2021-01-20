@@ -26,14 +26,11 @@ def _collapse(
         return None
     else:
         path = node.path if is_dir(node) else dirname(node.path)
-        if path == state.root.path:
-            return None
-        else:
-            paths = {
-                indexed
-                for indexed in state.index
-                if path in (ancestors(indexed) | {indexed})
-            }
-            index = state.index - paths
-            new_state = forward(state, settings=settings, index=index, paths=paths)
-            return Stage(new_state, focus=path)
+        paths = {
+            indexed
+            for indexed in state.index
+            if path in (ancestors(indexed) | {indexed})
+        }
+        index = (state.index - paths) | {state.root.path}
+        new_state = forward(state, settings=settings, index=index, paths=paths)
+        return Stage(new_state, focus=path)
