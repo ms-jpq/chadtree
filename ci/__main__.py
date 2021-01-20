@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from dataclasses import dataclass
 from datetime import datetime
 from json import dump, load
@@ -15,22 +13,22 @@ from yaml import safe_load
 
 _TOP_LV = Path(__file__).resolve().parent.parent
 _CI = _TOP_LV / "ci"
-TEMP = _TOP_LV / "temp"
-ASSETS = _TOP_LV / "assets"
-ARTIFACTS = _TOP_LV / "artifacts"
-DOCKER_PATH = _CI / "docker"
-LSC_EVAL = _CI / "lsc.sh"
+_TEMP = _TOP_LV / "temp"
+_ASSETS = _TOP_LV / "assets"
+_ARTIFACTS = _TOP_LV / "artifacts"
+_DOCKER_PATH = _CI / "docker"
+_LSC_EVAL = _CI / "lsc.sh"
 
 
-LANG_COLOURS = """
+_LANG_COLOURS = """
 https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
 """
 
-LANG_COLOURS_JSON = (ARTIFACTS / "github_colours").with_suffix(".json")
-TEMP_JSON = (TEMP / "icons").with_suffix(".json")
+_LANG_COLOURS_JSON = (_ARTIFACTS / "github_colours").with_suffix(".json")
+_TEMP_JSON = (_TEMP / "icons").with_suffix(".json")
 
-SRC_ICONS = ("unicode_icons", "emoji_icons")
-SRC_COLOUR = "colours"
+_SRC_ICONS = ("unicode_icons", "emoji_icons")
+_SRC_COLOUR = "colours"
 
 
 @dataclass(frozen=True)
@@ -145,39 +143,39 @@ def _invert_nightmode(night_mode: _ColoursDumpFormat) -> _ColoursDumpFormat:
 
 
 def _devicons() -> None:
-    TEMP.mkdir(parents=True, exist_ok=True)
+    _TEMP.mkdir(parents=True, exist_ok=True)
 
     image = "chad-icons"
     time = format(datetime.now(), "%H-%M-%S")
     container = f"{image}-{time}"
 
     check_call(
-        ("docker", "build", "-t", image, "-f", "Dockerfile", "."), cwd=DOCKER_PATH
+        ("docker", "build", "-t", image, "-f", "Dockerfile", "."), cwd=_DOCKER_PATH
     )
     check_call(("docker", "create", "--name", container, image))
 
-    for icon in SRC_ICONS:
+    for icon in _SRC_ICONS:
         src = f"{container}:/root/{icon}.json"
-        check_call(("docker", "cp", src, str(TEMP_JSON)))
+        check_call(("docker", "cp", src, str(_TEMP_JSON)))
 
-        parsed = _process_icons(load(TEMP_JSON.open()))
-        basic = safe_load((ASSETS / icon).with_suffix(".base.yml").read_bytes())
+        parsed = _process_icons(load(_TEMP_JSON.open()))
+        basic = safe_load((_ASSETS / icon).with_suffix(".base.yml").read_bytes())
         merged = merge(encode(parsed), basic)
 
-        dest = (ARTIFACTS / icon).with_suffix(".json")
+        dest = (_ARTIFACTS / icon).with_suffix(".json")
         _spit_json(dest, merged)
 
     ascii_json = "ascii_icons"
-    json = safe_load((ASSETS / ascii_json).with_suffix(".base.yml").read_bytes())
-    _spit_json((ARTIFACTS / ascii_json).with_suffix(".json"), json)
+    json = safe_load((_ASSETS / ascii_json).with_suffix(".base.yml").read_bytes())
+    _spit_json((_ARTIFACTS / ascii_json).with_suffix(".json"), json)
 
-    src = f"{container}:/root/{SRC_COLOUR}.json"
-    check_call(("docker", "cp", src, str(TEMP_JSON)))
-    night_mode = _process_colours(load(TEMP_JSON.open()))
+    src = f"{container}:/root/{_SRC_COLOUR}.json"
+    check_call(("docker", "cp", src, str(_TEMP_JSON)))
+    night_mode = _process_colours(load(_TEMP_JSON.open()))
     day_mode = _invert_nightmode(night_mode)
 
-    night_dest = (ARTIFACTS / f"{SRC_COLOUR}_night").with_suffix(".json")
-    day_dest = (ARTIFACTS / f"{SRC_COLOUR}_day").with_suffix(".json")
+    night_dest = (_ARTIFACTS / f"{_SRC_COLOUR}_night").with_suffix(".json")
+    day_dest = (_ARTIFACTS / f"{_SRC_COLOUR}_day").with_suffix(".json")
 
     _spit_json(night_dest, encode(night_mode))
     _spit_json(day_dest, encode(day_mode))
@@ -185,7 +183,7 @@ def _devicons() -> None:
 
 
 def _github_colours() -> None:
-    raw = _fetch(LANG_COLOURS)
+    raw = _fetch(_LANG_COLOURS)
     yaml: GithubSpec = decode(GithubSpec, safe_load(raw), strict=False)
     lookup: Mapping[str, str] = {
         ext: spec.color
@@ -194,42 +192,13 @@ def _github_colours() -> None:
         if spec.color
     }
 
-    _spit_json(LANG_COLOURS_JSON, lookup)
+    _spit_json(_LANG_COLOURS_JSON, lookup)
 
 
 def _ls_colours() -> None:
     pass
 
 
-def _git_alert() -> None:
-    prefix = "update-icons"
-    remote_brs = check_output(("git", "branch", "--remotes"), text=True)
-
-    print("DEBUG")
-    print([remote_brs])
-
-    def cont() -> Iterator[str]:
-        for br in remote_brs.splitlines():
-            b = br.strip()
-            if b and "->" not in b:
-                _, _, name = b.partition("/")
-                if name.startswith(prefix):
-                    yield name
-
-    refs = tuple(cont())
-    print(refs)
-
-    if refs:
-        check_call(("git", "push", "--delete", "origin", *refs))
-
-    proc = run(("git", "diff", "--exit-code"))
-    if proc.returncode:
-        time = datetime.now().strftime("%Y-%m-%d")
-        brname = f"{prefix}--{time}"
-        check_call(("git", "checkout", "-b", brname))
-        check_call(("git", "add", "."))
-        check_call(("git", "commit", "-m", f"update_icons: {time}"))
-        check_call(("git", "push", "--set-upstream", "origin", brname))
 
 
 def main() -> None:

@@ -1,17 +1,16 @@
-from pathlib import Path
+from chad_types import TOP_LEVEL
 
 WALK_PARALLELISM_FACTOR = 100
 FOLDER_MODE = 0o755
 FILE_MODE = 0o644
 
-_TOP_LEVEL = Path(__file__).parent.parent
-_CONFIG = _TOP_LEVEL / "config"
-_ARTIFACTS = _TOP_LEVEL / "artifacts"
-_VARS = _TOP_LEVEL / ".vars"
+
+_ARTIFACTS = TOP_LEVEL / "artifacts"
+_VARS = TOP_LEVEL / ".vars"
 
 
 RT_DIR = _VARS / "runtime"
-REQUIREMENTS = _TOP_LEVEL / "requirements.txt"
+REQUIREMENTS = TOP_LEVEL / "requirements.txt"
 DEPS_LOCK = _VARS / "deps.lock"
 
 
@@ -20,14 +19,10 @@ FM_NAMESPACE = "chadtree_ns"
 FM_HL_PREFIX = "chadtree"
 
 
-SETTINGS_VAR = "chadtree_settings"
-
-
-CONFIG_YML = _CONFIG / "defaults.yml"
-
-
-LANG_ROOT = _TOP_LEVEL / "locale"
 DEFAULT_LANG = "en"
+LANG_ROOT = TOP_LEVEL / "locale"
+CONFIG_YML = TOP_LEVEL / "config" / "defaults.yml"
+SETTINGS_VAR = "chadtree_settings"
 
 
 ASCII_ICONS_JSON = _ARTIFACTS / "ascii_icons.json"
@@ -40,8 +35,13 @@ NERD_COLOURS_LIGHT_JSON = _ARTIFACTS / "colours_day.json"
 NERD_COLOURS_DARK_JSON = _ARTIFACTS / "colours_night.json"
 
 
+"""
+Docs
+"""
+
+
 _DOCS_URI_BASE = "https://github.com/ms-jpq/chadtree/blob/future2/docs"
-_DOCS_DIR = _TOP_LEVEL / "docs"
+_DOCS_DIR = TOP_LEVEL / "docs"
 
 MIGRATION_URI = f"{_DOCS_URI_BASE}/MIGRATION.md"
 
@@ -64,6 +64,11 @@ CONFIGURATION_URI = f"{_DOCS_URI_BASE}/{_CONFIGURATION_md}"
 _THEME_md = "THEME.md"
 THEME_MD = _DOCS_DIR / _THEME_md
 THEME_URI = f"{_DOCS_URI_BASE}/{_THEME_md}"
+
+
+"""
+Sessions
+"""
 
 
 SESSION_DIR = _VARS / "sessions"
