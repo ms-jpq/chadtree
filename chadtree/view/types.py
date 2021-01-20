@@ -2,55 +2,10 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Mapping, Optional, Sequence
 
+from chad_types import Icons
 from pynvim_pp.highlight import HLgroup
 
 from ..fs.types import Mode, Node
-
-
-class ColourChoice(Enum):
-    ls_colours = auto()
-    nerd_tree = auto()
-
-
-@dataclass(frozen=True)
-class NerdColours:
-    ext_exact: Mapping[str, str]
-    name_exact: Mapping[str, str]
-    name_glob: Mapping[str, str]
-
-
-@dataclass(frozen=True)
-class FolderIcons:
-    open: str
-    closed: str
-
-
-@dataclass(frozen=True)
-class LinkIcons:
-    normal: str
-    broken: str
-
-
-@dataclass(frozen=True)
-class StatusIcons:
-    active: str
-    inactive: str
-    selected: str
-    not_selected: str
-
-
-@dataclass(frozen=True)
-class Icons:
-    ext_exact: Mapping[str, str]
-    default_icon: str
-    folder: FolderIcons
-    link: LinkIcons
-    name_exact: Mapping[str, str]
-    name_glob: Mapping[str, str]
-    status: StatusIcons
-
-
-GithubColours = Mapping[str, str]
 
 
 @dataclass(frozen=True)
@@ -63,7 +18,7 @@ class HLGroups:
 @dataclass(frozen=True)
 class HLcontext:
     groups: Sequence[HLgroup]
-    icon_exts: GithubColours
+    icon_exts: Mapping[str, str]
     mode_pre: Mapping[Mode, str]
     mode_post: Mapping[Optional[Mode], str]
     name_exact: Mapping[str, str]

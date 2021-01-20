@@ -5,7 +5,6 @@ FOLDER_MODE = 0o755
 FILE_MODE = 0o644
 
 
-_ARTIFACTS = TOP_LEVEL / "artifacts"
 _VARS = TOP_LEVEL / ".vars"
 
 
@@ -23,16 +22,6 @@ DEFAULT_LANG = "en"
 LANG_ROOT = TOP_LEVEL / "locale"
 CONFIG_YML = TOP_LEVEL / "config" / "defaults.yml"
 SETTINGS_VAR = "chadtree_settings"
-
-
-ASCII_ICONS_JSON = _ARTIFACTS / "ascii_icons.json"
-EMOJI_ICONS_JSON = _ARTIFACTS / "emoji_icons.json"
-DEVI_ICONS_JSON = _ARTIFACTS / "unicode_icons.json"
-
-
-GITHUB_COLOURS_JSON = _ARTIFACTS / "github_colours.json"
-NERD_COLOURS_LIGHT_JSON = _ARTIFACTS / "colours_day.json"
-NERD_COLOURS_DARK_JSON = _ARTIFACTS / "colours_night.json"
 
 
 """

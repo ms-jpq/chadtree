@@ -1,11 +1,11 @@
 from hashlib import sha1
-from json import dump
+from json import dump, load
 from pathlib import Path
+from typing import Any, Optional
 
 from std2.pickle import decode, encode
 
 from ..consts import FOLDER_MODE, SESSION_DIR
-from ..da import load_json
 from .types import Session, State
 
 
@@ -15,10 +15,18 @@ def _session_path(cwd: str) -> Path:
     return part.with_suffix(".json")
 
 
+def _load_json(path: Path) -> Optional[Any]:
+    if path.exists():
+        with path.open(encoding="utf8") as fd:
+            return load(fd)
+    else:
+        return None
+
+
 def load_session(cwd: str) -> Session:
     load_path = _session_path(cwd)
     try:
-        return decode(Session, load_json(load_path))
+        return decode(Session, _load_json(load_path))
     except Exception:
         return Session(index=None, show_hidden=None, enable_vc=None)
 

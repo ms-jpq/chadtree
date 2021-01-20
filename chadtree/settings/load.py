@@ -1,16 +1,16 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from json import loads
 from locale import strxfrm
-from typing import (
-    AbstractSet,
-    Mapping,
-    Optional,
-    Sequence,
-    SupportsFloat,
-    Union,
-)
+from typing import AbstractSet, Mapping, Optional, Sequence, SupportsFloat, Union
 
+from chad_types import (
+    ARTIFACT,
+    Artifact,
+    IconColourSetEnum,
+    IconSetEnum,
+    LSColoursEnum,
+    TextColourSetEnum,
+)
 from pynvim.api.nvim import Nvim
 from pynvim_pp.rpc import RpcSpec
 from std2.configparser import hydrate
@@ -19,27 +19,15 @@ from std2.tree import merge
 from std2.types import never
 from yaml import safe_load
 
-from ..consts import (
-    ASCII_ICONS_JSON,
-    CONFIG_YML,
-    DEVI_ICONS_JSON,
-    EMOJI_ICONS_JSON,
-    SETTINGS_VAR,
-)
-from ..view.parse_colours import load_colours
-from ..view.types import ColourChoice, HLGroups, Icons, Sortby
+from ..consts import CONFIG_YML, SETTINGS_VAR
+from ..view.load import load_view
+from ..view.types import HLGroups, Sortby
 from .types import Ignored, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
 
 
 class _OpenDirection(Enum):
     left = auto()
     right = auto()
-
-
-class _IconSet(Enum):
-    ascii = auto()
-    emoji = auto()
-    devicons = auto()
 
 
 @dataclass(frozen=True)
@@ -55,12 +43,18 @@ class _UserOptions:
 
 
 @dataclass(frozen=True)
+class _UserTheme:
+    ls_colours: LSColoursEnum
+    icon_set: IconSetEnum
+    icon_colour_set: IconColourSetEnum
+    text_colour_set: TextColourSetEnum
+
+
+@dataclass(frozen=True)
 class _UserView:
     open_direction: _OpenDirection
     width: int
     sort_by: Sequence[Sortby]
-    icon_set: _IconSet
-    colours: ColourChoice
     highlights: HLGroups
     time_format: str
     window_options: Mapping[str, Union[bool, str]]
@@ -70,8 +64,9 @@ class _UserView:
 class _UserConfig:
     keymap: Mapping[str, AbstractSet[str]]
     options: _UserOptions
-    view: _UserView
     ignore: Ignored
+    view: _UserView
+    theme: _UserTheme
 
 
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
@@ -79,27 +74,20 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
-    user_config = nvim.vars.get(SETTINGS_VAR, {})
+    artifacts: Artifact = decode(Artifact, safe_load(ARTIFACT.read_bytes()))
 
+    user_config = nvim.vars.get(SETTINGS_VAR, {})
     config: _UserConfig = decode(
         _UserConfig,
         merge(safe_load(CONFIG_YML.read_bytes()), hydrate(user_config), replace=True),
     )
-    options, view = config.options, config.view
+    options, view, theme = config.options, config.view, config.theme
 
-    if view.icon_set is _IconSet.ascii:
-        icons_spec = ASCII_ICONS_JSON
-    elif view.icon_set is _IconSet.emoji:
-        icons_spec = EMOJI_ICONS_JSON
-    elif view.icon_set is _IconSet.devicons:
-        icons_spec = DEVI_ICONS_JSON
-    else:
-        never(view.icon_set)
+    icons = artifacts.icon_colours.github
 
-    icons: Icons = decode(Icons, loads(icons_spec.read_text()))
-    hl_context = load_colours(
+    hl_context = load_view(
         nvim,
-        colours=view.colours,
+        colours=view.colour_set,
         particular_mappings=view.highlights,
     )
 
@@ -107,7 +95,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         hl_context=hl_context,
         icons=icons,
         sort_by=view.sort_by,
-        use_icons=view.icon_set is not _IconSet.ascii,
+        use_icons=theme.icon_set is not IconSetEnum.ascii,
         time_fmt=view.time_format,
     )
 

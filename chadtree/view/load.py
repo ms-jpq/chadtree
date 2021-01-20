@@ -25,7 +25,7 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
     return {k: v.name for k, v in mapping.items()}
 
 
-def load_colours(
+def load_view(
     nvim: Nvim,
     colours: ColourChoice,
     particular_mappings: HLGroups,
