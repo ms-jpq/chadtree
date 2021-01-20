@@ -109,6 +109,7 @@ class Render:
 
 @dataclass(frozen=True)
 class Derived:
+    rendered: Sequence[Render]
+    hashed: Sequence[int]
     node_row_lookup: Sequence[Node]
     path_row_lookup: Mapping[str, int]
-    rendered: Sequence[Render]

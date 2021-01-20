@@ -252,8 +252,12 @@ def render(
             yield from iter(children)
 
     _lookup, _rendered = zip(*render(node, depth=0, cleared=False))
-    lookup = cast(Sequence[Node], _lookup)
     rendered = cast(Sequence[Render], _rendered)
-    paths_lookup = {node.path: idx for idx, node in enumerate(lookup)}
-    derived = Derived(node_row_lookup=lookup, path_row_lookup=paths_lookup, rendered=rendered)
+    lookup = cast(Sequence[Node], _lookup)
+    derived = Derived(
+        rendered=rendered,
+        hashed=tuple(map(hash, rendered)),
+        node_row_lookup=lookup,
+        path_row_lookup={node.path: idx for idx, node in enumerate(lookup)},
+    )
     return derived

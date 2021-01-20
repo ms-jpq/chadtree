@@ -19,7 +19,6 @@ from ._registry import ____
 from .consts import WARN_DURATION
 from .registry import autocmd, enqueue_event, event_queue, pool, rpc
 from .settings.load import initial as initial_settings
-from .settings.localization import LANG
 from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
@@ -88,10 +87,8 @@ class ChadClient(Client):
                     mgr = suppress(NvimError) if stage.silent else nullcontext()
                     with mgr, timeit() as t:
                         redraw(nvim, state=self._state, focus=stage.focus)
-                    duration = t()
-                    if duration >= WARN_DURATION:
-                        msg = LANG("render time warning", duration=round(duration, 3))
-                        write(nvim, msg)
+                    # duration = t()
+                    # write(nvim, round(duration, 3))
 
             try:
                 threadsafe_call(nvim, cont)
