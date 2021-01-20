@@ -1,6 +1,4 @@
-from functools import reduce
-from operator import add
-from typing import Iterator, Optional, Sequence
+from typing import Optional, Sequence
 from uuid import uuid4
 
 from pynvim import Nvim
@@ -19,22 +17,20 @@ from .shared.wm import find_fm_windows
 _FM_HASH_VAR = f"CHAD_HASH_{uuid4()}"
 
 
-def _iter_updates(
-    nvim: Nvim, buf: Buffer, ns: int, derived: Derived
-) -> Iterator[Atomic]:
+def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
+    n_hash = tuple(map(str, derived.hashed))
     try:
-        p_hash: Sequence[int] = decode(
-            Sequence[int], buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR)
+        p_hash: Sequence[str] = decode(
+            Sequence[str], buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR)
         )
     except DecodeError:
         p_hash = ()
 
-    for (i1, i2), (j1, j2) in trans_inplace(
-        src=p_hash, dest=derived.hashed, unifying=10
-    ):
-        atomic = Atomic()
+    atomic = Atomic()
+
+    for (i1, i2), (j1, j2) in trans_inplace(src=p_hash, dest=n_hash, unifying=10):
         atomic.buf_clear_namespace(buf, ns, i1, i2 + 1)
-        atomic.buf_set_lines(buf, j1, j2 + 1, True, derived.lines[j1:j2])
+        atomic.buf_set_lines(buf, i1, i2 + 1, True, derived.lines[j1:j2])
 
         for idx, highlights in enumerate(derived.highlights[j1:j2], start=i1):
             for hl in highlights:
@@ -44,7 +40,8 @@ def _iter_updates(
             vtxt = tuple((bdg.text, bdg.group) for bdg in badges)
             atomic.buf_set_virtual_text(buf, ns, idx, vtxt, {})
 
-        yield atomic
+    atomic.buf_set_var(buf, _FM_HASH_VAR, n_hash)
+    return atomic
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
@@ -75,7 +72,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
         a1 = Atomic()
         a1.buf_set_option(buf, "modifiable", True)
 
-        a2 = reduce(add, _iter_updates(nvim, buf=buf, ns=ns, derived=derived), Atomic())
+        a2 = _update(nvim, buf=buf, ns=ns, derived=derived)
 
         a3 = Atomic()
         a3.buf_set_option(buf, "modifiable", False)
