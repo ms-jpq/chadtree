@@ -1,4 +1,5 @@
 from os.path import dirname
+from typing import Optional
 
 from pynvim import Nvim
 
@@ -13,7 +14,7 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _collapse(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+def _collapse(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
     """
     Collapse folder
     """

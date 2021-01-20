@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Mapping
 
 TOP_LEVEL = Path(__file__).resolve().parent
+ASSETS = TOP_LEVEL / "assets"
 ARTIFACT = TOP_LEVEL / "artifacts" / "artifact.json"
 
 

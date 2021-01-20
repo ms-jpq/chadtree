@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Mapping, Optional, Sequence
 
-from chad_types import IconColours, Hex
+from chad_types import Hex, IconColours, IconColourSet
 from std2.pickle import decode
 from std2.urllib import urlopen
 from yaml import safe_load
@@ -30,13 +30,14 @@ def _fetch(uri: str) -> str:
         return body.decode()
 
 
-def load_github() -> IconColours:
+def load_icon_colours() -> IconColourSet:
     raw = _fetch(_LINGUIST)
     yaml: _GithubSpec = decode(_GithubSpec, safe_load(raw), strict=False)
-    colours: IconColours = {
+    github: IconColours = {
         ext: spec.color
         for spec in yaml.values()
         for ext in spec.extensions
         if spec.color
     }
+    colours = IconColourSet(github=github)
     return colours

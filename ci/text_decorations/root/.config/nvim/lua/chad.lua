@@ -24,7 +24,7 @@ local load_rtp = function(src)
 end
 
 local load_viml = function(src)
-  vim.api.nvim_command("source /root/" .. src)
+  vim.api.nvim_command("source " .. "/root/" .. src)
 end
 
 load_viml "vim-devicons/plugin/webdevicons.vim"
@@ -43,6 +43,6 @@ local exports = {
 }
 local json = vim.fn.json_encode(exports)
 
-vim.fn.writefile({vim.inspect(json)}, "exports.json")
+vim.fn.writefile({json}, "exports.json")
 
 os.exit(0)
