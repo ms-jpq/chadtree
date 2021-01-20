@@ -80,6 +80,30 @@ class IconColourSetEnum(Enum):
 
 
 """
+LS Colours
+"""
+
+
+LS_COLOR = str
+
+
+@dataclass(frozen=True)
+class LSColourSet:
+    dark_256: LS_COLOR
+    ansi_dark: LS_COLOR
+    ansi_light: LS_COLOR
+    ansi_universal: LS_COLOR
+
+
+class LSColoursEnum(Enum):
+    env = auto()
+    dark_256 = auto()
+    ansi_dark = auto()
+    ansi_light = auto()
+    ansi_universal = auto()
+
+
+"""
 Text Colours
 """
 
@@ -100,31 +124,6 @@ class TextColourSet:
 class TextColourSetEnum(Enum):
     nerdtree_syntax_light = auto()
     nerdtree_syntax_dark = auto()
-
-
-"""
-LS Colours
-"""
-
-
-LS_COLOR = str
-
-
-@dataclass(frozen=True)
-class LSColourSet:
-    dark_256: LS_COLOR
-    ansi_dark: LS_COLOR
-    ansi_light: LS_COLOR
-    ansi_universal: LS_COLOR
-
-
-class LSColoursEnum(Enum):
-    none = auto()
-    env = auto()
-    dark_256 = auto()
-    ansi_dark = auto()
-    ansi_light = auto()
-    ansi_universal = auto()
 
 
 """

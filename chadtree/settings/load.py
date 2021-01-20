@@ -44,10 +44,9 @@ class _UserOptions:
 @dataclass(frozen=True)
 class _UserTheme:
     highlights: HLGroups
-    ls_colours: LSColoursEnum
-    icon_set: IconGlyphSetEnum
+    icon_glyph_set: IconGlyphSetEnum
     icon_colour_set: IconColourSetEnum
-    text_colour_set: TextColourSetEnum
+    text_colour_set: Union[LSColoursEnum, TextColourSetEnum]
 
 
 @dataclass(frozen=True)
@@ -86,8 +85,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         nvim,
         artifact=artifacts,
         particular_mappings=theme.highlights,
-        ls_colours=theme.ls_colours,
-        icon_set=theme.icon_set,
+        icon_set=theme.icon_glyph_set,
         icon_colour_set=theme.icon_colour_set,
         text_colour_set=theme.text_colour_set,
     )
@@ -96,7 +94,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         hl_context=hl_context,
         icons=icons,
         sort_by=view.sort_by,
-        use_icons=theme.icon_set is not IconGlyphSetEnum.ascii,
+        use_icons=theme.icon_glyph_set is not IconGlyphSetEnum.ascii,
         time_fmt=view.time_format,
     )
 

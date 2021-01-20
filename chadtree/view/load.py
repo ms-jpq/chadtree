@@ -1,11 +1,11 @@
 from itertools import chain
 from os import environ
-from typing import Mapping, Tuple, TypeVar
+from typing import Mapping, Tuple, TypeVar, Union
 
 from chad_types import (
     Artifact,
-    IconGlyphs,
     IconColourSetEnum,
+    IconGlyphs,
     IconGlyphSetEnum,
     LSColoursEnum,
     TextColourSetEnum,
@@ -30,10 +30,9 @@ def load_theme(
     nvim: Nvim,
     artifact: Artifact,
     particular_mappings: HLGroups,
-    ls_colours: LSColoursEnum,
     icon_set: IconGlyphSetEnum,
     icon_colour_set: IconColourSetEnum,
-    text_colour_set: TextColourSetEnum,
+    text_colour_set: Union[LSColoursEnum, TextColourSetEnum],
 ) -> Tuple[IconGlyphs, HLcontext]:
 
     if icon_set is IconGlyphSetEnum.ascii:
@@ -45,22 +44,23 @@ def load_theme(
     else:
         never(icon_set)
 
-    if ls_colours is LSColoursEnum.env:
-        _lsc = environ.get("LS_COLORS", "")
-    elif ls_colours is LSColoursEnum.dark_256:
-        _lsc = artifact.ls_colours.dark_256
-    elif ls_colours is LSColoursEnum.ansi_light:
-        _lsc = artifact.ls_colours.ansi_light
-    elif ls_colours is LSColoursEnum.ansi_dark:
-        _lsc = artifact.ls_colours.ansi_dark
-    elif ls_colours is LSColoursEnum.ansi_universal:
-        _lsc = artifact.ls_colours.ansi_universal
-    elif ls_colours is LSColoursEnum.none:
-        _lsc = ""
-    else:
-        never(ls_colours)
+    if text_colour_set is LSColoursEnum.env and "LS_COLORS" not in environ:
+        text_colour_set = LSColoursEnum.dark_256
 
-    if _lsc:
+    if isinstance(text_colour_set, LSColoursEnum):
+        if text_colour_set is LSColoursEnum.env:
+            _lsc = environ.get("LS_COLORS", "")
+        elif text_colour_set is LSColoursEnum.dark_256:
+            _lsc = artifact.ls_colours.dark_256
+        elif text_colour_set is LSColoursEnum.ansi_light:
+            _lsc = artifact.ls_colours.ansi_light
+        elif text_colour_set is LSColoursEnum.ansi_dark:
+            _lsc = artifact.ls_colours.ansi_dark
+        elif text_colour_set is LSColoursEnum.ansi_universal:
+            _lsc = artifact.ls_colours.ansi_universal
+        else:
+            never(text_colour_set)
+
         lsc = parse_lsc(_lsc)
         mode_pre = lsc.mode_pre
         mode_post = lsc.mode_post

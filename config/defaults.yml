@@ -91,12 +91,13 @@ options:
   version_control:
     enable: true
 theme:
-  icon_set: devicons
-  colours: ls_colours
   highlights:
     ignored: Comment
     quickfix: Label
     version_control: Comment
+  icon_glyph_set: devicons
+  icon_colour_set: github
+  text_colour_set: env
 view:
   open_direction: left
   sort_by:
