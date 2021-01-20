@@ -98,7 +98,7 @@ To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
 nnoremap <leader>v <cmd>CHADopen<cr>
 ```
 
-Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)
+**Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)**
 
 ### Recommendations
 

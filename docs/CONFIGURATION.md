@@ -211,78 +211,6 @@ Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/
 
 Some options to change CHADTree's apperance
 
-#### `chadtree_settings.view.colours`
-
-See the [doc on theme](https://github.com/ms-jpq/chadtree/raw/future2/docs/THEME.md) for more details.
-
-**legal keys: one of**
-
-```json
-["ls_colours", "nerd_tree"]
-```
-
-**default:**
-
-```json
-"ls_colours"
-```
-
-#### `chadtree_settings.view.icon_set`
-
-Which icon set to use. Note some of these might require additional fonts and or terminal support.
-
-See the [doc on theme](https://github.com/ms-jpq/chadtree/raw/future2/docs/THEME.md) for more details.
-
-**default:**
-
-**legal keys: one of**
-
-```json
-["ascii", "devicons", "emoji"]
-```
-
-**default:**
-
-```json
-"devicons"
-```
-
-#### `chadtree_settings.view.highlights`
-
-Vim [highlight groups](https://www.sbf5.com/~cduan/technical/vi/vi-4.shtml) to use for various parts of CHADTree
-
-see `:help highlight-groups`
-
-##### `chadtree_settings.view.highlights.ignored`
-
-Used for hidden files and files ignored by `git`
-
-**default:**
-
-```json
-"Comment"
-```
-
-##### `chadtree_settings.view.highlights.quickfix`
-
-Used to colour annotations for files inside the `quickfix` list
-
-**default:**
-
-```json
-"Label"
-```
-
-##### `chadtree_settings.view.highlights.version_control`
-
-Used to colour annotations for `git` status
-
-**default:**
-
-```json
-"Comment"
-```
-
 #### `chadtree_settings.view.open_direction`
 
 Which way does CHADTree open?
@@ -341,3 +269,7 @@ Set of window local options to for CHADTree windows
   "wrap": false
 }
 ```
+
+### chadtree_settings.theme
+
+See help docs on [themes](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md)

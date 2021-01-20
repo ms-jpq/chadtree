@@ -1,38 +1,35 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser, Namespace
 from json import dump
 from pathlib import Path
 from subprocess import check_output
 from sys import stdout
 from typing import Mapping, cast
 
+
 _LSC_SH = Path(__file__).parent.resolve() / "lsc.sh"
+
+_SOLARIZED = Path("dircolors-solarized").resolve()
+_NORD = Path("nord-dircolors").resolve()
+
 _PARSING = {
-    "dircolors.256dark": "dark_256",
-    "dircolors.ansi-dark": "ansi_dark",
-    "dircolors.ansi-light": "ansi_light",
-    "dircolors.ansi-universal": "ansi_universal",
+    _SOLARIZED / "dircolors.256dark": "dark_256",
+    _SOLARIZED / "dircolors.ansi-dark": "ansi_dark",
+    _SOLARIZED / "dircolors.ansi-light": "ansi_light",
+    _SOLARIZED / "dircolors.ansi-universal": "ansi_universal",
+    _NORD / "src" / "dir_colors": "nord",
 }
 
 
-def _parse_args() -> Namespace:
-    parser = ArgumentParser()
-    parser.add_argument("top_level", type=Path)
-    return parser.parse_args()
-
-
-def _load_lsc(top_level: Path) -> Mapping[str, str]:
+def _load_lsc() -> Mapping[str, str]:
     return {
-        dest: check_output((str(_LSC_SH), file_name), text=True, cwd=top_level)
+        dest: check_output((str(_LSC_SH), str(file_name)), text=True)
         for file_name, dest in _PARSING.items()
     }
 
 
 def main() -> None:
-    args = _parse_args()
-    top_level = cast(Path, args.top_level).resolve()
-    lsc = _load_lsc(top_level)
+    lsc = _load_lsc()
     dump(lsc, stdout, ensure_ascii=False, check_circular=False)
 
 
