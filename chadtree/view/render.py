@@ -5,6 +5,7 @@ from os import linesep
 from os.path import sep
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
+from pynvim_pp.highlight import highlight
 from std2.types import never
 
 from ..fs.cartographer import is_dir
@@ -12,12 +13,16 @@ from ..fs.types import Mode, Node
 from ..settings.types import IgnoreOpts, Settings
 from ..state.types import FilterPattern, Index, QuickFix, Selection
 from ..version_ctl.types import VCStatus
-from .types import Badge, Derived, Highlight, Render, Sortby
+from .types import Badge, Derived, Highlight, Sortby
 
 
 class _CompVals(IntEnum):
     FOLDER = auto()
     FILE = auto()
+
+
+Render = Tuple[str, Sequence[Highlight], Sequence[Badge]]
+NRender = Tuple[Node, str, Sequence[Highlight], Sequence[Badge]]
 
 
 def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
@@ -202,8 +207,7 @@ def _paint(
             highlights = tuple(
                 gen_highlights(node, pre=pre, icon=icon, name=name, ignored=ignored)
             )
-            render = Render(line=line, badges=badges, highlights=highlights)
-            return render
+            return line, highlights, badges
 
     return show
 
@@ -232,9 +236,7 @@ def render(
     comp = _gen_comp(settings.view.sort_by)
     keep_open = {node.path}
 
-    def render(
-        node: Node, *, depth: int, cleared: bool
-    ) -> Iterator[Tuple[Node, Render]]:
+    def render(node: Node, *, depth: int, cleared: bool) -> Iterator[NRender]:
         clear = (
             cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
         )
@@ -242,22 +244,31 @@ def render(
 
         if rend:
 
-            def gen_children() -> Iterator[Tuple[Node, Render]]:
+            def gen_children() -> Iterator[NRender]:
                 for child in sorted(node.children.values(), key=comp):
                     yield from render(child, depth=depth + 1, cleared=clear)
 
             children = tuple(gen_children())
             if clear or children or node.path in keep_open:
-                yield node, rend
+                yield (node, *rend)
             yield from iter(children)
 
-    _lookup, _rendered = zip(*render(node, depth=0, cleared=False))
-    rendered = cast(Sequence[Render], _rendered)
-    lookup = cast(Sequence[Node], _lookup)
+    rendered = render(node, depth=0, cleared=False)
+    _nodes, _lines, _highlights, _badges = zip(*rendered)
+    nodes, lines, highlights, badges = (
+        cast(Sequence[Node], _nodes),
+        cast(Sequence[str], _lines),
+        cast(Sequence[Sequence[Highlight]], _highlights),
+        cast(Sequence[Sequence[Badge]], _badges),
+    )
+    hashed = tuple(map(hash, rendered))
+    path_row_lookup = {node.path: idx for idx, node in enumerate(nodes)}
     derived = Derived(
-        rendered=rendered,
-        hashed=tuple(map(hash, rendered)),
-        node_row_lookup=lookup,
-        path_row_lookup={node.path: idx for idx, node in enumerate(lookup)},
+        lines=lines,
+        highlights=highlights,
+        badges=badges,
+        hashed=hashed,
+        node_row_lookup=nodes,
+        path_row_lookup=path_row_lookup,
     )
     return derived

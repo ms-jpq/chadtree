@@ -101,15 +101,11 @@ class Highlight:
 
 
 @dataclass(frozen=True)
-class Render:
-    badges: Sequence[Badge]
-    highlights: Sequence[Highlight]
-    line: str
-
-
-@dataclass(frozen=True)
 class Derived:
-    rendered: Sequence[Render]
+    lines: Sequence[str]
+    highlights: Sequence[Sequence[Highlight]]
+    badges: Sequence[Sequence[Badge]]
+
     hashed: Sequence[int]
     node_row_lookup: Sequence[Node]
     path_row_lookup: Mapping[str, int]
