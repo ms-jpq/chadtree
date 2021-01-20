@@ -98,6 +98,24 @@ theme:
   icon_glyph_set: devicons
   icon_colour_set: github
   text_colour_set: env
+  discrete_colour_map:
+    Black: Black
+    Red: Red
+    Green: Green
+    Yellow: Yellow
+    Blue: Blue
+    Magenta: Magenta
+    Cyan: Cyan
+    White: White
+
+    BrightBlack: BrightBlack
+    BrightRed: BrightRed
+    BrightGreen: BrightGreen
+    BrightYellow: BrightYellow
+    BrightBlue: BrightBlue
+    BrightMagenta: BrightMagenta
+    BrightCyan: BrightCyan
+    BrightWhite: BrightWhite
 view:
   open_direction: left
   sort_by:

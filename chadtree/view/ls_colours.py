@@ -233,7 +233,7 @@ def _parse_styling(codes: str) -> _Styling:
     return styling
 
 
-def _parseHLGroup(styling: _Styling) -> HLgroup:
+def _parseHLGroup(styling: _Styling, discrete_colours: Mapping[str, str]) -> HLgroup:
     fg, bg = styling.foreground, styling.background
     name = f"{FM_HL_PREFIX}_ls_{uuid4().hex}"
     cterm = {
@@ -241,10 +241,18 @@ def _parseHLGroup(styling: _Styling) -> HLgroup:
         for style in (_HL_STYLE_TABLE.get(style) for style in styling.styles)
         if style
     }
-    ctermfg = fg.value if isinstance(fg, _AnsiColour) else None
-    ctermbg = bg.value if isinstance(bg, _AnsiColour) else None
-    guifg = rgb_to_hex(fg.r, fg.g, fg.b) if isinstance(fg, _Colour) else None
-    guibg = rgb_to_hex(bg.r, bg.g, bg.b) if isinstance(bg, _Colour) else None
+    ctermfg = fg.value - 1 if isinstance(fg, _AnsiColour) else None
+    ctermbg = bg.value - 1 if isinstance(bg, _AnsiColour) else None
+    guifg = (
+        rgb_to_hex(fg.r, fg.g, fg.b)
+        if isinstance(fg, _Colour)
+        else (discrete_colours.get(fg.name) if isinstance(fg, _AnsiColour) else None)
+    )
+    guibg = (
+        rgb_to_hex(bg.r, bg.g, bg.b)
+        if isinstance(bg, _Colour)
+        else (discrete_colours.get(bg.name) if isinstance(bg, _AnsiColour) else None)
+    )
     group = HLgroup(
         name=name,
         cterm=cterm,
@@ -256,9 +264,9 @@ def _parseHLGroup(styling: _Styling) -> HLgroup:
     return group
 
 
-def parse_lsc(ls_colours: str) -> LSC:
+def parse_lsc(ls_colours: str, discrete_colours: Mapping[str, str]) -> LSC:
     hl_lookup = {
-        key: _parseHLGroup(_parse_styling(val))
+        key: _parseHLGroup(_parse_styling(val), discrete_colours=discrete_colours)
         for key, _, val in (
             segment.partition("=") for segment in ls_colours.strip(":").split(":")
         )

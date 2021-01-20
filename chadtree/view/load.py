@@ -30,6 +30,7 @@ def load_theme(
     nvim: Nvim,
     artifact: Artifact,
     particular_mappings: HLGroups,
+    discrete_colours: Mapping[str, str],
     icon_set: IconGlyphSetEnum,
     icon_colour_set: IconColourSetEnum,
     text_colour_set: Union[LSColoursEnum, TextColourSetEnum],
@@ -61,7 +62,7 @@ def load_theme(
         else:
             never(text_colour_set)
 
-        lsc = parse_lsc(_lsc)
+        lsc = parse_lsc(_lsc, discrete_colours=discrete_colours)
         mode_pre = lsc.mode_pre
         mode_post = lsc.mode_post
         ext_exact = lsc.exts

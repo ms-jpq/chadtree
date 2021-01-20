@@ -47,7 +47,7 @@ class _UserTheme:
     icon_glyph_set: IconGlyphSetEnum
     icon_colour_set: IconColourSetEnum
     text_colour_set: Union[LSColoursEnum, TextColourSetEnum]
-
+    discrete_colour_map: Mapping[str, str]
 
 @dataclass(frozen=True)
 class _UserView:
@@ -85,6 +85,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         nvim,
         artifact=artifacts,
         particular_mappings=theme.highlights,
+        discrete_colours=theme.discrete_colour_map,
         icon_set=theme.icon_glyph_set,
         icon_colour_set=theme.icon_colour_set,
         text_colour_set=theme.text_colour_set,
