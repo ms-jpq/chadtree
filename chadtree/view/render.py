@@ -5,7 +5,6 @@ from os import linesep
 from os.path import sep
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
-from pynvim_pp.highlight import highlight
 from std2.types import never
 
 from ..fs.cartographer import is_dir
@@ -21,8 +20,8 @@ class _CompVals(IntEnum):
     FILE = auto()
 
 
-Render = Tuple[str, Sequence[Highlight], Sequence[Badge]]
-NRender = Tuple[Node, str, Sequence[Highlight], Sequence[Badge]]
+_Render = Tuple[str, Sequence[Highlight], Sequence[Badge]]
+_NRender = Tuple[Node, str, Sequence[Highlight], Sequence[Badge]]
 
 
 def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
@@ -67,7 +66,7 @@ def _paint(
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[str],
-) -> Callable[[Node, int], Optional[Render]]:
+) -> Callable[[Node, int], Optional[_Render]]:
     icons = settings.view.icons
     context = settings.view.hl_context
     (
@@ -189,7 +188,7 @@ def _paint(
             hl = Highlight(group=text_group, begin=text_begin, end=text_end)
             yield hl
 
-    def show(node: Node, depth: int) -> Optional[Render]:
+    def show(node: Node, depth: int) -> Optional[_Render]:
         vc_ignored = _vc_ignored(node, vc=vc)
         user_ignored = _user_ignored(node, ignores=settings.ignores)
         ignored = vc_ignored or user_ignored
@@ -236,7 +235,7 @@ def render(
     comp = _gen_comp(settings.view.sort_by)
     keep_open = {node.path}
 
-    def render(node: Node, *, depth: int, cleared: bool) -> Iterator[NRender]:
+    def render(node: Node, *, depth: int, cleared: bool) -> Iterator[_NRender]:
         clear = (
             cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
         )
@@ -244,7 +243,7 @@ def render(
 
         if rend:
 
-            def gen_children() -> Iterator[NRender]:
+            def gen_children() -> Iterator[_NRender]:
                 for child in sorted(node.children.values(), key=comp):
                     yield from render(child, depth=depth + 1, cleared=clear)
 
@@ -261,7 +260,7 @@ def render(
         cast(Sequence[Sequence[Highlight]], _highlights),
         cast(Sequence[Sequence[Badge]], _badges),
     )
-    hashed = tuple(map(hash, rendered))
+    hashed = tuple(map(hash, zip(lines, highlights, badges)))
     path_row_lookup = {node.path: idx for idx, node in enumerate(nodes)}
     derived = Derived(
         lines=lines,
