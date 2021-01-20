@@ -89,18 +89,20 @@ LS_COLOR = str
 
 @dataclass(frozen=True)
 class LSColourSet:
-    dark_256: LS_COLOR
-    ansi_dark: LS_COLOR
-    ansi_light: LS_COLOR
-    ansi_universal: LS_COLOR
+    solarized_dark_256: LS_COLOR
+    solarized_dark: LS_COLOR
+    solarized_light: LS_COLOR
+    solarized_universal: LS_COLOR
+    nord: LS_COLOR
 
 
 class LSColoursEnum(Enum):
     env = auto()
-    dark_256 = auto()
-    ansi_dark = auto()
-    ansi_light = auto()
-    ansi_universal = auto()
+    solarized_dark_256 = auto()
+    solarized_dark = auto()
+    solarized_light = auto()
+    solarized_universal = auto()
+    nord = auto()
 
 
 """

@@ -46,19 +46,21 @@ def load_theme(
         never(icon_set)
 
     if text_colour_set is LSColoursEnum.env and "LS_COLORS" not in environ:
-        text_colour_set = LSColoursEnum.dark_256
+        text_colour_set = LSColoursEnum.solarized_dark_256
 
     if isinstance(text_colour_set, LSColoursEnum):
         if text_colour_set is LSColoursEnum.env:
             _lsc = environ.get("LS_COLORS", "")
-        elif text_colour_set is LSColoursEnum.dark_256:
-            _lsc = artifact.ls_colours.dark_256
-        elif text_colour_set is LSColoursEnum.ansi_light:
-            _lsc = artifact.ls_colours.ansi_light
-        elif text_colour_set is LSColoursEnum.ansi_dark:
-            _lsc = artifact.ls_colours.ansi_dark
-        elif text_colour_set is LSColoursEnum.ansi_universal:
-            _lsc = artifact.ls_colours.ansi_universal
+        elif text_colour_set is LSColoursEnum.solarized_dark_256:
+            _lsc = artifact.ls_colours.solarized_dark_256
+        elif text_colour_set is LSColoursEnum.solarized_light:
+            _lsc = artifact.ls_colours.solarized_light
+        elif text_colour_set is LSColoursEnum.solarized_dark:
+            _lsc = artifact.ls_colours.solarized_dark
+        elif text_colour_set is LSColoursEnum.solarized_universal:
+            _lsc = artifact.ls_colours.solarized_universal
+        elif text_colour_set is LSColoursEnum.nord:
+            _lsc = artifact.ls_colours.nord
         else:
             never(text_colour_set)
 
