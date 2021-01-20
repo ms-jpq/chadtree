@@ -39,7 +39,8 @@ local nerdtree_syntax = export_colours()
 local exports = {
   devicons = devicons,
   emoji = emoji,
-  nerdtree_syntax = nerdtree_syntax
+  nerdtree_syntax_light = nerdtree_syntax,
+  nerdtree_syntax_dark = nerdtree_syntax
 }
 local json = vim.fn.json_encode(exports)
 

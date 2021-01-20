@@ -93,11 +93,13 @@ class TextColours:
 
 @dataclass(frozen=True)
 class TextColourSet:
-    nerdtree_syntax: TextColours
+    nerdtree_syntax_light: TextColours
+    nerdtree_syntax_dark: TextColours
 
 
 class TextColourSetEnum(Enum):
-    nerdtree_syntax = auto()
+    nerdtree_syntax_light = auto()
+    nerdtree_syntax_dark = auto()
 
 
 """
@@ -117,7 +119,8 @@ class LSColourSet:
 
 
 class LSColoursEnum(Enum):
-    ls_colour_auto = auto()
+    none = auto()
+    env = auto()
     dark_256 = auto()
     ansi_dark = auto()
     ansi_light = auto()

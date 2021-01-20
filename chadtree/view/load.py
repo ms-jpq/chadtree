@@ -1,22 +1,23 @@
 from itertools import chain
-from json import loads
 from os import environ
-from typing import Mapping, TypeVar
+from typing import Mapping, Tuple, TypeVar
 
+from chad_types import (
+    Artifact,
+    Icons,
+    IconColourSetEnum,
+    IconSetEnum,
+    LSColoursEnum,
+    TextColourSetEnum,
+)
 from pynvim.api.nvim import Nvim
 from pynvim_pp.highlight import HLgroup
-from std2.pickle import decode
 from std2.types import never
 
-from ..consts import (
-    FM_HL_PREFIX,
-    GITHUB_COLOURS_JSON,
-    NERD_COLOURS_DARK_JSON,
-    NERD_COLOURS_LIGHT_JSON,
-)
+from ..consts import FM_HL_PREFIX
 from .highlight import gen_hl
 from .ls_colours import parse_lsc
-from .types import ColourChoice, GithubColours, HLcontext, HLGroups, NerdColours
+from .types import HLcontext, HLGroups
 
 T = TypeVar("T")
 
@@ -27,37 +28,60 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
 
 def load_view(
     nvim: Nvim,
-    colours: ColourChoice,
+    artifact: Artifact,
     particular_mappings: HLGroups,
-) -> HLcontext:
-    ls_colours = environ.get("LS_COLORS", "")
-    if not ls_colours:
-        colours = ColourChoice.nerd_tree
+    ls_colours: LSColoursEnum,
+    icon_set: IconSetEnum,
+    icon_colour_set: IconColourSetEnum,
+    text_colour_set: TextColourSetEnum,
+) -> Tuple[Icons, HLcontext]:
 
-    github_colours: GithubColours = decode(
-        GithubColours, loads(GITHUB_COLOURS_JSON.read_text())
-    )
+    if icon_set is IconSetEnum.ascii:
+        icons = artifact.icons.ascii
+    elif icon_set is IconSetEnum.devicons:
+        icons = artifact.icons.devicons
+    elif icon_set is IconSetEnum.emoji:
+        icons = artifact.icons.emoji
+    else:
+        never(icon_set)
 
-    if colours is ColourChoice.ls_colours:
-        lsc = parse_lsc(ls_colours)
+    if ls_colours is LSColoursEnum.env:
+        _lsc = environ.get("LS_COLORS", "")
+    elif ls_colours is LSColoursEnum.dark_256:
+        _lsc = artifact.ls_colours.dark_256
+    elif ls_colours is LSColoursEnum.ansi_light:
+        _lsc = artifact.ls_colours.ansi_light
+    elif ls_colours is LSColoursEnum.ansi_dark:
+        _lsc = artifact.ls_colours.ansi_dark
+    elif ls_colours is LSColoursEnum.ansi_universal:
+        _lsc = artifact.ls_colours.ansi_universal
+    elif ls_colours is LSColoursEnum.none:
+        _lsc = ""
+    else:
+        never(ls_colours)
+
+    if _lsc:
+        lsc = parse_lsc(_lsc)
         mode_pre = lsc.mode_pre
         mode_post = lsc.mode_post
         ext_exact = lsc.exts
         name_exact: Mapping[str, HLgroup] = {}
         name_glob = lsc.name_glob
-    elif colours is ColourChoice.nerd_tree:
-        light_theme = nvim.options["background"] == "light"
-        target = NERD_COLOURS_LIGHT_JSON if light_theme else NERD_COLOURS_DARK_JSON
-        nerd_colours: NerdColours = decode(NerdColours, loads(target.read_text()))
+    else:
+        if text_colour_set is TextColourSetEnum.nerdtree_syntax_light:
+            text_colour = artifact.text_colours.nerdtree_syntax_light
+        elif text_colour_set is TextColourSetEnum.nerdtree_syntax_dark:
+            text_colour = artifact.text_colours.nerdtree_syntax_dark
+        else:
+            never(text_colour_set)
+
         mode_pre = {}
         mode_post = {}
-        ext_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.ext_exact)
-        name_exact = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_exact)
-        name_glob = gen_hl(FM_HL_PREFIX, mapping=nerd_colours.name_glob)
-    else:
-        never(colours)
+        ext_exact = gen_hl(FM_HL_PREFIX, mapping=text_colour.ext_exact)
+        name_exact = gen_hl(FM_HL_PREFIX, mapping=text_colour.name_exact)
+        name_glob = gen_hl(FM_HL_PREFIX, mapping=text_colour.name_glob)
 
-    icon_exts = gen_hl(FM_HL_PREFIX, mapping=github_colours)
+    icon_exts = gen_hl(FM_HL_PREFIX, mapping=artifact.icon_colours.github)
 
     groups = tuple(
         chain(
@@ -80,4 +104,5 @@ def load_view(
         name_glob=_trans(name_glob),
         particular_mappings=particular_mappings,
     )
-    return context
+
+    return icons, context

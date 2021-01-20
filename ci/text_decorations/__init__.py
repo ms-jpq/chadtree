@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Mapping, Tuple
 
 from chad_types import ASSETS, Hex, Icons, IconSet, TextColours, TextColourSet
+from std2.coloursys import hex_inverse
 from std2.pickle import decode
 from std2.tree import merge
 from yaml import safe_load
@@ -25,6 +26,10 @@ def _process_hexcode(colours: Mapping[str, str]) -> Mapping[str, Hex]:
     return {k: f"#{v}" for k, v in colours.items()}
 
 
+def _process_inverse(colours: Mapping[str, str]) -> Mapping[str, str]:
+    return {k: hex_inverse(v) for k, v in colours.items()}
+
+
 def _process_icons(icons: Icons) -> Icons:
     return Icons(
         default_icon=icons.default_icon,
@@ -45,6 +50,14 @@ def _process_colours(colours: TextColours) -> TextColours:
     )
 
 
+def _make_lightmode(colours: TextColours) -> TextColours:
+    return TextColours(
+        ext_exact=_process_inverse(colours.ext_exact),
+        name_exact=_process_inverse(colours.name_exact),
+        name_glob=_process_inverse(colours.name_glob),
+    )
+
+
 def load_text_decors() -> Tuple[IconSet, TextColourSet]:
     yaml = safe_load(_ICON_BASE.read_bytes())
     json = loads(docker_run(_DOCKERFILE))
@@ -57,6 +70,7 @@ def load_text_decors() -> Tuple[IconSet, TextColourSet]:
     )
     colour_spec: TextColourSet = decode(TextColourSet, data, strict=False)
     colour_set = TextColourSet(
-        nerdtree_syntax=_process_colours(colour_spec.nerdtree_syntax)
+        nerdtree_syntax_light=_make_lightmode(_process_colours(colour_spec.nerdtree_syntax_light)),
+        nerdtree_syntax_dark=_process_colours(colour_spec.nerdtree_syntax_dark),
     )
     return icon_set, colour_set

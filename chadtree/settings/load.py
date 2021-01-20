@@ -83,12 +83,14 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
     options, view, theme = config.options, config.view, config.theme
 
-    icons = artifacts.icon_colours.github
-
-    hl_context = load_view(
+    icons, hl_context = load_view(
         nvim,
-        colours=view.colour_set,
+        artifact=artifacts,
         particular_mappings=view.highlights,
+        ls_colours=theme.ls_colours,
+        icon_set=theme.icon_set,
+        icon_colour_set=theme.icon_colour_set,
+        text_colour_set=theme.text_colour_set,
     )
 
     view_opts = ViewOptions(
