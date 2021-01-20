@@ -63,31 +63,36 @@ if command == "deps":
             print("You can now use :CHADopen", file=stderr)
 
 elif command == "run":
+    msg = """
+    Please update dependencies using :CHADdeps
+    -
+    -
+    Dependencies will be installed privately inside `chadtree/.vars`
+    `rm -rf chadtree/` will cleanly remove everything
+    """
+
     try:
         import pynvim
         import pynvim_pp
         import std2
         import yaml
     except ImportError:
-        msg = """
-        Please install dependencies using :CHADdeps
-        -
-        -
-        Dependencies will be installed privately inside `chadtree/.vars`
-        `rm -rf chadtree/` will cleanly remove everything
-        """
         print(dedent(msg), end="", file=stderr)
         exit(1)
 
     else:
-        from pynvim import attach
-        from pynvim_pp.client import run_client
+        if std2.__version__ != (0, 1, 10) or pynvim_pp.__version__ != (0, 1, 10):
+            print(dedent(msg), end="", file=stderr)
+            exit(1)
+        else:
+            from pynvim import attach
+            from pynvim_pp.client import run_client
 
-        from .client import ChadClient
+            from .client import ChadClient
 
-        nvim = attach("socket", path=args.socket)
-        code = run_client(nvim, client=ChadClient())
-        exit(code)
+            nvim = attach("socket", path=args.socket)
+            code = run_client(nvim, client=ChadClient())
+            exit(code)
 
 else:
     assert False
