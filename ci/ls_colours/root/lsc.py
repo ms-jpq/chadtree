@@ -5,9 +5,9 @@ from json import dump
 from pathlib import Path
 from subprocess import check_output
 from sys import stdout
-from typing import Mapping
+from typing import Mapping, cast
 
-_LSC_SH = Path(__file__).resolve() / "lsc.sh"
+_LSC_SH = Path(__file__).parent.resolve() / "lsc.sh"
 _PARSING = {
     "dircolors.256dark": "dark_256",
     "dircolors.ansi-dark": "ansi_dark",
@@ -24,14 +24,16 @@ def _parse_args() -> Namespace:
 
 def _load_lsc(top_level: Path) -> Mapping[str, str]:
     return {
-        dest: check_output((_LSC_SH, str(top_level / file_name)))
+        dest: check_output((str(_LSC_SH), file_name), text=True, cwd=top_level)
         for file_name, dest in _PARSING.items()
     }
 
 
 def main() -> None:
     args = _parse_args()
-    lsc = _load_lsc(args.top_level)
-    dump(stdout, lsc)
+    top_level = cast(Path, args.top_level).resolve()
+    lsc = _load_lsc(top_level)
+    dump(lsc, stdout, ensure_ascii=False, check_circular=False)
+
 
 main()

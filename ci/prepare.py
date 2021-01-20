@@ -3,8 +3,11 @@
 from datetime import datetime
 from os import environ
 from os.path import isdir
+from pathlib import Path
 from subprocess import check_call, check_output, run
 from typing import Iterator
+
+_TOP_LV = Path(__file__).resolve().parent.parent
 
 
 def _get_branch() -> str:
@@ -24,13 +27,13 @@ def _git_clone(name: str) -> None:
         check_call(("git", "config", "user.name", username), cwd=name)
 
 
-def _build(cwd: str) -> None:
-    check_call(("python3", "ci"), cwd=cwd)
+def _build() -> None:
+    check_call(("python3", "-m", "ci"), cwd=_TOP_LV)
 
 
 def _git_alert(cwd: str) -> None:
     prefix = "update-icons"
-    remote_brs = check_output(("git", "branch", "--remotes"), text=True)
+    remote_brs = check_output(("git", "branch", "--remotes"), text=True, cwd=cwd)
 
     def cont() -> Iterator[str]:
         for br in remote_brs.splitlines():
@@ -43,7 +46,7 @@ def _git_alert(cwd: str) -> None:
     refs = tuple(cont())
 
     if refs:
-        check_call(("git", "push", "--delete", "origin", *refs))
+        check_call(("git", "push", "--delete", "origin", *refs), cwd=cwd)
 
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
@@ -58,7 +61,7 @@ def _git_alert(cwd: str) -> None:
 def main() -> None:
     cwd = "temp"
     _git_clone(cwd)
-    _build(cwd)
+    _build()
     _git_alert(cwd)
 
 
