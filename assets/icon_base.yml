@@ -1,0 +1,29 @@
+---
+ascii:
+  default_icon: ●
+  folder:
+    closed: ▶
+    open: ▼
+  link:
+    broken: -/->
+    normal: ->
+  name_exact: {}
+  name_glob: {}
+  status:
+    active: '>'
+    inactive: ' '
+    not_selected: ' '
+    selected: '*'
+  ext_exact: {}
+
+devicons: &devicons
+  link:
+    broken: 
+    normal: 
+  status:
+    active: ▶
+    inactive: ' '
+    not_selected: ' '
+    selected: ✸
+
+emoji: *devicons
