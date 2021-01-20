@@ -1,1 +1,1 @@
-lua require('chad').init()
+lua require 'chad'

@@ -14,10 +14,12 @@ from std2.urllib import urlopen
 from yaml import safe_load
 
 _TOP_LV = Path(__file__).resolve().parent.parent
+_CI = _TOP_LV / "ci"
 TEMP = _TOP_LV / "temp"
 ASSETS = _TOP_LV / "assets"
 ARTIFACTS = _TOP_LV / "artifacts"
-DOCKER_PATH = _TOP_LV / "ci" / "docker"
+DOCKER_PATH = _CI / "docker"
+LSC_EVAL = _CI / "lsc.sh"
 
 
 LANG_COLOURS = """
@@ -195,6 +197,10 @@ def _github_colours() -> None:
     _spit_json(LANG_COLOURS_JSON, lookup)
 
 
+def _ls_colours() -> None:
+    pass
+
+
 def _git_alert() -> None:
     prefix = "update-icons"
     remote_brs = check_output(("git", "branch", "--remotes"), text=True)
@@ -229,6 +235,7 @@ def _git_alert() -> None:
 def main() -> None:
     _devicons()
     _github_colours()
+    _ls_colours()
     # _git_alert()
 
 

@@ -47,29 +47,23 @@ local load_viml = function(src)
   end
 end
 
-local init = function()
-  local v1 = {
-    "vim-devicons/plugin/webdevicons.vim"
-  }
-  local v2 = {
-    "vim-emoji-icon-theme/plugin/vim-emoji-icon-theme.vim"
-  }
-  local v3 = {
-    "vim-nerdtree-syntax-highlight/after/syntax/nerdtree.vim"
-  }
-
-  load_viml(v1)
-  export_icons("unicode_icons.json")
-
-  load_viml(v2)
-  export_icons("emoji_icons.json")
-
-  load_viml(v3)
-  export_colours("colours.json")
-
-  os.exit(0)
-end
-
-return {
-  init = init
+local v1 = {
+  "vim-devicons/plugin/webdevicons.vim"
 }
+local v2 = {
+  "vim-emoji-icon-theme/plugin/vim-emoji-icon-theme.vim"
+}
+local v3 = {
+  "vim-nerdtree-syntax-highlight/after/syntax/nerdtree.vim"
+}
+
+load_viml(v1)
+export_icons("unicode_icons.json")
+
+load_viml(v2)
+export_icons("emoji_icons.json")
+
+load_viml(v3)
+export_colours("colours.json")
+
+os.exit(0)
