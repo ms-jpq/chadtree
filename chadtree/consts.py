@@ -3,7 +3,6 @@ from pathlib import Path
 WALK_PARALLELISM_FACTOR = 100
 FOLDER_MODE = 0o755
 FILE_MODE = 0o644
-WARN_DURATION = 0.1
 
 _TOP_LEVEL = Path(__file__).parent.parent
 _CONFIG = _TOP_LEVEL / "config"

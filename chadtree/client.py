@@ -7,16 +7,14 @@ from pynvim import Nvim
 from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
-from pynvim_pp.lib import threadsafe_call, write
+from pynvim_pp.lib import threadsafe_call
 from pynvim_pp.logging import log
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 from std2.pickle import DecodeError
 from std2.sched import ticker
-from std2.timeit import timeit
 from std2.types import AnyFun
 
 from ._registry import ____
-from .consts import WARN_DURATION
 from .registry import autocmd, enqueue_event, event_queue, pool, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
@@ -85,10 +83,8 @@ class ChadClient(Client):
                 if stage:
                     self._state = stage.state
                     mgr = suppress(NvimError) if stage.silent else nullcontext()
-                    with mgr, timeit() as t:
+                    with mgr:
                         redraw(nvim, state=self._state, focus=stage.focus)
-                    # duration = t()
-                    # write(nvim, round(duration, 3))
 
             try:
                 threadsafe_call(nvim, cont)
