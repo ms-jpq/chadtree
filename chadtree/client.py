@@ -2,7 +2,7 @@ from asyncio.events import AbstractEventLoop
 from contextlib import nullcontext, suppress
 from sys import stderr
 from typing import Any, MutableMapping, Optional, cast
-
+from os import linesep
 from pynvim import Nvim
 from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
@@ -55,7 +55,9 @@ class ChadClient(Client):
         try:
             threadsafe_call(nvim, cont)
         except DecodeError as e:
-            print(e, file=stderr)
+            msg1 = "Some options may hanve changed."
+            msg2 = "See help doc on Github under [docs/CONFIGURATION.md]"
+            print(e, msg1, msg2, sep=linesep, file=stderr)
             return 1
         except Exception as e:
             log.exception("%s", e)

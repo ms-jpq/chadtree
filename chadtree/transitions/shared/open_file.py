@@ -1,10 +1,20 @@
 from contextlib import nullcontext
+from itertools import chain
 from mimetypes import guess_type
 from os.path import basename, splitext
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.api import buf_set_option, cur_buf, cur_win, set_cur_win, win_set_buf
+from pynvim.api.window import Window
+from pynvim_pp.api import (
+    buf_get_option,
+    buf_set_option,
+    cur_buf,
+    cur_win,
+    set_cur_win,
+    win_get_buf,
+    win_set_buf,
+)
 from pynvim_pp.hold import hold_win_pos
 
 from ...settings.localization import LANG
@@ -21,6 +31,12 @@ from .wm import (
 )
 
 
+def _win_nochange(nvim: Nvim, win: Window) -> bool:
+    buf = win_get_buf(nvim, win=win)
+    modified: bool = buf_get_option(nvim, buf=buf, key="modified")
+    return not modified
+
+
 def _show_file(
     nvim: Nvim, *, state: State, settings: Settings, click_type: ClickType
 ) -> None:
@@ -34,14 +50,18 @@ def _show_file(
         with mgr:
             non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
             buf = next(find_buffers_with_file(nvim, file=path), None)
-            win = (
-                next(find_window_with_file_in_tab(nvim, file=path), None)
-                or next(iter(non_fm_windows), None)
-                or new_window(
-                    nvim,
-                    open_left=not settings.open_left,
-                    width=nvim.options["columns"] - state.width - 1,
-                )
+            win = next(
+                chain(
+                    find_window_with_file_in_tab(nvim, file=path),
+                    (win for win in non_fm_windows if _win_nochange(nvim, win=win)),
+                ),
+                None,
+            ) or new_window(
+                nvim,
+                open_left=not settings.open_left,
+                width=None
+                if len(non_fm_windows)
+                else nvim.options["columns"] - state.width - 1,
             )
 
             set_cur_win(nvim, win=win)

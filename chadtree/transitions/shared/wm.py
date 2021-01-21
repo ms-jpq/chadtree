@@ -1,4 +1,4 @@
-from typing import AbstractSet, Iterator, Tuple
+from typing import AbstractSet, Iterator, Optional, Tuple
 
 from pynvim.api import Buffer, Nvim, Window
 from pynvim_pp.api import (
@@ -123,7 +123,7 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
     return buf
 
 
-def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
+def new_window(nvim: Nvim, *, open_left: bool, width: Optional[int]) -> Window:
     split_r = nvim.options["splitright"]
 
     wins = tuple(find_windows_in_tab(nvim, no_secondary=False))
@@ -132,7 +132,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
 
     nvim.options["splitright"] = direction
     set_cur_win(nvim, win=focus_win)
-    nvim.command(f"{width}vnew")
+    nvim.command(f"{width}vnew" if width else "vnew")
     nvim.options["splitright"] = split_r
 
     win = cur_win(nvim)
