@@ -18,6 +18,8 @@ from ..consts import (
     FEATURES_URI,
     KEYBIND_MD,
     KEYBIND_URI,
+    MIGRATION_MD,
+    MIGRATION_URI,
     README_MD,
     README_URI,
     THEME_MD,
@@ -33,6 +35,7 @@ class _Topics(Enum):
     keybind = auto()
     config = auto()
     theme = auto()
+    migration = auto()
 
 
 @dataclass(frozen=True)
@@ -52,6 +55,8 @@ def _directory(topic: Optional[_Topics]) -> Tuple[Path, str]:
         return CONFIGURATION_MD, CONFIGURATION_URI
     elif topic is _Topics.theme:
         return THEME_MD, THEME_URI
+    elif topic is _Topics.migration:
+        return MIGRATION_MD, MIGRATION_URI
     else:
         never(topic)
 

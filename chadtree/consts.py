@@ -32,7 +32,6 @@ Docs
 _DOCS_URI_BASE = "https://github.com/ms-jpq/chadtree/blob/future2/docs"
 _DOCS_DIR = TOP_LEVEL / "docs"
 
-MIGRATION_URI = f"{_DOCS_URI_BASE}/MIGRATION.md"
 
 _README_md = "README.md"
 README_MD = _DOCS_DIR / _README_md
@@ -54,6 +53,9 @@ _THEME_md = "THEME.md"
 THEME_MD = _DOCS_DIR / _THEME_md
 THEME_URI = f"{_DOCS_URI_BASE}/{_THEME_md}"
 
+_MIGRATION_md = "MIGRATION.md"
+MIGRATION_MD = _DOCS_DIR / _MIGRATION_md
+MIGRATION_URI = f"{_DOCS_URI_BASE}/${_MIGRATION_md}"
 
 """
 Sessions

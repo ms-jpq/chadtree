@@ -16,6 +16,8 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 
 - [:CHADhelp theme](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md)
 
+- [:CHADhelp migration](https://github.com/ms-jpq/chadtree/tree/future2/docs/MIGRATION.md)
+
 ---
 
 ## Commands
