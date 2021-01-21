@@ -74,8 +74,8 @@ class ChadClient(Client):
         pool.submit(sched)
 
         while True:
-            msg1: RpcMsg = event_queue.get()
-            name, args = msg1
+            msg: RpcMsg = event_queue.get()
+            name, args = msg
             handler = self._handlers.get(name, nil_handler(name))
 
             def cont() -> None:
