@@ -10,6 +10,12 @@ I am very sorry about this, but I am doing this in order to support more awesome
 
 **Windows Users, please use `legacy` branch for now, I [need help](https://github.com/ms-jpq/chadtree/issues/102) getting this to run under windows**
 
+Run the following once after updating your git repo to latest
+
+```vim
+:UpdateRemotePlugins
+```
+
 Change your extension manager to use the following:
 
 ```vim
