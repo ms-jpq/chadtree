@@ -1,0 +1,5 @@
+ignored:
+  # Allow Latest Dockerfile
+  - DL3007
+  # Allow Unpinned Apt Packages
+  - DL3008

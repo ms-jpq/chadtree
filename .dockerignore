@@ -1,3 +1,5 @@
-.venv/
-__pycache__
-preview/
+/.git/
+/.venv/
+__pycache__/
+/docs/img/
+/.vars/

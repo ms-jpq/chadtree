@@ -1,3 +1,5 @@
 /.venv/
-__pycache__
-temp/
+__pycache__/
+/.vars/
+/temp/
+/.vscode/

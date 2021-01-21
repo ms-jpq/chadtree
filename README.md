@@ -4,15 +4,17 @@ File Manager for Neovim, Better than NERDTree.
 
 ## Features Illustrated
 
-**See full list of screen captures [here](https://github.com/ms-jpq/chadtree/tree/chad/preview)**
+**See full list of screen captures [here](https://github.com/ms-jpq/chadtree/tree/future2/docs/FEATURES.md)**
 
 ### I like speed
 
-- Incremental file system scan
+- **Parallel** Filesystem Scan
 
-- None blocking
+- **[React Like](https://reactjs.org/docs/reconciliation.html)** Reconciliating Difference Minimizing Rendering engine
 
-- Literally every FS call is async.
+- **Never** blocks
+
+_You can read more about my [performance optimization](https://github.com/ms-jpq/chadtree/tree/future2/docs/ARCHITECTURE.md) here._
 
 ### I like power
 
@@ -22,7 +24,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Quickfix integration
 
-![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif)
+![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/visual_select.gif)
 
 ### I like 21st century
 
@@ -38,19 +40,15 @@ File Manager for Neovim, Better than NERDTree.
 
 - Correct! handling of symlinks
 
-- Mimetype warning (so you don't accidently open an image)
-
-![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/filtering.gif)
+![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/filtering.gif)
 
 ### I like version control
 
 - Asynchronous parse git status (untracked, modified, staged)
 
-- Full support for git ignore, toggle show / hide
+- Full support for git submodules
 
-- Full support for globbing ignored files
-
-![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/git.gif)
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/git_showcase.gif)
 
 ### I like colours
 
@@ -60,31 +58,49 @@ File Manager for Neovim, Better than NERDTree.
 
 - Full icon support from importing [vim-devicon](https://github.com/ryanoasis/vim-devicons)
 
-![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/ls_colours.png)
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/ls_colours.png)
 
-![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/github_colours.png)
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/github_colours.png)
+
+### I like refinement
+
+- Maintain cursor position on relevant files even when during movements.
+
+- Maintain selection when copying, moving files
+
+- Mimetype warning (so you don't accidently open an image)
+
+- Vaildating config parser **(notice, I added an extra `"dog"` param)**
+
+![mime warn.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/mimetype.png)
+
+![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
+
+### I like documentation
+
+- Build-in help command in a floating window!
+
+- Over 1000 lines of meticulous docs covering every option / function!
+
+**Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)**
+
+**Use `:CHADhelp --web` to open documentation in your browser!** (If you have one installed)
 
 ## Install
 
-Requires pyvim (as all python plugins do)
-
-```sh
-pip3 install pynvim
-```
+**Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`
 
 Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
 
-```VimL
-Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': ':UpdateRemotePlugins'}
+```vim
+Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 ```
 
-**Minimum version**: `python`: 3.7, `nvim`: `0.4.3`
+You will have to run `:CHADdeps` when installing / updating. This will install CHADTree's depdencies locally inside `chadtree/.vars/runtime`.
 
-## Documentation
+doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
 
-**important:** if you get a missing function error or see a new feature here but can't use yet, it means I added a feature and you need to run `:UpdateRemotePlugins` to see the new function.
-
-This is a Neovim limitation.
+## Usage
 
 To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
 
@@ -92,79 +108,9 @@ To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
 nnoremap <leader>v <cmd>CHADopen<cr>
 ```
 
-Use `:CHADopen --nofocus` to open but not focus on the sidebar.
+To see a list of hot keys:
 
-Check out [config.json](https://github.com/ms-jpq/chadtree/blob/chad/config/config.json) before you proceed for an overview of options.
-
-Set a dictionary with same keys to `g:chadtree_settings` to overwrite any options. You dont need to provide every key, just the ones you want to overwrite.
-
-### Keybindings
-
-`functions` only work under the CHADTree buffer
-
-| functions              | usage                                                                                                | default key                  |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------- |
-| quit                   | close chad window                                                                                    | `q`                          |
-| refresh                | trigger refresh                                                                                      | `<c-r>`                      |
-| change_focus           | re-center root at folder                                                                             | `c`                          |
-| change_focus_up        | re-center root at root's parent                                                                      | `C`                          |
-| refocus                | refocus root at vim cwd                                                                              | `~`                          |
-| jump_to_current        | set cursor row to currently active file                                                              | `J`                          |
-| primary                | open / close folders & open file                                                                     | `<enter>`                    |
-| secondary              | open / close folders & preview file                                                                  | `<tab>`, `<doubleclick>`     |
-| tertiary               | open / close folders & open file in new tab                                                          | `<m-enter>`, `<middlemouse>` |
-| v_split                | open / close folders & open file in vertical split                                                   | `w`                          |
-| h_split                | open / close folders & open file in horizontal split                                                 | `W`                          |
-| open_sys               | open file using `open` / `xdg-open`                                                                  | `o`                          |
-| toggle_hidden          | toggle showing hidden items _(you need to set your own ignore list)_                                 | `.`                          |
-| collapse               | collapse all sub folders                                                                             | `<s-tab>`                    |
-| copy_name              | copy file path of items under cursor / visual selection / selection                                  | `y`                          |
-| filter                 | set glob filter for visible items                                                                    | `f`                          |
-| clear_filter           | clear filtering                                                                                      | `F`                          |
-| select                 | select item under cursor / visual selection                                                          | `s`                          |
-| clear_select           | clear selection                                                                                      | `S`                          |
-| new                    | create new folder / file at location under cursor (name ending with os specific `/` will be folders) | `a`                          |
-| rename                 | rename file under cursor                                                                             | `r`                          |
-| delete                 | delete item under cursor / visual selection / selection                                              | `d`                          |
-| trash                  | trash item under cursor / visual selection / selection                                               | `t`                          |
-| copy                   | copy selected items to location under cursor                                                         | `p`                          |
-| cut                    | move selected items to location under cursor                                                         | `x`                          |
-| stat                   | print `ls -l` stat to status line                                                                    | `K`                          |
-| toggle_follow          | toggle follow mode on / off                                                                          |                              |
-| toggle_version_control | toggle version control on / off                                                                      |
-| bigger                 | increase chad size                                                                                   | `+`, `=`                     |
-| smaller                | decrease chad size                                                                                   | `-`, `_`                     |
-
-### View & Ignore
-
-**important:** if you are not seeing Icons, you are probably missing the [correct font](https://github.com/ryanoasis/nerd-fonts).
-
-Likewise set dictionaries to `g:chadtree_view` and `g:chadtree_ignores` to overwrite [view.json](https://github.com/ms-jpq/chadtree/blob/chad/config/view.json) and [ignore.json](https://github.com/ms-jpq/chadtree/blob/chad/config/ignore.json) accordingly.
-
-| option | usage                       |
-| ------ | --------------------------- |
-| name   | globs of name to ignore     |
-| path   | glob of full path to ignore |
-
-Note: **if you want to ignore dotfiles, you will need to set it up like so**
-
-```vimL
-lua vim.api.nvim_set_var("chadtree_ignores", { name = {".*", ".git"} })
-```
-
-To use [emoji theme](https://github.com/adelarsq/vim-emoji-icon-theme)
-
-```vimL
-lua vim.api.nvim_set_var("chadtree_settings", { use_icons = "emoji" })
-```
-
-### Colours
-
-Where to get `LS_COLORS`? Lots of places,such as [here](https://github.com/seebi/dircolors-solarized) or [here](https://github.com/trapd00r/LS_COLORS).
-
-Set `g:chadtree_colours` to customize colour mappings for `8bit` -> `24bit` [mappings](https://github.com/ms-jpq/chadtree/blob/chad/config/colours.json).
-
-Vaild values for `hl24` include hexcodes such as `#FFFFF`
+Either use `:CHADhelp keybind` or open in browser using [`:CHADhelp keybind --web`](https://github.com/ms-jpq/chadtree/tree/future2/docs/KEYBIND.md)
 
 ### Recommendations
 
@@ -184,6 +130,14 @@ Also check out
 
 ## Special Thanks
 
-> The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
+CHADTree does not define it's own colours beyond some minimal defaults, all themes are imported from other open source projects.
 
-> All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme) project by [adelarsq](https://github.com/adelarsq)
+> The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons)
+
+> All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme)
+
+> Some themes are imported from [dircolors-solarized](https://github.com/seebi/dircolors-solarized)
+
+> Some themes are imported from [nord-dircolors](https://github.com/arcticicestudio/nord-dircolors)
+
+> Some themes are imported from [vim-nerdtree-syntax-highlight](https://github.com/tiagofumo/vim-nerdtree-syntax-highlight)
