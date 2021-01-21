@@ -6,7 +6,7 @@ All themes are imported from other open source projects.
 
 You can customize themes using the `chadtree_settings.theme` settings.
 
-There are three main
+---
 
 ### `chadtree_settings.theme.highlights`
 
@@ -44,6 +44,8 @@ These are used to put a version control status beside each file.
 "Comment"
 ```
 
+---
+
 ### `chadtree_settings.theme.icon_glyph_set`
 
 To use **devicons**, you will need [supported fonts](https://github.com/ryanoasis/nerd-fonts#font-installation)
@@ -69,6 +71,8 @@ Imported from [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-
 ```json
 "devicons"
 ```
+
+---
 
 ### `chadtree_settings.theme.text_colour_set`
 
@@ -105,6 +109,9 @@ If you are not happy with that, you can choose one of the many others:
 "env"
 ```
 
+
+---
+
 ### `chadtree_settings.theme.icon_colour_set`
 
 Right now you all the file icons are coloured according to [Github colours](https://github.com/github/linguist).
@@ -126,3 +133,5 @@ There is no other options for the time being.
 ```json
 "github"
 ```
+
+---
