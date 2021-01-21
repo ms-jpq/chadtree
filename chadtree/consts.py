@@ -29,7 +29,7 @@ Docs
 """
 
 
-_DOCS_URI_BASE = "https://github.com/ms-jpq/chadtree/blob/future2/docs"
+_DOCS_URI_BASE = "https://github.com/ms-jpq/chadtree/blob/chad/docs"
 _DOCS_DIR = TOP_LEVEL / "docs"
 
 

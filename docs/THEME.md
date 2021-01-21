@@ -54,17 +54,17 @@ To use **devicons**, you will need [supported fonts](https://github.com/ryanoasi
 
 Imported from [vim-devicons](https://github.com/ryanoasis/vim-devicons)
 
-![devicons.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/icons_devicons.png)
+![devicons.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/icons_devicons.png)
 
 **emoji:**
 
 Imported from [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme)
 
-![emojicons.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/icons_emoji.png)
+![emojicons.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/icons_emoji.png)
 
 **ascii:**
 
-![asciicons.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/icons_ascii.png)
+![asciicons.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/icons_ascii.png)
 
 **default:**
 
@@ -120,7 +120,7 @@ There is no other options for the time being.
 
 **github:**
 
-![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/github_colours.png)
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/github_colours.png)
 
 **legal keys: one of**
 

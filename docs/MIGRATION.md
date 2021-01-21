@@ -19,7 +19,7 @@ Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 
 Run `:CHADdeps` the first time before you use `:CHADopen`
 
-**Check out [`new configuration`](https://github.com/ms-jpq/chadtree/blob/future2/docs/CONFIGURATION.md)**. It is incompatible with the old one, BUT comes with a new parser and vaildator so the migration will be mostly just renaming one or two keys.
+**Check out [`new configuration`](https://github.com/ms-jpq/chadtree/blob/chad/docs/CONFIGURATION.md)**. It is incompatible with the old one, BUT comes with a new parser and vaildator so the migration will be mostly just renaming one or two keys.
 
 If you make a typo, CHADTree will tell you so!
 
@@ -81,7 +81,7 @@ Previously CHADTree was fast because it was async.
 
 Now CHADTree can be even faster because it does things in parallel.
 
-See [design document here](https://github.com/ms-jpq/chadtree/tree/future2/docs/ARCHITECTURE.md) for details.
+See [design document here](https://github.com/ms-jpq/chadtree/tree/chad/docs/ARCHITECTURE.md) for details.
 
 ### Vastly Improved Rendering Speed
 
@@ -95,7 +95,7 @@ _This is only visible when you have 1000+ files visible. The old ways was fast e
 
 Yub, this is yuge. The #1 request was for more themes. They have came!
 
-Go see `:CHADhelp theme` for [details](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md).
+Go see `:CHADhelp theme` for [details](https://github.com/ms-jpq/chadtree/tree/chad/docs/THEME.md).
 
 ### Even more Poilsh
 

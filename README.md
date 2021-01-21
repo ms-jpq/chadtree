@@ -4,7 +4,7 @@ File Manager for Neovim, Better than NERDTree.
 
 ## Features Illustrated
 
-**See full list of screen captures [here](https://github.com/ms-jpq/chadtree/tree/future2/docs/FEATURES.md)**
+**See full list of screen captures [here](https://github.com/ms-jpq/chadtree/tree/chad/docs/FEATURES.md)**
 
 ### I like speed
 
@@ -14,7 +14,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - **Never** blocks
 
-_You can read more about my [performance optimization](https://github.com/ms-jpq/chadtree/tree/future2/docs/ARCHITECTURE.md) here._
+_You can read more about my [performance optimization](https://github.com/ms-jpq/chadtree/tree/chad/docs/ARCHITECTURE.md) here._
 
 ### I like power
 
@@ -24,7 +24,7 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Quickfix integration
 
-![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/visual_select.gif)
+![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/visual_select.gif)
 
 ### I like 21st century
 
@@ -40,7 +40,7 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Correct! handling of symlinks
 
-![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/filtering.gif)
+![filtering.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/filtering.gif)
 
 ### I like version control
 
@@ -48,7 +48,7 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Full support for git submodules
 
-![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/git_showcase.gif)
+![git.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/git_showcase.gif)
 
 ### I like colours
 
@@ -58,9 +58,9 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Full icon support from importing [vim-devicon](https://github.com/ryanoasis/vim-devicons)
 
-![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/ls_colours.png)
+![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/ls_colours.png)
 
-![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/future2/docs/img/github_colours.png)
+![github_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/github_colours.png)
 
 ### I like refinement
 
@@ -72,9 +72,9 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Vaildating config parser **(notice, I added an extra `"dog"` param)**
 
-![mime warn.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/mimetype.png)
+![mime warn.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/mimetype.png)
 
-![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
+![schema error.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/schema_error.png)
 
 ### I like documentation
 
@@ -82,7 +82,7 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Over 1000 lines of meticulous docs covering every option / function!
 
-**Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)**
+**Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/chad/docs)**
 
 **Use `:CHADhelp --web` to open documentation in your browser!** (If you have one installed)
 
@@ -110,7 +110,7 @@ nnoremap <leader>v <cmd>CHADopen<cr>
 
 To see a list of hot keys:
 
-Either use `:CHADhelp keybind` or open in browser using [`:CHADhelp keybind --web`](https://github.com/ms-jpq/chadtree/tree/future2/docs/KEYBIND.md)
+Either use `:CHADhelp keybind` or open in browser using [`:CHADhelp keybind --web`](https://github.com/ms-jpq/chadtree/tree/chad/docs/KEYBIND.md)
 
 ### Recommendations
 

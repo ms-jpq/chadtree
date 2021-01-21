@@ -51,7 +51,7 @@ let g:chadtree_settings = { 'ignore.dog': 'scratch, stratch' }
 
 Will give you the following error message:
 
-![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
+![schema error.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/schema_error.png)
 
 **Notice it says `Extra keys: {dog}`**
 
@@ -59,13 +59,13 @@ Will give you the following error message:
 
 ## Specifics
 
-The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/raw/future2/config/defaults.yml)
+The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/raw/chad/config/defaults.yml)
 
 ---
 
 ### chadtree_settings.keymap
 
-See help docs on [keybind](https://github.com/ms-jpq/chadtree/tree/future2/docs/KEYBIND.md)
+See help docs on [keybind](https://github.com/ms-jpq/chadtree/tree/chad/docs/KEYBIND.md)
 
 ---
 
@@ -283,4 +283,4 @@ Set of window local options to for CHADTree windows
 
 ### chadtree_settings.theme
 
-See help docs on [themes](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md)
+See help docs on [themes](https://github.com/ms-jpq/chadtree/tree/chad/docs/THEME.md)
