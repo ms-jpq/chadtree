@@ -70,7 +70,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Mimetype warning (so you don't accidently open an image)
 
-- Vaildating config parser (notice, I added an extra **`dog`** param)
+- Vaildating config parser **(notice, I added an extra `"dog"` param)**
 
 ![mime warn.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/mimetype.png)
 
@@ -81,7 +81,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Build-in help command in a floating window!
 
-- Over 1000 lines of high quality docs!
+- Over 1000 lines of meticulous docs covering every option / function!
 
 **Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)**
 
