@@ -70,7 +70,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - Mimetype warning (so you don't accidently open an image)
 
-- Vaildating config parser (notice, I added an extra `dog` param)
+- Vaildating config parser (notice, I added an extra **`dog`** param)
 
 ![mime warn.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/mimetype.png)
 
@@ -118,8 +118,14 @@ Also check out
 
 ## Special Thanks
 
-> The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons) project
+CHADTree does not define it's own colours beyond some minimal defaults, all themes are imported from other open source projects.
 
-> The fallback colours are imported from the [vim-nerdtree-syntax-highlight](https://github.com/tiagofumo/vim-nerdtree-syntax-highlight) project
+> The base icons are imported from the [vim-devicon](https://github.com/ryanoasis/vim-devicons)
 
-> All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme) project by [adelarsq](https://github.com/adelarsq)
+> All emoji icons are imported from the [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-theme)
+
+> Some themes are imported from [dircolors-solarized](https://github.com/seebi/dircolors-solarized)
+
+> Some themes are imported from [nord-dircolors](https://github.com/arcticicestudio/nord-dircolors)
+
+> Some themes are imported from [vim-nerdtree-syntax-highlight](https://github.com/tiagofumo/vim-nerdtree-syntax-highlight)
