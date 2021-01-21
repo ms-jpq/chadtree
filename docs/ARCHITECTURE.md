@@ -10,7 +10,7 @@ All RPC notifications from the `nvim` server are sent to a global message queue,
 
 No futher messages can be processed until the previous ones have.
 
-`nvim` never blocks for the notifications. The CHADTree client has no blocking API.
+`nvim` never blocks on the notifications. The CHADTree client has no blocking API.
 
 ## Parallelism
 
