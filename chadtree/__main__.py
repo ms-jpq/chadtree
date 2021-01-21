@@ -85,7 +85,7 @@ elif command == "run":
     else:
         if (
             not DEPS_LOCK.exists()
-            or DEPS_LOCK.read_bytes() != REQUIREMENTS.read_bytes()
+            or DEPS_LOCK.read_text().strip() != REQUIREMENTS.read_text().strip()
         ):
             print(msg, end="", file=stderr)
             exit(1)
