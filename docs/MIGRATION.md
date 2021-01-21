@@ -78,7 +78,7 @@ CHADTree now uses a React-like virtual rendering target. It only re-renders the 
 
 Yub, this is yuge. The #1 request was for more themes. They have came!
 
-Go see `:CHADhelp theme` for details.
+Go see `:CHADhelp theme` for [details](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md).
 
 ### Even more Poilsh
 
