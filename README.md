@@ -76,6 +76,18 @@ File Manager for Neovim, Better than NERDTree.
 
 ![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
 
+
+### I like documentation
+
+- Build-in help command in a floating window!
+
+- Over 1000 lines of high quality docs!
+
+**Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)**
+
+**Use `:CHADhelp --web` to open documentation in your browser!** (If you have one installed)
+
+
 ## Install
 
 **Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`
@@ -90,15 +102,16 @@ You will have to run `:CHADdeps` when installing / updating. This will install C
 
 doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
 
-## Documentation
+## Usage
 
 To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.
-
 ```vimL
 nnoremap <leader>v <cmd>CHADopen<cr>
 ```
 
-**Use `:CHADhelp` to view [documentation](https://github.com/ms-jpq/chadtree/tree/future2/docs)**
+To see a list of hot keys:
+
+Either use `:CHADhelp keybind` or open in browser using [`:CHADhelp keybind --web`](https://github.com/ms-jpq/chadtree/tree/future2/docs/KEYBIND.md)
 
 ### Recommendations
 
