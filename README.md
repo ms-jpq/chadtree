@@ -10,7 +10,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - **Parallel** Filesystem Scan
 
-- **Virtual Rendering** engine (React Like)
+- **[React Like](https://reactjs.org/docs/reconciliation.html)** Reconciliating Difference Minimizing Rendering engine
 
 - **Never** blocks
 
