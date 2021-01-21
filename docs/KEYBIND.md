@@ -2,6 +2,10 @@
 
 Keybinds can be customized under `chadtree_settings.keymap.<key>` with a set of keys.
 
+---
+
+## Window management
+
 ##### `chadtree_settings.keymap.quit`
 
 Close CHADTree window, quit if it is the last window.
@@ -32,8 +36,6 @@ Resize CHADTree window smaller.
 ["-", "_"]
 ```
 
----
-
 ##### `chadtree_settings.keymap.refresh`
 
 Refresh CHADTree.
@@ -43,6 +45,10 @@ Refresh CHADTree.
 ```json
 ["<c-r>"]
 ```
+
+---
+
+## Rerooting CHADTree
 
 ##### `chadtree_settings.keymap.change_dir`
 
@@ -75,6 +81,10 @@ Set CHADTree's root one level up.
 ```
 
 ---
+
+## Open file / folder
+
+Any of the keys that open files will double as a open / close toggle on folders.
 
 ##### `chadtree_settings.keymap.primary`
 
@@ -148,6 +158,8 @@ Collapse all subdirectories for directory at cursor.
 
 ---
 
+## Doing things with cursor
+
 ##### `chadtree_settings.keymap.refocus`
 
 Put cursor at the root of CHADTree
@@ -178,7 +190,19 @@ Print `ls --long` stat for file under cursor.
 ["K"]
 ```
 
+##### `chadtree_settings.keymap.copy_name`
+
+Copy names of files under cursor or visual block.
+
+**default:**
+
+```json
+["y"]
+```
+
 ---
+
+## Filtering
 
 ##### `chadtree_settings.keymap.filter`
 
@@ -202,6 +226,8 @@ Clear filter.
 
 ---
 
+## Selecting
+
 ##### `chadtree_settings.keymap.select`
 
 Select files under cursor or visual block.
@@ -222,17 +248,9 @@ Clear selection.
 ["S"]
 ```
 
-##### `chadtree_settings.keymap.copy_name`
-
-Copy names of files under cursor or visual block.
-
-**default:**
-
-```json
-["y"]
-```
-
 ---
+
+## File operations
 
 ##### `chadtree_settings.keymap.new`
 
@@ -301,6 +319,8 @@ You need [`brew install trash`](https://formulae.brew.sh/formula/trash) for MacO
 ```
 
 ---
+
+## Toggle settings on / off
 
 ##### `chadtree_settings.keymap.toggle_hidden`
 
