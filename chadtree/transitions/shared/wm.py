@@ -15,7 +15,6 @@ from pynvim_pp.api import (
     set_cur_win,
     tab_list_wins,
     win_get_buf,
-    win_get_cursor,
     win_get_option,
 )
 from pynvim_pp.keymap import Keymap
@@ -35,21 +34,24 @@ def is_fm_window(nvim: Nvim, win: Window) -> bool:
     return is_fm_buffer(nvim, buf=buf)
 
 
-def find_windows_in_tab(nvim: Nvim, no_preview: bool) -> Iterator[Window]:
+def find_windows_in_tab(nvim: Nvim, no_secondary: bool) -> Iterator[Window]:
     def key_by(win: Window) -> Tuple[int, int]:
         """
         -> sort by row, then col
         """
 
-        row, col = win_get_cursor(nvim, win=win)
+        row, col = nvim.funcs.win_screenpos(win.number)
         return col, row
 
     tab = cur_tab(nvim)
     wins = tab_list_wins(nvim, tab=tab)
 
     for win in sorted(wins, key=key_by):
-        if not no_preview or not win_get_option(nvim, win=win, key="previewwindow"):
-            yield win
+        if not no_secondary or not win_get_option(nvim, win=win, key="previewwindow"):
+            buf = win_get_buf(nvim, win)
+            ft = buf_filetype(nvim, buf=buf)
+            if ft != "qf":
+                yield win
 
 
 def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
@@ -60,21 +62,21 @@ def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
 
 
 def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, no_preview=True):
+    for win in find_windows_in_tab(nvim, no_secondary=True):
         buf = win_get_buf(nvim, win=win)
         if is_fm_buffer(nvim, buf=buf):
             yield win
 
 
 def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, no_preview=True):
+    for win in find_windows_in_tab(nvim, no_secondary=True):
         buf = win_get_buf(nvim, win=win)
         if not is_fm_buffer(nvim, buf=buf):
             yield win
 
 
 def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, no_preview=True):
+    for win in find_windows_in_tab(nvim, no_secondary=True):
         buf = win_get_buf(nvim, win=win)
         name = buf_name(nvim, buf=buf)
         if name == file:
@@ -124,7 +126,7 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
 def new_window(nvim: Nvim, *, open_left: bool, width: int) -> Window:
     split_r = nvim.options["splitright"]
 
-    wins = tuple(find_windows_in_tab(nvim, no_preview=False))
+    wins = tuple(find_windows_in_tab(nvim, no_secondary=False))
     focus_win = wins[0] if open_left else wins[-1]
     direction = False if open_left else True
 
