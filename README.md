@@ -82,7 +82,7 @@ File Manager for Neovim, Better than NERDTree.
 
 Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
 
-```VimL
+```vim
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 ```
 

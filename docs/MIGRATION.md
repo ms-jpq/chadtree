@@ -6,11 +6,26 @@ Please use the `legacy` branch if you cannot use newer versions of `python`.
 
 I am very sorry about this, but I am doing this in order to support more awesome features.
 
+## What you need to do:
+
+Change your extension manager to use the following:
+
+```vim
+Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
+
+```
+
+Run `:CHADdeps` the first time before you use `:CHADopen`
+
+**Check out [`new configuration`](https://github.com/ms-jpq/chadtree/blob/future2/docs/CONFIGURATION.md)**. It is incompatible with the old one, BUT comes with a new parser and vaildator so the migration will be mostly just renaming one or two keys.
+
+If you make a typo, CHADTree will tell you so!
+
 ## Why?
 
 Several reasons:
 
-Python 3.8 is the version of `python` on the latest Ubuntu LTS.
+Python `3.8.2` is the version of `python` on the latest Ubuntu LTS.
 
 There are some features I wanted to add that strictly cannot be supported below `python 3.8`. For example, I wanted to include a spec validator, but `python 3.7` lacks support for `Literal` in the `typing` module, and therefore could introduce ambiguities in the parser.
 

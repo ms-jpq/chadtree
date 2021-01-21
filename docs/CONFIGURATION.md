@@ -1,6 +1,6 @@
 # Configurations
 
-All configurations are under the global variable `chadtree_settings`.
+All configurations are under the global variable **`chadtree_settings`**.
 
 VimL:
 
@@ -53,7 +53,7 @@ Will give you the following error message:
 
 ![schema error.png](https://github.com/ms-jpq/chadtree/raw/future2/docs/img/schema_error.png)
 
-Notice it says `Extra keys: {dog}`
+**Notice it says `Extra keys: {dog}`**
 
 ---
 
