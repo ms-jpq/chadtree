@@ -33,7 +33,7 @@ from .wm import (
 
 def _win_nochange(nvim: Nvim, win: Window) -> bool:
     buf = win_get_buf(nvim, win=win)
-    modified = buf_get_option(nvim, buf=buf, key="modified")
+    modified: bool = buf_get_option(nvim, buf=buf, key="modified")
     return not modified
 
 
