@@ -2,7 +2,7 @@
 
 Keybinds can be customized under `chadtree_settings.keymap.<key>` with a set of keys.
 
-#### `chadtree_settings.keymap.quit`
+##### `chadtree_settings.keymap.quit`
 
 Close CHADTree window, quit if it is the last window.
 
@@ -12,7 +12,7 @@ Close CHADTree window, quit if it is the last window.
 ["q"]
 ```
 
-#### `chadtree_settings.keymap.bigger`
+##### `chadtree_settings.keymap.bigger`
 
 Resize CHADTree window bigger.
 
@@ -22,7 +22,7 @@ Resize CHADTree window bigger.
 ["+", "="]
 ```
 
-#### `chadtree_settings.keymap.smaller`
+##### `chadtree_settings.keymap.smaller`
 
 Resize CHADTree window smaller.
 
@@ -34,7 +34,7 @@ Resize CHADTree window smaller.
 
 ---
 
-#### `chadtree_settings.keymap.refresh`
+##### `chadtree_settings.keymap.refresh`
 
 Refresh CHADTree.
 
@@ -44,7 +44,7 @@ Refresh CHADTree.
 ["<c-r>"]
 ```
 
-#### `chadtree_settings.keymap.change_dir`
+##### `chadtree_settings.keymap.change_dir`
 
 Change vim's working directory.
 
@@ -54,7 +54,7 @@ Change vim's working directory.
 ["b"]
 ```
 
-#### `chadtree_settings.keymap.change_focus`
+##### `chadtree_settings.keymap.change_focus`
 
 Set CHADTree's root to folder at cursor. Does not change working directory.
 
@@ -64,7 +64,7 @@ Set CHADTree's root to folder at cursor. Does not change working directory.
 ["c"]
 ```
 
-#### `chadtree_settings.keymap.change_focus_up`
+##### `chadtree_settings.keymap.change_focus_up`
 
 Set CHADTree's root one level up.
 
@@ -76,7 +76,7 @@ Set CHADTree's root one level up.
 
 ---
 
-#### `chadtree_settings.keymap.primary`
+##### `chadtree_settings.keymap.primary`
 
 Open file at cursor.
 
@@ -86,7 +86,7 @@ Open file at cursor.
 ["<enter>"]
 ```
 
-#### `chadtree_settings.keymap.secondary`
+##### `chadtree_settings.keymap.secondary`
 
 Open file at cursor, keep cursor in CHADTree's window.
 
@@ -96,7 +96,7 @@ Open file at cursor, keep cursor in CHADTree's window.
 ["<tab>", "<2-leftmouse>"]
 ```
 
-#### `chadtree_settings.keymap.tertiary`
+##### `chadtree_settings.keymap.tertiary`
 
 Open file at cursor in a new tab.
 
@@ -106,7 +106,7 @@ Open file at cursor in a new tab.
 ["<m-enter>", "<middlemouse>"]
 ```
 
-#### `chadtree_settings.keymap.v_split`
+##### `chadtree_settings.keymap.v_split`
 
 Open file at cursor in vertical split.
 
@@ -116,7 +116,7 @@ Open file at cursor in vertical split.
 ["w"]
 ```
 
-#### `chadtree_settings.keymap.h_split`
+##### `chadtree_settings.keymap.h_split`
 
 Open file at cursor in horizontal split.
 
@@ -126,7 +126,7 @@ Open file at cursor in horizontal split.
 ["W"]
 ```
 
-#### `chadtree_settings.keymap.open_sys`
+##### `chadtree_settings.keymap.open_sys`
 
 Open file with GUI tools using `open` or `xdg open`. This will open third party tools such as `Finder` or `KDE Dolphin` or `GNOME nautilus`, etc. Depends on platform and user setup.
 
@@ -136,7 +136,7 @@ Open file with GUI tools using `open` or `xdg open`. This will open third party 
 ["o"]
 ```
 
-#### `chadtree_settings.keymap.collapse`
+##### `chadtree_settings.keymap.collapse`
 
 Collapse all subdirectories for directory at cursor.
 
@@ -148,7 +148,7 @@ Collapse all subdirectories for directory at cursor.
 
 ---
 
-#### `chadtree_settings.keymap.refocus`
+##### `chadtree_settings.keymap.refocus`
 
 Put cursor at the root of CHADTree
 
@@ -158,7 +158,7 @@ Put cursor at the root of CHADTree
 ["~"]
 ```
 
-#### `chadtree_settings.keymap.jump_to_current`
+##### `chadtree_settings.keymap.jump_to_current`
 
 Position cursor in CHADTree at currently open buffer, if the buffer points to a location visible under CHADTree.
 
@@ -168,7 +168,7 @@ Position cursor in CHADTree at currently open buffer, if the buffer points to a 
 ["J"]
 ```
 
-#### `chadtree_settings.keymap.stat`
+##### `chadtree_settings.keymap.stat`
 
 Print `ls --long` stat for file under cursor.
 
@@ -180,7 +180,7 @@ Print `ls --long` stat for file under cursor.
 
 ---
 
-#### `chadtree_settings.keymap.filter`
+##### `chadtree_settings.keymap.filter`
 
 Set a glob pattern to narrow down visible files.
 
@@ -190,7 +190,7 @@ Set a glob pattern to narrow down visible files.
 ["f"]
 ```
 
-#### `chadtree_settings.keymap.clear_filter`
+##### `chadtree_settings.keymap.clear_filter`
 
 Clear filter.
 
@@ -202,7 +202,7 @@ Clear filter.
 
 ---
 
-#### `chadtree_settings.keymap.select`
+##### `chadtree_settings.keymap.select`
 
 Select files under cursor or visual block.
 
@@ -212,7 +212,7 @@ Select files under cursor or visual block.
 ["s"]
 ```
 
-#### `chadtree_settings.keymap.clear_selection`
+##### `chadtree_settings.keymap.clear_selection`
 
 Clear selection.
 
@@ -222,7 +222,7 @@ Clear selection.
 ["S"]
 ```
 
-#### `chadtree_settings.keymap.copy_name`
+##### `chadtree_settings.keymap.copy_name`
 
 Copy names of files under cursor or visual block.
 
@@ -234,7 +234,7 @@ Copy names of files under cursor or visual block.
 
 ---
 
-#### `chadtree_settings.keymap.new`
+##### `chadtree_settings.keymap.new`
 
 Create new file at location under cursor. Files ending with platform specifc path seperator will be folders.
 
@@ -248,7 +248,7 @@ ie. `uwu/owo/` under `unix` will create `uwu/` then `owo/` under it. Both are fo
 ["n"]
 ```
 
-#### `chadtree_settings.keymap.rename`
+##### `chadtree_settings.keymap.rename`
 
 Rename file under cursor.
 
@@ -258,7 +258,7 @@ Rename file under cursor.
 ["r"]
 ```
 
-#### `chadtree_settings.keymap.copy`
+##### `chadtree_settings.keymap.copy`
 
 Copy the selected files to location under cursor.
 
@@ -268,7 +268,7 @@ Copy the selected files to location under cursor.
 ["p"]
 ```
 
-#### `chadtree_settings.keymap.cut`
+##### `chadtree_settings.keymap.cut`
 
 Move the selected files to location under cursor.
 
@@ -278,7 +278,7 @@ Move the selected files to location under cursor.
 ["x"]
 ```
 
-#### `chadtree_settings.keymap.delete`
+##### `chadtree_settings.keymap.delete`
 
 Delete the selected files. Items deleted cannot be recovered.
 
@@ -288,7 +288,7 @@ Delete the selected files. Items deleted cannot be recovered.
 ["d"]
 ```
 
-#### `chadtree_settings.keymap.trash`
+##### `chadtree_settings.keymap.trash`
 
 Trash the selected files using platform specific `trash` command, if they are available. Items trashed may be recovered.
 
@@ -302,7 +302,7 @@ You need [`brew install trash`](https://formulae.brew.sh/formula/trash) for MacO
 
 ---
 
-#### `chadtree_settings.keymap.toggle_hidden`
+##### `chadtree_settings.keymap.toggle_hidden`
 
 Toggle `show_hidden` on and off. See `chadtree_settings.options.show_hidden` for details.
 
@@ -312,7 +312,7 @@ Toggle `show_hidden` on and off. See `chadtree_settings.options.show_hidden` for
 ["."]
 ```
 
-#### `chadtree_settings.keymap.toggle_follow`
+##### `chadtree_settings.keymap.toggle_follow`
 
 Toggle `follow` on and off. See `chadtree_settings.options.follow` for details.
 
@@ -322,7 +322,7 @@ Toggle `follow` on and off. See `chadtree_settings.options.follow` for details.
 []
 ```
 
-#### `chadtree_settings.keymap.toggle_version_control`
+##### `chadtree_settings.keymap.toggle_version_control`
 
 Toggle version control integration on and off
 
