@@ -52,7 +52,7 @@ def _new(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
-                    new_parent = dirname(child)
+                    new_parent = dirname(path)
                     if new_parent in state.root.ancestors:
                         new_state = new_root(
                             nvim, state=state, settings=settings, new_cwd=new_parent
