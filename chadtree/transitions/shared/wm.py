@@ -132,8 +132,7 @@ def new_window(nvim: Nvim, *, open_left: bool, width: Optional[int]) -> Window:
 
     nvim.options["splitright"] = direction
     set_cur_win(nvim, win=focus_win)
-    if width:
-        nvim.command(f"{width}vnew")
+    nvim.command(f"{width}vnew" if width else "vnew")
     nvim.options["splitright"] = split_r
 
     win = cur_win(nvim)
