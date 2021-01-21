@@ -63,15 +63,15 @@ The default configuration can be found under an [`yaml` file](https://github.com
 
 ---
 
-#### chadtree_settings.keymap
+### chadtree_settings.keymap
 
 See help docs on [keybind](https://github.com/ms-jpq/chadtree/tree/future2/docs/KEYBIND.md)
 
 ---
 
-#### chadtree_settings.options
+### chadtree_settings.options
 
-##### `chadtree_settings.options.follow`
+#### `chadtree_settings.options.follow`
 
 CHADTree will highlight currently open file, and open all its parents.
 
@@ -81,7 +81,7 @@ CHADTree will highlight currently open file, and open all its parents.
 true
 ```
 
-##### `chadtree_settings.options.lang`
+#### `chadtree_settings.options.lang`
 
 CHADTree will guess your locale from [unix environmental variables](https://pubs.opengroup.org/onlinepubs/7908799/xbd/envvar.html).
 
@@ -97,11 +97,11 @@ null
 
 I only wrote localization for `en`. `zh` will be coming, and maybe `fr` if I can get my girlfriend to help.
 
-##### `chadtree_settings.options.mimetypes`
+#### `chadtree_settings.options.mimetypes`
 
 CHADTree will attempt to warn you when you try to open say an image. This is done via the [Internet Assigned Numbers Authority](https://www.iana.org/assignments/media-types/media-types.xhtml)'s mimetype database.
 
-###### `chadtree_settings.options.mimetypes.warn`
+##### `chadtree_settings.options.mimetypes.warn`
 
 Show a warning before opening these datatypes
 
@@ -111,7 +111,7 @@ Show a warning before opening these datatypes
 ["audio", "font", "image", "video"]
 ```
 
-###### `chadtree_settings.options.mimetypes.allow_exts`
+##### `chadtree_settings.options.mimetypes.allow_exts`
 
 Skip warning for these extensions
 
@@ -121,7 +121,7 @@ Skip warning for these extensions
 [".ts"]
 ```
 
-##### `chadtree_settings.options.page_increment`
+#### `chadtree_settings.options.page_increment`
 
 Change how many lines `{` and `}` scroll
 
@@ -131,7 +131,7 @@ Change how many lines `{` and `}` scroll
 5
 ```
 
-##### `chadtree_settings.options.polling_rate`
+#### `chadtree_settings.options.polling_rate`
 
 CHADTree's background refresh rate
 
@@ -141,7 +141,7 @@ CHADTree's background refresh rate
 2.0
 ```
 
-##### `chadtree_settings.options.session`
+#### `chadtree_settings.options.session`
 
 Save & restore currently open folders
 
@@ -151,7 +151,7 @@ Save & restore currently open folders
 true
 ```
 
-##### `chadtree_settings.options.show_hidden`
+#### `chadtree_settings.options.show_hidden`
 
 Hide some files and folders by default. By default this can be toggled using the `.` key.
 
@@ -163,9 +163,9 @@ see `chadtree_settings.ignore` for more details
 false
 ```
 
-##### `chadtree_settings.options.version_control`
+#### `chadtree_settings.options.version_control`
 
-###### `chadtree_settings.options.version_control.enable`
+##### `chadtree_settings.options.version_control.enable`
 
 Enable version control. This can also be toggled. But unlike `show_hidden`, does not have a default keybind.
 
@@ -177,11 +177,12 @@ true
 
 ---
 
-#### chadtree_settings.ignore
+
+### chadtree_settings.ignore
 
 CHADTree can ignore showing some files. This is toggable by default using the `.` key.
 
-##### `chadtree_settings.ignore.name_exact`
+#### `chadtree_settings.ignore.name_exact`
 
 Files whose name match these exactly will be ignored.
 
@@ -191,7 +192,7 @@ Files whose name match these exactly will be ignored.
 [".DS_Store", ".directory", "thumbs.db", ".git"]
 ```
 
-##### `chadtree_settings.ignore.name_glob`
+#### `chadtree_settings.ignore.name_glob`
 
 Files whose name match these [glob patterns](https://en.wikipedia.org/wiki/Glob_%28programming%29) will be ignored.
 
@@ -203,7 +204,7 @@ ie. `*.py` will match all python files
 []
 ```
 
-##### `chadtree_settings.ignore.path_glob`
+#### `chadtree_settings.ignore.path_glob`
 
 Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/Glob_%28programming%29) will be ignored.
 
@@ -215,11 +216,11 @@ Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/
 
 ---
 
-#### chadtree_settings.view
+### chadtree_settings.view
 
 Some options to change CHADTree's apperance
 
-##### `chadtree_settings.view.open_direction`
+#### `chadtree_settings.view.open_direction`
 
 Which way does CHADTree open?
 
@@ -235,7 +236,7 @@ Which way does CHADTree open?
 "left"
 ```
 
-##### `chadtree_settings.view.sort_by`
+#### `chadtree_settings.view.sort_by`
 
 CHADTree can sort by the following criterion. Reorder them if you want a different sorting order.
 
@@ -251,7 +252,7 @@ CHADTree can sort by the following criterion. Reorder them if you want a differe
 ["is_folder", "ext", "file_name"]
 ```
 
-##### `chadtree_settings.view.width`
+#### `chadtree_settings.view.width`
 
 How big is CHADTree when initially opened?
 
@@ -261,7 +262,7 @@ How big is CHADTree when initially opened?
 40
 ```
 
-##### `chadtree_settings.view.window_options`
+#### `chadtree_settings.view.window_options`
 
 Set of window local options to for CHADTree windows
 
@@ -280,6 +281,6 @@ Set of window local options to for CHADTree windows
 
 ---
 
-#### chadtree_settings.theme
+### chadtree_settings.theme
 
 See help docs on [themes](https://github.com/ms-jpq/chadtree/tree/future2/docs/THEME.md)
