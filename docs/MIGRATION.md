@@ -8,6 +8,8 @@ I am very sorry about this, but I am doing this in order to support more awesome
 
 ## What you need to do:
 
+**Windows Users, please use `legacy` branch for now, I [need help](https://github.com/ms-jpq/chadtree/issues/102) getting this to run under windows**
+
 Change your extension manager to use the following:
 
 ```vim
@@ -87,7 +89,7 @@ You know how React is famous because it only renders what needs to be changed?
 
 CHADTree now uses a React-like virtual rendering target. It only re-renders the minimal amount of lines. CHADTree can now handle thousands of visible files and still be reasonablly performant!
 
-*This is only visible when you have 1000+ files visible. The old ways was fast enough for most tasks.*
+_This is only visible when you have 1000+ files visible. The old ways was fast enough for most tasks._
 
 ### Theming
 
