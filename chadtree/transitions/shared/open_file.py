@@ -59,7 +59,9 @@ def _show_file(
             ) or new_window(
                 nvim,
                 open_left=not settings.open_left,
-                width=nvim.options["columns"] - state.width - 1,
+                width=None
+                if len(non_fm_windows)
+                else nvim.options["columns"] - state.width - 1,
             )
 
             set_cur_win(nvim, win=win)
