@@ -5,8 +5,8 @@ from typing import Optional, Sequence, Tuple
 from webbrowser import open as open_w
 
 from pynvim import Nvim
-from pynvim_pp.api import buf_set_lines, buf_set_option, create_buf
-from pynvim_pp.float_win import open_float_win
+from pynvim_pp.api import buf_set_lines, buf_set_option, create_buf, win_close
+from pynvim_pp.float_win import list_floatwins, open_float_win
 from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
 from std2.types import never
@@ -92,6 +92,8 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
         else:
             web_d = False
         if not web_d:
+            for win in list_floatwins(nvim):
+                win_close(nvim, win=win)
             lines = md.read_text().splitlines()
             buf = create_buf(nvim, listed=False, scratch=True, wipe=True, nofile=True)
             buf_set_lines(nvim, buf=buf, lo=0, hi=-1, lines=lines)
