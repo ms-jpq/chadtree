@@ -10,7 +10,7 @@ File Manager for Neovim, Better than NERDTree.
 
 - **Parallel** Filesystem Scan
 
-- **[React Like](https://reactjs.org/docs/reconciliation.html)** Reconciliating Difference Minimizing Rendering engine
+- **[React Like](https://reactjs.org/docs/reconciliation.html)** Reconciling Difference Minimizing Rendering engine
 
 - **Never** blocks
 
@@ -68,9 +68,9 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Maintain selection when copying, moving files
 
-- Mimetype warning (so you don't accidently open an image)
+- Mimetype warning (so you don't accidentally open an image)
 
-- Vaildating config parser **(notice, I added an extra `"dog"` param)**
+- Validating config parser **(notice, I added an extra `"dog"` param)**
 
 ![mime warn.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/mimetype.png)
 
@@ -96,7 +96,7 @@ Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vun
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 ```
 
-You will have to run `:CHADdeps` when installing / updating. This will install CHADTree's depdencies locally inside `chadtree/.vars/runtime`.
+You will have to run `:CHADdeps` when installing / updating. This will install CHADTree's dependencies locally inside `chadtree/.vars/runtime`.
 
 doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
 
