@@ -14,6 +14,7 @@ return function (args)
     local job_id = nil
     local chad_params = {}
     local err_exit = false
+    local py3 = vim.g.python3_host_prog or "python3"
 
     local function defer(timeout, callback)
       local timer = vim.loop.new_timer()
@@ -56,7 +57,7 @@ return function (args)
       local cwd = "/" .. top_lv
       local args =
         vim.tbl_flatten {
-        {"python3", "-m", "chadtree"},
+        {py3, "-m", "chadtree"},
         {...}
       }
       local params = {
