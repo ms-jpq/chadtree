@@ -9,8 +9,13 @@ from typing import Iterator
 
 _TOP_LV = Path(__file__).resolve().parent.parent
 
-email = "ci@ci.ci"
-username = "ci-bot"
+
+def _git_identity() -> None:
+    email = "ci@ci.ci"
+    username = "ci-bot"
+    check_call(("git", "config", "--global", "user.email", email))
+    check_call(("git", "config", "--global", "user.name", username))
+
 
 def _get_branch() -> str:
     ref = environ["GITHUB_REF"]
@@ -50,9 +55,6 @@ def _git_alert(cwd: str) -> None:
     if proc.returncode:
         time = datetime.now().strftime("%Y-%m-%d")
         brname = f"{prefix}--{time}"
-        check_call(("git", "config", "user.email", email), cwd=cwd)
-        check_call(("git", "config", "user.name", username), cwd=cwd)
-
         check_call(("git", "checkout", "-b", brname))
         check_call(("git", "add", "."))
         check_call(("git", "commit", "-m", f"update_icons: {time}"))
@@ -61,6 +63,7 @@ def _git_alert(cwd: str) -> None:
 
 def main() -> None:
     cwd = "temp"
+    _git_identity()
     _git_clone(cwd)
     _build()
     _git_alert(cwd)
