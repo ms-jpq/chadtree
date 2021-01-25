@@ -47,7 +47,7 @@ def find_windows_in_tab(nvim: Nvim, no_secondary: bool) -> Iterator[Window]:
     wins = tab_list_wins(nvim, tab=tab)
 
     for win in sorted(wins, key=key_by):
-        is_preview = win_get_option(nvim, win=win, key="previewwindow")
+        is_preview: bool = win_get_option(nvim, win=win, key="previewwindow")
         buf = win_get_buf(nvim, win)
         ft = buf_filetype(nvim, buf=buf)
         is_secondary = is_preview or ft == "qf"
