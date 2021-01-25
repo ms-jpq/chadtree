@@ -10,6 +10,13 @@ from typing import Iterator
 _TOP_LV = Path(__file__).resolve().parent.parent
 
 
+def _git_identity() -> None:
+    email = "ci@ci.ci"
+    username = "ci-bot"
+    check_call(("git", "config", "--global", "user.email", email))
+    check_call(("git", "config", "--global", "user.name", username))
+
+
 def _get_branch() -> str:
     ref = environ["GITHUB_REF"]
     return ref.replace("refs/heads/", "")
@@ -19,12 +26,8 @@ def _git_clone(name: str) -> None:
     if not isdir(name):
         token = environ["CI_TOKEN"]
         uri = f"https://ms-jpq:{token}@github.com/ms-jpq/chadtree.git"
-        email = "ci@ci.ci"
-        username = "ci-bot"
         branch = _get_branch()
         check_call(("git", "clone", "--branch", branch, uri, name))
-        check_call(("git", "config", "user.email", email), cwd=name)
-        check_call(("git", "config", "user.name", username), cwd=name)
 
 
 def _build() -> None:
@@ -60,6 +63,7 @@ def _git_alert(cwd: str) -> None:
 
 def main() -> None:
     cwd = "temp"
+    _git_identity()
     _git_clone(cwd)
     _build()
     _git_alert(cwd)

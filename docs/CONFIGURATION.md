@@ -37,6 +37,14 @@ Note in lua, you will need to quote your keys like so:
 { ["dog.puppy"] = 2 }
 ```
 
+
+Note in VimL, to specify `True` and `False`, you need to use the following:
+
+```vim
+v:true
+v:false
+```
+
 ---
 
 ## Validation

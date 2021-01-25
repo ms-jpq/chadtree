@@ -39,15 +39,13 @@ def _new(
             return None
         else:
             path = abspath(join(parent, child))
-            if child.endswith(sep):
-                path = path + sep
-
             if exists(path):
                 write(nvim, LANG("already_exists", name=path), error=True)
                 return None
             else:
                 try:
-                    new((path,))
+                    dest = path + sep if child.endswith(sep) else path
+                    new((dest,))
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
@@ -63,11 +61,4 @@ def _new(
                         new_state = forward(
                             state, settings=settings, index=index, paths=paths
                         )
-                    nxt = open_file(
-                        nvim,
-                        state=new_state,
-                        settings=settings,
-                        path=path,
-                        click_type=ClickType.secondary,
-                    )
-                    return nxt
+                    return Stage(new_state, focus=path)
