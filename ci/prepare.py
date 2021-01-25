@@ -9,6 +9,8 @@ from typing import Iterator
 
 _TOP_LV = Path(__file__).resolve().parent.parent
 
+email = "ci@ci.ci"
+username = "ci-bot"
 
 def _get_branch() -> str:
     ref = environ["GITHUB_REF"]
@@ -19,12 +21,8 @@ def _git_clone(name: str) -> None:
     if not isdir(name):
         token = environ["CI_TOKEN"]
         uri = f"https://ms-jpq:{token}@github.com/ms-jpq/chadtree.git"
-        email = "ci@ci.ci"
-        username = "ci-bot"
         branch = _get_branch()
         check_call(("git", "clone", "--branch", branch, uri, name))
-        check_call(("git", "config", "user.email", email), cwd=name)
-        check_call(("git", "config", "user.name", username), cwd=name)
 
 
 def _build() -> None:
@@ -52,6 +50,9 @@ def _git_alert(cwd: str) -> None:
     if proc.returncode:
         time = datetime.now().strftime("%Y-%m-%d")
         brname = f"{prefix}--{time}"
+        check_call(("git", "config", "user.email", email), cwd=cwd)
+        check_call(("git", "config", "user.name", username), cwd=cwd)
+
         check_call(("git", "checkout", "-b", brname))
         check_call(("git", "add", "."))
         check_call(("git", "commit", "-m", f"update_icons: {time}"))
