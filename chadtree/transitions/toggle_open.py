@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from pathlib import Path
+from os.path import exists, isabs, isdir, join, realpath
 from typing import Optional, Sequence
 
 from pynvim import Nvim
 from pynvim.api import Window
 from pynvim_pp.api import (
     cur_win,
+    get_cwd,
     list_wins,
     set_cur_win,
     win_close,
@@ -14,12 +15,13 @@ from pynvim_pp.api import (
 )
 from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
-from pynvim_pp.api import get_cwd
+
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
-from .shared.current import new_current_file
+from .shared.current import new_current_file, new_root
+from .shared.open_file import open_file
 from .shared.wm import (
     find_current_buffer_name,
     find_fm_buffers,
@@ -29,12 +31,12 @@ from .shared.wm import (
     new_window,
     resize_fm_windows,
 )
-from .types import Stage
+from .types import ClickType, Stage
 
 
 @dataclass(frozen=True)
 class _Args:
-    path: Optional[Path]
+    path: Optional[str]
     toggle: bool
     focus: bool
 
@@ -52,8 +54,7 @@ def _parse_args(args: Sequence[str]) -> _Args:
     )
 
     ns = parser.parse_args(args=args)
-    path = Path(ns.path) if ns.path else None
-    opts = _Args(path=path, toggle=ns.toggle, focus=ns.focus)
+    opts = _Args(path=ns.path, toggle=ns.toggle, focus=ns.focus)
     return opts
 
 
@@ -110,15 +111,31 @@ def _open(
         write(nvim, e, error=True)
         return None
     else:
-        _open_fm_window(nvim, state=state, settings=settings, opts=opts)
-        path = opts.path
-        if path:
-            a_path = (path if path.is_absolute() else Path(get_cwd(nvim)) / path).resolve()
-            if not a_path.exists():
-                write(nvim, LANG("path not exist", path=a_path))
+        raw_path = opts.path
+        if raw_path:
+            path = realpath(
+                raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
+            )
+            if not exists(path):
+                write(nvim, LANG("path not exist", path=path))
+                return None
             else:
-                ...
+                _open_fm_window(nvim, state=state, settings=settings, opts=opts)
+                if isdir(path):
+                    new_state = new_root(
+                        nvim, state=state, settings=settings, new_cwd=path
+                    )
+                    return Stage(new_state)
+                else:
+                    return open_file(
+                        nvim,
+                        state=state,
+                        settings=settings,
+                        path=path,
+                        click_type=ClickType.primary,
+                    )
         else:
+            _open_fm_window(nvim, state=state, settings=settings, opts=opts)
             curr = find_current_buffer_name(nvim)
             stage = new_current_file(nvim, state=state, settings=settings, current=curr)
             return stage if stage else Stage(state)
