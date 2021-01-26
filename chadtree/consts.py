@@ -28,7 +28,7 @@ DEPS_LOCK = _VARS / "deps.lock"
 SESSION_DIR = _VARS / "sessions"
 
 _XDG_DATA_DIR = Path(environ.get("XDG_DATA_HOME", _VARS))
-_XDG_VARS = _XDG_DATA_DIR / "chadtree"
+_XDG_VARS = _XDG_DATA_DIR / "nvim" / "chadtree"
 RT_DIR_XDG = _XDG_VARS / "runtime"
 DEPS_LOCK_XDG = _XDG_VARS / "deps.lock"
 SESSION_DIR_XDG = _XDG_VARS / "sessions"
