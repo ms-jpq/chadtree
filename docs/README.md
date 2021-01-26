@@ -39,5 +39,3 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 Dependencies will be privately installed inside CHADTree's git root under `.vars/runtime`.
 
 Running `rm -rf` on `chadtree/` will cleanly remove everything CHADTree installs to your local system.
-
-**Note: `:CHADdeps` if successful, will say "error blah", "You can now use `:CHADopen`", this is normal**
