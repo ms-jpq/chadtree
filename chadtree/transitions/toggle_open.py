@@ -54,7 +54,7 @@ def _parse_args(args: Sequence[str]) -> _Args:
     )
 
     ns = parser.parse_args(args=args)
-    opts = _Args(path=ns.path, toggle=ns.toggle, focus=ns.focus)
+    opts = _Args(path=ns.path, toggle=False if ns.path else ns.toggle, focus=ns.focus)
     return opts
 
 
@@ -127,12 +127,15 @@ def _open(
                     )
                     return Stage(new_state)
                 else:
+                    click_type = (
+                        ClickType.primary if opts.toggle else ClickType.secondary
+                    )
                     return open_file(
                         nvim,
                         state=state,
                         settings=settings,
                         path=path,
-                        click_type=ClickType.primary,
+                        click_type=click_type,
                     )
         else:
             _open_fm_window(nvim, state=state, settings=settings, opts=opts)

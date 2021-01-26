@@ -1,6 +1,9 @@
+from os.path import dirname
+from pathlib import PurePath
 from typing import AbstractSet, Optional
 
 from pynvim import Nvim
+from std2.pathlib import longest_common_path
 
 from ...fs.cartographer import new
 from ...fs.ops import ancestors
@@ -36,3 +39,15 @@ def new_root(nvim: Nvim, state: State, settings: Settings, new_cwd: str) -> Stat
     return forward(
         state, settings=settings, root=root, selection=selection, index=index
     )
+
+
+def maybe_path_above(
+    nvim: Nvim, state: State, settings: Settings, path: str
+) -> Optional[State]:
+    root = state.root.path
+    if PurePath(path).is_relative_to(root):
+        return None
+    else:
+        lcp = longest_common_path(path, root)
+        new_cwd = str(lcp) if lcp else dirname(path)
+        return new_root(nvim, state=state, settings=settings, new_cwd=new_cwd)

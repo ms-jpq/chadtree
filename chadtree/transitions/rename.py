@@ -12,7 +12,7 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
-from .shared.current import new_root
+from .shared.current import maybe_path_above
 from .shared.index import indices
 from .shared.refresh import refresh
 from .shared.wm import kill_buffers
@@ -40,7 +40,6 @@ def _rename(
             return None
         else:
             new_name = abspath(join(parent, child))
-            new_parent = dirname(new_name)
 
             if exists(new_name):
                 write(nvim, LANG("already_exists", name=new_name), error=True)
@@ -52,18 +51,16 @@ def _rename(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
-                    if new_parent in state.root.ancestors:
-                        new_state = new_root(
-                            nvim, state=state, settings=settings, new_cwd=new_parent
+                    new_state = (
+                        maybe_path_above(
+                            nvim, state=state, settings=settings, path=new_name
                         )
-                        return Stage(new_state, focus=new_name)
-                    else:
-                        paths = {
-                            *chain((parent,), (new_parent,), ancestors(new_parent))
-                        }
-                        index = state.index | paths
-                        new_state = forward(
-                            state, settings=settings, index=index, paths=paths
-                        )
-                        kill_buffers(nvim, paths={prev_name})
-                        return Stage(new_state, focus=new_name)
+                        or state
+                    )
+                    paths = ancestors(new_name)
+                    index = state.index | paths
+                    next_state = forward(
+                        new_state, settings=settings, index=index, paths=paths
+                    )
+                    kill_buffers(nvim, paths={prev_name})
+                    return Stage(next_state, focus=new_name)
