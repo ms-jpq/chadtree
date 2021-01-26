@@ -132,8 +132,7 @@ return function(args)
     local chad_params = {}
     local err_exit = false
 
-    handlers.on_exit = function(args)
-      local code = unpack(args)
+    handlers.on_exit = function(code)
       local msg = " | CHADTree EXITED - " .. code
       if not (code == 0 or code == 143) then
         err_exit = true
@@ -159,7 +158,7 @@ return function(args)
         {...},
         (settings.xdg and {"--xdg"} or {})
       }
-      local job_id = spawn(py3, args, cwd, env, handlers)
+      local job_id = spawn(py3, args, nil, cwd, env, handlers)
       return job_id
     end
 
