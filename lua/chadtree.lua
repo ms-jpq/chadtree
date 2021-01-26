@@ -70,6 +70,10 @@ return function(args)
         on_stdout = "CHADon_stdout",
         on_stderr = "CHADon_stderr"
       }
+      if vim.api.nvim_call_function("has", {"win32"}) == 1 then
+        local cmd = table.concat(args, " ")
+        args = vim.api.nvim_call_function("shellescape", {cmd})
+      end
       local job_id = vim.api.nvim_call_function("jobstart", {args, params})
       return job_id
     end
@@ -87,10 +91,19 @@ return function(args)
 
         if not job_id then
           local server = vim.api.nvim_call_function("serverstart", {})
-          job_id = start("run", "--socket", server)
+          local jid = start("run", "--socket", server)
+          if jid == -1 then
+            vim.api.nvim_err_writeln("Error! - Invalid job!")
+          elseif jid == 0 then
+            vim.api.nvim_err_writeln("Error! - Not executable!")
+          else
+            job_id = jid
+          end
         end
 
-        if not err_exit and _G[cmd] then
+        if not job_id then
+          return
+        elseif not err_exit and _G[cmd] then
           _G[cmd](args)
         else
           defer(
