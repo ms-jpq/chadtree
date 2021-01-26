@@ -14,8 +14,9 @@ from pynvim_pp.api import (
 )
 from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
-
+from pynvim_pp.api import get_cwd
 from ..registry import rpc
+from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
 from .shared.current import new_current_file
@@ -110,9 +111,13 @@ def _open(
         return None
     else:
         _open_fm_window(nvim, state=state, settings=settings, opts=opts)
-
-        if opts.path:
-            pass
+        path = opts.path
+        if path:
+            a_path = (path if path.is_absolute() else Path(get_cwd(nvim)) / path).resolve()
+            if not a_path.exists():
+                write(nvim, LANG("path not exist", path=a_path))
+            else:
+                ...
         else:
             curr = find_current_buffer_name(nvim)
             stage = new_current_file(nvim, state=state, settings=settings, current=curr)
