@@ -26,7 +26,7 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 
 `:CHADopen` will toggle CHADTree open / close
 
-`CHADopen <path>` will open at `<path>`
+`:CHADopen <path>` will open at `<path>`
 
 `:CHADopen --always-focus` will disable toggle if already opened
 
