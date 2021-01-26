@@ -7,6 +7,7 @@ from typing import Optional
 from pynvim import Nvim
 from pynvim.api.window import Window
 from pynvim_pp.api import (
+    ask_mc,
     buf_get_option,
     buf_set_option,
     cur_buf,
@@ -95,13 +96,15 @@ def open_file(
     m_type, _, _ = (mime or "").partition("/")
     _, ext = splitext(name)
 
-    def ask() -> bool:
-        question = LANG("mime_warn", name=name, mime=str(mime))
-        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
-        return resp == 1
+    question = LANG("mime_warn", name=name, mime=str(mime))
 
     go = (
-        ask()
+        ask_mc(
+            nvim,
+            question=question,
+            answers=LANG("ask_yesno"),
+            answer_key={1: True, 2: False},
+        )
         if m_type in settings.mime.warn and ext not in settings.mime.allow_exts
         else True
     )

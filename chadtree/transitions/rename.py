@@ -3,6 +3,7 @@ from os.path import abspath, dirname, exists, join, relpath
 from typing import Optional
 
 from pynvim import Nvim
+from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
 from ..fs.ops import ancestors, rename
@@ -34,7 +35,7 @@ def _rename(
         parent = state.root.path
         rel_path = relpath(prev_name, start=parent)
 
-        child: Optional[str] = nvim.funcs.input(LANG("pencil"), rel_path)
+        child = ask(nvim, question=LANG("pencil"), default=rel_path)
         if not child:
             return None
         else:

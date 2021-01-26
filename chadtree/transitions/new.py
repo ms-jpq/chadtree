@@ -3,6 +3,7 @@ from os.path import abspath, dirname, exists, join
 from typing import Optional
 
 from pynvim import Nvim
+from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
@@ -14,9 +15,8 @@ from ..state.next import forward
 from ..state.types import State
 from .shared.current import new_root
 from .shared.index import indices
-from .shared.open_file import open_file
 from .shared.refresh import refresh
-from .types import ClickType, Stage
+from .types import Stage
 
 
 @rpc(blocking=False)
@@ -33,7 +33,7 @@ def _new(
     else:
         parent = node.path if is_dir(node) else dirname(node.path)
 
-        child: Optional[str] = nvim.funcs.input(LANG("pencil"))
+        child = ask(nvim, question=LANG("pencil"), default="")
 
         if not child:
             return None

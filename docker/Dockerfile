@@ -15,6 +15,6 @@ RUN mkdir -p autoload && \
 COPY docker/root /
 COPY . /root/.config/nvim/plugged/chadtree/
 
-
+ENV XDG_DATA_HOME /root/XDG_DATA_HOME
 WORKDIR /root/.config/nvim/plugged/chadtree
 # RUN python3 -m chadtree deps

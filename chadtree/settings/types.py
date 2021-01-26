@@ -18,6 +18,7 @@ class MimetypeOptions:
 
 @dataclass(frozen=True)
 class Settings:
+    xdg: bool
     follow: bool
     ignores: Ignored
     page_increment: int

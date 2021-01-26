@@ -5,7 +5,14 @@ from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
 
-from .consts import DEPS_LOCK, MIGRATION_URI, REQUIREMENTS, RT_DIR
+from .consts import (
+    DEPS_LOCK,
+    DEPS_LOCK_XDG,
+    MIGRATION_URI,
+    REQUIREMENTS,
+    RT_DIR,
+    RT_DIR_XDG,
+)
 
 if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
@@ -15,9 +22,6 @@ if version_info < (3, 8, 2):
 
 from typing import Literal
 
-RT_DIR.mkdir(parents=True, exist_ok=True)
-path.append(str(RT_DIR))
-
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
@@ -26,14 +30,23 @@ def parse_args() -> Namespace:
 
     s_run = sub_parsers.add_parser("run")
     s_run.add_argument("--socket", required=True)
+    s_run.add_argument("--xdg", action="store_true")
 
     s_deps = sub_parsers.add_parser("deps")
+    s_deps.add_argument("--xdg", action="store_true")
 
     return parser.parse_args()
 
 
 args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
+
+_RT_DIR = RT_DIR_XDG if args.xdg else RT_DIR
+
+_RT_DIR.mkdir(parents=True, exist_ok=True)
+_DEPS_LOCK = DEPS_LOCK_XDG if args.xdg else DEPS_LOCK
+path.append(str(_RT_DIR))
+
 
 if command == "deps":
     try:
@@ -50,20 +63,20 @@ if command == "deps":
                 "install",
                 "--upgrade",
                 "--target",
-                str(RT_DIR),
+                str(_RT_DIR),
                 "--requirement",
                 str(REQUIREMENTS),
             ),
             stdin=DEVNULL,
             stderr=stdout,
-            cwd=str(RT_DIR),
+            cwd=str(_RT_DIR),
         )
         if proc.returncode:
             print("Installation failed, check :message", file=stderr)
             exit(proc.returncode)
         else:
-            DEPS_LOCK.parent.mkdir(parents=True, exist_ok=True)
-            DEPS_LOCK.write_bytes(REQUIREMENTS.read_bytes())
+            _DEPS_LOCK.parent.mkdir(parents=True, exist_ok=True)
+            _DEPS_LOCK.write_bytes(REQUIREMENTS.read_bytes())
             msg = """
             ---
             This is not an error:
@@ -92,8 +105,8 @@ elif command == "run":
         exit(1)
     else:
         if (
-            not DEPS_LOCK.exists()
-            or DEPS_LOCK.read_text().strip() != REQUIREMENTS.read_text().strip()
+            not _DEPS_LOCK.exists()
+            or _DEPS_LOCK.read_text().strip() != REQUIREMENTS.read_text().strip()
         ):
             print(msg, end="", file=stderr)
             exit(1)

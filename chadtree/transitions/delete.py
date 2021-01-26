@@ -6,7 +6,7 @@ from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
 from typing import Callable, Iterable, Optional
 
 from pynvim.api import Nvim
-from pynvim_pp.api import get_cwd
+from pynvim_pp.api import ask_mc, get_cwd
 from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 
@@ -50,8 +50,12 @@ def _remove(
         )
 
         question = LANG("ask_trash", display_paths=display_paths)
-        resp: int = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
-        ans = resp == 1
+        ans = ask_mc(
+            nvim,
+            question=question,
+            answers=LANG("ask_yesno"),
+            answer_key={1: True, 2: False},
+        )
 
         if not ans:
             return None

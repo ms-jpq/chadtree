@@ -49,6 +49,7 @@ class _UserTheme:
     text_colour_set: Union[LSColoursEnum, TextColourSetEnum]
     discrete_colour_map: Mapping[str, str]
 
+
 @dataclass(frozen=True)
 class _UserView:
     open_direction: _OpenDirection
@@ -65,6 +66,7 @@ class _UserConfig:
     ignore: Ignored
     view: _UserView
     theme: _UserTheme
+    xdg: bool
 
 
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
@@ -126,6 +128,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         view=view_opts,
         width=view.width,
         win_local_opts=view.window_options,
+        xdg=config.xdg,
     )
 
     return settings

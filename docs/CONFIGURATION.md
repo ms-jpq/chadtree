@@ -11,8 +11,8 @@ let g:chadtree_settings = { ... }
 Lua:
 
 ```lua
-local chad_settings = { ... }
-vim.api.nvim_set_var("chadtree_settings", chad_settings)
+local chadtree_settings = { ... }
+vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
 ```
 
 ---
@@ -67,7 +67,21 @@ Will give you the following error message:
 
 ## Specifics
 
-The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/raw/chad/config/defaults.yml)
+The default configuration can be found under an [`yaml` file](https://github.com/ms-jpq/chadtree/tree/chad/config/defaults.yml)
+
+---
+
+### chadtree_settings.xdg
+
+Use `XDG` specifications for storing the CHADTree runtime and session files.
+
+If set to false, will store everything under repo location.
+
+**default:**
+
+```json
+false
+```
 
 ---
 
