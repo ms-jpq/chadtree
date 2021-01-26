@@ -20,7 +20,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
-from .shared.current import new_current_file, new_root
+from .shared.current import maybe_path_above, new_current_file
 from .shared.open_file import open_file
 from .shared.wm import (
     find_current_buffer_name,
@@ -120,19 +120,20 @@ def _open(
                 write(nvim, LANG("path not exist", path=path))
                 return None
             else:
-                _open_fm_window(nvim, state=state, settings=settings, opts=opts)
+                new_state = (
+                    maybe_path_above(nvim, state=state, settings=settings, path=path)
+                    or state
+                )
+                _open_fm_window(nvim, state=new_state, settings=settings, opts=opts)
                 if isdir(path):
-                    new_state = new_root(
-                        nvim, state=state, settings=settings, new_cwd=path
-                    )
-                    return Stage(new_state)
+                    return Stage(new_state, focus=path)
                 else:
                     click_type = (
                         ClickType.primary if opts.toggle else ClickType.secondary
                     )
                     return open_file(
                         nvim,
-                        state=state,
+                        state=new_state,
                         settings=settings,
                         path=path,
                         click_type=click_type,

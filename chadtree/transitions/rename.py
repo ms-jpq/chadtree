@@ -1,5 +1,4 @@
-from itertools import chain
-from os.path import abspath, dirname, exists, join, relpath
+from os.path import abspath, exists, join, relpath
 from typing import Optional
 
 from pynvim import Nvim

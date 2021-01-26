@@ -33,7 +33,7 @@ def new_current_file(
 
 
 def new_root(nvim: Nvim, state: State, settings: Settings, new_cwd: str) -> State:
-    index = state.index | {new_cwd}
+    index = state.index | ancestors(new_cwd) | {new_cwd}
     root = new(new_cwd, index=index)
     selection = {path for path in state.selection if root.path in ancestors(path)}
     return forward(
