@@ -66,6 +66,7 @@ if command == "deps":
                 str(_RT_DIR),
                 "--requirement",
                 str(REQUIREMENTS),
+                "--no-color",
             ),
             stdin=DEVNULL,
             stderr=stdout,
