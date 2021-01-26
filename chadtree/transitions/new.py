@@ -15,9 +15,8 @@ from ..state.next import forward
 from ..state.types import State
 from .shared.current import new_root
 from .shared.index import indices
-from .shared.open_file import open_file
 from .shared.refresh import refresh
-from .types import ClickType, Stage
+from .types import Stage
 
 
 @rpc(blocking=False)
