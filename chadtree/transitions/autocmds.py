@@ -3,6 +3,7 @@ from os.path import isfile
 from typing import Optional
 
 from pynvim import Nvim
+from pynvim.api.common import NvimError
 from pynvim_pp.api import get_cwd, win_close
 from pynvim_pp.float_win import list_floatwins
 
@@ -31,10 +32,13 @@ autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"
 
 @rpc(blocking=False)
 def _kill_float_wins(nvim: Nvim, state: State, settings: Settings) -> None:
-    wins = tuple(list_floatwins(nvim))
-    if len(wins) != 2:
-        for win in wins:
-            win_close(nvim, win=win)
+    try:
+        wins = tuple(list_floatwins(nvim))
+        if len(wins) != 2:
+            for win in wins:
+                win_close(nvim, win=win)
+    except NvimError:
+        pass
 
 
 autocmd("WinEnter") << f"lua {_kill_float_wins.name}()"
@@ -61,10 +65,13 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
     Follow buffer
     """
 
-    curr = find_current_buffer_name(nvim)
-    if isfile(curr):
-        return new_current_file(nvim, state=state, settings=settings, current=curr)
-    else:
+    try:
+        curr = find_current_buffer_name(nvim)
+        if isfile(curr):
+            return new_current_file(nvim, state=state, settings=settings, current=curr)
+        else:
+            return None
+    except NvimError:
         return None
 
 
