@@ -3,6 +3,7 @@ from os.path import abspath, dirname, exists, join
 from typing import Optional
 
 from pynvim import Nvim
+from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
@@ -33,7 +34,7 @@ def _new(
     else:
         parent = node.path if is_dir(node) else dirname(node.path)
 
-        child: Optional[str] = nvim.funcs.input(LANG("pencil"))
+        child = ask(nvim, question=LANG("pencil"), default="")
 
         if not child:
             return None

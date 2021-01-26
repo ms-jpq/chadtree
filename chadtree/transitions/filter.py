@@ -1,6 +1,7 @@
 from typing import Optional
 
 from pynvim import Nvim
+from pynvim_pp.api import ask
 
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -29,7 +30,9 @@ def _clear_filter(
 
 
 @rpc(blocking=False)
-def _filter(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+def _filter(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Update filter
     """
@@ -40,7 +43,8 @@ def _filter(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Op
     else:
         focus = node.path
         old_p = state.filter_pattern.pattern if state.filter_pattern else ""
-        pattern: Optional[str] = nvim.funcs.input(LANG("new_filter"), old_p)
+        pattern = ask(nvim, question=LANG("new_filter"), default=old_p)
+
         filter_pattern = FilterPattern(pattern=pattern) if pattern else None
         selection: Selection = state.selection if filter_pattern else set()
         new_state = forward(
