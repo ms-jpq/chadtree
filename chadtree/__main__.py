@@ -42,9 +42,11 @@ args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
 
 _RT_DIR = RT_DIR_XDG if args.xdg else RT_DIR
+
 _RT_DIR.mkdir(parents=True, exist_ok=True)
 _DEPS_LOCK = DEPS_LOCK_XDG if args.xdg else DEPS_LOCK
 path.append(str(_RT_DIR))
+
 
 if command == "deps":
     try:
