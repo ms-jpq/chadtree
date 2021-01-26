@@ -1,28 +1,37 @@
+from os import environ
+from pathlib import Path
+
 from chad_types import TOP_LEVEL
 
 WALK_PARALLELISM_FACTOR = 100
 FOLDER_MODE = 0o755
 FILE_MODE = 0o644
 
-
-_VARS = TOP_LEVEL / ".vars"
-
-
-RT_DIR = _VARS / "runtime"
 REQUIREMENTS = TOP_LEVEL / "requirements.txt"
-DEPS_LOCK = _VARS / "deps.lock"
-
 
 FM_FILETYPE = "CHADTree"
 FM_NAMESPACE = "chadtree_ns"
 FM_HL_PREFIX = "chadtree"
-
 
 DEFAULT_LANG = "en"
 LANG_ROOT = TOP_LEVEL / "locale"
 CONFIG_YML = TOP_LEVEL / "config" / "defaults.yml"
 SETTINGS_VAR = "chadtree_settings"
 
+"""
+STORAGE
+"""
+
+_VARS = TOP_LEVEL / ".vars"
+RT_DIR = _VARS / "runtime"
+DEPS_LOCK = _VARS / "deps.lock"
+SESSION_DIR = _VARS / "sessions"
+
+_XDG_DATA_DIR = Path(environ.get("XDG_DATA_HOME", _VARS))
+_XDG_VARS = _XDG_DATA_DIR / "chadtree"
+RT_DIR_XDG = _XDG_VARS / "runtime"
+DEPS_LOCK_XDG = _XDG_VARS / "deps.lock"
+SESSION_DIR_XDG = _XDG_VARS / "sessions"
 
 """
 Docs
@@ -56,10 +65,3 @@ THEME_URI = f"{_DOCS_URI_BASE}/{_THEME_md}"
 _MIGRATION_md = "MIGRATION.md"
 MIGRATION_MD = _DOCS_DIR / _MIGRATION_md
 MIGRATION_URI = f"{_DOCS_URI_BASE}/{_MIGRATION_md}"
-
-"""
-Sessions
-"""
-
-
-SESSION_DIR = _VARS / "sessions"

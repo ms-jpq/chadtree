@@ -24,7 +24,7 @@ def save_session(nvim: Nvim, state: State, settings: Settings) -> None:
     Save CHADTree state
     """
 
-    dump_session(state)
+    dump_session(state, use_xdg=settings.xdg)
 
 
 autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"

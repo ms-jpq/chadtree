@@ -14,8 +14,11 @@ return function(args)
     local job_id = nil
     local chad_params = {}
     local err_exit = false
+
     local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
     local py3 = go and _py3 or "python3"
+    local go, _settings = pcall(vim.api.nvim_get_var, "chadtree_settings")
+    local settings = _settings or {}
 
     local function defer(timeout, callback)
       local timer = vim.loop.new_timer()
@@ -61,7 +64,8 @@ return function(args)
       local args =
         vim.tbl_flatten {
         {"python3", "-m", "chadtree"},
-        {...}
+        {...},
+        (settings.xdg and {"--xdg"} or {})
       }
       local params = {
         cwd = cwd,
