@@ -1,5 +1,5 @@
 return function(args)
-  local top_lv = unpack(args)
+  local cwd = unpack(args)
 
   chad = chad or {}
   local linesep = "\n"
@@ -58,7 +58,6 @@ return function(args)
       local go, _settings = pcall(vim.api.nvim_get_var, "chadtree_settings")
       local settings = go and _settings or {}
 
-      local cwd = top_lv
       local args =
         vim.tbl_flatten {
         {py3, "-m", "chadtree"},
