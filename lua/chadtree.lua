@@ -35,7 +35,7 @@ return function(args)
         assert(not err, err)
         if data then
           (handlers.on_stdout or function()
-            end)(code)
+            end)(data)
         end
       end
     )
@@ -46,7 +46,7 @@ return function(args)
         assert(not err, err)
         if data then
           (handlers.on_stderr or function()
-            end)(code)
+            end)(data)
         end
       end
     )
@@ -94,7 +94,11 @@ return function(args)
     )
   end
 
-  local handlers = {on_exit = on_exit, on_stdout = on_stdout, on_stderr = on_stderr}
+  local handlers = {
+    on_exit = on_exit,
+    on_stdout = on_stdout,
+    on_stderr = on_stderr
+  }
 
   local function defer(timeout, callback)
     local timer = uv.new_timer()
