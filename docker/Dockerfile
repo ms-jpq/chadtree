@@ -17,4 +17,4 @@ COPY . /root/.config/nvim/plugged/chadtree/
 
 
 WORKDIR /root/.config/nvim/plugged/chadtree
-RUN python3 -m chadtree deps
+# RUN python3 -m chadtree deps

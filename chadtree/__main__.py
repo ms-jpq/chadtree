@@ -1,6 +1,5 @@
 from argparse import ArgumentParser, Namespace
-from shutil import which
-from subprocess import DEVNULL, CalledProcessError, run
+from subprocess import DEVNULL, run
 from sys import executable, path, stderr, stdout, version_info
 from textwrap import dedent
 from typing import Union
@@ -37,28 +36,24 @@ args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
 
 if command == "deps":
-    cmd = [executable, "-m", "pip"]
     try:
-        run(
-            cmd + ["--version", ],
-            check=True,
-            stdin=DEVNULL,
-            stderr=stdout,
-            cwd=str(RT_DIR),
-        )
-    except CalledProcessError as e:
-        print(f"{e}\nPlease install pip separately.", file=stderr)
+        import pip
+    except ImportError:
+        print("Please install pip separately.", file=stderr)
         exit(1)
     else:
         proc = run(
-            cmd + [
+            (
+                executable,
+                "-m",
+                "pip",
                 "install",
                 "--upgrade",
                 "--target",
                 str(RT_DIR),
                 "--requirement",
                 str(REQUIREMENTS),
-            ],
+            ),
             stdin=DEVNULL,
             stderr=stdout,
             cwd=str(RT_DIR),
