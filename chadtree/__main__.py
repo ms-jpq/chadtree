@@ -29,11 +29,14 @@ def parse_args() -> Namespace:
 
     s_deps = sub_parsers.add_parser("deps")
 
+    parser.add_argument("--xdg", action="store_true")
+
     return parser.parse_args()
 
 
 args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
+print(args, flush=True)
 
 if command == "deps":
     try:
