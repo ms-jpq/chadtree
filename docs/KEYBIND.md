@@ -263,7 +263,7 @@ ie. `uwu/owo/` under `unix` will create `uwu/` then `owo/` under it. Both are fo
 **default:**
 
 ```json
-["n"]
+["a"]
 ```
 
 ##### `chadtree_settings.keymap.rename`
