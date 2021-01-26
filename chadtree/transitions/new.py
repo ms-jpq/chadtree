@@ -13,7 +13,7 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
-from .shared.current import new_root
+from .shared.current import maybe_path_above
 from .shared.index import indices
 from .shared.refresh import refresh
 from .types import Stage
@@ -50,15 +50,15 @@ def _new(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
-                    new_parent = dirname(path)
-                    if new_parent in state.root.ancestors:
-                        new_state = new_root(
-                            nvim, state=state, settings=settings, new_cwd=new_parent
+                    new_state = (
+                        maybe_path_above(
+                            nvim, state=state, settings=settings, path=path
                         )
-                    else:
-                        paths = ancestors(path)
-                        index = state.index | paths
-                        new_state = forward(
-                            state, settings=settings, index=index, paths=paths
-                        )
-                    return Stage(new_state, focus=path)
+                        or state
+                    )
+                    paths = ancestors(path)
+                    index = state.index | paths
+                    next_state = forward(
+                        new_state, settings=settings, index=index, paths=paths
+                    )
+                    return Stage(next_state, focus=path)
