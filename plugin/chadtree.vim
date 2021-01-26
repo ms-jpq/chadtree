@@ -12,5 +12,5 @@ function CHADon_stderr(_, msg, __)
 endfunction
 
 
-let s:chad_top = resolve(expand('<sfile>:p:h:h'))
-call luaeval('require("chadtree")(...)', [s:chad_top])
+let s:top_level = resolve(expand('<sfile>:p:h:h'))
+call luaeval('require("chadtree")(...)', [s:top_level])
