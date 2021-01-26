@@ -2,7 +2,7 @@ FROM ubuntu:focal
 
 ENV TERM=xterm-256color
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip neovim git wget && \
+    apt-get install -y python3-pip neovim git wget && \
     rm -rf /var/lib/apt/lists/*
 
 
