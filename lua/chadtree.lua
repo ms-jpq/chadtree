@@ -37,6 +37,8 @@ return function(args)
       if not (code == 0 or code == 143) then
         err_exit = true
         vim.api.nvim_err_writeln(msg)
+      else:
+        err_exit = false
       end
       job_id = nil
       for _, param in ipairs(chad_params) do
