@@ -40,10 +40,14 @@ class _Args:
 def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
     parser.add_argument("path", nargs="?")
-    parser.add_argument(
+
+    focus_group = parser.add_mutually_exclusive_group()
+    focus_group.add_argument(
         "--always-focus", dest="toggle", action="store_false", default=True
     )
-    parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
+    focus_group.add_argument(
+        "--nofocus", dest="focus", action="store_false", default=True
+    )
 
     ns = parser.parse_args(args=args)
     opts = _Args(path=ns.path, toggle=ns.toggle, focus=ns.focus)
