@@ -131,3 +131,4 @@ view:
     signcolumn: "no"
     winfixwidth: true
     wrap: false
+xdg: False
