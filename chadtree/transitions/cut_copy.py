@@ -5,7 +5,7 @@ from os.path import basename, dirname, exists, join
 from typing import AbstractSet, Callable, Mapping, MutableMapping, Optional
 
 from pynvim.api import Nvim
-from pynvim_pp.api import get_cwd
+from pynvim_pp.api import ask_mc, get_cwd
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
@@ -91,8 +91,12 @@ def _operation(
             )
 
             question = LANG("confirm op", operation=op_name, paths=msg)
-            resp = nvim.funcs.confirm(question, LANG("ask_yesno"), 2)
-            ans = resp == 1
+            ans = ask_mc(
+                nvim,
+                question=question,
+                answers=LANG("ask_yesno"),
+                answer_key={1: True, 2: False},
+            )
 
             if not ans:
                 return None
