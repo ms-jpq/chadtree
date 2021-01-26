@@ -68,7 +68,8 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
     try:
         curr = find_current_buffer_name(nvim)
         if isfile(curr):
-            return new_current_file(nvim, state=state, settings=settings, current=curr)
+            stage = new_current_file(nvim, state=state, settings=settings, current=curr)
+            return Stage(state=stage.state, focus=stage.focus, silent=True)
         else:
             return None
     except NvimError:
