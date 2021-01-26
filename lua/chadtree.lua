@@ -112,3 +112,4 @@ return function(args)
     set_chad_call("help_cmd", "CHADhelp")
     vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.help_cmd(<f-args>)]]
   end
+end
