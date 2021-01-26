@@ -63,7 +63,7 @@ return function(args)
       local cwd = "/" .. top_lv
       local args =
         vim.tbl_flatten {
-        {"python3", "-m", "chadtree"},
+        {py3, "-m", "chadtree"},
         {...},
         (settings.xdg and {"--xdg"} or {})
       }
