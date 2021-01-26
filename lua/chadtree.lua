@@ -133,17 +133,19 @@ return function(args)
     local err_exit = false
 
     handlers.on_exit = function(code)
-      local msg = " | CHADTree EXITED - " .. code
-      if not (code == 0 or code == 143) then
-        err_exit = true
-        vim.api.nvim_err_writeln(msg)
-      else
-        err_exit = false
-      end
-      job_id = nil
-      for _, param in ipairs(chad_params) do
-        chad[chad_params] = nil
-      end
+      vim.schedule(function ()
+        local msg = " | CHADTree EXITED - " .. code
+        if not (code == 0 or code == 143) then
+          err_exit = true
+          vim.api.nvim_err_writeln(msg)
+        else
+          err_exit = false
+        end
+        job_id = nil
+        for _, param in ipairs(chad_params) do
+          chad[chad_params] = nil
+        end
+      end)
     end
 
     local start = function(...)
