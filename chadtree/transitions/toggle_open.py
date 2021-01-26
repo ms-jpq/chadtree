@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional, Sequence
 
 from pynvim import Nvim
@@ -32,7 +33,7 @@ from .types import Stage
 
 @dataclass(frozen=True)
 class _Args:
-    path: Optional[str]
+    path: Optional[Path]
     toggle: bool
     focus: bool
 
@@ -50,7 +51,8 @@ def _parse_args(args: Sequence[str]) -> _Args:
     )
 
     ns = parser.parse_args(args=args)
-    opts = _Args(path=ns.path, toggle=ns.toggle, focus=ns.focus)
+    path = Path(ns.path) if ns.path else None
+    opts = _Args(path=path, toggle=ns.toggle, focus=ns.focus)
     return opts
 
 
@@ -107,11 +109,11 @@ def _open(
         write(nvim, e, error=True)
         return None
     else:
-        curr = find_current_buffer_name(nvim)
         _open_fm_window(nvim, state=state, settings=settings, opts=opts)
 
-        stage = new_current_file(nvim, state=state, settings=settings, current=curr)
-        if stage:
-            return stage
+        if opts.path:
+            pass
         else:
-            return Stage(state)
+            curr = find_current_buffer_name(nvim)
+            stage = new_current_file(nvim, state=state, settings=settings, current=curr)
+            return stage if stage else Stage(state)
