@@ -3,7 +3,7 @@ from pathlib import PurePath
 from typing import AbstractSet, Optional
 
 from pynvim import Nvim
-from std2.pathlib import longest_common_path
+from std2.pathlib import longest_common_path, is_relative_to
 
 from ...fs.cartographer import new
 from ...fs.ops import ancestors
@@ -51,7 +51,7 @@ def maybe_path_above(
     nvim: Nvim, state: State, settings: Settings, path: str
 ) -> Optional[State]:
     root = state.root.path
-    if PurePath(path).is_relative_to(root):
+    if is_relative_to(path, root):
         return None
     else:
         lcp = longest_common_path(path, root)
