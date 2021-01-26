@@ -26,6 +26,10 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 
 `:CHADopen` will toggle CHADTree open / close
 
+`CHADopen <path>` will open at `<path>`
+
+`:CHADopen --always-focus` will disable toggle if already opened
+
 `:CHADopen --nofocus` will open CHADTree without giving the sidebar focus
 
 ### `CHADdeps`
@@ -35,3 +39,5 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 Dependencies will be privately installed inside CHADTree's git root under `.vars/runtime`.
 
 Running `rm -rf` on `chadtree/` will cleanly remove everything CHADTree installs to your local system.
+
+**Note: `:CHADdeps` if successful, will say "error blah", "You can now use `:CHADopen`", this is normal**

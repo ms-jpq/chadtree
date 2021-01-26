@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+from os.path import exists, isabs, isdir, join, realpath
 from typing import Optional, Sequence
 
 from pynvim import Nvim
 from pynvim.api import Window
 from pynvim_pp.api import (
     cur_win,
+    get_cwd,
     list_wins,
     set_cur_win,
     win_close,
@@ -15,9 +17,11 @@ from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
 
 from ..registry import rpc
+from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
-from .shared.current import new_current_file
+from .shared.current import new_current_file, new_root
+from .shared.open_file import open_file
 from .shared.wm import (
     find_current_buffer_name,
     find_fm_buffers,
@@ -27,20 +31,30 @@ from .shared.wm import (
     new_window,
     resize_fm_windows,
 )
-from .types import Stage
+from .types import ClickType, Stage
 
 
 @dataclass(frozen=True)
 class _Args:
+    path: Optional[str]
+    toggle: bool
     focus: bool
 
 
 def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
-    parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
+    parser.add_argument("path", nargs="?")
+
+    focus_group = parser.add_mutually_exclusive_group()
+    focus_group.add_argument(
+        "--always-focus", dest="toggle", action="store_false", default=True
+    )
+    focus_group.add_argument(
+        "--nofocus", dest="focus", action="store_false", default=True
+    )
 
     ns = parser.parse_args(args=args)
-    opts = _Args(focus=ns.focus)
+    opts = _Args(path=ns.path, toggle=ns.toggle, focus=ns.focus)
     return opts
 
 
@@ -58,17 +72,16 @@ def _ensure_side_window(
         resize_fm_windows(nvim, state.width)
 
 
-def _toggle_fm_window(
-    nvim: Nvim, state: State, settings: Settings, opts: _Args
-) -> None:
+def _open_fm_window(nvim: Nvim, state: State, settings: Settings, opts: _Args) -> None:
     cwin = cur_win(nvim)
     win = next(find_fm_windows_in_tab(nvim), None)
     if win:
-        wins = list_wins(nvim)
-        if len(wins) <= 1:
-            pass
+        if opts.toggle:
+            wins = list_wins(nvim)
+            if len(wins) > 1:
+                win_close(nvim, win=win)
         else:
-            win_close(nvim, win=win)
+            set_cur_win(nvim, win=win)
     else:
         buf = next(find_fm_buffers(nvim), None)
         if buf is None:
@@ -98,11 +111,31 @@ def _open(
         write(nvim, e, error=True)
         return None
     else:
-        curr = find_current_buffer_name(nvim)
-        _toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
-
-        stage = new_current_file(nvim, state=state, settings=settings, current=curr)
-        if stage:
-            return stage
+        raw_path = opts.path
+        if raw_path:
+            path = realpath(
+                raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
+            )
+            if not exists(path):
+                write(nvim, LANG("path not exist", path=path))
+                return None
+            else:
+                _open_fm_window(nvim, state=state, settings=settings, opts=opts)
+                if isdir(path):
+                    new_state = new_root(
+                        nvim, state=state, settings=settings, new_cwd=path
+                    )
+                    return Stage(new_state)
+                else:
+                    return open_file(
+                        nvim,
+                        state=state,
+                        settings=settings,
+                        path=path,
+                        click_type=ClickType.primary,
+                    )
         else:
-            return Stage(state)
+            _open_fm_window(nvim, state=state, settings=settings, opts=opts)
+            curr = find_current_buffer_name(nvim)
+            stage = new_current_file(nvim, state=state, settings=settings, current=curr)
+            return stage if stage else Stage(state)
