@@ -32,15 +32,21 @@ from .types import Stage
 
 @dataclass(frozen=True)
 class _Args:
+    path: Optional[str]
+    toggle: bool
     focus: bool
 
 
 def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
+    parser.add_argument("path", nargs="?")
+    parser.add_argument(
+        "--always-focus", dest="toggle", action="store_false", default=True
+    )
     parser.add_argument("--nofocus", dest="focus", action="store_false", default=True)
 
     ns = parser.parse_args(args=args)
-    opts = _Args(focus=ns.focus)
+    opts = _Args(path=ns.path, toggle=ns.toggle, focus=ns.focus)
     return opts
 
 
@@ -58,17 +64,16 @@ def _ensure_side_window(
         resize_fm_windows(nvim, state.width)
 
 
-def _toggle_fm_window(
-    nvim: Nvim, state: State, settings: Settings, opts: _Args
-) -> None:
+def _open_fm_window(nvim: Nvim, state: State, settings: Settings, opts: _Args) -> None:
     cwin = cur_win(nvim)
     win = next(find_fm_windows_in_tab(nvim), None)
     if win:
-        wins = list_wins(nvim)
-        if len(wins) <= 1:
-            pass
+        if opts.toggle:
+            wins = list_wins(nvim)
+            if len(wins) > 1:
+                win_close(nvim, win=win)
         else:
-            win_close(nvim, win=win)
+            set_cur_win(nvim, win=win)
     else:
         buf = next(find_fm_buffers(nvim), None)
         if buf is None:
@@ -99,7 +104,7 @@ def _open(
         return None
     else:
         curr = find_current_buffer_name(nvim)
-        _toggle_fm_window(nvim, state=state, settings=settings, opts=opts)
+        _open_fm_window(nvim, state=state, settings=settings, opts=opts)
 
         stage = new_current_file(nvim, state=state, settings=settings, current=curr)
         if stage:
