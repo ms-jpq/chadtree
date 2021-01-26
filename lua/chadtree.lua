@@ -1,7 +1,5 @@
 return function(args)
-  local sfile = unpack(args)
-  local filepath = "/plugin/chadtree.vim"
-  local top_lv = string.sub(sfile, 2, #sfile - #filepath)
+  local top_lv = unpack(args)
 
   chad = chad or {}
   local linesep = "\n"

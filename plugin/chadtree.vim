@@ -12,4 +12,4 @@ function CHADon_stderr(_, msg, __)
 endfunction
 
 
-call luaeval('require("chadtree")(...)', [expand('<sfile>')])
+call luaeval('require("chadtree")(...)', [expand('<sfile>:p:h:h')])
