@@ -1,7 +1,6 @@
 from argparse import ArgumentParser, Namespace
-from shutil import which
 from subprocess import DEVNULL, run
-from sys import path, stderr, stdout, version_info
+from sys import executable, path, stderr, stdout, version_info
 from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
@@ -37,14 +36,17 @@ args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
 
 if command == "deps":
-    cmd = "pip3"
-    if not which(cmd):
-        print("Cannot find pip3! Please install pip3 separately", file=stderr)
+    try:
+        import pip
+    except ImportError:
+        print("Please install pip separately.", file=stderr)
         exit(1)
     else:
         proc = run(
             (
-                cmd,
+                executable,
+                "-m",
+                "pip",
                 "install",
                 "--upgrade",
                 "--target",
