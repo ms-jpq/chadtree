@@ -100,8 +100,6 @@ You will have to run `:CHADdeps` when installing / updating. This will install C
 
 doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
 
-**Note: `:CHADdeps` if successful, will say "error blah", "You can now use `:CHADopen`", this is normal**
-
 ## Usage
 
 To toggle CHADTree run command `:CHADopen`. Set it to a hotkey for convenience.

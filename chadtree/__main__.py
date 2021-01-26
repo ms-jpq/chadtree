@@ -64,7 +64,13 @@ if command == "deps":
         else:
             DEPS_LOCK.parent.mkdir(parents=True, exist_ok=True)
             DEPS_LOCK.write_bytes(REQUIREMENTS.read_bytes())
-            print("You can now use :CHADopen", file=stderr)
+            msg = """
+            ---
+            This is not an error:
+            You can now use :CHADopen
+            """
+            msg = dedent(msg)
+            print(msg, file=stderr)
 
 elif command == "run":
     msg = """
