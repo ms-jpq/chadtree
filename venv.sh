@@ -25,4 +25,11 @@ fi
 
 
 export PATH="$PREPEND/runtime/bin:$PATH"
-exec "$@"
+
+if [[ -x "$1"  ]]
+then
+  shift
+  exec python3 "$@"
+else
+  exec "$@"
+fi

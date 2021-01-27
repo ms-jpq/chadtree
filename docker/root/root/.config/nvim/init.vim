@@ -14,5 +14,7 @@ call plug#begin('~/.config/nvim/plugged')
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 call plug#end()
 
+
+let g:python3_host_prog='/usr/bin/python3'
 let mapleader=' '
 nnoremap <leader>v <cmd>CHADopen<cr>
