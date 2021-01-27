@@ -67,6 +67,7 @@ class _UserConfig:
     view: _UserView
     theme: _UserTheme
     xdg: bool
+    profiling: bool
 
 
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
@@ -79,7 +80,9 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     user_config = nvim.vars.get(SETTINGS_VAR, {})
     config: _UserConfig = decode(
         _UserConfig,
-        merge(safe_load(CONFIG_YML.read_text("UTF-8")), hydrate(user_config), replace=True),
+        merge(
+            safe_load(CONFIG_YML.read_text("UTF-8")), hydrate(user_config), replace=True
+        ),
     )
     options, view, theme = config.options, config.view, config.theme
 
@@ -129,6 +132,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         width=view.width,
         win_local_opts=view.window_options,
         xdg=config.xdg,
+        profiling=config.profiling,
     )
 
     return settings

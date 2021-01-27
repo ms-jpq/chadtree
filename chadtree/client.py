@@ -1,13 +1,19 @@
 from asyncio.events import AbstractEventLoop
 from contextlib import nullcontext, suppress
-from sys import stderr
-from typing import Any, MutableMapping, Optional, cast
+from multiprocessing import cpu_count
 from os import linesep
+from pathlib import Path
+from platform import uname
+from sys import executable, stderr
+from textwrap import dedent
+from time import monotonic
+from typing import Any, MutableMapping, Optional, cast
+
 from pynvim import Nvim
 from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
-from pynvim_pp.lib import threadsafe_call
+from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 from std2.pickle import DecodeError
@@ -62,11 +68,13 @@ class ChadClient(Client):
         except Exception as e:
             log.exception("%s", e)
             return 1
+        else:
+            settings = cast(Settings, self._settings)
+            t1, has_drawn = monotonic(), False
 
         def sched() -> None:
-            period = cast(Settings, self._settings).polling_rate
             enqueue_event(vc_refresh)
-            for _ in ticker(period, immediately=False):
+            for _ in ticker(settings.polling_rate, immediately=False):
                 enqueue_event(schedule_update)
                 enqueue_event(vc_refresh)
                 enqueue_event(save_session)
@@ -79,14 +87,29 @@ class ChadClient(Client):
             handler = self._handlers.get(name, nil_handler(name))
 
             def cont() -> None:
+                nonlocal has_drawn
                 stage = cast(AnyFun[Optional[Stage]], handler)(
-                    nvim, self._state, self._settings, *args
+                    nvim, self._state, settings, *args
                 )
                 if stage:
                     self._state = stage.state
                     mgr = suppress(NvimError) if stage.silent else nullcontext()
                     with mgr:
                         redraw(nvim, state=self._state, focus=stage.focus)
+                        if settings.profiling and not has_drawn:
+                            has_drawn = True
+                            t2 = monotonic()
+                            info = uname()
+                            msg = f"""
+                            First msg  {int((t2 - t1) * 1000)}ms
+                            Arch       {info.machine}
+                            Processor  {info.processor}
+                            Cores      {cpu_count()}
+                            System     {info.system}
+                            Version    {info.version}
+                            Python     {Path(executable).resolve()}
+                            """
+                            write(nvim, dedent(msg))
 
             try:
                 threadsafe_call(nvim, cont)

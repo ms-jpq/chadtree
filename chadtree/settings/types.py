@@ -33,3 +33,4 @@ class Settings:
     view: ViewOptions
     width: int
     win_local_opts: Mapping[str, Union[bool, str]]
+    profiling: bool

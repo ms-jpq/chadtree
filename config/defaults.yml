@@ -1,4 +1,5 @@
 ---
+profiling: false
 ignore:
   name_exact:
     - .DS_Store
@@ -131,4 +132,4 @@ view:
     signcolumn: "no"
     winfixwidth: true
     wrap: false
-xdg: False
+xdg: false
