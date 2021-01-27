@@ -84,9 +84,12 @@ return function(args)
 
     local set_chad_call = function(name, cmd)
       table.insert(chad_params, name)
-      local time_acc = 0
+      local t1 = 0
       chad[name] = function(...)
         local args = {...}
+        if t1 == 0 then
+          t1 = vim.loop.now()
+        end
 
         if not job_id then
           local server = vim.api.nvim_call_function("serverstart", {})
@@ -95,7 +98,8 @@ return function(args)
 
         if not err_exit and _G[cmd] then
           _G[cmd](args)
-          print(time_acc .. "ms")
+          t2 = vim.loop.now()
+          print(t2 - t1)
         else
           defer(
             POLLING_RATE,
@@ -103,7 +107,6 @@ return function(args)
               if err_exit then
                 return
               else
-                time_acc = time_acc + POLLING_RATE
                 chad[name](unpack(args))
               end
             end
