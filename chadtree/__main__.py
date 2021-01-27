@@ -1,9 +1,9 @@
 from argparse import ArgumentParser, Namespace
 from os import name
+from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import executable, stderr, stdout, version_info
 from textwrap import dedent
-from typing import Union
 from webbrowser import open as open_w
 
 from .consts import MIGRATION_URI, REQUIREMENTS, RT_DIR, RT_DIR_XDG, RT_PY, RT_PY_XDG
@@ -12,14 +12,12 @@ if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
     print(msg, end="", file=stderr)
     open_w(MIGRATION_URI)
-
-
-from typing import Literal
+    exit(1)
 
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-
+    parser.add_argument("--python")
     sub_parsers = parser.add_subparsers(dest="command", required=True)
 
     s_run = sub_parsers.add_parser("run")
@@ -34,7 +32,8 @@ def parse_args() -> Namespace:
 
 is_win = name == "nt"
 args = parse_args()
-command: Union[Literal["deps"], Literal["run"]] = args.command
+py3 = Path(args.python) if args.python else None
+command: str = args.command
 
 use_xdg = False if is_win else args.xdg
 _RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
@@ -61,7 +60,7 @@ if command == "deps":
     else:
         proc = run(
             (
-                _RT_PY,
+                py3 or _RT_PY,
                 "-m",
                 "pip",
                 "install",
