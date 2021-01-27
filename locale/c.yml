@@ -22,6 +22,7 @@
 
 "path not exist": |-
   !! Path does not exist: ${path}
+
 "operation not permitted on root": |-
   Operation not permitted on root or parent(s) of root
 
