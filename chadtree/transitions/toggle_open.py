@@ -20,6 +20,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
+from ..version_ctl.git import root as version_ctl_toplv
 from .shared.current import maybe_path_above, new_current_file
 from .shared.wm import (
     find_current_buffer_name,
@@ -36,6 +37,7 @@ from .types import Stage
 @dataclass(frozen=True)
 class _Args:
     path: Optional[str]
+    version_ctl: bool
     toggle: bool
     focus: bool
 
@@ -43,6 +45,7 @@ class _Args:
 def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
     parser.add_argument("path", nargs="?")
+    parser.add_argument("--version-ctl", action="store_true")
 
     focus_group = parser.add_mutually_exclusive_group()
     focus_group.add_argument(
@@ -53,7 +56,12 @@ def _parse_args(args: Sequence[str]) -> _Args:
     )
 
     ns = parser.parse_args(args=args)
-    opts = _Args(path=ns.path, toggle=False if ns.path else ns.toggle, focus=ns.focus)
+    opts = _Args(
+        path=ns.path,
+        version_ctl=ns.version_ctl,
+        toggle=False if ns.path else ns.toggle,
+        focus=ns.focus,
+    )
     return opts
 
 
@@ -110,7 +118,7 @@ def _open(
         write(nvim, e, error=True)
         return None
     else:
-        raw_path = opts.path
+        raw_path = version_ctl_toplv(state.root.path) if opts.version_ctl else opts.path
         if raw_path:
             path = realpath(
                 raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
