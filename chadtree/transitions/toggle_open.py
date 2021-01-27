@@ -123,7 +123,7 @@ def _open(
         if opts.version_ctl:
             if which("git"):
                 try:
-                    raw_path = version_ctl_toplv(state.root.path)
+                    raw_path: Optional[str] = version_ctl_toplv(state.root.path)
                 except CalledProcessError:
                     write(nvim, LANG("cannot find version ctl root"), error=True)
                     return None
