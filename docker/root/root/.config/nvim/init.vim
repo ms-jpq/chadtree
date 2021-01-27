@@ -15,6 +15,7 @@ Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
 call plug#end()
 
 
-let g:python3_host_prog='/usr/bin/python3'
+let g:python3_host_prog = '/usr/bin/python3'
+let g:chadtree_settings = {'profiling': v:true}
 let mapleader=' '
 nnoremap <leader>v <cmd>CHADopen<cr>
