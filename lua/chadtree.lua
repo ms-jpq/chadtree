@@ -104,7 +104,7 @@ return function(args)
           _G[cmd](args)
           t2 = vim.loop.now()
           if settings().profiling and t1 >= 0 then
-            print((t2 - t1) .. "ms")
+            print("Init       " .. (t2 - t1) .. "ms")
           end
           t1 = -1
         else

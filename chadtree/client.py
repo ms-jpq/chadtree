@@ -101,7 +101,7 @@ class ChadClient(Client):
                             t2 = monotonic()
                             info = uname()
                             msg = f"""
-                            {int((t2 - t1) * 1000)}ms
+                            First msg  {int((t2 - t1) * 1000)}ms
                             Arch       {info.machine}
                             Processor  {info.processor}
                             Cores      {cpu_count()}
