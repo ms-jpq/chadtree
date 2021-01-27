@@ -1,4 +1,4 @@
 cd /D "%~dp0"
-set path=%PATH%
+set path="%PATH%;%cd%\.vars\runtime\bin"
 
-$*
+echo "%path%"
