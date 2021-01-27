@@ -100,6 +100,7 @@ return function(args)
           _G[cmd](args)
           t2 = vim.loop.now()
           print(t2 - t1)
+          t1 = 0
         else
           defer(
             POLLING_RATE,
