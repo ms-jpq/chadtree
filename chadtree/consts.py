@@ -25,16 +25,14 @@ STORAGE
 _VARS = TOP_LEVEL / ".vars"
 RT_DIR = _VARS / "runtime"
 RT_PY = (
-    str(RT_DIR / "Scripts" / "python.exe")
-    if name == "nt"
-    else str(RT_DIR / "bin" / "python3")
+    RT_DIR / "Scripts" / "python.exe" if name == "nt" else RT_DIR / "bin" / "python3"
 )
 SESSION_DIR = _VARS / "sessions"
 
 _XDG_DATA_DIR = Path(environ.get("XDG_DATA_HOME", _VARS))
 _XDG_VARS = _XDG_DATA_DIR / "nvim" / "chadtree"
 RT_DIR_XDG = _XDG_VARS / "runtime"
-RT_PY_XDG = str(RT_DIR_XDG / "bin" / "python3")
+RT_PY_XDG = RT_DIR_XDG / "bin" / "python3"
 SESSION_DIR_XDG = _XDG_VARS / "sessions"
 
 """

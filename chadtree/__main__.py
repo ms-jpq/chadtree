@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, Namespace
 from os import name
+from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import executable, stderr, stdout, version_info
 from textwrap import dedent
@@ -53,7 +54,7 @@ if command == "deps":
                 system_site_packages=False,
                 with_pip=True,
                 upgrade=True,
-                symlinks=not is_win,
+                symlinks=False,
                 clear=True,
             ).create(_RT_DIR)
     except (ImportError, SystemExit):
@@ -62,7 +63,7 @@ if command == "deps":
     else:
         proc = run(
             (
-                _RT_PY,
+                str(_RT_PY),
                 "-m",
                 "pip",
                 "install",
@@ -87,7 +88,7 @@ if command == "deps":
 
 elif command == "run":
     try:
-        if executable != _RT_PY:
+        if Path(executable).resolve() != _RT_PY:
             raise RuntimeError()
         else:
             import pynvim
