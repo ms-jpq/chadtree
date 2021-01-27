@@ -5,3 +5,4 @@ set path=%cd%\.vars\runtime\bin;%PATH%
 
 
 echo %path%
+echo $*
