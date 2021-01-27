@@ -53,12 +53,12 @@ return function(args)
     end
 
     local start = function(...)
-      local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
-      local py3 = go and _py3 or "python3"
-      local go, _settings = pcall(vim.api.nvim_get_var, "chadtree_settings")
-      local settings = go and _settings or {}
       local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
 
+      local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
+      local py3 = go and _py3 or (is_win and "python" or "python3")
+      local go, _settings = pcall(vim.api.nvim_get_var, "chadtree_settings")
+      local settings = go and _settings or {}
       local main = cwd .. (is_win and [[\venv.bat]] or "/venv.sh")
 
       local args =
