@@ -1,6 +1,7 @@
 autocmd VimEnter * silent! autocmd! FileExplorer
 silent! autocmd! FileExplorer
 
+
 function CHADon_exit(_, code, __)
   call luaeval('chad.on_exit(...)', [a:code])
 endfunction

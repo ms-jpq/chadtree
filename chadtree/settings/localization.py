@@ -40,5 +40,7 @@ def init(code: Optional[str]) -> None:
         else (LANG_ROOT / DEFAULT_LANG).with_suffix(".yml")
     )
 
-    specs: Mapping[str, str] = decode(Mapping[str, str], safe_load(yml_path.open()))
+    specs: Mapping[str, str] = decode(
+        Mapping[str, str], safe_load(yml_path.read_text("UTF-8"))
+    )
     LANG._specs.update(specs)

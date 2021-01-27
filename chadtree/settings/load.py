@@ -74,12 +74,12 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
-    artifacts: Artifact = decode(Artifact, safe_load(ARTIFACT.read_bytes()))
+    artifacts: Artifact = decode(Artifact, safe_load(ARTIFACT.read_text("UTF-8")))
 
     user_config = nvim.vars.get(SETTINGS_VAR, {})
     config: _UserConfig = decode(
         _UserConfig,
-        merge(safe_load(CONFIG_YML.read_bytes()), hydrate(user_config), replace=True),
+        merge(safe_load(CONFIG_YML.read_text("UTF-8")), hydrate(user_config), replace=True),
     )
     options, view, theme = config.options, config.view, config.theme
 

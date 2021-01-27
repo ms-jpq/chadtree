@@ -1,4 +1,6 @@
+setuptools
+wheel
 git+https://github.com/ms-jpq/std2.git@a42443ea6de414a846a75a704feba6d06fa04146
-git+https://github.com/ms-jpq/pynvim_pp.git@48173fd7b75c844d2a6d0b8d3e9d0c13022cb6f5
+git+https://github.com/ms-jpq/pynvim_pp.git@52ad6dc45be8bd1e6407c6d38d46da041e5d2b43
 pynvim==0.4.2
 PyYAML==5.3.1
