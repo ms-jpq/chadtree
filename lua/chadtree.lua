@@ -59,7 +59,7 @@ return function(args)
       local settings = go and _settings or {}
       local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
 
-      local main = cwd .. (is_win and [[\venv.ps1]] or "/venv.sh")
+      local main = cwd .. (is_win and [[\venv.bat]] or "/venv.sh")
 
       local args =
         vim.tbl_flatten {
