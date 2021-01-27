@@ -4,5 +4,4 @@ set path=%cd%\.vars\runtime\bin;%PATH%
 @echo on
 
 
-echo %path%
-echo %*
+%*
