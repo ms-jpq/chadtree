@@ -9,20 +9,20 @@ cd "$(dirname "$0")" || exit 1
 USE_XDG=0
 for arg in "$@"
 do
-  if [[ arg = '--xdg' ]]
+  if [[ "$arg" = '--xdg' ]]
   then
     USE_XDG=1
   fi
 done
 
 
-PREPEND="$PWD/.vars/runtime/bin"
+PREPEND="$PWD/.vars"
 if [[ "$USE_XDG" -ne 0 ]]
 then
-  PREPEND="${XDG_DATA_HOME:-"$PREPEND"}"
+  PREPEND="${XDG_DATA_HOME:-"$PWD"}/nvim/chadtree"
   mkdir -p "$PREPEND"
 fi
 
 
-export PATH="$PREPEND:$PATH"
+export PATH="$PREPEND/runtime/bin:$PATH"
 exec "$@"
