@@ -1,5 +1,4 @@
 from os.path import dirname
-from pathlib import PurePath
 from typing import AbstractSet, Optional
 
 from pynvim import Nvim

@@ -129,4 +129,4 @@ def _open(
             curr = find_current_buffer_name(nvim)
             stage = new_current_file(nvim, state=state, settings=settings, current=curr)
             _open_fm_window(nvim, state=state, settings=settings, opts=opts)
-            return stage if stage else Stage(state, focus=curr)
+            return Stage(stage.state, focus=curr) if stage else Stage(state, focus=curr)
