@@ -59,7 +59,7 @@ def _make_lightmode(colours: TextColours) -> TextColours:
 
 
 def load_text_decors() -> Tuple[IconGlyphSet, TextColourSet]:
-    yaml = safe_load(_ICON_BASE.read_bytes())
+    yaml = safe_load(_ICON_BASE.read_text("UTF-8"))
     json = loads(docker_run(_DOCKERFILE))
     data = merge(json, yaml)
     icon_spec: IconGlyphSet = decode(IconGlyphSet, data, strict=False)

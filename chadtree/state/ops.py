@@ -1,5 +1,5 @@
 from hashlib import sha1
-from json import dump, load
+from json import dumps, loads
 from pathlib import Path
 from typing import Any, Optional
 
@@ -17,8 +17,8 @@ def _session_path(cwd: str, use_xdg: bool) -> Path:
 
 def _load_json(path: Path) -> Optional[Any]:
     if path.exists():
-        with path.open(encoding="utf8") as fd:
-            return load(fd)
+        json = path.read_text("UTF-8")
+        return loads(json)
     else:
         return None
 
@@ -39,5 +39,5 @@ def dump_session(state: State, use_xdg: bool) -> None:
 
     path = _session_path(state.root.path, use_xdg=use_xdg)
     path.parent.mkdir(mode=FOLDER_MODE, parents=True, exist_ok=True)
-    with path.open("w") as fd:
-        dump(json, fd, ensure_ascii=False, check_circular=False, indent=2)
+    json = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
+    path.write_text(json, "UTF-8")
