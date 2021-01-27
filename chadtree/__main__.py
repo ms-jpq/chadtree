@@ -45,13 +45,16 @@ if command == "deps":
         from venv import EnvBuilder
 
         print("...", flush=True)
-        EnvBuilder(
-            system_site_packages=False,
-            with_pip=True,
-            upgrade=not is_win,
-            symlinks=not is_win,
-            clear=not is_win,
-        ).create(_RT_DIR)
+        if is_win and _RT_DIR.exists():
+            pass
+        else:
+            EnvBuilder(
+                system_site_packages=False,
+                with_pip=True,
+                upgrade=True,
+                symlinks=not is_win,
+                clear=True,
+            ).create(_RT_DIR)
     except (ImportError, SystemExit):
         print("Please install venv separately.", file=stderr)
         exit(1)
