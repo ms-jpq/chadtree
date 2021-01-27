@@ -15,6 +15,12 @@ return function(args)
     return timer
   end
 
+  local settings = function()
+    local go, _settings = pcall(vim.api.nvim_get_var, "chadtree_settings")
+    local settings = go and _settings or {}
+    return settings
+  end
+
   chad = chad or {}
   local linesep = "\n"
   local POLLING_RATE = 10
@@ -57,15 +63,13 @@ return function(args)
 
       local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
       local py3 = go and _py3 or (is_win and "python" or "python3")
-      local go, _settings = pcall(vim.api.nvim_get_var, "chadtree_settings")
-      local settings = go and _settings or {}
       local main = cwd .. (is_win and [[\venv.bat]] or "/venv.sh")
 
       local args =
         vim.tbl_flatten {
         {main, py3, "-m", "chadtree"},
         {...},
-        (settings.xdg and {"--xdg"} or {})
+        (settings().xdg and {"--xdg"} or {})
       }
       local params = {
         on_exit = "CHADon_exit",
@@ -99,7 +103,9 @@ return function(args)
         if not err_exit and _G[cmd] then
           _G[cmd](args)
           t2 = vim.loop.now()
-          print((t2 - t1) .. "ms")
+          if settings().profiling then
+            print((t2 - t1) .. "ms")
+          end
           t1 = 0
         else
           defer(
