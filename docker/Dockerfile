@@ -2,16 +2,11 @@ FROM ubuntu:focal
 
 ENV TERM=xterm-256color
 RUN apt-get update && \
-    apt-get install -y python3-venv neovim git wget && \
+    apt-get install -y python3-venv neovim git && \
     rm -rf /var/lib/apt/lists/*
 
 
-WORKDIR /root/.config/nvim
-RUN mkdir -p autoload && \
-    wget https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim --output-document=autoload/plug.vim && \
-    git clone --depth=1 https://github.com/ms-jpq/chadtree.git
-
-
+ADD https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim /root/.config/nvim/autoload/plug.vim
 COPY docker/root /
 COPY . /root/.config/nvim/plugged/chadtree/
 
