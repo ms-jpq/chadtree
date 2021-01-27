@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from os.path import exists, isabs, join, realpath
+from shutil import which
+from subprocess import CalledProcessError
 from typing import Optional, Sequence
 
 from pynvim import Nvim
@@ -118,7 +120,19 @@ def _open(
         write(nvim, e, error=True)
         return None
     else:
-        raw_path = version_ctl_toplv(state.root.path) if opts.version_ctl else opts.path
+        if opts.version_ctl:
+            if which("git"):
+                try:
+                    raw_path = version_ctl_toplv(state.root.path)
+                except CalledProcessError:
+                    write(nvim, LANG("cannot find version ctl root"), error=True)
+                    return None
+            else:
+                write(nvim, LANG("cannot find version ctl root"), error=True)
+                return None
+        else:
+            raw_path = opts.path
+
         if raw_path:
             path = realpath(
                 raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
