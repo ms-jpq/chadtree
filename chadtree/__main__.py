@@ -1,9 +1,9 @@
 from argparse import ArgumentParser, Namespace
 from os import name
-from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import executable, stderr, stdout, version_info
 from textwrap import dedent
+from typing import Union
 from webbrowser import open as open_w
 
 from .consts import MIGRATION_URI, REQUIREMENTS, RT_DIR, RT_DIR_XDG, RT_PY, RT_PY_XDG
@@ -15,8 +15,12 @@ if version_info < (3, 8, 2):
     exit(1)
 
 
+from typing import Literal
+
+
 def parse_args() -> Namespace:
     parser = ArgumentParser()
+
     sub_parsers = parser.add_subparsers(dest="command", required=True)
 
     s_run = sub_parsers.add_parser("run")
@@ -31,8 +35,7 @@ def parse_args() -> Namespace:
 
 is_win = name == "nt"
 args = parse_args()
-py3 = Path(args.python) if args.python else None
-command: str = args.command
+command: Union[Literal["deps"], Literal["run"]] = args.command
 
 use_xdg = False if is_win else args.xdg
 _RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
@@ -59,7 +62,7 @@ if command == "deps":
     else:
         proc = run(
             (
-                py3 or _RT_PY,
+                _RT_PY,
                 "-m",
                 "pip",
                 "install",
