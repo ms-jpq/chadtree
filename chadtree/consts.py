@@ -25,7 +25,7 @@ STORAGE
 _VARS = TOP_LEVEL / ".vars"
 RT_DIR = _VARS / "runtime"
 RT_PY = (
-    (RT_DIR / "Scripts" / "python3.exe")
+    str(RT_DIR / "Scripts" / "python3.exe")
     if name == "nt"
     else str(RT_DIR / "bin" / "python3")
 )
