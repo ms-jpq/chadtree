@@ -96,7 +96,7 @@ class ChadClient(Client):
                         if settings.profiling and not has_drawn:
                             has_drawn = True
                             t2 = monotonic()
-                            write(nvim, f"{round((t2 - t1) * 1000, 3)}ms")
+                            write(nvim, f"{int((t2 - t1) * 1000)}ms")
 
             try:
                 threadsafe_call(nvim, cont)
