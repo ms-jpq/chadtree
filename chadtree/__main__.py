@@ -32,10 +32,11 @@ def parse_args() -> Namespace:
     return parser.parse_args()
 
 
+is_win = name == "nt"
 args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
 
-use_xdg = False if name == "nt" else args.xdg
+use_xdg = False if is_win else args.xdg
 _RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
 _RT_PY = RT_PY_XDG if use_xdg else RT_PY
 
@@ -48,8 +49,8 @@ if command == "deps":
             system_site_packages=False,
             with_pip=True,
             upgrade=True,
-            symlinks=name != "nt",
-            clear=True,
+            symlinks=not is_win,
+            clear=not is_win,
         ).create(_RT_DIR)
     except (ImportError, SystemExit):
         print("Please install venv separately.", file=stderr)
