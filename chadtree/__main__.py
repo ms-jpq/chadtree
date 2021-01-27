@@ -35,8 +35,9 @@ def parse_args() -> Namespace:
 args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
 
-_RT_DIR = RT_DIR_XDG if args.xdg else RT_DIR
-_RT_PY = RT_PY_XDG if args.xdg else RT_PY
+use_xdg = False if name == "nt" else args.xdg
+_RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
+_RT_PY = RT_PY_XDG if use_xdg else RT_PY
 
 if command == "deps":
     try:

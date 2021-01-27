@@ -1,4 +1,4 @@
-from os import environ
+from os import environ, name
 from pathlib import Path
 
 from chad_types import TOP_LEVEL
@@ -24,7 +24,11 @@ STORAGE
 
 _VARS = TOP_LEVEL / ".vars"
 RT_DIR = _VARS / "runtime"
-RT_PY = str(RT_DIR / "bin" / "python3")
+RT_PY = (
+    (RT_DIR / "Scripts" / "python3.exe")
+    if name == "nt"
+    else str(RT_DIR / "bin" / "python3")
+)
 SESSION_DIR = _VARS / "sessions"
 
 _XDG_DATA_DIR = Path(environ.get("XDG_DATA_HOME", _VARS))
