@@ -41,8 +41,6 @@ class ChadClient(Client):
         return None
 
     def wait(self, nvim: Nvim) -> int:
-        t1, has_drawn = monotonic(), False
-
         def cont() -> None:
             if isinstance(nvim.loop, AbstractEventLoop):
                 nvim.loop.set_default_executor(pool)
@@ -68,6 +66,7 @@ class ChadClient(Client):
             return 1
         else:
             settings = cast(Settings, self._settings)
+            t1, has_drawn = monotonic(), False
 
         def sched() -> None:
             enqueue_event(vc_refresh)
