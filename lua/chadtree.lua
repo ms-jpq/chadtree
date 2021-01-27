@@ -99,7 +99,7 @@ return function(args)
         if not err_exit and _G[cmd] then
           _G[cmd](args)
           t2 = vim.loop.now()
-          print(t2 - t1)
+          print((t2 - t1) .. "ms")
           t1 = 0
         else
           defer(
