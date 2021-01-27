@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, Namespace
 from os import name
+from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import executable, stderr, stdout, version_info
 from textwrap import dedent
@@ -12,6 +13,7 @@ if version_info < (3, 8, 2):
     msg = "For python < 3.8.2 please install using the branch -- legacy"
     print(msg, end="", file=stderr)
     open_w(MIGRATION_URI)
+    exit(1)
 
 
 from typing import Literal
@@ -61,7 +63,7 @@ if command == "deps":
     else:
         proc = run(
             (
-                _RT_PY,
+                str(_RT_PY),
                 "-m",
                 "pip",
                 "install",
@@ -86,7 +88,7 @@ if command == "deps":
 
 elif command == "run":
     try:
-        if executable != _RT_PY:
+        if Path(executable) != _RT_PY:
             raise RuntimeError()
         else:
             import pynvim

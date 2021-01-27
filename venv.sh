@@ -24,12 +24,15 @@ then
 fi
 
 
-export PATH="$PREPEND/runtime/bin:$PATH"
+RT_BIN="$PREPEND/runtime/bin"
+RT_PY="$RT_BIN/python3"
+export PATH="$RT_BIN:$PATH"
 
-if [[ -x "$1"  ]]
+
+if [[ -x "$1" ]] && [[ -x "$RT_PY" ]]
 then
   shift
-  exec python3 "$@"
+  exec "$RT_PY" "$@"
 else
   exec "$@"
 fi
