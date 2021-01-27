@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from os.path import exists, isabs, isdir, join, realpath
+from os.path import exists, isabs, join, realpath
 from typing import Optional, Sequence
 
 from pynvim import Nvim
@@ -21,7 +21,6 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
 from .shared.current import maybe_path_above, new_current_file
-from .shared.open_file import open_file
 from .shared.wm import (
     find_current_buffer_name,
     find_fm_buffers,
@@ -31,7 +30,7 @@ from .shared.wm import (
     new_window,
     resize_fm_windows,
 )
-from .types import ClickType, Stage
+from .types import Stage
 
 
 @dataclass(frozen=True)
@@ -125,21 +124,9 @@ def _open(
                     or state
                 )
                 _open_fm_window(nvim, state=new_state, settings=settings, opts=opts)
-                if isdir(path):
-                    return Stage(new_state, focus=path)
-                else:
-                    click_type = (
-                        ClickType.primary if opts.toggle else ClickType.secondary
-                    )
-                    return open_file(
-                        nvim,
-                        state=new_state,
-                        settings=settings,
-                        path=path,
-                        click_type=click_type,
-                    )
+                return Stage(new_state, focus=path)
         else:
-            _open_fm_window(nvim, state=state, settings=settings, opts=opts)
             curr = find_current_buffer_name(nvim)
             stage = new_current_file(nvim, state=state, settings=settings, current=curr)
-            return stage if stage else Stage(state)
+            _open_fm_window(nvim, state=state, settings=settings, opts=opts)
+            return stage if stage else Stage(state, focus=curr)
