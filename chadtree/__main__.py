@@ -41,10 +41,7 @@ _RT_PY = RT_PY_XDG if args.xdg else RT_PY
 if command == "deps":
     try:
         from venv import EnvBuilder
-    except ImportError:
-        print("Please install venv separately.", file=stderr)
-        exit(1)
-    else:
+
         EnvBuilder(
             system_site_packages=False,
             with_pip=True,
@@ -52,6 +49,10 @@ if command == "deps":
             symlinks=name != "nt",
             clear=True,
         ).create(_RT_DIR)
+    except (ImportError, SystemExit):
+        print("Please install venv separately.", file=stderr)
+        exit(1)
+    else:
         proc = run(
             (
                 _RT_PY,
