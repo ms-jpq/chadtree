@@ -59,7 +59,7 @@ def _parse_args(args: Sequence[str]) -> _Args:
     opts = _Args(
         path=ns.path,
         version_ctl=ns.version_ctl,
-        toggle=False if ns.path else ns.toggle,
+        toggle=False if ns.version_ctl or ns.path else ns.toggle,
         focus=ns.focus,
     )
     return opts
