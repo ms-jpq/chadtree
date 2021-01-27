@@ -17,6 +17,9 @@
   &Yes
   &No
 
+"cannot find version ctl root": |-
+  ⚠️  Cannot find version control top level
+
 "path not exist": |-
   ⚠️  Path does not exist: ${path}
 

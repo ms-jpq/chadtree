@@ -23,7 +23,7 @@ _SUBMODULE_MARKER = "S"
 _IGNORED_MARKER = "I"
 
 
-def _root(cwd: str) -> str:
+def root(cwd: str) -> str:
     stdout = check_output(
         ("git", "rev-parse", "--show-toplevel"), stderr=PIPE, text=True, cwd=cwd
     )
@@ -141,7 +141,7 @@ def status(cwd: str) -> VCStatus:
             ret: Tuple[
                 str, Iterator[Tuple[str, str]], Iterator[Tuple[str, str]]
             ] = gather(
-                pool.submit(_root, cwd=cwd),
+                pool.submit(root, cwd=cwd),
                 pool.submit(_stat_main, cwd=cwd),
                 pool.submit(_stat_sub_modules, cwd=cwd),
             )

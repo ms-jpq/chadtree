@@ -32,6 +32,8 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 
 `:CHADopen --nofocus` will open CHADTree without giving the sidebar focus
 
+`:CHADopen --version-ctl` will open CHADTree at version control top level.
+
 ### `CHADdeps`
 
 `:CHADdeps` will install all of CHADTree's depdencies locally.
