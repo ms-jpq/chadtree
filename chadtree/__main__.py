@@ -43,6 +43,7 @@ if command == "deps":
     try:
         from venv import EnvBuilder
 
+        print("...", flush=True)
         EnvBuilder(
             system_site_packages=False,
             with_pip=True,
@@ -54,7 +55,7 @@ if command == "deps":
         print("Please install venv separately.", file=stderr)
         exit(1)
     else:
-        print(_RT_PY, flush=True)
+        print("--", _RT_PY, flush=True)
         proc = run(
             (
                 _RT_PY,
