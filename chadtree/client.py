@@ -1,7 +1,11 @@
 from asyncio.events import AbstractEventLoop
 from contextlib import nullcontext, suppress
+from multiprocessing import cpu_count
 from os import linesep
-from sys import stderr
+from pathlib import Path
+from platform import uname
+from sys import executable, stderr
+from textwrap import dedent
 from time import monotonic
 from typing import Any, MutableMapping, Optional, cast
 
@@ -95,7 +99,17 @@ class ChadClient(Client):
                         if settings.profiling and not has_drawn:
                             has_drawn = True
                             t2 = monotonic()
-                            write(nvim, f"{int((t2 - t1) * 1000)}ms")
+                            info = uname()
+                            msg = f"""
+                            {int((t2 - t1) * 1000)}ms
+                            Arch       {info.machine}
+                            Processor  {info.processor}
+                            Cores      {cpu_count()}
+                            System     {info.system}
+                            Version    {info.version}
+                            Python     {Path(executable).resolve()}
+                            """
+                            write(nvim, dedent(msg))
 
             try:
                 threadsafe_call(nvim, cont)
