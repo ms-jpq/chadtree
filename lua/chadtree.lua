@@ -103,10 +103,10 @@ return function(args)
         if not err_exit and _G[cmd] then
           _G[cmd](args)
           t2 = vim.loop.now()
-          if settings().profiling then
+          if settings().profiling and t1 >= 0 then
             print((t2 - t1) .. "ms")
           end
-          t1 = 0
+          t1 = -1
         else
           defer(
             POLLING_RATE,
