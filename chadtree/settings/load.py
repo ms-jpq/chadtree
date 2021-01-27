@@ -39,7 +39,6 @@ class _UserOptions:
     session: bool
     show_hidden: bool
     version_control: VersionCtlOpts
-    profiling: bool
 
 
 @dataclass(frozen=True)
@@ -68,6 +67,7 @@ class _UserConfig:
     view: _UserView
     theme: _UserTheme
     xdg: bool
+    profiling: bool
 
 
 def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
