@@ -19,7 +19,7 @@ done
 PREPEND="$PWD/.vars/runtime/bin"
 if [[ "$USE_XDG" -ne 0 ]]
 then
-  PREPEND = "${XDG_DATA_HOME:-"$PREPEND"}"
+  PREPEND="${XDG_DATA_HOME:-"$PREPEND"}"
   mkdir -p "$PREPEND"
 fi
 
