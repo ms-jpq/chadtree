@@ -1,4 +1,5 @@
 ---
+profiling: false
 ignore:
   name_exact:
     - .DS_Store

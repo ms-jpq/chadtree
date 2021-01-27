@@ -39,6 +39,7 @@ class _UserOptions:
     session: bool
     show_hidden: bool
     version_control: VersionCtlOpts
+    profiling: bool
 
 
 @dataclass(frozen=True)
