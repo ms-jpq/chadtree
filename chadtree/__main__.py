@@ -54,7 +54,7 @@ if command == "deps":
                 system_site_packages=False,
                 with_pip=True,
                 upgrade=True,
-                symlinks=False,
+                symlinks=not is_win,
                 clear=True,
             ).create(_RT_DIR)
     except (ImportError, SystemExit):
@@ -88,7 +88,7 @@ if command == "deps":
 
 elif command == "run":
     try:
-        if Path(executable).resolve() != _RT_PY:
+        if Path(executable) != _RT_PY:
             raise RuntimeError()
         else:
             import pynvim
