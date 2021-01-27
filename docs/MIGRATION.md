@@ -8,8 +8,6 @@ I am very sorry about this, but I am doing this in order to support more awesome
 
 ## What you need to do:
 
-**Windows Users, please use `legacy` branch for now, I [need help](https://github.com/ms-jpq/chadtree/issues/102) getting this to run under windows**
-
 Run the following once after updating your git repo to latest
 
 ```vim
