@@ -48,7 +48,7 @@ if command == "deps":
         EnvBuilder(
             system_site_packages=False,
             with_pip=True,
-            upgrade=True,
+            upgrade=not is_win,,
             symlinks=not is_win,
             clear=not is_win,
         ).create(_RT_DIR)
