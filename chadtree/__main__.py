@@ -17,7 +17,6 @@ if version_info < (3, 8, 2):
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument("--python")
     sub_parsers = parser.add_subparsers(dest="command", required=True)
 
     s_run = sub_parsers.add_parser("run")
