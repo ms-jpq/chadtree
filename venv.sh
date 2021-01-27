@@ -5,12 +5,24 @@ set -o pipefail
 
 cd "$(dirname "$0")" || exit 1
 
-# if [[ 1 ]]
-# then
-#   PREPEND = ""
-# else
-#   PREPEND = "$PWD"
-# fi
 
-export PATH="$PWD/.vars/runtime/bin:$PATH"
+USE_XDG=0
+for arg in "$@"
+do
+  if [[ arg = '--xdg' ]]
+  then
+    USE_XDG=1
+  fi
+done
+
+
+PREPEND="$PWD/.vars/runtime/bin"
+if [[ "$USE_XDG" -ne 0 ]]
+then
+  PREPEND = "${XDG_DATA_HOME:-"$PREPEND"}"
+  mkdir -p "$PREPEND"
+fi
+
+
+export PATH="$PREPEND:$PATH"
 exec "$@"

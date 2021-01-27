@@ -81,10 +81,11 @@ elif command == "run":
     try:
         if executable != _RT_PY:
             raise RuntimeError()
-        import pynvim
-        import pynvim_pp
-        import std2
-        import yaml
+        else:
+            import pynvim
+            import pynvim_pp
+            import std2
+            import yaml
     except (ImportError, RuntimeError):
         msg = """
         Please update dependencies using :CHADdeps
