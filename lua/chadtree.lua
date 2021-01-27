@@ -84,6 +84,7 @@ return function(args)
 
     local set_chad_call = function(name, cmd)
       table.insert(chad_params, name)
+      local time_acc = 0
       chad[name] = function(...)
         local args = {...}
 
@@ -94,6 +95,7 @@ return function(args)
 
         if not err_exit and _G[cmd] then
           _G[cmd](args)
+          print(time_acc .. "ms")
         else
           defer(
             POLLING_RATE,
@@ -101,6 +103,7 @@ return function(args)
               if err_exit then
                 return
               else
+                time_acc = time_acc + POLLING_RATE
                 chad[name](unpack(args))
               end
             end
