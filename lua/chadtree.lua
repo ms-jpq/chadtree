@@ -1,5 +1,6 @@
 return function(args)
   local cwd = unpack(args)
+  local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
 
   local function defer(timeout, callback)
     local timer = vim.loop.new_timer()
@@ -58,20 +59,36 @@ return function(args)
       vim.api.nvim_err_write(table.concat(msg, linesep))
     end
 
-    local start = function(...)
-      local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
-
+    local main = function (is_xdg)
       local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
       local py3 = go and _py3 or (is_win and "python" or "python3")
-      local main = cwd .. (is_win and [[\venv.bat]] or "/venv.sh")
 
+      if is_win then
+        return {cwd .. [[/venv.bat]], py3}
+      else
+        local v_py_normal = cwd .. "/.vars/runtime/bin/python3"
+        local xdg_dir = vim.api.nvim_call_function("getenv", {"XDG_DATA_HOME"})
+        local v_py_xdg = xdg_dir and (xdg_dir .. "/nvim/chadtree/runtime/python3") or v_py_normal
+        local v_py = is_xdg and v_py_xdg or v_py_normal
+        if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
+          return {v_py}
+        else
+          return py3
+        end
+      end
+    end
+
+    local start = function(...)
+      local is_xdg = settings().xdg
       local args =
         vim.tbl_flatten {
-        {main, py3, "-m", "chadtree"},
+        main(is_xdg),
+        {"-m", "chadtree"},
         {...},
-        (settings().xdg and {"--xdg"} or {})
+        (is_xdg and {"--xdg"} or {})
       }
       local params = {
+        cwd = cwd,
         on_exit = "CHADon_exit",
         on_stdout = "CHADon_stdout",
         on_stderr = "CHADon_stderr"
