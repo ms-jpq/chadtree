@@ -56,7 +56,9 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - [Github coloured](https://github.com/github/linguist) icons (over 600 colours!)
 
-- Full icon support from importing [vim-devicon](https://github.com/ryanoasis/vim-devicons)
+- Three different sets of icons out of the box
+
+- Three built-in themes - nord, solarized, vim-syntax
 
 ![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/ls_colours.png)
 
