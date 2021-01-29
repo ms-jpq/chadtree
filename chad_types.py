@@ -104,7 +104,7 @@ class LSColoursEnum(Enum):
     solarized_light = auto()
     solarized_universal = auto()
     nord = auto()
-    trapdoor: auto()
+    trapdoor = auto()
 
 
 """

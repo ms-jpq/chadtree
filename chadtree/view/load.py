@@ -61,6 +61,8 @@ def load_theme(
             _lsc = artifact.ls_colours.solarized_universal
         elif text_colour_set is LSColoursEnum.nord:
             _lsc = artifact.ls_colours.nord
+        elif text_colour_set is LSColoursEnum.trapdoor:
+            _lsc = artifact.ls_colours.trapdoor
         else:
             never(text_colour_set)
 

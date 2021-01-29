@@ -58,7 +58,7 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Three different sets of icons out of the box
 
-- Three built-in themes - nord, solarized, vim-syntax
+- Four built-in themes - nord, solarized, trapdoor, vim-syntax
 
 ![ls_colours.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/ls_colours.png)
 
@@ -141,5 +141,7 @@ CHADTree does not define it's own colours beyond some minimal defaults, all them
 > Some themes are imported from [dircolors-solarized](https://github.com/seebi/dircolors-solarized)
 
 > Some themes are imported from [nord-dircolors](https://github.com/arcticicestudio/nord-dircolors)
+
+> Some themes are imported from [LS_COLORS](https://github.com/trapd00r/LS_COLORS)
 
 > Some themes are imported from [vim-nerdtree-syntax-highlight](https://github.com/tiagofumo/vim-nerdtree-syntax-highlight)
