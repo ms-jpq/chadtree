@@ -36,6 +36,7 @@ return function(args)
     chad.on_exit = function(args)
       local code = unpack(args)
       local msg = " | CHADTree EXITED - " .. code
+      print(code)
       if not (code == 0 or code == 143) then
         err_exit = true
         vim.api.nvim_err_writeln(msg)
@@ -94,8 +95,6 @@ return function(args)
         if t1 == 0 then
           t1 = vim.loop.now()
         end
-
-        print(err_exit)
 
         if not job_id then
           local server = vim.api.nvim_call_function("serverstart", {})
