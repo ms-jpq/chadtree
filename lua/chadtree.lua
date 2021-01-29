@@ -95,6 +95,8 @@ return function(args)
           t1 = vim.loop.now()
         end
 
+        print(err_exit)
+
         if not job_id then
           local server = vim.api.nvim_call_function("serverstart", {})
           job_id = start("run", "--socket", server)
