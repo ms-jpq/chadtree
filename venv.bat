@@ -1,11 +1,12 @@
-@echo off
+
 cd /D "%~dp0"
 set "path=%cd%\.vars\runtime\Scripts;%PATH%"
+set "py3_exe=%cd%\.vars\runtime\Scripts\python.exe"
 
 if exist "%1" (
-  if exist "%cd%\.vars\runtime\Scripts\python.exe" (
+  if exist "%py3_exe%" (
     shift
-    python %*
+    "%py3_exe%" %*
   ) else (
     %*
   )
