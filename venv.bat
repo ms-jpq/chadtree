@@ -12,4 +12,6 @@ if exist "%1" (
 ) else (
   %*
 )
+
+exit -b %ERRORLEVEL%
 @echo on
