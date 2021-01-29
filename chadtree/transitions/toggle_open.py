@@ -23,7 +23,7 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
 from ..version_ctl.git import root as version_ctl_toplv
-from .shared.current import maybe_path_above, new_current_file
+from .shared.current import maybe_path_above, new_current_file, new_root
 from .shared.wm import (
     find_current_buffer_name,
     find_fm_buffers,
@@ -68,7 +68,7 @@ def _parse_args(args: Sequence[str]) -> _Args:
 
 
 def _ensure_side_window(
-    nvim: Nvim, *, window: Window, state: State, settings: Settings
+    nvim: Nvim, *, window: Window, settings: Settings, width: int
 ) -> None:
     open_left = settings.open_left
     windows = tuple(find_windows_in_tab(nvim, no_secondary=False))
@@ -78,10 +78,10 @@ def _ensure_side_window(
             nvim.api.command("wincmd H")
         else:
             nvim.api.command("wincmd L")
-        resize_fm_windows(nvim, state.width)
+        resize_fm_windows(nvim, width=width)
 
 
-def _open_fm_window(nvim: Nvim, state: State, settings: Settings, opts: _Args) -> None:
+def _open_fm_window(nvim: Nvim, settings: Settings, opts: _Args, width: int) -> None:
     cwin = cur_win(nvim)
     win = next(find_fm_windows_in_tab(nvim), None)
     if win:
@@ -96,12 +96,12 @@ def _open_fm_window(nvim: Nvim, state: State, settings: Settings, opts: _Args) -
         if buf is None:
             buf = new_fm_buffer(nvim, settings=settings)
 
-        win = new_window(nvim, open_left=settings.open_left, width=state.width)
+        win = new_window(nvim, open_left=settings.open_left, width=width)
         for key, val in settings.win_local_opts.items():
             win_set_option(nvim, win=win, key=key, val=val)
         win_set_buf(nvim, win=win, buf=buf)
 
-        _ensure_side_window(nvim, window=win, state=state, settings=settings)
+        _ensure_side_window(nvim, window=win, settings=settings, width=width)
         if not opts.focus:
             set_cur_win(nvim, win=cwin)
 
@@ -123,7 +123,10 @@ def _open(
         if opts.version_ctl:
             if which("git"):
                 try:
-                    raw_path: Optional[str] = version_ctl_toplv(state.root.path)
+                    cwd = version_ctl_toplv(state.root.path)
+                    new_state = new_root(
+                        nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
+                    )
                 except CalledProcessError:
                     write(nvim, LANG("cannot find version ctl root"), error=True)
                     return None
@@ -131,8 +134,9 @@ def _open(
                 write(nvim, LANG("cannot find version ctl root"), error=True)
                 return None
         else:
-            raw_path = opts.path
+            new_state = state
 
+        raw_path = opts.path
         if raw_path:
             path = realpath(
                 raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
@@ -141,14 +145,24 @@ def _open(
                 write(nvim, LANG("path not exist", path=path))
                 return None
             else:
-                new_state = (
-                    maybe_path_above(nvim, state=state, settings=settings, path=path)
-                    or state
+                next_state = (
+                    maybe_path_above(
+                        nvim, state=new_state, settings=settings, path=path
+                    )
+                    or new_state
                 )
-                _open_fm_window(nvim, state=new_state, settings=settings, opts=opts)
-                return Stage(new_state, focus=path)
+                _open_fm_window(
+                    nvim, settings=settings, opts=opts, width=next_state.width
+                )
+                return Stage(next_state, focus=path)
         else:
             curr = find_current_buffer_name(nvim)
-            stage = new_current_file(nvim, state=state, settings=settings, current=curr)
-            _open_fm_window(nvim, state=state, settings=settings, opts=opts)
-            return Stage(stage.state, focus=curr) if stage else Stage(state, focus=curr)
+            stage = new_current_file(
+                nvim, state=new_state, settings=settings, current=curr
+            )
+            _open_fm_window(nvim, settings=settings, opts=opts, width=new_state.width)
+            return (
+                Stage(stage.state, focus=curr)
+                if stage
+                else Stage(new_state, focus=curr)
+            )
