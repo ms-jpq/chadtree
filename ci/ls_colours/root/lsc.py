@@ -9,6 +9,7 @@ _LSC_SH = Path(__file__).parent.resolve() / "lsc.sh"
 
 _SOLARIZED = Path("dircolors-solarized").resolve()
 _NORD = Path("nord-dircolors").resolve()
+_TRAP_DOOR = Path("LS_COLORS").resolve()
 
 _PARSING = {
     _SOLARIZED / "dircolors.256dark": "solarized_dark_256",
@@ -16,6 +17,7 @@ _PARSING = {
     _SOLARIZED / "dircolors.ansi-light": "solarized_light",
     _SOLARIZED / "dircolors.ansi-universal": "solarized_universal",
     _NORD / "src" / "dir_colors": "nord",
+    _TRAP_DOOR / "LS_COLORS": "trapdoor"
 }
 
 

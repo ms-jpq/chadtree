@@ -10,7 +10,8 @@ WORKDIR /root
 
 
 RUN git clone --depth=1 https://github.com/seebi/dircolors-solarized.git && \
-    git clone --depth=1 https://github.com/arcticicestudio/nord-dircolors.git
+    git clone --depth=1 https://github.com/arcticicestudio/nord-dircolors.git && \
+    git clone --depth=1 https://github.com/trapd00r/LS_COLORS
 COPY . /
 
 
