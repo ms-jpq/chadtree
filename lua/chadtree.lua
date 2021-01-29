@@ -69,7 +69,7 @@ return function(args)
         local v_py_normal = cwd .. "/.vars/runtime/bin/python3"
         local xdg_dir = vim.api.nvim_call_function("getenv", {"XDG_DATA_HOME"})
         local v_py_xdg =
-          xdg_dir and (xdg_dir .. "/nvim/chadtree/runtime/python3") or
+          xdg_dir and (xdg_dir .. "/nvim/chadtree/runtime/bin/python3") or
           v_py_normal
         local v_py = is_xdg and v_py_xdg or v_py_normal
         if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
