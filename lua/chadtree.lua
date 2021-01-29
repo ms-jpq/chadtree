@@ -62,24 +62,24 @@ return function(args)
     local main = function(is_xdg)
       local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
       local py3 = go and _py3 or (is_win and "python" or "python3")
+      local v_py =
+        cwd ..
+        (is_win and [[/.vars/runtime/Scripts/python.exe]] or
+          "/.vars/runtime/bin/python3")
+      local win_proxy = cwd .. [[/win.bat]]
+      local xdg_dir = vim.api.nvim_call_function("getenv", {"XDG_DATA_HOME"})
 
       if is_win then
-        local v_py = cwd .. [[/.vars/runtime/Scripts/python.exe]]
-        local proxy = cwd .. [[/win.bat]]
-
         if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
           return {v_py}
         else
-          return {proxy, py3}
+          return {win_proxy, py3}
         end
       else
-        local v_py_normal = cwd .. "/.vars/runtime/bin/python3"
-        local xdg_dir = vim.api.nvim_call_function("getenv", {"XDG_DATA_HOME"})
         local v_py_xdg =
           xdg_dir and (xdg_dir .. "/nvim/chadtree/runtime/bin/python3") or
-          v_py_normal
-        local v_py = is_xdg and v_py_xdg or v_py_normal
-
+          v_py
+        local v_py = is_xdg and v_py_xdg or v_py
         if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
           return {v_py}
         else
