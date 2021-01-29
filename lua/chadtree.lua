@@ -77,8 +77,7 @@ return function(args)
         end
       else
         local v_py_xdg =
-          xdg_dir and (xdg_dir .. "/nvim/chadtree/runtime/bin/python3") or
-          v_py
+          xdg_dir and (xdg_dir .. "/nvim/chadtree/runtime/bin/python3") or v_py
         local v_py = is_xdg and v_py_xdg or v_py
         if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
           return {v_py}
