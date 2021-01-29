@@ -75,7 +75,7 @@ return function(args)
         if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
           return {v_py}
         else
-          return py3
+          return {py3}
         end
       end
     end
