@@ -86,6 +86,8 @@ If you are not happy with that, you can choose one of the many others:
 
 - [nord-dircolors](https://github.com/arcticicestudio/nord-dircolors)
 
+- [trapd00r](https://github.com/trapd00r/LS_COLORS)
+
 - [vim-nerdtree-syntax-highlight](https://github.com/tiagofumo/vim-nerdtree-syntax-highlight)
 
 **legal keys: one of**
