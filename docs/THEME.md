@@ -98,6 +98,7 @@ If you are not happy with that, you can choose one of the many others:
   "solarized_light",
   "solarized_universal",
   "nord",
+  "trapdoor",
   "nerdtree_syntax_light",
   "nerdtree_syntax_dark"
 ]
