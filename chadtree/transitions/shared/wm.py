@@ -107,6 +107,7 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
     buf = create_buf(nvim, listed=False, scratch=True, wipe=False, nofile=True)
     buf_set_option(nvim, buf=buf, key="modifiable", val=False)
     buf_set_option(nvim, buf=buf, key="filetype", val=FM_FILETYPE)
+    buf_set_option(nvim, buf=buf, key="swapfile", val=False)
 
     km = Keymap()
     km.n("{") << f"{settings.page_increment}<up>"
