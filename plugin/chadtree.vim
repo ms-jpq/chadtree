@@ -1,6 +1,11 @@
 autocmd VimEnter * silent! autocmd! FileExplorer
 silent! autocmd! FileExplorer
 
+augroup CHADTree
+  autocmd!
+
+  autocmd FileType CHADTree autocmd BufEnter,WinEnter <buffer> stopinsert
+augroup end
 
 function CHADon_exit(_, code, __)
   call luaeval('chad.on_exit(...)', [a:code])
