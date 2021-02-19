@@ -20,7 +20,7 @@ def _open_gui(path: str, cwd: str) -> None:
         command = ("open", "--", path)
         check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     elif which("xdg-open"):
-        command = ("xdg-open", "--", path)
+        command = ("xdg-open", path)
         check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     else:
         raise LookupError(LANG("sys_open_err"))
