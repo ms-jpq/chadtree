@@ -27,6 +27,8 @@ keymap:
     - "`"
   copy:
     - p
+  copy_basename:
+    - Y
   copy_name:
     - y
   cut:

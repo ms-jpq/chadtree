@@ -46,7 +46,7 @@ def _copy_basename(
     nvim: Nvim, state: State, settings: Settings, is_visual: bool
 ) -> None:
     """
-    Copy dirname / filename
+    Copy basename of dirname / filename
     """
 
     _cn(nvim, state=state, is_visual=is_visual, al_qaeda=True)
