@@ -65,7 +65,7 @@ def _fs_stat(path: str) -> AbstractSet[Mode]:
         if S_ISLNK(info.st_mode):
             try:
                 link_info = stat(path, follow_symlinks=True)
-            except FileNotFoundError:
+            except (FileNotFoundError, NotADirectoryError):
                 return {Mode.orphan_link}
             else:
                 mode = {*_fs_modes(link_info.st_mode)}
