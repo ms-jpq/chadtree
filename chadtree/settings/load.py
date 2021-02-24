@@ -3,6 +3,14 @@ from enum import Enum, auto
 from locale import strxfrm
 from typing import AbstractSet, Mapping, Optional, Sequence, SupportsFloat, Union
 
+from pynvim.api.nvim import Nvim
+from pynvim_pp.api import cur_win, win_get_option
+from pynvim_pp.rpc import RpcSpec
+from std2.configparser import hydrate
+from std2.pickle import DecodeError, decode
+from std2.tree import merge
+from yaml import safe_load
+
 from chad_types import (
     ARTIFACT,
     Artifact,
@@ -11,12 +19,6 @@ from chad_types import (
     LSColoursEnum,
     TextColourSetEnum,
 )
-from pynvim.api.nvim import Nvim
-from pynvim_pp.rpc import RpcSpec
-from std2.configparser import hydrate
-from std2.pickle import DecodeError, decode
-from std2.tree import merge
-from yaml import safe_load
 
 from ..consts import CONFIG_YML, SETTINGS_VAR
 from ..view.load import load_theme
@@ -75,6 +77,7 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
+    win = cur_win(nvim)
     artifacts: Artifact = decode(Artifact, safe_load(ARTIFACT.read_text("UTF-8")))
 
     user_config = nvim.vars.get(SETTINGS_VAR, {})
@@ -85,6 +88,9 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         ),
     )
     options, view, theme = config.options, config.view, config.theme
+    win_actual_opts: Mapping[str, Union[bool, str]] = {
+        opt: win_get_option(nvim, win=win, key=opt) for opt in view.window_options
+    }
 
     icons, hl_context = load_theme(
         nvim,
@@ -130,6 +136,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         version_ctl=options.version_control,
         view=view_opts,
         width=view.width,
+        win_actual_opts=win_actual_opts,
         win_local_opts=view.window_options,
         xdg=config.xdg,
         profiling=config.profiling,
