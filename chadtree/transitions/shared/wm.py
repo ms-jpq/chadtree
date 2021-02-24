@@ -1,4 +1,4 @@
-from typing import AbstractSet, Iterator, Optional, Tuple
+from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
 
 from pynvim.api import Buffer, Nvim, Window
 from pynvim_pp.api import (
@@ -16,6 +16,7 @@ from pynvim_pp.api import (
     tab_list_wins,
     win_get_buf,
     win_get_option,
+    win_set_option,
 )
 from pynvim_pp.keymap import Keymap
 
@@ -124,7 +125,13 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
     return buf
 
 
-def new_window(nvim: Nvim, *, open_left: bool, width: Optional[int]) -> Window:
+def new_window(
+    nvim: Nvim,
+    *,
+    win_local: Mapping[str, Union[bool, str]],
+    open_left: bool,
+    width: Optional[int],
+) -> Window:
     split_r = nvim.options["splitright"]
 
     wins = tuple(find_windows_in_tab(nvim, no_secondary=False))
@@ -138,6 +145,8 @@ def new_window(nvim: Nvim, *, open_left: bool, width: Optional[int]) -> Window:
 
     win = cur_win(nvim)
     buf = win_get_buf(nvim, win)
+    for key, val in win_local.items():
+        win_set_option(nvim, win=win, key=key, val=val)
     buf_set_option(nvim, buf=buf, key="bufhidden", val="wipe")
     return win
 

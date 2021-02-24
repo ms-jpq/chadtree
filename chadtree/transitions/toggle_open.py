@@ -96,7 +96,12 @@ def _open_fm_window(nvim: Nvim, settings: Settings, opts: _Args, width: int) -> 
         if buf is None:
             buf = new_fm_buffer(nvim, settings=settings)
 
-        win = new_window(nvim, open_left=settings.open_left, width=width)
+        win = new_window(
+            nvim,
+            win_local=settings.win_actual_opts,
+            open_left=settings.open_left,
+            width=width,
+        )
         for key, val in settings.win_local_opts.items():
             win_set_option(nvim, win=win, key=key, val=val)
         win_set_buf(nvim, win=win, buf=buf)
