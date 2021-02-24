@@ -125,6 +125,8 @@ def _open(
         write(nvim, e, error=True)
         return None
     else:
+        raw_path = opts.path
+
         if opts.version_ctl:
             if which("git"):
                 try:
@@ -141,7 +143,6 @@ def _open(
         else:
             new_state = state
 
-        raw_path = opts.path
         if raw_path:
             path = realpath(
                 raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
