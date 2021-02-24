@@ -192,12 +192,22 @@ Print `ls --long` stat for file under cursor.
 
 ##### `chadtree_settings.keymap.copy_name`
 
-Copy names of files under cursor or visual block.
+Copy paths of files under cursor or visual block.
 
 **default:**
 
 ```json
 ["y"]
+```
+
+##### `chadtree_settings.keymap.copy_basename`
+
+Copy names of files under cursor or visual block.
+
+**default:**
+
+```json
+["Y"]
 ```
 
 ---
