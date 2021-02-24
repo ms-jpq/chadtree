@@ -44,9 +44,9 @@ _RT_PY = RT_PY_XDG if use_xdg else RT_PY
 _EXEC_PATH = Path(executable)
 
 
-def _is_relative_to(origin: AnyPath, *other: AnyPath) -> bool:
+def _is_relative_to(origin: Path, *other: Path) -> bool:
     try:
-        PurePath(origin).relative_to(*other)
+        origin.relative_to(*other)
         return True
     except ValueError:
         return False
@@ -57,7 +57,7 @@ if command == "deps":
         from venv import EnvBuilder
 
         print("...", flush=True)
-        if _is_relative_to(_EXEC_PATH, _RT_RIR):
+        if _is_relative_to(_EXEC_PATH, _RT_DIR):
             pass
         else:
             EnvBuilder(
