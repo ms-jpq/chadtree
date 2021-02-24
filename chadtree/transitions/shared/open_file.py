@@ -59,6 +59,7 @@ def _show_file(
                 None,
             ) or new_window(
                 nvim,
+                win_local=settings.win_actual_opts,
                 open_left=not settings.open_left,
                 width=None
                 if len(non_fm_windows)
