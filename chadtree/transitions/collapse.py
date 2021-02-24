@@ -14,7 +14,9 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _collapse(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+def _collapse(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> Optional[Stage]:
     """
     Collapse folder
     """
@@ -24,11 +26,16 @@ def _collapse(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
         return None
     else:
         path = node.path if is_dir(node) else dirname(node.path)
-        paths = {
+        parent = dirname(path)
+        sub_paths = {
             indexed
             for indexed in state.index
             if path in (ancestors(indexed) | {indexed})
         }
+
+        paths = sub_paths or {parent}
+        focus = path if sub_paths else parent
+
         index = (state.index - paths) | {state.root.path}
         new_state = forward(state, settings=settings, index=index, paths=paths)
-        return Stage(new_state, focus=path)
+        return Stage(new_state, focus=focus)
