@@ -41,13 +41,23 @@ command: Union[Literal["deps"], Literal["run"]] = args.command
 use_xdg = False if is_win else args.xdg
 _RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
 _RT_PY = RT_PY_XDG if use_xdg else RT_PY
+_EXEC_PATH = Path(executable)
+
+
+def _is_relative_to(origin: AnyPath, *other: AnyPath) -> bool:
+    try:
+        PurePath(origin).relative_to(*other)
+        return True
+    except ValueError:
+        return False
+
 
 if command == "deps":
     try:
         from venv import EnvBuilder
 
         print("...", flush=True)
-        if is_win and _RT_DIR.exists():
+        if _is_relative_to(_EXEC_PATH, _RT_RIR):
             pass
         else:
             EnvBuilder(
@@ -88,7 +98,7 @@ if command == "deps":
 
 elif command == "run":
     try:
-        if Path(executable) != _RT_PY:
+        if _EXEC_PATH != _RT_PY:
             raise RuntimeError()
         else:
             import pynvim
