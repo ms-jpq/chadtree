@@ -21,7 +21,8 @@ def _cn(nvim: Nvim, state: State, is_visual: bool, al_qaeda: bool) -> None:
             for node in nodes:
                 yield basename(node.path) if al_qaeda else node.path
         else:
-            yield from selection
+            for path in selection:
+                yield basename(path) if al_qaeda else path
 
     paths = sorted(gen_paths(), key=strxfrm)
     clip = linesep.join(paths)
