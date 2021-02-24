@@ -1,6 +1,6 @@
 from shutil import which
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
-from typing import cast
+from typing import Sequence, cast
 
 from pynvim import Nvim
 from pynvim_pp.api import get_cwd
@@ -17,10 +17,10 @@ from .shared.index import indices
 
 def _open_gui(path: str, cwd: str) -> None:
     if which("open"):
-        command = ("open", "--", path)
+        command: Sequence[str] = ("open", "--", path)
         check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     elif which("xdg-open"):
-        command = ("xdg-open", "--", path)
+        command = ("xdg-open", path)
         check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     else:
         raise LookupError(LANG("sys_open_err"))
