@@ -15,6 +15,7 @@ from pynvim_pp.api import (
     set_cur_win,
     win_get_buf,
     win_set_buf,
+    win_set_option,
 )
 from pynvim_pp.hold import hold_win_pos
 
@@ -43,6 +44,9 @@ def _show_file(
 ) -> None:
     if click_type is ClickType.tertiary:
         nvim.api.command("tabnew")
+        win = cur_win(nvim)
+        for key, val in settings.win_actual_opts.items():
+            win_set_option(nvim, win=win, key=key, val=val)
 
     path = state.current
     if path:
