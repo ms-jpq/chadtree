@@ -41,6 +41,7 @@ class _UserOptions:
     session: bool
     show_hidden: bool
     version_control: VersionCtlOpts
+    close_on_open: bool
 
 
 @dataclass(frozen=True)
@@ -140,6 +141,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         win_local_opts=view.window_options,
         xdg=config.xdg,
         profiling=config.profiling,
+        close_on_open=options.close_on_open
     )
 
     return settings
