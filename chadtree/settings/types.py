@@ -35,3 +35,4 @@ class Settings:
     win_actual_opts: Mapping[str, Union[bool, str]]
     win_local_opts: Mapping[str, Union[bool, str]]
     profiling: bool
+    close_on_open: bool
