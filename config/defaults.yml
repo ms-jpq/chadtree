@@ -93,6 +93,7 @@ options:
   show_hidden: false
   version_control:
     enable: true
+  close_on_open: false
 theme:
   icon_glyph_set: devicons
   text_colour_set: env
