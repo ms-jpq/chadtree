@@ -1,4 +1,4 @@
-from os.path import abspath, exists, join, relpath
+from os.path import abspath, exists, join, basename, dirname
 from typing import Optional
 
 from pynvim import Nvim
@@ -31,14 +31,13 @@ def _rename(
         return None
     else:
         prev_name = node.path
-        parent = state.root.path
-        rel_path = relpath(prev_name, start=parent)
+        base_name, parent_name = basename(prev_name), dirname(prev_name)
 
-        child = ask(nvim, question=LANG("pencil"), default=rel_path)
+        child = ask(nvim, question=LANG("pencil"), default=base_name)
         if not child:
             return None
         else:
-            new_name = abspath(join(parent, child))
+            new_name = abspath(join(parent_name, child))
 
             if exists(new_name):
                 write(nvim, LANG("already_exists", name=new_name), error=True)
