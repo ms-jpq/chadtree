@@ -38,6 +38,7 @@ def _operation(
     is_visual: bool,
     nono: AbstractSet[str],
     op_name: str,
+    kill_buffs: bool,
     action: Callable[[Mapping[str, str]], None],
 ) -> Optional[Stage]:
 
@@ -122,7 +123,8 @@ def _operation(
                         paths=paths,
                     )
 
-                    kill_buffers(nvim, paths=selection)
+                    if kill_buffs:
+                        kill_buffers(nvim, paths=selection)
                     return Stage(new_state)
 
 
@@ -144,6 +146,7 @@ def _cut(
         nono=nono,
         op_name=LANG("cut"),
         action=cut,
+        kill_buffs=True,
     )
 
 
@@ -163,4 +166,5 @@ def _copy(
         nono=set(),
         op_name=LANG("copy"),
         action=copy,
+        kill_buffs=False,
     )
