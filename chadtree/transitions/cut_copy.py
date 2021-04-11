@@ -38,10 +38,9 @@ def _operation(
     is_visual: bool,
     nono: AbstractSet[str],
     op_name: str,
+    kill_buffs: bool,
     action: Callable[[Mapping[str, str]], None],
 ) -> Optional[Stage]:
-
-    root = state.root.path
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
     selection = state.selection
     unified = unify_ancestors(selection)
@@ -59,10 +58,9 @@ def _operation(
         new_operations: MutableMapping[str, str] = {}
         while pre_existing:
             source, dest = pre_existing.popitem()
-            rel_dest = display_path(dest, state=state)
-            resp = ask(nvim, question=LANG("path_exists_err"), default=rel_dest)
-
-            new_dest = join(root, resp) if resp else None
+            base_name, parent_name = basename(dest), dirname(dest)
+            resp = ask(nvim, question=LANG("path_exists_err"), default=base_name)
+            new_dest = join(parent_name, resp) if resp else None
 
             if not new_dest:
                 pre_existing[source] = dest
@@ -122,7 +120,8 @@ def _operation(
                         paths=paths,
                     )
 
-                    kill_buffers(nvim, paths=selection)
+                    if kill_buffs:
+                        kill_buffers(nvim, paths=selection)
                     return Stage(new_state)
 
 
@@ -144,6 +143,7 @@ def _cut(
         nono=nono,
         op_name=LANG("cut"),
         action=cut,
+        kill_buffs=True,
     )
 
 
@@ -163,4 +163,5 @@ def _copy(
         nono=set(),
         op_name=LANG("copy"),
         action=copy,
+        kill_buffs=False,
     )
