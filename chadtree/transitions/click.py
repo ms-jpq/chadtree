@@ -1,7 +1,7 @@
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.api import list_wins, win_close
+from pynvim_pp.api import win_close
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
@@ -13,7 +13,7 @@ from ..state.next import forward
 from ..state.types import State
 from .shared.index import indices
 from .shared.open_file import open_file
-from .shared.wm import find_fm_windows_in_tab
+from .shared.wm import find_fm_windows
 from .types import ClickType, Stage, State
 
 
@@ -53,12 +53,8 @@ def _click(
                 )
 
                 if settings.close_on_open:
-                    wins = list_wins(nvim)
-                    if len(wins) <= 1:
-                        nvim.api.command("quit")
-                    else:
-                        for win in find_fm_windows_in_tab(nvim):
-                            win_close(nvim, win=win)
+                    for win, _ in find_fm_windows(nvim):
+                        win_close(nvim, win=win)
 
                 return nxt
 
