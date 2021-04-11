@@ -33,6 +33,21 @@ from .transitions.types import Stage
 from .transitions.version_ctl import vc_refresh
 
 
+def _profile(nvim: Nvim, t1: float) -> None:
+    t2 = monotonic()
+    info = uname()
+    msg = f"""
+    First msg  {int((t2 - t1) * 1000)}ms
+    Arch       {info.machine}
+    Processor  {info.processor}
+    Cores      {cpu_count()}
+    System     {info.system}
+    Version    {info.version}
+    Python     {Path(executable).resolve()}
+    """
+    write(nvim, dedent(msg))
+
+
 class ChadClient(Client):
     def __init__(self) -> None:
         self._handlers: MutableMapping[str, RpcCallable] = {}
@@ -99,22 +114,11 @@ class ChadClient(Client):
                         if stage.silent:
                             pass
                         else:
-                            raise e
+                            write(nvim, e)
 
                     if settings.profiling and not has_drawn:
                         has_drawn = True
-                        t2 = monotonic()
-                        info = uname()
-                        msg = f"""
-                        First msg  {int((t2 - t1) * 1000)}ms
-                        Arch       {info.machine}
-                        Processor  {info.processor}
-                        Cores      {cpu_count()}
-                        System     {info.system}
-                        Version    {info.version}
-                        Python     {Path(executable).resolve()}
-                        """
-                        write(nvim, dedent(msg))
+                        _profile(nvim, t1=t1)
 
             try:
                 threadsafe_call(nvim, cdraw)
