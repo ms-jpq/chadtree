@@ -59,7 +59,8 @@ def _click(
                     else:
                         for win in find_fm_windows_in_tab(nvim):
                             win_close(nvim, win=win)
-                    return nxt
+
+                return nxt
 
 
 @rpc(blocking=False)
