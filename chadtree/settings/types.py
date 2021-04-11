@@ -18,15 +18,16 @@ class MimetypeOptions:
 
 @dataclass(frozen=True)
 class Settings:
-    xdg: bool
+    close_on_open: bool
     follow: bool
     ignores: Ignored
-    page_increment: int
     keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]
     mime: MimetypeOptions
     open_left: bool
+    page_increment: int
     polling_rate: float
+    profiling: bool
     session: bool
     show_hidden: bool
     version_ctl: VersionCtlOpts
@@ -34,4 +35,4 @@ class Settings:
     width: int
     win_actual_opts: Mapping[str, Union[bool, str]]
     win_local_opts: Mapping[str, Union[bool, str]]
-    profiling: bool
+    xdg: bool
