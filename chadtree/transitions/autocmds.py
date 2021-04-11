@@ -72,7 +72,7 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         if isfile(curr):
             stage = new_current_file(nvim, state=state, settings=settings, current=curr)
             return (
-                Stage(state=stage.state, focus=stage.focus, silent=True)
+                Stage(state=stage.state, focus=stage.focus)
                 if stage
                 else None
             )

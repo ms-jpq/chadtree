@@ -20,6 +20,7 @@ from std2.sched import ticker
 from std2.types import AnyFun
 
 from ._registry import ____
+from .consts import RENDER_RETRIES
 from .registry import autocmd, enqueue_event, event_queue, pool, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
@@ -108,13 +109,15 @@ class ChadClient(Client):
                 if stage:
                     self._state = stage.state
 
-                    try:
-                        redraw(nvim, state=self._state, focus=stage.focus)
-                    except NvimError as e:
-                        if stage.silent:
+                    for _ in range(RENDER_RETRIES - 1):
+                        try:
+                            redraw(nvim, state=self._state, focus=stage.focus)
+                        except NvimError:
                             pass
                         else:
-                            write(nvim, e)
+                            break
+                    else:
+                        redraw(nvim, state=self._state, focus=stage.focus)
 
                     if settings.profiling and not has_drawn:
                         has_drawn = True
