@@ -1,9 +1,8 @@
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.lib import write
 from pynvim_pp.api import list_wins, win_close
-from .shared.wm import find_fm_windows_in_tab
+from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
 from ..fs.types import Mode
@@ -14,6 +13,7 @@ from ..state.next import forward
 from ..state.types import State
 from .shared.index import indices
 from .shared.open_file import open_file
+from .shared.wm import find_fm_windows_in_tab
 from .types import ClickType, Stage, State
 
 

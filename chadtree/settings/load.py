@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from locale import strxfrm
-from typing import AbstractSet, Mapping, Optional, Sequence, SupportsFloat, Union
+from typing import AbstractSet, Mapping, Optional, Sequence, SupportsFloat, Union, cast
 
 from pynvim.api.nvim import Nvim
 from pynvim_pp.api import cur_win, win_get_option
@@ -33,6 +33,7 @@ class _OpenDirection(Enum):
 
 @dataclass(frozen=True)
 class _UserOptions:
+    close_on_open: bool
     follow: bool
     lang: Optional[str]
     mimetypes: MimetypeOptions
@@ -41,7 +42,6 @@ class _UserOptions:
     session: bool
     show_hidden: bool
     version_control: VersionCtlOpts
-    close_on_open: bool
 
 
 @dataclass(frozen=True)
@@ -90,7 +90,8 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
     options, view, theme = config.options, config.view, config.theme
     win_actual_opts: Mapping[str, Union[bool, str]] = {
-        opt: win_get_option(nvim, win=win, key=opt) for opt in view.window_options
+        opt: cast(Union[bool, str], win_get_option(nvim, win=win, key=opt))
+        for opt in view.window_options
     }
 
     icons, hl_context = load_theme(
@@ -124,6 +125,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         )
 
     settings = Settings(
+        close_on_open=options.close_on_open,
         follow=options.follow,
         ignores=config.ignore,
         keymap=keymap,
@@ -141,7 +143,6 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         win_local_opts=view.window_options,
         xdg=config.xdg,
         profiling=config.profiling,
-        close_on_open=options.close_on_open
     )
 
     return settings
