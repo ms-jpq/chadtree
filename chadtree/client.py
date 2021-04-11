@@ -1,5 +1,4 @@
 from asyncio.events import AbstractEventLoop
-from contextlib import nullcontext, suppress
 from multiprocessing import cpu_count
 from os import linesep
 from pathlib import Path
@@ -86,32 +85,38 @@ class ChadClient(Client):
             name, args = msg
             handler = self._handlers.get(name, nil_handler(name))
 
-            def cont() -> None:
+            def cdraw() -> None:
                 nonlocal has_drawn
                 stage = cast(AnyFun[Optional[Stage]], handler)(
                     nvim, self._state, settings, *args
                 )
                 if stage:
                     self._state = stage.state
-                    mgr = suppress(NvimError) if stage.silent else nullcontext()
-                    with mgr:
+
+                    try:
                         redraw(nvim, state=self._state, focus=stage.focus)
-                        if settings.profiling and not has_drawn:
-                            has_drawn = True
-                            t2 = monotonic()
-                            info = uname()
-                            msg = f"""
-                            First msg  {int((t2 - t1) * 1000)}ms
-                            Arch       {info.machine}
-                            Processor  {info.processor}
-                            Cores      {cpu_count()}
-                            System     {info.system}
-                            Version    {info.version}
-                            Python     {Path(executable).resolve()}
-                            """
-                            write(nvim, dedent(msg))
+                    except NvimError as e:
+                        if stage.silent:
+                            pass
+                        else:
+                            raise e
+
+                    if settings.profiling and not has_drawn:
+                        has_drawn = True
+                        t2 = monotonic()
+                        info = uname()
+                        msg = f"""
+                        First msg  {int((t2 - t1) * 1000)}ms
+                        Arch       {info.machine}
+                        Processor  {info.processor}
+                        Cores      {cpu_count()}
+                        System     {info.system}
+                        Version    {info.version}
+                        Python     {Path(executable).resolve()}
+                        """
+                        write(nvim, dedent(msg))
 
             try:
-                threadsafe_call(nvim, cont)
+                threadsafe_call(nvim, cdraw)
             except Exception as e:
                 log.exception("%s", e)
