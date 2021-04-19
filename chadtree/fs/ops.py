@@ -80,6 +80,15 @@ def fs_stat(path: str) -> FSstat:
     return fs_stat
 
 
+def exists(path: str, follow: bool) -> bool:
+    try:
+        stat(path, follow_symlinks=follow)
+    except (OSError, ValueError):
+        return False
+    else:
+        return True
+
+
 def _new(path: str) -> None:
     if path.endswith(sep):
         makedirs(path, mode=FOLDER_MODE, exist_ok=True)
@@ -130,7 +139,7 @@ def _copy(src: str, dest: str) -> None:
     if S_ISDIR(stats.st_mode):
         copytree(src, dest)
     else:
-        copy2(src, dest)
+        copy2(src, dest, follow_symlinks=False)
 
 
 def copy(operations: Mapping[str, str]) -> None:

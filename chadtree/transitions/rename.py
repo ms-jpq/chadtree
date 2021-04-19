@@ -1,11 +1,11 @@
-from os.path import abspath, exists, join, basename, dirname
+from os.path import abspath, basename, dirname, join
 from typing import Optional
 
 from pynvim import Nvim
 from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
-from ..fs.ops import ancestors, rename
+from ..fs.ops import ancestors, exists, rename
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -39,7 +39,7 @@ def _rename(
         else:
             new_name = abspath(join(parent_name, child))
 
-            if exists(new_name):
+            if exists(new_name, follow=False):
                 write(nvim, LANG("already_exists", name=new_name), error=True)
                 return None
             else:

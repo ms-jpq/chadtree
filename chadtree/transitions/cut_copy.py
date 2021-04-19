@@ -1,7 +1,7 @@
 from itertools import chain
 from locale import strxfrm
 from os import linesep
-from os.path import basename, dirname, exists, join
+from os.path import basename, dirname, join
 from typing import AbstractSet, Callable, Mapping, MutableMapping, Optional
 
 from pynvim.api import Nvim
@@ -9,7 +9,7 @@ from pynvim_pp.api import ask, ask_mc, get_cwd
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
-from ..fs.ops import ancestors, copy, cut, unify_ancestors
+from ..fs.ops import ancestors, copy, cut, exists, unify_ancestors
 from ..fs.types import Node
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -53,7 +53,9 @@ def _operation(
         return None
     else:
         pre_operations = {src: _find_dest(src, node) for src in unified}
-        pre_existing = {s: d for s, d in pre_operations.items() if exists(d)}
+        pre_existing = {
+            s: d for s, d in pre_operations.items() if exists(d, follow=False)
+        }
 
         new_operations: MutableMapping[str, str] = {}
         while pre_existing:
@@ -65,7 +67,7 @@ def _operation(
             if not new_dest:
                 pre_existing[source] = dest
                 break
-            elif exists(new_dest):
+            elif exists(new_dest, follow=False):
                 pre_existing[source] = new_dest
             else:
                 new_operations[source] = new_dest

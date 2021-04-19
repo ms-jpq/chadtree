@@ -1,5 +1,5 @@
 from os import sep
-from os.path import abspath, dirname, exists, join
+from os.path import abspath, dirname, join
 from typing import Optional
 
 from pynvim import Nvim
@@ -7,7 +7,7 @@ from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
-from ..fs.ops import ancestors, new
+from ..fs.ops import ancestors, exists, new
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -39,7 +39,7 @@ def _new(
             return None
         else:
             path = abspath(join(parent, child))
-            if exists(path):
+            if exists(path, follow=False):
                 write(nvim, LANG("already_exists", name=path), error=True)
                 return None
             else:
