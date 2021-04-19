@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from os.path import exists, isabs, join, realpath
+from os.path import isabs, join, realpath
 from shutil import which
 from subprocess import CalledProcessError
 from typing import Optional, Sequence
@@ -18,6 +18,7 @@ from pynvim_pp.api import (
 from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
 
+from ..fs.ops import exists
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -147,7 +148,7 @@ def _open(
             path = realpath(
                 raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
             )
-            if not exists(path):
+            if not exists(path, follow=True):
                 write(nvim, LANG("path not exist", path=path))
                 return None
             else:

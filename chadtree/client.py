@@ -1,5 +1,4 @@
 from asyncio.events import AbstractEventLoop
-from contextlib import nullcontext, suppress
 from multiprocessing import cpu_count
 from os import linesep
 from pathlib import Path
@@ -21,6 +20,7 @@ from std2.sched import ticker
 from std2.types import AnyFun
 
 from ._registry import ____
+from .consts import RENDER_RETRIES
 from .registry import autocmd, enqueue_event, event_queue, pool, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
@@ -32,6 +32,21 @@ from .transitions.redraw import redraw
 from .transitions.schedule_update import schedule_update
 from .transitions.types import Stage
 from .transitions.version_ctl import vc_refresh
+
+
+def _profile(nvim: Nvim, t1: float) -> None:
+    t2 = monotonic()
+    info = uname()
+    msg = f"""
+    First msg  {int((t2 - t1) * 1000)}ms
+    Arch       {info.machine}
+    Processor  {info.processor}
+    Cores      {cpu_count()}
+    System     {info.system}
+    Version    {info.version}
+    Python     {Path(executable).resolve()}
+    """
+    write(nvim, dedent(msg))
 
 
 class ChadClient(Client):
@@ -86,32 +101,29 @@ class ChadClient(Client):
             name, args = msg
             handler = self._handlers.get(name, nil_handler(name))
 
-            def cont() -> None:
+            def cdraw() -> None:
                 nonlocal has_drawn
                 stage = cast(AnyFun[Optional[Stage]], handler)(
                     nvim, self._state, settings, *args
                 )
                 if stage:
                     self._state = stage.state
-                    mgr = suppress(NvimError) if stage.silent else nullcontext()
-                    with mgr:
+
+                    for _ in range(RENDER_RETRIES - 1):
+                        try:
+                            redraw(nvim, state=self._state, focus=stage.focus)
+                        except NvimError:
+                            pass
+                        else:
+                            break
+                    else:
                         redraw(nvim, state=self._state, focus=stage.focus)
-                        if settings.profiling and not has_drawn:
-                            has_drawn = True
-                            t2 = monotonic()
-                            info = uname()
-                            msg = f"""
-                            First msg  {int((t2 - t1) * 1000)}ms
-                            Arch       {info.machine}
-                            Processor  {info.processor}
-                            Cores      {cpu_count()}
-                            System     {info.system}
-                            Version    {info.version}
-                            Python     {Path(executable).resolve()}
-                            """
-                            write(nvim, dedent(msg))
+
+                    if settings.profiling and not has_drawn:
+                        has_drawn = True
+                        _profile(nvim, t1=t1)
 
             try:
-                threadsafe_call(nvim, cont)
+                threadsafe_call(nvim, cdraw)
             except Exception as e:
                 log.exception("%s", e)
