@@ -83,6 +83,13 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
     )
 
 
+def _listdir(path: str) -> Iterator[str]:
+    try:
+        yield from listdir(path)
+    except NotADirectoryError:
+        pass
+
+
 def _new(
     roots: Iterable[str], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
 ) -> None:
@@ -97,7 +104,7 @@ def _new(
             acc.put(node)
 
             if root in index:
-                for item in listdir(root):
+                for item in _listdir(root):
                     path = join(root, item)
                     bfs_q.put(path)
 
