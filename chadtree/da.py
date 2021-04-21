@@ -7,7 +7,7 @@ from operator import pow
 def human_readable_size(size: float, precision: int = 3) -> str:
     units = ("", "K", "M", "G", "T", "P", "E", "Z", "Y")
     step = partial(pow, 10)
-    steps = zip(map(step, count(step=3)), units)
+    steps = zip(map(step, count(0, step=3)), units)
     for factor, unit in steps:
         divided = size / factor
         if abs(divided) < 1000:
