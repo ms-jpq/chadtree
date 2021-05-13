@@ -33,12 +33,6 @@ from .wm import (
 )
 
 
-def _win_nochange(nvim: Nvim, win: Window) -> bool:
-    buf = win_get_buf(nvim, win=win)
-    modified: bool = buf_get_option(nvim, buf=buf, key="modified")
-    return not modified
-
-
 def _show_file(
     nvim: Nvim, *, state: State, settings: Settings, click_type: ClickType
 ) -> None:
@@ -58,7 +52,7 @@ def _show_file(
             win = next(
                 chain(
                     find_window_with_file_in_tab(nvim, file=path),
-                    (win for win in non_fm_windows if _win_nochange(nvim, win=win)),
+                    non_fm_windows,
                 ),
                 None,
             ) or new_window(
