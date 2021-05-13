@@ -105,7 +105,9 @@ def find_current_buffer_name(nvim: Nvim) -> str:
 
 
 def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
-    buf = create_buf(nvim, listed=False, scratch=True, wipe=False, nofile=True)
+    buf = create_buf(
+        nvim, listed=False, scratch=True, wipe=False, nofile=True, noswap=True
+    )
     buf_set_option(nvim, buf=buf, key="modifiable", val=False)
     buf_set_option(nvim, buf=buf, key="filetype", val=FM_FILETYPE)
 
@@ -114,12 +116,14 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
     km.n("}") << f"{settings.page_increment}<down>"
     for function, mappings in settings.keymap.items():
         for mapping in mappings:
-            km.n(
-                mapping, noremap=True, silent=True, nowait=True
-            ) << f"<cmd>lua {function}(false)<cr>"
-            km.v(
-                mapping, noremap=True, silent=True, nowait=True
-            ) << f"<esc><cmd>lua {function}(true)<cr>"
+            (
+                km.n(mapping, noremap=True, silent=True, nowait=True)
+                << f"<cmd>lua {function}(false)<cr>"
+            )
+            (
+                km.v(mapping, noremap=True, silent=True, nowait=True)
+                << f"<esc><cmd>lua {function}(true)<cr>"
+            )
 
     km.drain(buf=buf).commit(nvim)
     return buf
