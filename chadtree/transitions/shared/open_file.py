@@ -76,8 +76,7 @@ def _show_file(
             win = cur_win(nvim)
 
             if buf is None:
-                nvim.command("enew")
-                nvim.command(f"file! {path}")
+                nvim.command(f"edit! {path}")
             else:
                 win_set_buf(nvim, win=win, buf=buf)
 
