@@ -64,6 +64,7 @@ def _show_file(
                 else nvim.options["columns"] - state.width - 1,
             )
 
+            nvim.command("write")
             set_cur_win(nvim, win=win)
             non_fm_count = len(non_fm_windows)
 
@@ -79,7 +80,6 @@ def _show_file(
             win = cur_win(nvim)
 
             if buf is None:
-                nvim.command("write")
                 nvim.command(f"edit {path}")
             else:
                 win_set_buf(nvim, win=win, buf=buf)
