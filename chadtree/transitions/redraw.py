@@ -2,6 +2,7 @@ from typing import Optional, Sequence
 from uuid import uuid4
 
 from pynvim import Nvim
+from pynvim.api import NvimError
 from pynvim.api.buffer import Buffer
 from pynvim_pp.api import buf_get_var, buf_line_count, cur_win, win_get_cursor
 from pynvim_pp.atomic import Atomic
@@ -15,6 +16,10 @@ from ..view.types import Derived
 from .shared.wm import find_fm_windows
 
 _FM_HASH_VAR = f"CHAD_HASH_{uuid4()}"
+
+
+class UnrecoverableError(Exception):
+    pass
 
 
 def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
@@ -80,4 +85,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
         if new_row is not None:
             a3.win_set_cursor(win, (new_row, col))
 
-        (a1 + a2 + a3).commit(nvim)
+        try:
+            (a1 + a2 + a3).commit(nvim)
+        except NvimError as e:
+            raise UnrecoverableError(e)
