@@ -99,13 +99,13 @@ class ChadClient(Client):
         while True:
             msg: RpcMsg = event_queue.get()
             name, args = msg
-            handler = self._handlers.get(name, nil_handler(name))
+            handler = cast(
+                AnyFun[Optional[Stage]], self._handlers.get(name, nil_handler(name))
+            )
 
             def cdraw() -> None:
                 nonlocal has_drawn
-                stage = cast(AnyFun[Optional[Stage]], handler)(
-                    nvim, self._state, settings, *args
-                )
+                stage = handler(nvim, self._state, settings, *args)
                 if stage:
                     self._state = stage.state
 
