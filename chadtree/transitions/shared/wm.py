@@ -86,13 +86,13 @@ def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
 
 
 def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
-    for buf in list_bufs(nvim):
+    for buf in list_bufs(nvim, listed=True):
         if is_fm_buffer(nvim, buf=buf):
             yield buf
 
 
 def find_buffers_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
-    for buf in list_bufs(nvim):
+    for buf in list_bufs(nvim, listed=True):
         name = buf_name(nvim, buf=buf)
         if name == file:
             yield buf
@@ -105,7 +105,9 @@ def find_current_buffer_name(nvim: Nvim) -> str:
 
 
 def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
-    buf = create_buf(nvim, listed=False, scratch=True, wipe=False, nofile=True)
+    buf = create_buf(
+        nvim, listed=False, scratch=True, wipe=False, nofile=True, noswap=True
+    )
     buf_set_option(nvim, buf=buf, key="modifiable", val=False)
     buf_set_option(nvim, buf=buf, key="filetype", val=FM_FILETYPE)
 
@@ -114,12 +116,14 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
     km.n("}") << f"{settings.page_increment}<down>"
     for function, mappings in settings.keymap.items():
         for mapping in mappings:
-            km.n(
-                mapping, noremap=True, silent=True, nowait=True
-            ) << f"<cmd>lua {function}(false)<cr>"
-            km.v(
-                mapping, noremap=True, silent=True, nowait=True
-            ) << f"<esc><cmd>lua {function}(true)<cr>"
+            (
+                km.n(mapping, noremap=True, silent=True, nowait=True)
+                << f"<cmd>lua {function}(false)<cr>"
+            )
+            (
+                km.v(mapping, noremap=True, silent=True, nowait=True)
+                << f"<esc><cmd>lua {function}(true)<cr>"
+            )
 
     km.drain(buf=buf).commit(nvim)
     return buf
@@ -157,7 +161,7 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
 
 
 def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> None:
-    for buf in list_bufs(nvim):
+    for buf in list_bufs(nvim, listed=True):
         name = buf_name(nvim, buf=buf)
         buf_paths = ancestors(name) | {name}
         if not buf_paths.isdisjoint(paths):

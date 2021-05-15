@@ -5,15 +5,12 @@ from os.path import basename, splitext
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim.api.window import Window
 from pynvim_pp.api import (
     ask_mc,
-    buf_get_option,
     buf_set_option,
     cur_buf,
     cur_win,
     set_cur_win,
-    win_get_buf,
     win_set_buf,
     win_set_option,
 )
@@ -79,7 +76,7 @@ def _show_file(
             win = cur_win(nvim)
 
             if buf is None:
-                nvim.command(f"edit {path}")
+                nvim.command(f"edit! {path}")
             else:
                 win_set_buf(nvim, win=win, buf=buf)
 
