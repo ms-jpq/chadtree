@@ -41,8 +41,9 @@ command: Union[Literal["deps"], Literal["run"]] = args.command
 use_xdg = False if is_win else args.xdg
 _RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
 _RT_PY = RT_PY_XDG if use_xdg else RT_PY
-_LOCK_FILE = RT_DIR / "requirements.lock"
+_LOCK_FILE = _RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
+_REQ = REQUIREMENTS.read_text()
 
 
 def _is_relative_to(origin: Path, *other: Path) -> bool:
@@ -104,6 +105,7 @@ if command == "deps":
             print("Installation failed, check :message", file=stderr)
             exit(proc.returncode)
         else:
+            _LOCK_FILE.write_text(_REQ)
             msg = """
             ---
             This is not an error:
@@ -113,7 +115,6 @@ if command == "deps":
             print(msg, file=stderr)
 
 elif command == "run":
-    req = REQUIREMENTS.read_text()
     try:
         lock = _LOCK_FILE.read_text()
     except Exception:
@@ -121,7 +122,7 @@ elif command == "run":
     try:
         if _EXEC_PATH != _RT_PY:
             raise ImportError()
-        elif lock != req:
+        elif lock != _REQ:
             raise ImportError()
         else:
             import pynvim
