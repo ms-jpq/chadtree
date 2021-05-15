@@ -71,6 +71,17 @@ if command == "deps":
         print("Please install venv separately.", file=stderr)
         exit(1)
     else:
+        run(
+            (
+                str(_RT_PY),
+                "-m",
+                "pip",
+                "install",
+                "pip",
+            ),
+            stdin=DEVNULL,
+            stderr=stdout,
+        )
         proc = run(
             (
                 str(_RT_PY),
