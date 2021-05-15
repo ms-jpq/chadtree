@@ -86,13 +86,13 @@ def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
 
 
 def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
-    for buf in list_bufs(nvim):
+    for buf in list_bufs(nvim, listed=True):
         if is_fm_buffer(nvim, buf=buf):
             yield buf
 
 
 def find_buffers_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
-    for buf in list_bufs(nvim):
+    for buf in list_bufs(nvim, listed=True):
         name = buf_name(nvim, buf=buf)
         if name == file:
             yield buf
@@ -161,7 +161,7 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
 
 
 def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> None:
-    for buf in list_bufs(nvim):
+    for buf in list_bufs(nvim, listed=True):
         name = buf_name(nvim, buf=buf)
         buf_paths = ancestors(name) | {name}
         if not buf_paths.isdisjoint(paths):
