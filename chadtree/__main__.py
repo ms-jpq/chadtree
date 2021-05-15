@@ -41,6 +41,7 @@ command: Union[Literal["deps"], Literal["run"]] = args.command
 use_xdg = False if is_win else args.xdg
 _RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
 _RT_PY = RT_PY_XDG if use_xdg else RT_PY
+_LOCK_FILE = RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
 
 
@@ -71,17 +72,21 @@ if command == "deps":
         print("Please install venv separately.", file=stderr)
         exit(1)
     else:
-        run(
+        proc = run(
             (
                 str(_RT_PY),
                 "-m",
                 "pip",
                 "install",
+                "--upgrade",
                 "pip",
             ),
             stdin=DEVNULL,
             stderr=stdout,
         )
+        if proc.returncode:
+            print("Installation failed, check :message", file=stderr)
+            exit(proc.returncode)
         proc = run(
             (
                 str(_RT_PY),
@@ -108,15 +113,22 @@ if command == "deps":
             print(msg, file=stderr)
 
 elif command == "run":
+    req = REQUIREMENTS.read_text()
+    try:
+        lock = _LOCK_FILE.read_text()
+    except Exception:
+        lock = ""
     try:
         if _EXEC_PATH != _RT_PY:
-            raise RuntimeError()
+            raise ImportError()
+        elif lock != req:
+            raise ImportError()
         else:
             import pynvim
             import pynvim_pp
             import std2
             import yaml
-    except (ImportError, RuntimeError):
+    except ImportError:
         msg = """
         Please update dependencies using :CHADdeps
         -
