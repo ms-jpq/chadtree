@@ -4,8 +4,8 @@ ignore:
   name_exact:
     - .DS_Store
     - .directory
-    - thumbs.db
     - .git
+    - thumbs.db
   name_glob: []
   path_glob: []
 keymap:
