@@ -32,7 +32,7 @@ from .wm import (
 
 
 def _escape_path(path: str) -> str:
-    rules = {"$": "\\"}
+    rules = {"\\": "\\", "$": "\\", "%": "\\", "#": "\\"}
     return "".join(escape_with_prefix(path, escape=rules))
 
 
