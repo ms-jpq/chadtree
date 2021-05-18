@@ -2,7 +2,7 @@ from locale import getdefaultlocale
 from string import Template
 from typing import Mapping, MutableMapping, Optional, Union
 
-from std2.pickle.decode import decode
+from std2.pickle import decode
 from yaml import safe_load
 
 from ..consts import DEFAULT_LANG, LANG_ROOT
