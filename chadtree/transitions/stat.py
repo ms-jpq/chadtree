@@ -1,13 +1,13 @@
 from pynvim import Nvim
 from pynvim_pp.lib import write
+from std2.locale import human_readable_size
 
-from ..da import human_readable_size
 from ..fs.ops import fs_stat
 from ..registry import rpc
 from ..settings.types import Settings
-from .shared.index import indices
 from ..state.types import State
 from ..view.ops import display_path
+from .shared.index import indices
 
 
 @rpc(blocking=False)
