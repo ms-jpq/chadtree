@@ -34,13 +34,13 @@ def parse_args() -> Namespace:
     return parser.parse_args()
 
 
-is_win = name == "nt"
-args = parse_args()
-command: Union[Literal["deps"], Literal["run"]] = args.command
+_is_win = name == "nt"
+_args = parse_args()
+_command: Union[Literal["deps"], Literal["run"]] = _args.command
 
-use_xdg = False if is_win else args.xdg
-_RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
-_RT_PY = RT_PY_XDG if use_xdg else RT_PY
+_use_xdg = False if _is_win else _args.xdg
+_RT_DIR = RT_DIR_XDG if _use_xdg else RT_DIR
+_RT_PY = RT_PY_XDG if _use_xdg else RT_PY
 _LOCK_FILE = _RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
 _REQ = REQUIREMENTS.read_text()
@@ -54,7 +54,7 @@ def _is_relative_to(origin: Path, *other: Path) -> bool:
         return False
 
 
-if command == "deps":
+if _command == "deps":
     try:
         from venv import EnvBuilder
 
@@ -66,7 +66,7 @@ if command == "deps":
                 system_site_packages=False,
                 with_pip=True,
                 upgrade=True,
-                symlinks=not is_win,
+                symlinks=not _is_win,
                 clear=True,
             ).create(_RT_DIR)
     except (ImportError, SystemExit):
@@ -115,7 +115,7 @@ if command == "deps":
             msg = dedent(msg)
             print(msg, file=stderr)
 
-elif command == "run":
+elif _command == "run":
     try:
         lock = _LOCK_FILE.read_text()
     except Exception:
@@ -147,7 +147,7 @@ elif command == "run":
 
         from .client import ChadClient
 
-        nvim = attach("socket", path=args.socket)
+        nvim = attach("socket", path=_args.socket)
         code = run_client(nvim, client=ChadClient())
         exit(code)
 
