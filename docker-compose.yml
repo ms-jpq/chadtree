@@ -4,7 +4,6 @@ services:
   chadtree:
     restart: always
     build: .
-    container_name: chad
     environment:
       - TZ
 
