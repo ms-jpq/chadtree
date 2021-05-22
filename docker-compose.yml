@@ -1,9 +1,10 @@
 version: "3.8"
 
 services:
-  router:
+  chadtree:
     restart: always
-    build: ./docker
+    build: .
+    container_name: chad
     environment:
       - TZ
 
