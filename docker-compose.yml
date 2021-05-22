@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  router:
+    restart: always
+    build: ./docker
+    environment:
+      - TZ
+
