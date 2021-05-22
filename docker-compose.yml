@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  chadtree:
+    restart: always
+    build: .
+    environment:
+      - TZ
+

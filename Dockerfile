@@ -7,9 +7,8 @@ RUN apt-get update && \
 
 
 ADD https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim /root/.config/nvim/autoload/plug.vim
-COPY docker/root /
-COPY . /root/.config/nvim/plugged/chadtree/
-
+COPY ./docker /
+COPY . /root/.config/nvim/plugged/chadtree
 
 ENV XDG_DATA_HOME /root/XDG_DATA_HOME
 WORKDIR /root/.config/nvim/plugged/chadtree
