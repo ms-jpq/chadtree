@@ -31,7 +31,6 @@ return function(args)
   else
     chad.loaded = true
     local job_id = nil
-    local chad_params = {}
     local err_exit = false
 
     chad.on_exit = function(args)
@@ -44,9 +43,6 @@ return function(args)
         err_exit = false
       end
       job_id = nil
-      for _, param in ipairs(chad_params) do
-        chad[chad_params] = nil
-      end
     end
 
     chad.on_stdout = function(args)
@@ -113,7 +109,6 @@ return function(args)
     vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.CHADdeps()]]
 
     local set_chad_call = function(cmd)
-      table.insert(chad_params, cmd)
       local t1 = 0
       chad[cmd] = function(...)
         local args = {...}
