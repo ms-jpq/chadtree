@@ -106,16 +106,16 @@ return function(args)
       return job_id
     end
 
-    chad.deps_cmd = function()
+    chad.CHADdeps = function()
       start("deps")
     end
 
-    vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.deps_cmd()]]
+    vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.CHADdeps()]]
 
-    local set_chad_call = function(name, cmd)
-      table.insert(chad_params, name)
+    local set_chad_call = function(cmd)
+      table.insert(chad_params, cmd)
       local t1 = 0
-      chad[name] = function(...)
+      chad[cmd] = function(...)
         local args = {...}
         if t1 == 0 then
           t1 = vim.loop.now()
@@ -140,7 +140,7 @@ return function(args)
               if err_exit then
                 return
               else
-                chad[name](unpack(args))
+                chad[cmd](unpack(args))
               end
             end
           )
@@ -148,10 +148,10 @@ return function(args)
       end
     end
 
-    set_chad_call("open_cmd", "CHADopen")
-    vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.open_cmd(<f-args>)]]
+    set_chad_call("CHADopen")
+    vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.CHADopen(<f-args>)]]
 
-    set_chad_call("help_cmd", "CHADhelp")
-    vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.help_cmd(<f-args>)]]
+    set_chad_call("CHADhelp")
+    vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.CHADhelp(<f-args>)]]
   end
 end
