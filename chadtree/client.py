@@ -60,32 +60,38 @@ class ChadClient(Client):
         return None
 
     def wait(self, nvim: Nvim) -> int:
-        def cont() -> None:
+        def cont() -> bool:
             if isinstance(nvim.loop, AbstractEventLoop):
                 nvim.loop.set_default_executor(pool)
 
             atomic, specs = rpc.drain(nvim.channel_id)
             self._handlers.update(specs)
-            self._settings = initial_settings(nvim, specs)
-            hl = highlight(*self._settings.view.hl_context.groups)
-            (atomic + autocmd.drain() + hl).commit(nvim)
+            try:
+                self._settings = initial_settings(nvim, specs)
+            except DecodeError as e:
+                msg1 = "Some options may hanve changed."
+                msg2 = "See help doc on Github under [docs/CONFIGURATION.md]"
+                write(nvim, e, msg1, msg2, sep=linesep, error=True)
+                return False
+            else:
+                hl = highlight(*self._settings.view.hl_context.groups)
+                (atomic + autocmd.drain() + hl).commit(nvim)
 
-            self._state = initial_state(nvim, settings=self._settings)
-            init_locale(self._settings.lang)
+                self._state = initial_state(nvim, settings=self._settings)
+                init_locale(self._settings.lang)
+                return True
 
         try:
-            threadsafe_call(nvim, cont)
-        except DecodeError as e:
-            msg1 = "Some options may hanve changed."
-            msg2 = "See help doc on Github under [docs/CONFIGURATION.md]"
-            print(e, msg1, msg2, sep=linesep, file=stderr)
-            return 1
+            go = threadsafe_call(nvim, cont)
         except Exception as e:
             log.exception("%s", e)
             return 1
         else:
-            settings = cast(Settings, self._settings)
-            t1, has_drawn = monotonic(), False
+            if not go:
+                return 1
+            else:
+                settings = cast(Settings, self._settings)
+                t1, has_drawn = monotonic(), False
 
         def sched() -> None:
             enqueue_event(vc_refresh)
