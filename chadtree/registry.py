@@ -21,7 +21,7 @@ rpc = RPC(name_gen=_name_gen)
 
 def enqueue_event(event: RpcCallable, *args: Any) -> None:
     try:
-        msg: RpcMsg = (event.name, args)
+        msg: RpcMsg = (event.name, (args,))
         event_queue.put(msg)
     except Exception as e:
         log.exception("%s", e)
