@@ -10,7 +10,6 @@ from typing import (
     Set,
     Tuple,
     Union,
-    cast,
 )
 from uuid import uuid4
 
@@ -219,10 +218,10 @@ def _parse_styling(codes: str) -> _Styling:
     styles: Set[_Style] = set()
     colours: MutableMapping[_Ground, Union[_AnsiColour, _Colour]] = {}
     for ret in _parse_codes(codes):
-        if type(ret) is _Style:
-            styles.add(cast(_Style, ret))
-        elif type(ret) is tuple:
-            ground, colour = cast(Tuple[_Ground, Union[_AnsiColour, _Colour]], ret)
+        if isinstance(ret, _Style):
+            styles.add(ret)
+        elif isinstance(ret, tuple):
+            ground, colour = ret
             colours[ground] = colour
 
     styling = _Styling(
