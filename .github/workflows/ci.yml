@@ -27,7 +27,9 @@ jobs:
           python-version: ${{ matrix.python_ver }}
 
       - name: Pip Packages
-        run: pip install -U mypy
+        run: |-
+          pip install -U mypy
+          mypy --install-types
 
       - name: Pip Packages 2
         run: pip install -U -r requirements.txt
