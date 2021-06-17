@@ -2,7 +2,7 @@ from os.path import abspath, basename, dirname, join
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.api import ask
+from pynvim_pp.api import ask, win_get_buf
 from pynvim_pp.lib import write
 
 from ..fs.ops import ancestors, exists, rename
@@ -15,7 +15,7 @@ from .shared.current import maybe_path_above
 from .shared.index import indices
 from .shared.open_file import open_file
 from .shared.refresh import refresh
-from .shared.wm import kill_buffers
+from .shared.wm import find_non_fm_windows_in_tab, kill_buffers
 from .types import ClickType, Stage
 
 
@@ -61,8 +61,12 @@ def _rename(
                     next_state = forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
+                    win_bufs = {
+                        win_get_buf(nvim, win=win)
+                        for win in find_non_fm_windows_in_tab(nvim)
+                    }
                     killed = {*kill_buffers(nvim, paths={prev_name})}
-                    if prev_name in killed:
+                    if killed & win_bufs:
                         return open_file(
                             nvim,
                             state=state,

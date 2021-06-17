@@ -160,10 +160,11 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
         window.width = width
 
 
-def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> Iterator[str]:
+def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> Iterator[Buffer]:
     for buf in list_bufs(nvim, listed=True):
         name = buf_name(nvim, buf=buf)
         buf_paths = ancestors(name) | {name}
         if not buf_paths.isdisjoint(paths):
             buf_close(nvim, buf=buf)
-            yield name
+            yield buf
+
