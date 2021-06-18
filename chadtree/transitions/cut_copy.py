@@ -85,10 +85,7 @@ def _operation(
             return None
 
         else:
-            operations: Mapping[PurePath, PurePath] = {
-                **pre_operations,
-                **new_operations,
-            }
+            operations = {**pre_operations, **new_operations}
             msg = linesep.join(
                 f"{display_path(s, state=state)} -> {display_path(d, state=state)}"
                 for s, d in sorted(operations.items(), key=lambda t: strxfrm(str(t[0])))
