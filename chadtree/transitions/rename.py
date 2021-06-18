@@ -49,7 +49,6 @@ def _rename(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
-                    kill_buffers(nvim, paths={prev_name}, reopen={prev_name: new_name})
                     new_state = (
                         maybe_path_above(
                             nvim, state=state, settings=settings, path=new_name
@@ -61,5 +60,6 @@ def _rename(
                     next_state = forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
+                    kill_buffers(nvim, paths={prev_name}, reopen={prev_name: new_name})
                     return Stage(next_state, focus=new_name)
 
