@@ -27,10 +27,12 @@ from .types import VCStatus
 
 _WHITE_SPACES = {*whitespace}
 _GIT_LIST_CMD = ("git", "status", "--ignored", "--renames", "--porcelain", "-z")
-_GIT_SUBMODULE_MARKER = "Entering "
 _GIT_ENV = {"LC_ALL": "C"}
+
+_GIT_SUBMODULE_MARKER = "Entering "
 _SUBMODULE_MARKER = "S"
 _IGNORED_MARKER = "I"
+_UNTRACKED_MARKER = "?"
 
 
 def root(cwd: PurePath) -> PurePath:
@@ -112,10 +114,11 @@ def _stat_sub_modules(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
 
 
 def _stat_name(stat: str) -> str:
-    if stat == "!!":
-        return _IGNORED_MARKER
-    else:
-        return stat
+    markers = {
+        "!!": _IGNORED_MARKER,
+        "??": _UNTRACKED_MARKER,
+    }
+    return markers.get(stat, stat)
 
 
 def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
@@ -133,7 +136,8 @@ def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
             for ancestor in ancestors(path):
                 parents = directories.setdefault(ancestor, set())
                 if stat != _SUBMODULE_MARKER:
-                    parents.add(stat)
+                    for sym in stat:
+                        parents.add(sym)
 
     for directory, syms in directories.items():
         pre_existing = {*status.get(directory, "")}
