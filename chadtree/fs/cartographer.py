@@ -77,8 +77,8 @@ def _fs_stat(path: PurePath) -> AbstractSet[Mode]:
 
 def user_ignored(node: Node, ignores: Ignored) -> bool:
     return (
-        node.name in ignores.name_exact
-        or any(fnmatch(node.name, pattern) for pattern in ignores.name_glob)
+        node.path.name in ignores.name_exact
+        or any(fnmatch(node.path.name, pattern) for pattern in ignores.name_glob)
         or any(fnmatch(str(node.path), pattern) for pattern in ignores.path_glob)
     )
 
@@ -100,8 +100,6 @@ def _new(
             node = Node(
                 path=root,
                 mode=mode,
-                name=root.name,
-                ext=root.suffix or None,
                 ancestors=_ancestors,
             )
             acc.put(node)
@@ -167,10 +165,8 @@ def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
         return Node(
             path=root.path,
             mode=root.mode,
-            name=root.name,
             ancestors=root.ancestors,
             children=children,
-            ext=root.ext,
         )
 
 

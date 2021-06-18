@@ -32,9 +32,9 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
                 if sb is Sortby.is_folder:
                     yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
                 elif sb is Sortby.ext:
-                    yield strxfrm(node.ext or ""),
+                    yield strxfrm(node.path.suffix),
                 elif sb is Sortby.file_name:
-                    yield strxfrm(node.name)
+                    yield strxfrm(node.path.name)
                 else:
                     never(sb)
 
@@ -84,7 +84,7 @@ def _paint(
         if ignored:
             return particular_mappings.ignored
         else:
-            return icon_exts.get(node.ext or "")
+            return icon_exts.get(node.path.suffix)
 
     def search_text_hl(node: Node, ignored: bool) -> Optional[str]:
         if ignored:
@@ -96,15 +96,15 @@ def _paint(
             if hl:
                 return hl
 
-        hl = name_exact.get(node.name)
+        hl = name_exact.get(node.path.name)
         if hl:
             return hl
 
         for pattern, hl in name_glob.items():
-            if fnmatch(node.name, pattern):
+            if fnmatch(node.path.name, pattern):
                 return hl
 
-        hl = ext_exact.get(node.ext or "")
+        hl = ext_exact.get(node.path.suffix)
         if hl:
             return hl
 
@@ -132,17 +132,21 @@ def _paint(
             yield icons.folder.open if node.path in index else icons.folder.closed
         else:
             yield (
-                icons.name_exact.get(node.name, "")
-                or icons.ext_exact.get(node.ext or "", "")
+                icons.name_exact.get(node.path.name, "")
+                or icons.ext_exact.get(node.path.suffix, "")
                 or next(
-                    (v for k, v in icons.name_glob.items() if fnmatch(node.name, k)),
+                    (
+                        v
+                        for k, v in icons.name_glob.items()
+                        if fnmatch(node.path.name, k)
+                    ),
                     icons.default_icon,
                 )
             ) if settings.view.use_icons else icons.default_icon
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
-        yield node.name.replace(linesep, r"\n")
+        yield node.path.name.replace(linesep, r"\n")
         if not settings.view.use_icons and is_dir(node):
             yield sep
 
@@ -230,7 +234,9 @@ def render(
 
     def render(node: Node, *, depth: int, cleared: bool) -> Iterator[_NRender]:
         clear = (
-            cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
+            cleared
+            or not filter_pattern
+            or fnmatch(node.path.name, filter_pattern.pattern)
         )
         rend = show(node, depth)
 

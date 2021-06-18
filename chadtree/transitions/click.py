@@ -26,8 +26,7 @@ def _click(
         return None
     else:
         if Mode.orphan_link in node.mode:
-            name = node.name
-            write(nvim, LANG("dead_link", name=name), error=True)
+            write(nvim, LANG("dead_link", name=node.path.name), error=True)
             return None
         else:
             if is_dir(node):

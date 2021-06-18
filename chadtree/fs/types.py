@@ -29,11 +29,9 @@ class Mode(IntEnum):
 @dataclass(frozen=True)
 class Node:
     mode: AbstractSet[Mode]
-    name: str
     path: PurePath
     ancestors: AbstractSet[PurePath]
     children: Mapping[PurePath, Node] = field(default_factory=dict)
-    ext: Optional[str] = None
 
 
 @dataclass(frozen=True)

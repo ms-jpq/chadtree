@@ -4,7 +4,7 @@ from os import makedirs
 from os import name as os_name
 from os import readlink
 from os import remove as rm
-from os import sep, stat
+from os import stat
 from pathlib import Path, PurePath
 from shutil import copy2, copytree
 from shutil import move as mv
