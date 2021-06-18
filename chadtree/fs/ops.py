@@ -128,7 +128,7 @@ def remove(paths: Iterable[PurePath]) -> None:
 
 
 def _cut(src: PurePath, dest: PurePath) -> None:
-    mv(src, dest)
+    mv(str(src), str(dest))
 
 
 def cut(operations: Mapping[PurePath, PurePath]) -> None:
