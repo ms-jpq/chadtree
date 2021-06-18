@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from os.path import isabs, realpath
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from shutil import which
 from subprocess import CalledProcessError
 from typing import Optional, Sequence
@@ -146,13 +145,11 @@ def _open(
             new_state = state
 
         if raw_path:
-            path = PurePath(
-                realpath(
-                    raw_path
-                    if raw_path.is_absolute()
-                    else PurePath(get_cwd(nvim)) / raw_path
-                )
-            )
+            path = Path(
+                raw_path
+                if raw_path.is_absolute()
+                else PurePath(get_cwd(nvim)) / raw_path
+            ).resolve()
             if not exists(path, follow=True):
                 write(nvim, LANG("path not exist", path=str(path)))
                 return None
