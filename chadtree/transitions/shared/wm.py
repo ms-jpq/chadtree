@@ -18,6 +18,7 @@ from pynvim_pp.api import (
     win_get_option,
     win_set_option,
 )
+from pynvim_pp.hold import hold_win_pos
 from pynvim_pp.keymap import Keymap
 from std2.lex import escape_with_prefix
 
@@ -187,5 +188,4 @@ def kill_buffers(
                     escaped = escape_file_path(new_path)
                     nvim.command(f"edit! {escaped}")
             buf_close(nvim, buf=buf)
-            yield buf
 
