@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
 
 from pynvim.api import Buffer, Nvim, Window
@@ -183,9 +184,12 @@ def kill_buffers(
             win = active.get(buf)
             new_path = reopen.get(name)
             if reopen and win and new_path:
+                p = Path(name)
+                p.touch()
                 with hold_win_pos(nvim):
                     set_cur_win(nvim, win=win)
                     escaped = escape_file_path(new_path)
                     nvim.command(f"edit! {escaped}")
+                    p.unlink(missing_ok=True)
             buf_close(nvim, buf=buf)
 

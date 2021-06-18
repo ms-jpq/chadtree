@@ -2,7 +2,7 @@ from os.path import abspath, basename, dirname, join
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.api import ask, win_get_buf
+from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
 from ..fs.ops import ancestors, exists, rename
