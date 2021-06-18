@@ -3,6 +3,7 @@ from fnmatch import fnmatch
 from locale import strxfrm
 from os import linesep
 from os.path import sep
+from pathlib import PurePath
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from std2.types import never
@@ -31,9 +32,9 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
                 if sb is Sortby.is_folder:
                     yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
                 elif sb is Sortby.ext:
-                    yield strxfrm(node.ext or ""),
+                    yield strxfrm(node.path.suffix),
                 elif sb is Sortby.file_name:
-                    yield strxfrm(node.name)
+                    yield strxfrm(node.path.name)
                 else:
                     never(sb)
 
@@ -57,7 +58,7 @@ def _paint(
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
-    current: Optional[str],
+    current: Optional[PurePath],
 ) -> Callable[[Node, int], Optional[_Render]]:
     icons = settings.view.icons
     context = settings.view.hl_context
@@ -83,7 +84,7 @@ def _paint(
         if ignored:
             return particular_mappings.ignored
         else:
-            return icon_exts.get(node.ext or "")
+            return icon_exts.get(node.path.suffix)
 
     def search_text_hl(node: Node, ignored: bool) -> Optional[str]:
         if ignored:
@@ -95,15 +96,15 @@ def _paint(
             if hl:
                 return hl
 
-        hl = name_exact.get(node.name)
+        hl = name_exact.get(node.path.name)
         if hl:
             return hl
 
         for pattern, hl in name_glob.items():
-            if fnmatch(node.name, pattern):
+            if fnmatch(node.path.name, pattern):
                 return hl
 
-        hl = ext_exact.get(node.ext or "")
+        hl = ext_exact.get(node.path.suffix)
         if hl:
             return hl
 
@@ -114,7 +115,7 @@ def _paint(
         else:
             return mode_post.get(None)
 
-    def gen_status(path: str) -> str:
+    def gen_status(path: PurePath) -> str:
         selected = (
             icons.status.selected if path in selection else icons.status.not_selected
         )
@@ -131,17 +132,21 @@ def _paint(
             yield icons.folder.open if node.path in index else icons.folder.closed
         else:
             yield (
-                icons.name_exact.get(node.name, "")
-                or icons.ext_exact.get(node.ext or "", "")
+                icons.name_exact.get(node.path.name, "")
+                or icons.ext_exact.get(node.path.suffix, "")
                 or next(
-                    (v for k, v in icons.name_glob.items() if fnmatch(node.name, k)),
+                    (
+                        v
+                        for k, v in icons.name_glob.items()
+                        if fnmatch(node.path.name, k)
+                    ),
                     icons.default_icon,
                 )
             ) if settings.view.use_icons else icons.default_icon
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
-        yield node.name.replace(linesep, r"\n")
+        yield node.path.name.replace(linesep, r"\n")
         if not settings.view.use_icons and is_dir(node):
             yield sep
 
@@ -154,7 +159,7 @@ def _paint(
             yield " "
             yield icons.link.normal
 
-    def gen_badges(path: str) -> Iterator[Badge]:
+    def gen_badges(path: PurePath) -> Iterator[Badge]:
         qf_count = qf.locations[path]
         stat = vc.status.get(path)
         if qf_count:
@@ -213,7 +218,7 @@ def render(
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
-    current: Optional[str],
+    current: Optional[PurePath],
 ) -> Derived:
     show = _paint(
         settings,
@@ -229,7 +234,9 @@ def render(
 
     def render(node: Node, *, depth: int, cleared: bool) -> Iterator[_NRender]:
         clear = (
-            cleared or not filter_pattern or fnmatch(node.name, filter_pattern.pattern)
+            cleared
+            or not filter_pattern
+            or fnmatch(node.path.name, filter_pattern.pattern)
         )
         rend = show(node, depth)
 
@@ -263,3 +270,4 @@ def render(
         path_row_lookup=path_row_lookup,
     )
     return derived
+

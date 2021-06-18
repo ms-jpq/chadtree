@@ -1,8 +1,8 @@
-from os.path import dirname
+from pathlib import PurePath
 from typing import AbstractSet, Optional
 
 from pynvim import Nvim
-from std2.pathlib import longest_common_path, is_relative_to
+from std2.pathlib import is_relative_to, longest_common_path
 
 from ...fs.cartographer import new
 from ...fs.ops import ancestors
@@ -13,7 +13,7 @@ from ..types import Stage
 
 
 def new_current_file(
-    nvim: Nvim, state: State, settings: Settings, current: str
+    nvim: Nvim, state: State, settings: Settings, current: PurePath
 ) -> Optional[Stage]:
     """
     New file focused in buf
@@ -21,7 +21,7 @@ def new_current_file(
 
     parents = ancestors(current)
     if state.root.path in parents:
-        paths: AbstractSet[str] = parents if state.follow else set()
+        paths: AbstractSet[PurePath] = parents if state.follow else set()
         index = state.index | paths
         new_state = forward(
             state, settings=settings, index=index, paths=paths, current=current
@@ -35,8 +35,8 @@ def new_root(
     nvim: Nvim,
     state: State,
     settings: Settings,
-    new_cwd: str,
-    indices: AbstractSet[str],
+    new_cwd: PurePath,
+    indices: AbstractSet[PurePath],
 ) -> State:
     index = state.index | ancestors(new_cwd) | {new_cwd} | indices
     root = new(new_cwd, index=index)
@@ -47,15 +47,16 @@ def new_root(
 
 
 def maybe_path_above(
-    nvim: Nvim, state: State, settings: Settings, path: str
+    nvim: Nvim, state: State, settings: Settings, path: PurePath
 ) -> Optional[State]:
     root = state.root.path
     if is_relative_to(path, root):
         return None
     else:
         lcp = longest_common_path(path, root)
-        new_cwd = str(lcp) if lcp else dirname(path)
+        new_cwd = lcp if lcp else path.parent
         indices = ancestors(path)
         return new_root(
             nvim, state=state, settings=settings, new_cwd=new_cwd, indices=indices
         )
+

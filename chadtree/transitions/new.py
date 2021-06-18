@@ -1,5 +1,6 @@
 from os import sep
-from os.path import abspath, dirname, join
+from os.path import abspath
+from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
@@ -7,7 +8,7 @@ from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
-from ..fs.ops import ancestors, exists, new
+from ..fs.ops import ancestors, exists, mkdir, new
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -31,21 +32,23 @@ def _new(
     if not node:
         return None
     else:
-        parent = node.path if is_dir(node) else dirname(node.path)
+        parent = node.path if is_dir(node) else node.path.parent
 
         child = ask(nvim, question=LANG("pencil"), default="")
 
         if not child:
             return None
         else:
-            path = abspath(join(parent, child))
+            path = PurePath(abspath(parent / child))
             if exists(path, follow=False):
-                write(nvim, LANG("already_exists", name=path), error=True)
+                write(nvim, LANG("already_exists", name=str(path)), error=True)
                 return None
             else:
                 try:
-                    dest = path + sep if child.endswith(sep) else path
-                    new((dest,))
+                    if child.endswith(sep):
+                        mkdir((path,))
+                    else:
+                        new((path,))
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
@@ -62,3 +65,4 @@ def _new(
                         new_state, settings=settings, index=index, paths=paths
                     )
                     return Stage(next_state, focus=path)
+

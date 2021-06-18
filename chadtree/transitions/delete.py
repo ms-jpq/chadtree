@@ -1,6 +1,6 @@
 from locale import strxfrm
 from os import linesep
-from os.path import dirname
+from pathlib import PurePath
 from shutil import which
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
 from typing import Callable, Iterable, Optional
@@ -29,9 +29,9 @@ def _remove(
     state: State,
     settings: Settings,
     is_visual: bool,
-    yeet: Callable[[Iterable[str]], None],
+    yeet: Callable[[Iterable[PurePath]], None],
 ) -> Optional[Stage]:
-    cwd, root = get_cwd(nvim), state.root.path
+    cwd, root = PurePath(get_cwd(nvim)), state.root.path
     nono = {cwd, root} | ancestors(cwd) | ancestors(root)
 
     selection = state.selection or {
@@ -66,7 +66,7 @@ def _remove(
                 write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
             else:
-                paths = {dirname(path) for path in unified}
+                paths = {path.parent for path in unified}
                 new_state = forward(
                     state, settings=settings, selection=set(), paths=paths
                 )
@@ -88,14 +88,14 @@ def _delete(
     )
 
 
-def _sys_trash(nvim: Nvim) -> Callable[[Iterable[str]], None]:
-    cwd = get_cwd(nvim)
+def _sys_trash(nvim: Nvim) -> Callable[[Iterable[PurePath]], None]:
+    cwd = PurePath(get_cwd(nvim))
 
-    def cont(paths: Iterable[str]) -> None:
+    def cont(paths: Iterable[PurePath]) -> None:
         def c1() -> None:
             cmd = "trash"
             if which(cmd):
-                command = (cmd, "--", *paths)
+                command = (cmd, "--", *map(str, paths))
                 check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
             else:
                 raise LookupError(LANG("sys_trash_err"))
@@ -126,3 +126,4 @@ def _trash(
     return _remove(
         nvim, state=state, settings=settings, is_visual=is_visual, yeet=_sys_trash(nvim)
     )
+

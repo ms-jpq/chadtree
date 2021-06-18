@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
 
 from pynvim.api import Buffer, Nvim, Window
@@ -28,9 +28,9 @@ from ...fs.ops import ancestors
 from ...settings.types import Settings
 
 
-def escape_file_path(path: str) -> str:
+def escape_file_path(path: PurePath) -> str:
     rules = {"\\": "\\", "$": "\\", "%": "\\", "#": "\\"}
-    return "".join(escape_with_prefix(path, escape=rules))
+    return "".join(escape_with_prefix(str(path), escape=rules))
 
 
 def is_fm_buffer(nvim: Nvim, buf: Buffer) -> bool:
@@ -85,10 +85,10 @@ def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
             yield win
 
 
-def find_window_with_file_in_tab(nvim: Nvim, file: str) -> Iterator[Window]:
+def find_window_with_file_in_tab(nvim: Nvim, file: PurePath) -> Iterator[Window]:
     for win in find_windows_in_tab(nvim, no_secondary=True):
         buf = win_get_buf(nvim, win=win)
-        name = buf_name(nvim, buf=buf)
+        name = PurePath(buf_name(nvim, buf=buf))
         if name == file:
             yield win
 
@@ -99,16 +99,16 @@ def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
             yield buf
 
 
-def find_buffers_with_file(nvim: Nvim, file: str) -> Iterator[Buffer]:
+def find_buffers_with_file(nvim: Nvim, file: PurePath) -> Iterator[Buffer]:
     for buf in list_bufs(nvim, listed=True):
-        name = buf_name(nvim, buf=buf)
+        name = PurePath(buf_name(nvim, buf=buf))
         if name == file:
             yield buf
 
 
-def find_current_buffer_name(nvim: Nvim) -> str:
+def find_current_buffer_name(nvim: Nvim) -> PurePath:
     buf = cur_buf(nvim)
-    name = buf_name(nvim, buf=buf)
+    name = PurePath(buf_name(nvim, buf=buf))
     return name
 
 
@@ -169,7 +169,7 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
 
 
 def kill_buffers(
-    nvim: Nvim, paths: AbstractSet[str], reopen: Mapping[str, str]
+    nvim: Nvim, paths: AbstractSet[PurePath], reopen: Mapping[PurePath, PurePath]
 ) -> None:
     active = (
         {win_get_buf(nvim, win=win): win for win in find_non_fm_windows_in_tab(nvim)}
@@ -178,8 +178,9 @@ def kill_buffers(
     )
 
     for buf in list_bufs(nvim, listed=True):
-        name = buf_name(nvim, buf=buf)
+        name = PurePath(buf_name(nvim, buf=buf))
         buf_paths = ancestors(name) | {name}
+
         if not buf_paths.isdisjoint(paths):
             win = active.get(buf)
             new_path = reopen.get(name)

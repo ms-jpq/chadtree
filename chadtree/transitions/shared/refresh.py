@@ -1,3 +1,4 @@
+from pathlib import PurePath
 from typing import AbstractSet, Optional
 
 from pynvim import Nvim
@@ -23,7 +24,7 @@ def refresh(
 
     index = {path for path in state.index if exists(path, follow=True)} | paths
     selection = {s for s in state.selection if exists(s, follow=False)}
-    parent_paths: AbstractSet[str] = ancestors(current) if state.follow else set()
+    parent_paths: AbstractSet[PurePath] = ancestors(current) if state.follow else set()
     new_index = index if new_current else index | parent_paths
 
     qf = quickfix(nvim)
@@ -38,3 +39,4 @@ def refresh(
     )
 
     return Stage(new_state)
+

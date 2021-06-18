@@ -1,7 +1,7 @@
 from contextlib import nullcontext
 from itertools import chain
 from mimetypes import guess_type
-from os.path import basename, splitext
+from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
@@ -22,15 +22,13 @@ from ...state.next import forward
 from ...state.types import State
 from ..types import ClickType, Stage, State
 from .wm import (
+    escape_file_path,
     find_buffers_with_file,
     find_non_fm_windows_in_tab,
     find_window_with_file_in_tab,
     new_window,
     resize_fm_windows,
-    escape_file_path
 )
-
-
 
 
 def _show_file(
@@ -89,14 +87,12 @@ def _show_file(
 
 
 def open_file(
-    nvim: Nvim, state: State, settings: Settings, path: str, click_type: ClickType
+    nvim: Nvim, state: State, settings: Settings, path: PurePath, click_type: ClickType
 ) -> Optional[Stage]:
-    name = basename(path)
-    mime, _ = guess_type(name, strict=False)
+    mime, _ = guess_type(path.name, strict=False)
     m_type, _, _ = (mime or "").partition("/")
-    _, ext = splitext(name)
 
-    question = LANG("mime_warn", name=name, mime=str(mime))
+    question = LANG("mime_warn", name=path.name, mime=str(mime))
 
     go = (
         ask_mc(
@@ -105,7 +101,7 @@ def open_file(
             answers=LANG("ask_yesno"),
             answer_key={1: True, 2: False},
         )
-        if m_type in settings.mime.warn and ext not in settings.mime.allow_exts
+        if m_type in settings.mime.warn and path.suffix not in settings.mime.allow_exts
         else True
     )
 
@@ -115,3 +111,4 @@ def open_file(
         return Stage(new_state, focus=path)
     else:
         return None
+

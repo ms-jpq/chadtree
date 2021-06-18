@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+from pathlib import PurePath
 from typing import Optional
 
 from ..state.types import State
@@ -16,4 +17,5 @@ class ClickType(Enum):
 @dataclass(frozen=True)
 class Stage:
     state: State
-    focus: Optional[str] = None
+    focus: Optional[PurePath] = None
+

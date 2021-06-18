@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+from pathlib import PurePath
 from typing import Mapping, Optional, Sequence
 
-from chad_types import IconGlyphs
 from pynvim_pp.highlight import HLgroup
+
+from chad_types import IconGlyphs
 
 from ..fs.types import Mode, Node
 
@@ -63,4 +65,5 @@ class Derived:
 
     hashed: Sequence[str]
     node_row_lookup: Sequence[Node]
-    path_row_lookup: Mapping[str, int]
+    path_row_lookup: Mapping[PurePath, int]
+

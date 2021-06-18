@@ -1,4 +1,3 @@
-from os.path import dirname
 from typing import Optional
 
 from pynvim import Nvim
@@ -26,9 +25,9 @@ def _collapse(
         return None
     else:
         if is_dir(node):
-            path = node.path if node.path in state.index else dirname(node.path)
+            path = node.path if node.path in state.index else node.path.parent
         else:
-            path = dirname(node.path)
+            path = node.path.parent
 
         paths = {
             indexed
@@ -39,3 +38,4 @@ def _collapse(
         index = (state.index - paths) | {state.root.path}
         new_state = forward(state, settings=settings, index=index, paths=paths)
         return Stage(new_state, focus=path)
+

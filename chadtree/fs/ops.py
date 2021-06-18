@@ -4,8 +4,7 @@ from os import makedirs
 from os import name as os_name
 from os import readlink
 from os import remove as rm
-from os import sep, stat
-from os.path import dirname
+from os import stat
 from pathlib import Path, PurePath
 from shutil import copy2, copytree
 from shutil import move as mv
@@ -17,11 +16,11 @@ from ..consts import FILE_MODE, FOLDER_MODE
 from ..registry import pool
 
 
-def ancestors(path: str) -> AbstractSet[str]:
-    return {str(p) for p in PurePath(path).parents}
+def ancestors(path: PurePath) -> AbstractSet[PurePath]:
+    return {p for p in PurePath(path).parents}
 
 
-def unify_ancestors(paths: AbstractSet[str]) -> AbstractSet[str]:
+def unify_ancestors(paths: AbstractSet[PurePath]) -> AbstractSet[PurePath]:
     return {p for p in paths if ancestors(p).isdisjoint(paths)}
 
 
@@ -61,7 +60,7 @@ else:
             return str(gid)
 
 
-def fs_stat(path: str) -> FSstat:
+def fs_stat(path: PurePath) -> FSstat:
     stats = stat(path, follow_symlinks=False)
     permissions = filemode(stats.st_mode)
     user = _get_username(stats.st_uid)
@@ -80,7 +79,7 @@ def fs_stat(path: str) -> FSstat:
     return fs_stat
 
 
-def exists(path: str, follow: bool) -> bool:
+def exists(path: PurePath, follow: bool) -> bool:
     try:
         stat(path, follow_symlinks=follow)
     except (OSError, ValueError):
@@ -89,31 +88,34 @@ def exists(path: str, follow: bool) -> bool:
         return True
 
 
-def _new(path: str) -> None:
-    if path.endswith(sep):
-        makedirs(path, mode=FOLDER_MODE, exist_ok=True)
-    else:
-        parent = dirname(path)
-        makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
-        Path(path).touch(mode=FILE_MODE, exist_ok=True)
+def _mkdir(path: PurePath) -> None:
+    makedirs(path, mode=FOLDER_MODE, exist_ok=True)
 
 
-def new(paths: Iterable[str]) -> None:
+def mkdir(paths: Iterable[PurePath]) -> None:
+    tuple(pool.map(_mkdir, paths))
+
+
+def _new(path: PurePath) -> None:
+    makedirs(path.parent, mode=FOLDER_MODE, exist_ok=True)
+    Path(path).touch(mode=FILE_MODE, exist_ok=True)
+
+
+def new(paths: Iterable[PurePath]) -> None:
     tuple(pool.map(_new, paths))
 
 
-def _rename(src: str, dest: str) -> None:
-    parent = dirname(dest)
-    makedirs(parent, mode=FOLDER_MODE, exist_ok=True)
-    mv(src, dest)
+def _rename(src: PurePath, dest: PurePath) -> None:
+    makedirs(dest.parent, mode=FOLDER_MODE, exist_ok=True)
+    mv(str(src), str(dest))
 
 
-def rename(operations: Mapping[str, str]) -> None:
+def rename(operations: Mapping[PurePath, PurePath]) -> None:
     _op = lambda op: _rename(*op)
     tuple(pool.map(_op, operations.items()))
 
 
-def _remove(path: str) -> None:
+def _remove(path: PurePath) -> None:
     stats = stat(path, follow_symlinks=False)
     if S_ISDIR(stats.st_mode):
         rmtree(path)
@@ -121,20 +123,20 @@ def _remove(path: str) -> None:
         rm(path)
 
 
-def remove(paths: Iterable[str]) -> None:
+def remove(paths: Iterable[PurePath]) -> None:
     tuple(pool.map(_remove, paths))
 
 
-def _cut(src: str, dest: str) -> None:
-    mv(src, dest)
+def _cut(src: PurePath, dest: PurePath) -> None:
+    mv(str(src), str(dest))
 
 
-def cut(operations: Mapping[str, str]) -> None:
+def cut(operations: Mapping[PurePath, PurePath]) -> None:
     _op = lambda op: _cut(*op)
     tuple(pool.map(_op, operations.items()))
 
 
-def _copy(src: str, dest: str) -> None:
+def _copy(src: PurePath, dest: PurePath) -> None:
     stats = stat(src, follow_symlinks=False)
     if S_ISDIR(stats.st_mode):
         copytree(src, dest)
@@ -142,6 +144,7 @@ def _copy(src: str, dest: str) -> None:
         copy2(src, dest, follow_symlinks=False)
 
 
-def copy(operations: Mapping[str, str]) -> None:
+def copy(operations: Mapping[PurePath, PurePath]) -> None:
     _op = lambda op: _copy(*op)
     tuple(pool.map(_op, operations.items()))
+

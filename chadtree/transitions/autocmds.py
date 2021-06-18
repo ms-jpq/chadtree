@@ -1,5 +1,6 @@
 from os import chdir
 from os.path import isfile
+from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
@@ -50,7 +51,7 @@ def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     Follow cwd update
     """
 
-    cwd = get_cwd(nvim)
+    cwd = PurePath(get_cwd(nvim))
     chdir(cwd)
     new_state = new_root(
         nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
@@ -71,11 +72,7 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         curr = find_current_buffer_name(nvim)
         if isfile(curr):
             stage = new_current_file(nvim, state=state, settings=settings, current=curr)
-            return (
-                Stage(state=stage.state, focus=stage.focus)
-                if stage
-                else None
-            )
+            return Stage(state=stage.state, focus=stage.focus) if stage else None
         else:
             return None
     except NvimError:
@@ -97,3 +94,4 @@ def _update_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 
 autocmd("QuickfixCmdPost") << f"lua {_update_quickfix.name}()"
+

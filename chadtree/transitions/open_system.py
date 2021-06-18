@@ -1,3 +1,4 @@
+from pathlib import PurePath
 from shutil import which
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
 from typing import Sequence, cast
@@ -15,12 +16,12 @@ from ..state.types import State
 from .shared.index import indices
 
 
-def _open_gui(path: str, cwd: str) -> None:
+def _open_gui(path: PurePath, cwd: PurePath) -> None:
     if which("open"):
-        command: Sequence[str] = ("open", "--", path)
+        command: Sequence[str] = ("open", "--", str(path))
         check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     elif which("xdg-open"):
-        command = ("xdg-open", path)
+        command = ("xdg-open", str(path))
         check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
     else:
         raise LookupError(LANG("sys_open_err"))
@@ -36,7 +37,7 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
     if not node:
         return None
     else:
-        cwd = get_cwd(nvim)
+        cwd = PurePath(get_cwd(nvim))
 
         def cont() -> None:
             try:
@@ -47,3 +48,4 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
                 log.exception("%s", e)
 
         pool.submit(cont)
+
