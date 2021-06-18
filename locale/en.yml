@@ -20,9 +20,6 @@
 "cannot find version ctl root": |-
   ⚠️  Cannot find version control top level
 
-"path not exist": |-
-  ⚠️  Path does not exist: ${path}
-
 "operation not permitted on root": |-
   ⚠️  Operation not permitted on root or parent(s) of root
 
@@ -83,3 +80,4 @@
 
 "version_control_indi": |-
   🐶 enable version control: ${enable_vc}
+

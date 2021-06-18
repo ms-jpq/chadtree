@@ -18,7 +18,7 @@ from pynvim_pp.api import (
 from pynvim_pp.lib import write
 from std2.argparse import ArgparseError, ArgParser
 
-from ..fs.ops import exists
+from ..fs.ops import exists, new
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -151,19 +151,13 @@ def _open(
                 else PurePath(get_cwd(nvim)) / raw_path
             ).resolve()
             if not exists(path, follow=True):
-                write(nvim, LANG("path not exist", path=str(path)))
-                return None
-            else:
-                next_state = (
-                    maybe_path_above(
-                        nvim, state=new_state, settings=settings, path=path
-                    )
-                    or new_state
-                )
-                _open_fm_window(
-                    nvim, settings=settings, opts=opts, width=next_state.width
-                )
-                return Stage(next_state, focus=path)
+                new((path,))
+            next_state = (
+                maybe_path_above(nvim, state=new_state, settings=settings, path=path)
+                or new_state
+            )
+            _open_fm_window(nvim, settings=settings, opts=opts, width=next_state.width)
+            return Stage(next_state, focus=path)
         else:
             curr = find_current_buffer_name(nvim)
             stage = new_current_file(
