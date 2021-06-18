@@ -4,7 +4,7 @@ from pathlib import Path, PurePath
 from typing import Any, Optional
 
 from std2.pickle import decode, encode
-from std2.pickle.coders import BUILTIN_ENCODERS
+from std2.pickle.coders import BUILTIN_DECODERS, BUILTIN_ENCODERS
 
 from ..consts import FOLDER_MODE, SESSION_DIR, SESSION_DIR_XDG
 from .types import Session, State
@@ -27,7 +27,7 @@ def _load_json(path: Path) -> Optional[Any]:
 def load_session(cwd: PurePath, use_xdg: bool) -> Session:
     load_path = _session_path(cwd, use_xdg=use_xdg)
     try:
-        return decode(Session, _load_json(load_path))
+        return decode(Session, _load_json(load_path), decoders=BUILTIN_DECODERS)
     except Exception:
         return Session(index=None, show_hidden=None, enable_vc=None)
 
