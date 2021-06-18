@@ -4,6 +4,7 @@ from pathlib import Path, PurePath
 from typing import Any, Optional
 
 from std2.pickle import decode, encode
+from std2.pickle.coders import BUILTIN_ENCODERS
 
 from ..consts import FOLDER_MODE, SESSION_DIR, SESSION_DIR_XDG
 from .types import Session, State
@@ -35,7 +36,7 @@ def dump_session(state: State, use_xdg: bool) -> None:
     session = Session(
         index=state.index, show_hidden=state.show_hidden, enable_vc=state.enable_vc
     )
-    json = encode(session)
+    json = encode(session, encoders=BUILTIN_ENCODERS)
 
     path = _session_path(state.root.path, use_xdg=use_xdg)
     path.parent.mkdir(mode=FOLDER_MODE, parents=True, exist_ok=True)
