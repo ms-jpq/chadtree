@@ -121,7 +121,13 @@ def _operation(
                         paths=paths,
                     )
                     focus = next(
-                        iter(sorted(new_selection, key=lambda p: strxfrm(str(p)))), None
+                        iter(
+                            sorted(
+                                new_selection,
+                                key=lambda p: tuple(map(strxfrm, p.parts)),
+                            ),
+                        ),
+                        None,
                     )
 
                     if kill_buffs:
