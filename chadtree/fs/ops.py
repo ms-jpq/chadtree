@@ -107,7 +107,7 @@ def new(paths: Iterable[PurePath]) -> None:
 
 def _rename(src: PurePath, dest: PurePath) -> None:
     makedirs(dest.parent, mode=FOLDER_MODE, exist_ok=True)
-    mv(src, dest)
+    mv(str(src), str(dest))
 
 
 def rename(operations: Mapping[PurePath, PurePath]) -> None:
