@@ -36,6 +36,6 @@ class Node:
 
 @dataclass(frozen=True)
 class Ignored:
-    name_exact: AbstractSet[PurePath]
+    name_exact: AbstractSet[str]
     name_glob: Sequence[str]
     path_glob: Sequence[str]
