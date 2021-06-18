@@ -13,10 +13,9 @@ from ..state.next import forward
 from ..state.types import State
 from .shared.current import maybe_path_above
 from .shared.index import indices
-from .shared.open_file import open_file
 from .shared.refresh import refresh
-from .shared.wm import find_non_fm_windows_in_tab, kill_buffers
-from .types import ClickType, Stage
+from .shared.wm import kill_buffers
+from .types import Stage
 
 
 @rpc(blocking=False)
@@ -50,6 +49,7 @@ def _rename(
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
+                    kill_buffers(nvim, paths={prev_name}, reopen={prev_name: new_name})
                     new_state = (
                         maybe_path_above(
                             nvim, state=state, settings=settings, path=new_name
@@ -61,19 +61,5 @@ def _rename(
                     next_state = forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
-                    win_bufs = {
-                        win_get_buf(nvim, win=win)
-                        for win in find_non_fm_windows_in_tab(nvim)
-                    }
-                    killed = {*kill_buffers(nvim, paths={prev_name})}
-                    if killed & win_bufs:
-                        return open_file(
-                            nvim,
-                            state=state,
-                            settings=settings,
-                            path=new_name,
-                            click_type=ClickType.primary,
-                        )
-                    else:
-                        return Stage(next_state, focus=new_name)
+                    return Stage(next_state, focus=new_name)
 

@@ -15,7 +15,6 @@ from pynvim_pp.api import (
     win_set_option,
 )
 from pynvim_pp.hold import hold_win_pos
-from std2.lex import escape_with_prefix
 
 from ...settings.localization import LANG
 from ...settings.types import Settings
@@ -28,12 +27,10 @@ from .wm import (
     find_window_with_file_in_tab,
     new_window,
     resize_fm_windows,
+    escape_file_path
 )
 
 
-def _escape_path(path: str) -> str:
-    rules = {"\\": "\\", "$": "\\", "%": "\\", "#": "\\"}
-    return "".join(escape_with_prefix(path, escape=rules))
 
 
 def _show_file(
@@ -82,7 +79,7 @@ def _show_file(
             win = cur_win(nvim)
 
             if buf is None:
-                escaped = _escape_path(path)
+                escaped = escape_file_path(path)
                 nvim.command(f"edit! {escaped}")
             else:
                 win_set_buf(nvim, win=win, buf=buf)

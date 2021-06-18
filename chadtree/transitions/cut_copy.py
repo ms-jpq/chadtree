@@ -123,7 +123,7 @@ def _operation(
                     )
 
                     if kill_buffs:
-                        kill_buffers(nvim, paths=selection)
+                        kill_buffers(nvim, paths=selection, reopen={})
                     return Stage(new_state)
 
 
