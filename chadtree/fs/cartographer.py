@@ -1,6 +1,6 @@
 from fnmatch import fnmatch
 from os import listdir, stat
-from os.path import basename, dirname, join, splitext
+from pathlib import PurePath
 from queue import SimpleQueue
 from stat import (
     S_IEXEC,
@@ -56,7 +56,7 @@ def _fs_modes(stat: int) -> Iterator[Mode]:
             yield mode
 
 
-def _fs_stat(path: str) -> AbstractSet[Mode]:
+def _fs_stat(path: PurePath) -> AbstractSet[Mode]:
     try:
         info = stat(path, follow_symlinks=False)
     except FileNotFoundError:
@@ -79,33 +79,36 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
     return (
         node.name in ignores.name_exact
         or any(fnmatch(node.name, pattern) for pattern in ignores.name_glob)
-        or any(fnmatch(node.path, pattern) for pattern in ignores.path_glob)
+        or any(fnmatch(str(node.path), pattern) for pattern in ignores.path_glob)
     )
 
 
-def _listdir(path: str) -> Iterator[str]:
+def _listdir(path: PurePath) -> Iterator[PurePath]:
     try:
-        yield from listdir(path)
+        yield from map(PurePath, listdir(path))
     except NotADirectoryError:
         pass
 
 
 def _new(
-    roots: Iterable[str], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
+    roots: Iterable[PurePath], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
 ) -> None:
     for root in roots:
         try:
             mode = _fs_stat(root)
-            name = basename(root)
-            _, _ext = splitext(name)
-            ext = None if Mode.folder in mode else _ext
             _ancestors = ancestors(root)
-            node = Node(path=root, mode=mode, name=name, ext=ext, ancestors=_ancestors)
+            node = Node(
+                path=root,
+                mode=mode,
+                name=root.name,
+                ext=root.suffix or None,
+                ancestors=_ancestors,
+            )
             acc.put(node)
 
             if root in index:
                 for item in _listdir(root):
-                    path = join(root, item)
+                    path = root / item
                     bfs_q.put(path)
 
         except PermissionError:
@@ -114,19 +117,19 @@ def _new(
 
 def _join(nodes: SimpleQueue) -> Node:
     root_node: Optional[Node] = None
-    acc: MutableMapping[str, Node] = {}
+    acc: MutableMapping[PurePath, Node] = {}
 
     while not nodes.empty():
         node: Node = nodes.get()
         path = node.path
         acc[path] = node
 
-        parent = acc.get(dirname(path))
+        parent = acc.get(path.parent)
         if not parent or parent.path == node.path:
             assert root_node is None
             root_node = node
         else:
-            siblings = cast(MutableMapping[str, Node], parent.children)
+            siblings = cast(MutableMapping[PurePath, Node], parent.children)
             siblings[path] = node
 
     if not root_node:
@@ -135,7 +138,7 @@ def _join(nodes: SimpleQueue) -> Node:
         return root_node
 
 
-def new(root: str, index: Index) -> Node:
+def new(root: PurePath, index: Index) -> Node:
     acc: SimpleQueue = SimpleQueue()
     bfs_q: SimpleQueue = SimpleQueue()
 
@@ -154,7 +157,7 @@ def new(root: str, index: Index) -> Node:
     return _join(acc)
 
 
-def _update(root: Node, index: Index, paths: AbstractSet[str]) -> Node:
+def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
     if root.path in paths:
         return new(root.path, index=index)
     else:
@@ -171,7 +174,7 @@ def _update(root: Node, index: Index, paths: AbstractSet[str]) -> Node:
         )
 
 
-def update(root: Node, *, index: Index, paths: AbstractSet[str]) -> Node:
+def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
     try:
         return _update(root, index=index, paths=paths)
     except FileNotFoundError:
@@ -180,3 +183,4 @@ def update(root: Node, *, index: Index, paths: AbstractSet[str]) -> Node:
 
 def is_dir(node: Node) -> bool:
     return Mode.folder in node.mode
+

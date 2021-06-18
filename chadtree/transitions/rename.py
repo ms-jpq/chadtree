@@ -1,4 +1,5 @@
-from os.path import abspath, basename, dirname, join
+from os.path import abspath
+from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
@@ -30,36 +31,34 @@ def _rename(
     if not node:
         return None
     else:
-        prev_name = node.path
-        base_name, parent_name = basename(prev_name), dirname(prev_name)
 
-        child = ask(nvim, question=LANG("pencil"), default=base_name)
+        child = ask(nvim, question=LANG("pencil"), default=str(node.path.name))
         if not child:
             return None
         else:
-            new_name = abspath(join(parent_name, child))
+            new_path = PurePath(abspath(node.path.parent / child))
 
-            if exists(new_name, follow=False):
-                write(nvim, LANG("already_exists", name=new_name), error=True)
+            if exists(new_path, follow=False):
+                write(nvim, LANG("already_exists", name=str(new_path)), error=True)
                 return None
             else:
                 try:
-                    rename({prev_name: new_name})
+                    rename({node.path: new_path})
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
                 else:
                     new_state = (
                         maybe_path_above(
-                            nvim, state=state, settings=settings, path=new_name
+                            nvim, state=state, settings=settings, path=new_path
                         )
                         or state
                     )
-                    paths = ancestors(new_name)
+                    paths = ancestors(new_path)
                     index = state.index | paths
                     next_state = forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
-                    kill_buffers(nvim, paths={prev_name}, reopen={prev_name: new_name})
-                    return Stage(next_state, focus=new_name)
+                    kill_buffers(nvim, paths={node.path}, reopen={node.path: new_path})
+                    return Stage(next_state, focus=new_path)
 

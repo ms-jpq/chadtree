@@ -1,7 +1,7 @@
 from itertools import chain
 from locale import strxfrm
 from os import linesep
-from os.path import basename, dirname, join
+from pathlib import PurePath
 from typing import AbstractSet, Callable, Mapping, MutableMapping, Optional
 
 from pynvim.api import Nvim
@@ -23,10 +23,9 @@ from .shared.wm import kill_buffers
 from .types import Stage
 
 
-def _find_dest(src: str, node: Node) -> str:
-    name = basename(src)
-    parent = node.path if is_dir(node) else dirname(node.path)
-    dst = join(parent, name)
+def _find_dest(src: PurePath, node: Node) -> PurePath:
+    parent = node.path if is_dir(node) else node.path.parent
+    dst = parent / src.name
     return dst
 
 
@@ -36,10 +35,10 @@ def _operation(
     state: State,
     settings: Settings,
     is_visual: bool,
-    nono: AbstractSet[str],
+    nono: AbstractSet[PurePath],
     op_name: str,
     kill_buffs: bool,
-    action: Callable[[Mapping[str, str]], None],
+    action: Callable[[Mapping[PurePath, PurePath]], None],
 ) -> Optional[Stage]:
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
     selection = state.selection
@@ -57,12 +56,11 @@ def _operation(
             s: d for s, d in pre_operations.items() if exists(d, follow=False)
         }
 
-        new_operations: MutableMapping[str, str] = {}
+        new_operations: MutableMapping[PurePath, PurePath] = {}
         while pre_existing:
             source, dest = pre_existing.popitem()
-            base_name, parent_name = basename(dest), dirname(dest)
-            resp = ask(nvim, question=LANG("path_exists_err"), default=base_name)
-            new_dest = join(parent_name, resp) if resp else None
+            resp = ask(nvim, question=LANG("path_exists_err"), default=dest.name)
+            new_dest = dest.parent / resp if resp else None
 
             if not new_dest:
                 pre_existing[source] = dest
@@ -75,7 +73,9 @@ def _operation(
         if pre_existing:
             msg = linesep.join(
                 f"{display_path(s, state=state)} -> {display_path(d, state=state)}"
-                for s, d in sorted(pre_existing.items(), key=lambda t: strxfrm(t[0]))
+                for s, d in sorted(
+                    pre_existing.items(), key=lambda t: strxfrm(str(t[0]))
+                )
             )
             write(
                 nvim,
@@ -85,10 +85,13 @@ def _operation(
             return None
 
         else:
-            operations: Mapping[str, str] = {**pre_operations, **new_operations}
+            operations: Mapping[PurePath, PurePath] = {
+                **pre_operations,
+                **new_operations,
+            }
             msg = linesep.join(
                 f"{display_path(s, state=state)} -> {display_path(d, state=state)}"
-                for s, d in sorted(operations.items(), key=lambda t: strxfrm(t[0]))
+                for s, d in sorted(operations.items(), key=lambda t: strxfrm(str(t[0])))
             )
 
             question = LANG("confirm op", operation=op_name, paths=msg)
@@ -109,8 +112,7 @@ def _operation(
                     return refresh(nvim, state=state, settings=settings)
                 else:
                     paths = {
-                        dirname(p)
-                        for p in chain(operations.keys(), operations.values())
+                        p.parent for p in chain(operations.keys(), operations.values())
                     }
                     index = state.index | paths
                     new_selection = {*operations.values()}
@@ -135,7 +137,7 @@ def _cut(
     Cut selected
     """
 
-    cwd, root = get_cwd(nvim), state.root.path
+    cwd, root = PurePath(get_cwd(nvim)), state.root.path
     nono = {cwd, root} | ancestors(cwd) | ancestors(root)
     return _operation(
         nvim,
@@ -167,3 +169,4 @@ def _copy(
         action=copy,
         kill_buffs=False,
     )
+

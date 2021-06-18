@@ -1,3 +1,4 @@
+from pathlib import PurePath
 from threading import Lock
 
 from pynvim import Nvim
@@ -28,7 +29,7 @@ def vc_refresh(nvim: Nvim, state: State, settings: Settings) -> None:
     """
 
     if state.enable_vc:
-        cwd = get_cwd(nvim)
+        cwd = PurePath(get_cwd(nvim))
 
         def cont() -> None:
             if _lock.locked():
@@ -43,3 +44,4 @@ def vc_refresh(nvim: Nvim, state: State, settings: Settings) -> None:
                         enqueue_event(_set_vc, vc)
 
         pool.submit(cont)
+

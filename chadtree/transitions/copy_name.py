@@ -1,6 +1,5 @@
 from locale import strxfrm
 from os import linesep
-from os.path import basename
 from typing import Iterator
 
 from pynvim import Nvim
@@ -19,10 +18,10 @@ def _cn(nvim: Nvim, state: State, is_visual: bool, al_qaeda: bool) -> None:
         if not selection:
             nodes = indices(nvim, state=state, is_visual=is_visual)
             for node in nodes:
-                yield basename(node.path) if al_qaeda else node.path
+                yield node.path.name if al_qaeda else str(node.path)
         else:
             for path in selection:
-                yield basename(path) if al_qaeda else path
+                yield path.name if al_qaeda else str(path)
 
     paths = sorted(gen_paths(), key=strxfrm)
     clip = linesep.join(paths)
@@ -51,3 +50,4 @@ def _copy_basename(
     """
 
     _cn(nvim, state=state, is_visual=is_visual, al_qaeda=True)
+

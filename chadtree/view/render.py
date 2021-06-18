@@ -3,6 +3,7 @@ from fnmatch import fnmatch
 from locale import strxfrm
 from os import linesep
 from os.path import sep
+from pathlib import PurePath
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from std2.types import never
@@ -57,7 +58,7 @@ def _paint(
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
-    current: Optional[str],
+    current: Optional[PurePath],
 ) -> Callable[[Node, int], Optional[_Render]]:
     icons = settings.view.icons
     context = settings.view.hl_context
@@ -114,7 +115,7 @@ def _paint(
         else:
             return mode_post.get(None)
 
-    def gen_status(path: str) -> str:
+    def gen_status(path: PurePath) -> str:
         selected = (
             icons.status.selected if path in selection else icons.status.not_selected
         )
@@ -154,7 +155,7 @@ def _paint(
             yield " "
             yield icons.link.normal
 
-    def gen_badges(path: str) -> Iterator[Badge]:
+    def gen_badges(path: PurePath) -> Iterator[Badge]:
         qf_count = qf.locations[path]
         stat = vc.status.get(path)
         if qf_count:
@@ -213,7 +214,7 @@ def render(
     qf: QuickFix,
     vc: VCStatus,
     show_hidden: bool,
-    current: Optional[str],
+    current: Optional[PurePath],
 ) -> Derived:
     show = _paint(
         settings,
@@ -263,3 +264,4 @@ def render(
         path_row_lookup=path_row_lookup,
     )
     return derived
+

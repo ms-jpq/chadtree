@@ -1,3 +1,5 @@
+from pathlib import PurePath
+
 from pynvim import Nvim
 from pynvim_pp.api import get_cwd
 
@@ -10,7 +12,7 @@ from .types import Selection, State, VCStatus
 
 
 def initial(nvim: Nvim, settings: Settings) -> State:
-    cwd = get_cwd(nvim)
+    cwd = PurePath(get_cwd(nvim))
 
     session = load_session(cwd, use_xdg=settings.xdg) if settings.session else None
     index = session.index if session and session.index is not None else {cwd}
@@ -61,3 +63,4 @@ def initial(nvim: Nvim, settings: Settings) -> State:
         derived=derived,
     )
     return state
+

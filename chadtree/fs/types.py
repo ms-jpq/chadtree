@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 from typing import AbstractSet, Mapping, Optional, Sequence
+from pathlib import PurePath
 
 
 class Mode(IntEnum):
@@ -29,14 +30,14 @@ class Mode(IntEnum):
 class Node:
     mode: AbstractSet[Mode]
     name: str
-    path: str
-    ancestors: AbstractSet[str]
-    children: Mapping[str, Node] = field(default_factory=dict)
+    path: PurePath
+    ancestors: AbstractSet[PurePath]
+    children: Mapping[PurePath, Node] = field(default_factory=dict)
     ext: Optional[str] = None
 
 
 @dataclass(frozen=True)
 class Ignored:
-    name_exact: AbstractSet[str]
+    name_exact: AbstractSet[PurePath]
     name_glob: Sequence[str]
     path_glob: Sequence[str]

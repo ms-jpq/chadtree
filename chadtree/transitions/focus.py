@@ -1,4 +1,5 @@
 from os.path import dirname
+from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
@@ -40,7 +41,7 @@ def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
     Follow cwd update
     """
 
-    cwd = get_cwd(nvim)
+    cwd = PurePath(get_cwd(nvim))
     new_state = new_root(
         nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
     )
@@ -60,13 +61,13 @@ def _change_dir(
     if not node:
         return None
     else:
-        cwd = node.path if is_dir(node) else dirname(node.path)
+        cwd = node.path if is_dir(node) else node.path.parent
         new_state = new_root(
             nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
         )
         focus = new_state.root.path
         nvim.command(f"chdir {focus}")
-        write(nvim, LANG("new cwd", cwd=focus))
+        write(nvim, LANG("new cwd", cwd=str(focus)))
         return Stage(new_state, focus=focus)
 
 
@@ -82,7 +83,7 @@ def _change_focus(
     if not node:
         return None
     else:
-        new_base = node.path if is_dir(node) else dirname(node.path)
+        new_base = node.path if is_dir(node) else node.path.parent
         new_state = new_root(
             nvim, state=state, settings=settings, new_cwd=new_base, indices=set()
         )
@@ -102,10 +103,12 @@ def _change_focus_up(
     if not node:
         return None
     else:
-        root = state.root.path
-        parent = dirname(root)
         new_state = new_root(
-            nvim, state=state, settings=settings, new_cwd=parent, indices=set()
+            nvim,
+            state=state,
+            settings=settings,
+            new_cwd=state.root.path.parent,
+            indices=set(),
         )
-        focus = node.path
-        return Stage(new_state, focus=focus)
+        return Stage(new_state, focus=node.path)
+

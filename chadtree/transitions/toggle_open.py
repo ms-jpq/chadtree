@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from os.path import isabs, join, realpath
+from os.path import isabs, realpath
+from pathlib import PurePath
 from shutil import which
 from subprocess import CalledProcessError
 from typing import Optional, Sequence
@@ -39,7 +40,7 @@ from .types import Stage
 
 @dataclass(frozen=True)
 class _Args:
-    path: Optional[str]
+    path: Optional[PurePath]
     version_ctl: bool
     toggle: bool
     focus: bool
@@ -47,7 +48,7 @@ class _Args:
 
 def _parse_args(args: Sequence[str]) -> _Args:
     parser = ArgParser()
-    parser.add_argument("path", nargs="?")
+    parser.add_argument("path", nargs="?", type=PurePath)
     parser.add_argument("--version-ctl", action="store_true")
 
     focus_group = parser.add_mutually_exclusive_group()
@@ -145,11 +146,15 @@ def _open(
             new_state = state
 
         if raw_path:
-            path = realpath(
-                raw_path if isabs(raw_path) else join(get_cwd(nvim), raw_path)
+            path = PurePath(
+                realpath(
+                    raw_path
+                    if raw_path.is_absolute()
+                    else PurePath(get_cwd(nvim)) / raw_path
+                )
             )
             if not exists(path, follow=True):
-                write(nvim, LANG("path not exist", path=path))
+                write(nvim, LANG("path not exist", path=str(path)))
                 return None
             else:
                 next_state = (
@@ -173,3 +178,4 @@ def _open(
                 if stage
                 else Stage(new_state, focus=curr)
             )
+

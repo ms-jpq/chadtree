@@ -1,5 +1,6 @@
 from contextlib import nullcontext
 from itertools import chain
+from pathlib import PurePath
 from mimetypes import guess_type
 from os.path import basename, splitext
 from typing import Optional
@@ -89,7 +90,7 @@ def _show_file(
 
 
 def open_file(
-    nvim: Nvim, state: State, settings: Settings, path: str, click_type: ClickType
+    nvim: Nvim, state: State, settings: Settings, path: PurePath, click_type: ClickType
 ) -> Optional[Stage]:
     name = basename(path)
     mime, _ = guess_type(name, strict=False)

@@ -1,3 +1,4 @@
+from pathlib import PurePath
 from typing import Optional, Sequence
 from uuid import uuid4
 
@@ -48,10 +49,10 @@ def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
     return atomic
 
 
-def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
+def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
     derived, current = state.derived, state.current
     focus_row = derived.path_row_lookup.get(focus) if focus else None
-    current_row = derived.path_row_lookup.get(current or "")
+    current_row = derived.path_row_lookup.get(current) if current else None
 
     cwin = cur_win(nvim)
     ns = nvim.api.create_namespace(FM_NAMESPACE)
@@ -89,3 +90,4 @@ def redraw(nvim: Nvim, state: State, focus: Optional[str]) -> None:
             (a1 + a2 + a3).commit(nvim)
         except NvimError as e:
             raise UnrecoverableError(e)
+

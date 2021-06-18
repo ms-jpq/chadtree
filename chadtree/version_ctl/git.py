@@ -1,14 +1,24 @@
+from concurrent.futures import Future, wait
 from itertools import chain
 from locale import strxfrm
-from os import environ, linesep
-from os.path import join, sep
-from shlex import join as sh_join
+from os import environ, linesep, sep
+from pathlib import PurePath
+from shlex import join
 from shutil import which
 from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
-from typing import Iterable, Iterator, MutableMapping, MutableSequence, Set, Tuple
+from typing import (
+    Any,
+    Iterable,
+    Iterator,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    Sequence,
+    Tuple,
+    cast,
+)
 
-from std2.concurrent.futures import gather
 from std2.string import removeprefix, removesuffix
 
 from ..fs.ops import ancestors
@@ -23,36 +33,36 @@ _SUBMODULE_MARKER = "S"
 _IGNORED_MARKER = "I"
 
 
-def root(cwd: str) -> str:
+def root(cwd: PurePath) -> PurePath:
     stdout = check_output(
         ("git", "rev-parse", "--show-toplevel"), stderr=PIPE, text=True, cwd=cwd
     )
-    return stdout.rstrip()
+    return PurePath(stdout.rstrip())
 
 
-def _stat_main(cwd: str) -> Iterator[Tuple[str, str]]:
+def _stat_main(cwd: str) -> Sequence[Tuple[str, PurePath]]:
     stdout = check_output(_GIT_LIST_CMD, stdin=DEVNULL, stderr=PIPE, text=True, cwd=cwd)
 
-    def cont() -> Iterator[Tuple[str, str]]:
+    def cont() -> Iterator[Tuple[str, PurePath]]:
         it = iter(stdout.split("\0"))
         for line in it:
             prefix, file = line[:2], line[3:]
-            yield prefix, file.rstrip(sep)
+            yield prefix, PurePath(file)
 
             if "R" in prefix:
                 next(it, None)
 
-    return cont()
+    return tuple(cont())
 
 
-def _stat_sub_modules(cwd: str) -> Iterator[Tuple[str, str]]:
+def _stat_sub_modules(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
     stdout = check_output(
         (
             "git",
             "submodule",
             "foreach",
             "--recursive",
-            sh_join(_GIT_LIST_CMD),
+            join(_GIT_LIST_CMD),
         ),
         env={**environ, **_GIT_ENV},
         stdin=DEVNULL,
@@ -61,9 +71,9 @@ def _stat_sub_modules(cwd: str) -> Iterator[Tuple[str, str]]:
         cwd=cwd,
     )
 
-    def cont() -> Iterator[Tuple[str, str]]:
+    def cont() -> Iterator[Tuple[str, PurePath]]:
         it = iter(stdout)
-        sub_module = ""
+        sub_module = PurePath(sep)
         acc: MutableSequence[str] = []
 
         for char in it:
@@ -78,8 +88,8 @@ def _stat_sub_modules(cwd: str) -> Iterator[Tuple[str, str]]:
                     if not (quoted.startswith("'") and quoted.endswith("'")):
                         raise ValueError(stdout)
                     else:
-                        sub_module = removesuffix(
-                            removeprefix(quoted, prefix="'"), suffix="'"
+                        sub_module = PurePath(
+                            removesuffix(removeprefix(quoted, prefix="'"), suffix="'")
                         )
                         yield _SUBMODULE_MARKER, sub_module
 
@@ -91,14 +101,14 @@ def _stat_sub_modules(cwd: str) -> Iterator[Tuple[str, str]]:
                     raise ValueError(stdout)
                 else:
                     prefix, file = line[:2], line[3:]
-                    yield prefix, join(sub_module, file.rstrip(sep))
+                    yield prefix, sub_module / file
 
                     if "R" in prefix:
                         next(it, None)
             else:
                 acc.append(char)
 
-    return cont()
+    return tuple(cont())
 
 
 def _stat_name(stat: str) -> str:
@@ -108,14 +118,14 @@ def _stat_name(stat: str) -> str:
         return stat
 
 
-def _parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
+def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
     above = ancestors(root)
-    ignored: Set[str] = set()
-    status: MutableMapping[str, str] = {}
-    directories: MutableMapping[str, Set[str]] = {}
+    ignored: MutableSet[PurePath] = set()
+    status: MutableMapping[PurePath, str] = {}
+    directories: MutableMapping[PurePath, MutableSet[str]] = {}
 
     for stat, name in stats:
-        path = join(root, name)
+        path = root / name
         status[path] = _stat_name(stat)
         if "!" in stat:
             ignored.add(path)
@@ -123,7 +133,7 @@ def _parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
             for ancestor in ancestors(path):
                 parents = directories.setdefault(ancestor, set())
                 if stat != _SUBMODULE_MARKER:
-                    parents.update(stat)
+                    parents.add(stat)
 
     for directory, syms in directories.items():
         pre_existing = {*status.get(directory, "")}
@@ -135,19 +145,17 @@ def _parse(root: str, stats: Iterable[Tuple[str, str]]) -> VCStatus:
     return VCStatus(ignored=ignored, status=trimmed)
 
 
-def status(cwd: str) -> VCStatus:
+def status(cwd: PurePath) -> VCStatus:
     if which("git"):
         try:
-            ret: Tuple[
-                str, Iterator[Tuple[str, str]], Iterator[Tuple[str, str]]
-            ] = gather(
-                pool.submit(root, cwd=cwd),
-                pool.submit(_stat_main, cwd=cwd),
-                pool.submit(_stat_sub_modules, cwd=cwd),
-            )
-            r, s_main, s_sub = ret
-            return _parse(r, stats=chain(s_main, s_sub))
+            r = pool.submit(root, cwd=cwd)
+            s_main = pool.submit(_stat_main, cwd=cwd)
+            s_sub = pool.submit(_stat_sub_modules, cwd=cwd)
+
+            wait(cast(Sequence[Future[Any]], (r, s_main, s_sub)))
+            return _parse(r.result(), stats=chain(s_main.result(), s_sub.result()))
         except CalledProcessError:
             return VCStatus()
     else:
         return VCStatus()
+
