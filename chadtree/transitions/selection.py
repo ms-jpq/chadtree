@@ -3,8 +3,8 @@ from pynvim import Nvim
 from ..registry import rpc
 from ..settings.types import Settings
 from ..state.next import forward
-from .shared.index import indices
 from ..state.types import State
+from .shared.index import indices
 from .types import Stage
 
 
@@ -30,3 +30,4 @@ def _select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> St
     selection = state.selection ^ {node.path for node in nodes}
     new_state = forward(state, settings=settings, selection=selection)
     return Stage(new_state)
+

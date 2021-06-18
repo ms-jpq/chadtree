@@ -46,3 +46,4 @@ def _smaller(
     """
 
     return _resize(nvim, state=state, settings=settings, direction=sub)
+

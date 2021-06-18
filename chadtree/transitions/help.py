@@ -95,8 +95,11 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
             for win in list_floatwins(nvim):
                 win_close(nvim, win=win)
             lines = md.read_text("UTF-8").splitlines()
-            buf = create_buf(nvim, listed=False, scratch=True, wipe=True, nofile=True, noswap=True)
+            buf = create_buf(
+                nvim, listed=False, scratch=True, wipe=True, nofile=True, noswap=True
+            )
             buf_set_lines(nvim, buf=buf, lo=0, hi=-1, lines=lines)
             buf_set_option(nvim, buf=buf, key="modifiable", val=False)
             buf_set_option(nvim, buf=buf, key="filetype", val="markdown")
             open_float_win(nvim, margin=0, relsize=0.95, buf=buf)
+

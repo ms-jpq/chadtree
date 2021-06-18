@@ -61,3 +61,4 @@ def _toggle_version_control(
     new_state = forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
     write(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
     return Stage(new_state)
+

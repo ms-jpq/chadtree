@@ -19,3 +19,4 @@ def _quit(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
     else:
         for win in find_fm_windows_in_tab(nvim):
             win_close(nvim, win=win)
+
