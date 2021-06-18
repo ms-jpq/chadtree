@@ -20,7 +20,7 @@ from ..view.ops import display_path
 from .refresh import refresh as _refresh
 from .shared.index import indices
 from .shared.refresh import refresh
-from .shared.wm import kill_buffers, find_non_fm_windows_in_tab
+from .shared.wm import kill_buffers
 from .types import Stage
 
 
