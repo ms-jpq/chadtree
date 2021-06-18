@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from shutil import which
 from subprocess import CalledProcessError
 from typing import Optional, Sequence
@@ -25,6 +25,7 @@ from ..settings.types import Settings
 from ..state.types import State
 from ..version_ctl.git import root as version_ctl_toplv
 from .shared.current import maybe_path_above, new_current_file, new_root
+from .shared.open_file import open_file
 from .shared.wm import (
     find_current_buffer_name,
     find_fm_buffers,
@@ -34,7 +35,7 @@ from .shared.wm import (
     new_window,
     resize_fm_windows,
 )
-from .types import Stage
+from .types import ClickType, Stage
 
 
 @dataclass(frozen=True)
@@ -126,8 +127,6 @@ def _open(
         write(nvim, e, error=True)
         return None
     else:
-        raw_path = opts.path
-
         if opts.version_ctl:
             if which("git"):
                 try:
@@ -144,12 +143,12 @@ def _open(
         else:
             new_state = state
 
-        if raw_path:
-            path = Path(
-                raw_path
-                if raw_path.is_absolute()
-                else PurePath(get_cwd(nvim)) / raw_path
-            ).resolve()
+        if opts.path:
+            path = (
+                opts.path
+                if opts.path.is_absolute()
+                else PurePath(get_cwd(nvim)) / opts.path
+            )
             if not exists(path, follow=True):
                 new((path,))
             next_state = (
@@ -157,6 +156,13 @@ def _open(
                 or new_state
             )
             _open_fm_window(nvim, settings=settings, opts=opts, width=next_state.width)
+            open_file(
+                nvim,
+                state=state,
+                settings=settings,
+                path=path,
+                click_type=ClickType.primary,
+            )
             return Stage(next_state, focus=path)
         else:
             curr = find_current_buffer_name(nvim)
