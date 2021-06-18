@@ -34,3 +34,4 @@ def _stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
             full_name = f"{name} -> {stat.link}" if stat.link else name
             mode_line = f"{permissions} {size}b {user} {group} {mtime} {full_name}"
             write(nvim, mode_line)
+

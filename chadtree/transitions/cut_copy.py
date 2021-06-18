@@ -120,10 +120,13 @@ def _operation(
                         selection=new_selection,
                         paths=paths,
                     )
+                    focus = next(
+                        iter(sorted(new_selection, key=lambda p: strxfrm(str(p)))), None
+                    )
 
                     if kill_buffs:
                         kill_buffers(nvim, paths=selection, reopen={})
-                    return Stage(new_state)
+                    return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
