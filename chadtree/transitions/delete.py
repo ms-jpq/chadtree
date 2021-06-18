@@ -71,7 +71,7 @@ def _remove(
                     state, settings=settings, selection=set(), paths=paths
                 )
 
-                kill_buffers(nvim, paths=selection)
+                kill_buffers(nvim, paths=selection, reopen={})
                 return Stage(new_state)
 
 

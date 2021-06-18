@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
 
 from pynvim.api import Buffer, Nvim, Window
@@ -18,11 +19,18 @@ from pynvim_pp.api import (
     win_get_option,
     win_set_option,
 )
+from pynvim_pp.hold import hold_win_pos
 from pynvim_pp.keymap import Keymap
+from std2.lex import escape_with_prefix
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
 from ...settings.types import Settings
+
+
+def escape_file_path(path: str) -> str:
+    rules = {"\\": "\\", "$": "\\", "%": "\\", "#": "\\"}
+    return "".join(escape_with_prefix(path, escape=rules))
 
 
 def is_fm_buffer(nvim: Nvim, buf: Buffer) -> bool:
@@ -160,9 +168,28 @@ def resize_fm_windows(nvim: Nvim, width: int) -> None:
         window.width = width
 
 
-def kill_buffers(nvim: Nvim, paths: AbstractSet[str]) -> None:
+def kill_buffers(
+    nvim: Nvim, paths: AbstractSet[str], reopen: Mapping[str, str]
+) -> None:
+    active = (
+        {win_get_buf(nvim, win=win): win for win in find_non_fm_windows_in_tab(nvim)}
+        if reopen
+        else {}
+    )
+
     for buf in list_bufs(nvim, listed=True):
         name = buf_name(nvim, buf=buf)
         buf_paths = ancestors(name) | {name}
         if not buf_paths.isdisjoint(paths):
+            win = active.get(buf)
+            new_path = reopen.get(name)
+            if reopen and win and new_path:
+                p = Path(name)
+                p.touch()
+                with hold_win_pos(nvim):
+                    set_cur_win(nvim, win=win)
+                    escaped = escape_file_path(new_path)
+                    nvim.command(f"edit! {escaped}")
+                    p.unlink(missing_ok=True)
             buf_close(nvim, buf=buf)
+
