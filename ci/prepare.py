@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
-from os import environ
-from os.path import isdir
+from datetime import datetime, timezone
+from os import environ, sep
 from pathlib import Path
 from subprocess import check_call, check_output, run
 from typing import Iterator
@@ -22,27 +21,27 @@ def _get_branch() -> str:
     return ref.replace("refs/heads/", "")
 
 
-def _git_clone(name: str) -> None:
-    if not isdir(name):
+def _git_clone(path: Path) -> None:
+    if not path.is_dir():
         token = environ["CI_TOKEN"]
         uri = f"https://ms-jpq:{token}@github.com/ms-jpq/chadtree.git"
         branch = _get_branch()
-        check_call(("git", "clone", "--branch", branch, uri, name))
+        check_call(("git", "clone", "--branch", branch, uri, str(path)))
 
 
 def _build() -> None:
     check_call(("python3", "-m", "ci"), cwd=_TOP_LV)
 
 
-def _git_alert(cwd: str) -> None:
-    prefix = "update-icons"
+def _git_alert(cwd: Path) -> None:
+    prefix = "ci-"
     remote_brs = check_output(("git", "branch", "--remotes"), text=True, cwd=cwd)
 
     def cont() -> Iterator[str]:
         for br in remote_brs.splitlines():
             b = br.strip()
             if b and "->" not in b:
-                _, _, name = b.partition("/")
+                _, _, name = b.partition(sep)
                 if name.startswith(prefix):
                     yield name
 
@@ -53,7 +52,7 @@ def _git_alert(cwd: str) -> None:
 
     proc = run(("git", "diff", "--exit-code"))
     if proc.returncode:
-        time = datetime.now().strftime("%Y-%m-%d")
+        time = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
         brname = f"{prefix}--{time}"
         check_call(("git", "checkout", "-b", brname))
         check_call(("git", "add", "."))
@@ -62,7 +61,7 @@ def _git_alert(cwd: str) -> None:
 
 
 def main() -> None:
-    cwd = "temp"
+    cwd = Path() / "temp"
     _git_identity()
     _git_clone(cwd)
     _build()
@@ -70,3 +69,4 @@ def main() -> None:
 
 
 main()
+
