@@ -34,7 +34,7 @@ def _build() -> None:
 
 
 def _git_alert(cwd: Path) -> None:
-    prefix = "ci-"
+    prefix = "ci"
     remote_brs = check_output(("git", "branch", "--remotes"), text=True, cwd=cwd)
 
     def cont() -> Iterator[str]:
