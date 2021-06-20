@@ -1,6 +1,6 @@
 setuptools
 wheel
-std2@https://github.com/ms-jpq/std2/archive/6ce2b39cc4fd7fab09898a9eac6f5af18a69bc45.tar.gz
+std2@https://github.com/ms-jpq/std2/archive/78c928d5675e3d19a35f6e3f25d1716e2113328f.tar.gz
 pynvim_pp@https://github.com/ms-jpq/pynvim_pp/archive/823b75b3464f7049ade617a02123cb256f5fedf6.tar.gz
 pynvim==0.4.2
 PyYAML==5.4.1
