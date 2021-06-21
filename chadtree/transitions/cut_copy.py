@@ -11,6 +11,7 @@ from pynvim_pp.lib import write
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors, copy, cut, exists, unify_ancestors
 from ..fs.types import Node
+from ..lsp.notify import lsp_created, lsp_moved
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -37,7 +38,7 @@ def _operation(
     is_visual: bool,
     nono: AbstractSet[PurePath],
     op_name: str,
-    kill_buffs: bool,
+    is_move: bool,
     action: Callable[[Mapping[PurePath, PurePath]], None],
 ) -> Optional[Stage]:
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
@@ -130,8 +131,11 @@ def _operation(
                         None,
                     )
 
-                    if kill_buffs:
+                    if is_move:
                         kill_buffers(nvim, paths=selection, reopen={})
+                        lsp_moved(nvim, paths=operations)
+                    else:
+                        lsp_created(nvim, paths=new_selection)
                     return Stage(new_state, focus=focus)
 
 
@@ -153,7 +157,7 @@ def _cut(
         nono=nono,
         op_name=LANG("cut"),
         action=cut,
-        kill_buffs=True,
+        is_move=True,
     )
 
 
@@ -173,6 +177,6 @@ def _copy(
         nono=set(),
         op_name=LANG("copy"),
         action=copy,
-        kill_buffs=False,
+        is_move=False,
     )
 

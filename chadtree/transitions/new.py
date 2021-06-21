@@ -9,6 +9,7 @@ from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors, exists, mkdir, new
+from ..lsp.notify import lsp_created
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -64,5 +65,6 @@ def _new(
                     next_state = forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
+                    lsp_created(nvim, paths=(path,))
                     return Stage(next_state, focus=path)
 
