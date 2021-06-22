@@ -1,9 +1,7 @@
+---
 title: CHADTree
 
 showcase: True
-
-desc: >-
-  File manager for Neovim. Better than NERDTree.
 
 images:
   - https://raw.githubusercontent.com/ms-jpq/chadtree/chad/preview/visual_select.gif
