@@ -1,5 +1,5 @@
 ---
-name: Icons
+name: Artifacts
 
 on:
   push:

@@ -7,6 +7,7 @@ from pynvim_pp.api import ask
 from pynvim_pp.lib import write
 
 from ..fs.ops import ancestors, exists, rename
+from ..lsp.notify import lsp_moved
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -37,13 +38,13 @@ def _rename(
             return None
         else:
             new_path = PurePath(abspath(node.path.parent / child))
-
+            operations = {node.path: new_path}
             if exists(new_path, follow=False):
                 write(nvim, LANG("already_exists", name=str(new_path)), error=True)
                 return None
             else:
                 try:
-                    rename({node.path: new_path})
+                    rename(operations)
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
@@ -60,5 +61,6 @@ def _rename(
                         new_state, settings=settings, index=index, paths=paths
                     )
                     kill_buffers(nvim, paths={node.path}, reopen={node.path: new_path})
+                    lsp_moved(nvim, paths=operations)
                     return Stage(next_state, focus=new_path)
 

@@ -130,6 +130,7 @@ view:
   width: 40
   window_options:
     cursorline: true
+    foldenable: false
     number: false
     relativenumber: false
     signcolumn: "no"

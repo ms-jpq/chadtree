@@ -27,7 +27,10 @@ def _load_json(path: Path) -> Optional[Any]:
 def load_session(cwd: PurePath, use_xdg: bool) -> Session:
     load_path = _session_path(cwd, use_xdg=use_xdg)
     try:
-        return decode(Session, _load_json(load_path), decoders=BUILTIN_DECODERS)
+        session: Session = decode(
+            Session, _load_json(load_path), decoders=BUILTIN_DECODERS
+        )
+        return session
     except Exception:
         return Session(index=None, show_hidden=None, enable_vc=None)
 

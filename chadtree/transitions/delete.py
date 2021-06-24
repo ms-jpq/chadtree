@@ -11,6 +11,7 @@ from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 
 from ..fs.ops import ancestors, remove, unify_ancestors
+from ..lsp.notify import lsp_removed
 from ..registry import enqueue_event, pool, rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -72,6 +73,7 @@ def _remove(
                 )
 
                 kill_buffers(nvim, paths=selection, reopen={})
+                lsp_removed(nvim, paths=unified)
                 return Stage(new_state)
 
 

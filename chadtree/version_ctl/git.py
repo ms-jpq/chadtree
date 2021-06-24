@@ -8,7 +8,6 @@ from shutil import which
 from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
 from typing import (
-    Any,
     Iterable,
     Iterator,
     MutableMapping,
@@ -156,7 +155,7 @@ def status(cwd: PurePath) -> VCStatus:
             s_main = pool.submit(_stat_main, cwd=cwd)
             s_sub = pool.submit(_stat_sub_modules, cwd=cwd)
 
-            wait(cast(Sequence[Future[Any]], (r, s_main, s_sub)))
+            wait(cast(Sequence[Future], (r, s_main, s_sub)))
             return _parse(r.result(), stats=chain(s_main.result(), s_sub.result()))
         except CalledProcessError:
             return VCStatus()
