@@ -1,3 +1,4 @@
+from concurrent.futures import wait
 from fnmatch import fnmatch
 from os import listdir, stat
 from pathlib import PurePath
@@ -24,7 +25,6 @@ from typing import (
     cast,
 )
 
-from std2.concurrent.futures import gather
 from std2.itertools import chunk
 
 from ..consts import WALK_PARALLELISM_FACTOR
@@ -146,11 +146,11 @@ def new(root: PurePath, index: Index) -> Node:
 
     bfs_q.put(root)
     while not bfs_q.empty():
-        tasks = (
+        tasks = tuple(
             pool.submit(_new, roots=paths, index=index, acc=acc, bfs_q=bfs_q)
             for paths in chunk(drain(), n=WALK_PARALLELISM_FACTOR)
         )
-        gather(*tasks)
+        wait(tasks)
 
     return _join(acc)
 

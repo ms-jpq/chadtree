@@ -1,6 +1,6 @@
 from pynvim import Nvim
 from pynvim_pp.lib import write
-from std2.locale import human_readable_size
+from std2.locale import si_prefixed
 
 from ..fs.ops import fs_stat
 from ..registry import rpc
@@ -26,7 +26,7 @@ def _stat(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
             write(nvim, e, error=True)
         else:
             permissions = stat.permissions
-            size = human_readable_size(stat.size, precision=2)
+            size = si_prefixed(stat.size, precision=2)
             user = stat.user
             group = stat.group
             mtime = stat.date_mod.strftime(settings.view.time_fmt)
