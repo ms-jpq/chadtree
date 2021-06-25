@@ -21,7 +21,7 @@ from pynvim_pp.api import (
 )
 from pynvim_pp.hold import hold_win_pos
 from pynvim_pp.keymap import Keymap
-from std2.lex import escape_with_prefix
+from std2.lex import escape
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
@@ -30,7 +30,7 @@ from ...settings.types import Settings
 
 def escape_file_path(path: PurePath) -> str:
     rules = {"\\": "\\", "$": "\\", "%": "\\", "#": "\\"}
-    return "".join(escape_with_prefix(str(path), escape=rules))
+    return "".join(escape(str(path), replace=False, escape=rules))
 
 
 def is_fm_buffer(nvim: Nvim, buf: Buffer) -> bool:
