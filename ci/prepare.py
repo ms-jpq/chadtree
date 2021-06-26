@@ -54,10 +54,10 @@ def _git_alert(cwd: Path) -> None:
     if proc.returncode:
         time = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
         brname = f"{prefix}--{time}"
-        check_call(("git", "checkout", "-b", brname))
-        check_call(("git", "add", "."))
-        check_call(("git", "commit", "-m", f"update_icons: {time}"))
-        check_call(("git", "push", "--set-upstream", "origin", brname))
+        check_call(("git", "checkout", "-b", brname), cwd=cwd)
+        check_call(("git", "add", "."), cwd=cwd)
+        check_call(("git", "commit", "-m", f"update_icons: {time}"), cwd=cwd)
+        check_call(("git", "push", "--set-upstream", "origin", brname), cwd=cwd)
 
 
 def main() -> None:
