@@ -118,8 +118,8 @@ class ChadClient(Client):
                     for _ in range(RENDER_RETRIES - 1):
                         try:
                             redraw(nvim, state=self._state, focus=stage.focus)
-                        except NvimError as e:
-                            write(nvim, f"recoverable error - {e}")
+                        except NvimError:
+                            pass
                         else:
                             break
                     else:
