@@ -3,7 +3,6 @@ from itertools import chain
 from locale import strxfrm
 from os import environ, linesep, sep
 from pathlib import PurePath
-from shlex import join
 from shutil import which
 from string import whitespace
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
@@ -63,7 +62,7 @@ def _stat_sub_modules(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
             "submodule",
             "foreach",
             "--recursive",
-            join(_GIT_LIST_CMD),
+            *_GIT_LIST_CMD,
         ),
         env={**environ, **_GIT_ENV},
         stdin=DEVNULL,
