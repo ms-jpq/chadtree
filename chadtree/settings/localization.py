@@ -19,7 +19,7 @@ def _get_lang(code: Optional[str], fallback: str) -> str:
         return lang
 
 
-class Lang:
+class _Lang:
     def __init__(self, specs: MutableMapping[str, str]) -> None:
         self._specs = specs
 
@@ -28,7 +28,7 @@ class Lang:
         return Template(spec).substitute(kwds)
 
 
-LANG = Lang({})
+LANG = _Lang({})
 
 
 def init(code: Optional[str]) -> None:
