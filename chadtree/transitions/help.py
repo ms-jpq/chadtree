@@ -87,10 +87,7 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
         write(nvim, e, error=True)
     else:
         md, uri = _directory(opts.topic)
-        if opts.use_web:
-            web_d = open_w(uri)
-        else:
-            web_d = False
+        web_d = open_w(uri) if opts.use_web else False
         if not web_d:
             for win in list_floatwins(nvim):
                 win_close(nvim, win=win)
