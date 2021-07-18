@@ -1,3 +1,4 @@
+from contextlib import suppress
 from os import chdir
 from os.path import isfile
 from pathlib import PurePath
@@ -33,13 +34,11 @@ autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"
 
 @rpc(blocking=False)
 def _kill_float_wins(nvim: Nvim, state: State, settings: Settings) -> None:
-    try:
+    with suppress(NvimError):
         wins = tuple(list_floatwins(nvim))
         if len(wins) != 2:
             for win in wins:
                 win_close(nvim, win=win)
-    except NvimError:
-        pass
 
 
 autocmd("WinEnter") << f"lua {_kill_float_wins.name}()"
