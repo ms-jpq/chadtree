@@ -1,7 +1,6 @@
-from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import Optional, Sequence, Tuple
+from typing import Sequence, Tuple
 from webbrowser import open as open_w
 
 from pynvim import Nvim
@@ -31,6 +30,7 @@ from ..state.types import State
 
 
 class _Topics(Enum):
+    index = auto()
     features = auto()
     keybind = auto()
     config = auto()
@@ -38,14 +38,8 @@ class _Topics(Enum):
     migration = auto()
 
 
-@dataclass(frozen=True)
-class _Args:
-    topic: Optional[_Topics]
-    use_web: bool
-
-
-def _directory(topic: Optional[_Topics]) -> Tuple[Path, str]:
-    if topic is None:
+def _directory(topic: _Topics) -> Tuple[Path, str]:
+    if topic is _Topics.index:
         return README_MD, README_URI
     elif topic is _Topics.features:
         return FEATURES_MD, FEATURES_URI
@@ -61,18 +55,17 @@ def _directory(topic: Optional[_Topics]) -> Tuple[Path, str]:
         never(topic)
 
 
-def _parse_args(args: Sequence[str]) -> _Args:
+def _parse_args(args: Sequence[str]) -> Tuple[_Topics, bool]:
     parser = ArgParser()
     parser.add_argument(
         "topic",
         nargs="?",
         choices=tuple(topic.name for topic in _Topics),
-        default=None,
+        default=_Topics.index.name,
     )
     parser.add_argument("-w", "--web", action="store_true", default=False)
     ns = parser.parse_args(args)
-    opts = _Args(topic=_Topics[ns.topic] if ns.topic else None, use_web=ns.web)
-    return opts
+    return _Topics[ns.topic], ns.web
 
 
 @rpc(blocking=False)
@@ -82,12 +75,12 @@ def _help(nvim: Nvim, state: State, settings: Settings, args: Sequence[str]) -> 
     """
 
     try:
-        opts = _parse_args(args)
+        topic, use_web = _parse_args(args)
     except ArgparseError as e:
         write(nvim, e, error=True)
     else:
-        md, uri = _directory(opts.topic)
-        web_d = open_w(uri) if opts.use_web else False
+        md, uri = _directory(topic)
+        web_d = open_w(uri) if use_web else False
         if not web_d:
             for win in list_floatwins(nvim):
                 win_close(nvim, win=win)
