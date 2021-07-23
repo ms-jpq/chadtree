@@ -37,7 +37,6 @@ Note in lua, you will need to quote your keys like so:
 { ["dog.puppy"] = 2 }
 ```
 
-
 Note in VimL, to specify `True` and `False`, you need to use the following:
 
 ```vim
@@ -199,7 +198,6 @@ true
 
 ---
 
-
 ### chadtree_settings.ignore
 
 CHADTree can ignore showing some files. This is toggable by default using the `.` key.
@@ -306,3 +304,4 @@ Set of window local options to for CHADTree windows
 ### chadtree_settings.theme
 
 See help docs on [themes](https://github.com/ms-jpq/chadtree/tree/chad/docs/THEME.md)
+
