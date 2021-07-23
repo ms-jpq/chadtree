@@ -2,7 +2,7 @@ FROM ubuntu:focal
 
 ENV TERM=xterm-256color
 RUN apt-get update && \
-    apt-get install -y python3-venv neovim git && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes -- python3-venv neovim git && \
     rm -rf /var/lib/apt/lists/*
 
 
