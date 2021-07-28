@@ -75,7 +75,7 @@ if command == "deps":
     else:
         proc = run(
             (
-                str(_RT_PY),
+                _RT_PY,
                 "-m",
                 "pip",
                 "install",
@@ -90,7 +90,7 @@ if command == "deps":
             exit(proc.returncode)
         proc = run(
             (
-                str(_RT_PY),
+                _RT_PY,
                 "-m",
                 "pip",
                 "install",

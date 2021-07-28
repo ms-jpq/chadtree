@@ -26,7 +26,7 @@ def _git_clone(path: Path) -> None:
         token = environ["CI_TOKEN"]
         uri = f"https://ms-jpq:{token}@github.com/ms-jpq/chadtree.git"
         branch = _get_branch()
-        check_call(("git", "clone", "--branch", branch, uri, str(path)))
+        check_call(("git", "clone", "--branch", branch, uri, path))
 
 
 def _build() -> None:
