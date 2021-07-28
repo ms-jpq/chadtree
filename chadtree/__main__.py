@@ -97,7 +97,7 @@ if command == "deps":
                 "--upgrade",
                 "--force-reinstall",
                 "--requirement",
-                str(REQUIREMENTS),
+                REQUIREMENTS,
             ),
             stdin=DEVNULL,
             stderr=stdout,
