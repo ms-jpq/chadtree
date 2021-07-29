@@ -2,7 +2,7 @@ from argparse import ArgumentParser, Namespace
 from os import name
 from pathlib import Path
 from subprocess import DEVNULL, run
-from sys import executable, stderr, stdout, version_info
+from sys import executable, exit, stderr, stdout, version_info
 from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
@@ -75,7 +75,7 @@ if _command == "deps":
     else:
         proc = run(
             (
-                str(_RT_PY),
+                _RT_PY,
                 "-m",
                 "pip",
                 "install",
@@ -90,14 +90,14 @@ if _command == "deps":
             exit(proc.returncode)
         proc = run(
             (
-                str(_RT_PY),
+                _RT_PY,
                 "-m",
                 "pip",
                 "install",
                 "--upgrade",
                 "--force-reinstall",
                 "--requirement",
-                str(REQUIREMENTS),
+                REQUIREMENTS,
             ),
             stdin=DEVNULL,
             stderr=stdout,

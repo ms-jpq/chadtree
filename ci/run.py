@@ -12,7 +12,7 @@ def docker_run(dockerfile: Path) -> str:
             "--tag",
             name,
             "--file",
-            str(dockerfile),
+            dockerfile,
             "--progress",
             "plain",
             ".",
@@ -21,3 +21,4 @@ def docker_run(dockerfile: Path) -> str:
     )
     output = check_output(("docker", "run", "--rm", name), text=True)
     return output
+

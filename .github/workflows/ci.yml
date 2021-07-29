@@ -33,4 +33,4 @@ jobs:
         run: pip install -U -r requirements.txt
 
       - name: Lint
-        run: ./lint.sh
+        run: mypy -- .
