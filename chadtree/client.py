@@ -13,7 +13,7 @@ from pynvim.api.common import NvimError
 from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call, write
-from pynvim_pp.logging import log
+from pynvim_pp.logging import log, with_suppress
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
 from std2.pickle import DecodeError
 from std2.sched import ticker
@@ -123,13 +123,14 @@ class ChadClient(Client):
                         else:
                             break
                     else:
-                        redraw(nvim, state=self._state, focus=stage.focus)
+                        try:
+                            redraw(nvim, state=self._state, focus=stage.focus)
+                        except NvimError as e:
+                            log.warn("%s", e)
 
                     if settings.profiling and not has_drawn:
                         has_drawn = True
                         _profile(nvim, t1=t1)
 
-            try:
+            with with_suppress():
                 threadsafe_call(nvim, cdraw)
-            except Exception as e:
-                log.exception("%s", e)
