@@ -123,7 +123,10 @@ class ChadClient(Client):
                         else:
                             break
                     else:
-                        redraw(nvim, state=self._state, focus=stage.focus)
+                        try:
+                            redraw(nvim, state=self._state, focus=stage.focus)
+                        except NvimError as e:
+                            log.warn("%s", e)
 
                     if settings.profiling and not has_drawn:
                         has_drawn = True
