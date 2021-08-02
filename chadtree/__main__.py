@@ -53,7 +53,6 @@ if command == "deps":
 
     try:
         from venv import EnvBuilder
-
         print("...", flush=True)
         EnvBuilder(
             system_site_packages=False,
