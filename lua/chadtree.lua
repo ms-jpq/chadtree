@@ -152,7 +152,7 @@ return function(args)
 
     chad.lsp_ensure_capacities = function(cfg)
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities.workspace.workspaceEdit.fileOperations = {
+      capabilities.workspace.workspace.fileOperations = {
         didCreate = true,
         didRename = true,
         didDelete = true
