@@ -3,7 +3,8 @@ from multiprocessing import cpu_count
 from os import linesep
 from pathlib import Path
 from platform import uname
-from sys import executable, stderr
+from string import Template
+from sys import executable
 from textwrap import dedent
 from time import monotonic
 from typing import Any, MutableMapping, Optional, cast
@@ -69,9 +70,15 @@ class ChadClient(Client):
             try:
                 self._settings = initial_settings(nvim, specs)
             except DecodeError as e:
-                msg1 = "Some options may hanve changed."
-                msg2 = "See help doc on Github under [docs/CONFIGURATION.md]"
-                write(nvim, e, msg1, msg2, sep=linesep, error=True)
+                tpl = """
+                Some options may hanve changed.
+                See help doc on Github under [docs/CONFIGURATION.md]
+
+
+                ${e}
+                """
+                ms = Template(dedent(tpl)).substitute(e=e)
+                write(nvim, ms, error=True)
                 return False
             else:
                 hl = highlight(*self._settings.view.hl_context.groups)
