@@ -45,6 +45,8 @@ _LOCK_FILE = _RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
 _REQ = REQUIREMENTS.read_text()
 
+_IN_VENV = _EXEC_PATH == _RT_PY
+
 
 def _is_relative_to(origin: Path, *other: Path) -> bool:
     try:
@@ -55,6 +57,8 @@ def _is_relative_to(origin: Path, *other: Path) -> bool:
 
 
 if command == "deps":
+    assert not _IN_VENV
+
     try:
         from venv import EnvBuilder
 
@@ -121,7 +125,7 @@ elif command == "run":
     except Exception:
         lock = ""
     try:
-        if _EXEC_PATH != _RT_PY:
+        if not _IN_VENV:
             raise ImportError()
         elif lock != _REQ:
             raise ImportError()
