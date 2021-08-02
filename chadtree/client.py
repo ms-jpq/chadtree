@@ -74,6 +74,7 @@ class ChadClient(Client):
                 Some options may hanve changed.
                 See help doc on Github under [docs/CONFIGURATION.md]
 
+
                 ${e}
                 """
                 ms = Template(dedent(tpl)).substitute(e=e)
