@@ -158,11 +158,7 @@ return function(args)
         didDelete = true
       }
       local enhancements = {capacities = capacities}
-      vim.tbl_deep_extend(
-        "force",
-        cfg or {[vim.type_idx] = vim.types.dictionary},
-        enhancements
-      )
+      vim.tbl_deep_extend("force", cfg or vim.empty_dict(), enhancements)
     end
   end
 end
