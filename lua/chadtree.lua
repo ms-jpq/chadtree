@@ -157,8 +157,10 @@ return function(args)
         didRename = true,
         didDelete = true
       }
-      local enhancements = {capacities = capacities}
-      vim.tbl_deep_extend("force", cfg or vim.empty_dict(), enhancements)
+      local enhancements = {capabilities = capabilities}
+      local new =
+        vim.tbl_deep_extend("force", cfg or vim.empty_dict(), enhancements)
+      return new
     end
   end
 end
