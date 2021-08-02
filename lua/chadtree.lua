@@ -55,9 +55,10 @@ return function(args)
       vim.api.nvim_err_write(table.concat(msg, linesep))
     end
 
+    local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
+    local py3 = go and _py3 or (is_win and "python" or "python3")
+
     local main = function(is_xdg)
-      local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
-      local py3 = go and _py3 or (is_win and "python" or "python3")
       local v_py =
         cwd ..
         (is_win and [[/.vars/runtime/Scripts/python.exe]] or
@@ -83,11 +84,11 @@ return function(args)
       end
     end
 
-    local start = function(...)
+    local start = function(deps, ...)
       local is_xdg = settings().xdg
       local args =
         vim.tbl_flatten {
-        main(is_xdg),
+        deps and py3 or main(is_xdg),
         {"-m", "chadtree"},
         {...},
         (is_xdg and {"--xdg"} or {})
@@ -103,7 +104,7 @@ return function(args)
     end
 
     chad.CHADdeps = function()
-      start("deps")
+      start(true, "deps")
     end
 
     vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.CHADdeps()]]
@@ -118,7 +119,7 @@ return function(args)
 
         if not job_id then
           local server = vim.api.nvim_call_function("serverstart", {})
-          job_id = start("run", "--socket", server)
+          job_id = start(false, "run", "--socket", server)
         end
 
         if not err_exit and _G[cmd] then

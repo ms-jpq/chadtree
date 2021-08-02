@@ -34,41 +34,34 @@ def parse_args() -> Namespace:
     return parser.parse_args()
 
 
-_is_win = name == "nt"
-_args = parse_args()
-_command: Union[Literal["deps"], Literal["run"]] = _args.command
+is_win = name == "nt"
+args = parse_args()
+command: Union[Literal["deps"], Literal["run"]] = args.command
 
-_use_xdg = False if _is_win else _args.xdg
-_RT_DIR = RT_DIR_XDG if _use_xdg else RT_DIR
-_RT_PY = RT_PY_XDG if _use_xdg else RT_PY
+use_xdg = False if is_win else args.xdg
+_RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
+_RT_PY = RT_PY_XDG if use_xdg else RT_PY
 _LOCK_FILE = _RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
 _REQ = REQUIREMENTS.read_text()
 
-
-def _is_relative_to(origin: Path, *other: Path) -> bool:
-    try:
-        origin.relative_to(*other)
-        return True
-    except ValueError:
-        return False
+_IN_VENV = _EXEC_PATH == _RT_PY
 
 
-if _command == "deps":
+if command == "deps":
+    assert not _IN_VENV
+
     try:
         from venv import EnvBuilder
 
         print("...", flush=True)
-        if _is_relative_to(_EXEC_PATH, _RT_DIR):
-            pass
-        else:
-            EnvBuilder(
-                system_site_packages=False,
-                with_pip=True,
-                upgrade=True,
-                symlinks=not _is_win,
-                clear=True,
-            ).create(_RT_DIR)
+        EnvBuilder(
+            system_site_packages=False,
+            with_pip=True,
+            upgrade=True,
+            symlinks=not is_win,
+            clear=True,
+        ).create(_RT_DIR)
     except (ImportError, SystemExit):
         print("Please install venv separately.", file=stderr)
         exit(1)
@@ -115,13 +108,13 @@ if _command == "deps":
             msg = dedent(msg)
             print(msg, file=stderr)
 
-elif _command == "run":
+elif command == "run":
     try:
         lock = _LOCK_FILE.read_text()
     except Exception:
         lock = ""
     try:
-        if _EXEC_PATH != _RT_PY:
+        if not _IN_VENV:
             raise ImportError()
         elif lock != _REQ:
             raise ImportError()
@@ -147,9 +140,10 @@ elif _command == "run":
 
         from .client import ChadClient
 
-        nvim = attach("socket", path=_args.socket)
+        nvim = attach("socket", path=args.socket)
         code = run_client(nvim, client=ChadClient())
         exit(code)
 
 else:
     assert False
+
