@@ -152,7 +152,11 @@ return function(args)
 
     chad.lsp_ensure_capacities = function(cfg)
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities.workspace.workspaceEdit.changeAnnotationSupport = true
+      capabilities.workspace.workspaceEdit.fileOperations = {
+        didCreate = true,
+        didRename = true,
+        didDelete = true
+      }
       local enhancements = {capacities = capacities}
       vim.tbl_deep_extend("force", cfg or {}, enhancements)
     end
