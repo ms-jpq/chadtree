@@ -151,7 +151,10 @@ return function(args)
     vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.CHADhelp(<f-args>)]]
 
     chad.lsp_ensure_capabilities = function(cfg)
-      local spec = {
+      local spec1 = {
+        capabilities = vim.lsp.protocol.make_client_capabilities()
+      }
+      local spec2 = {
         capabilities = {
           workspace = {
             fileOperations = {
@@ -162,7 +165,9 @@ return function(args)
           }
         }
       }
-      local new = vim.tbl_deep_extend("force", cfg or vim.empty_dict(), spec)
+      local maps = cfg.capabilities and {spec2} or {spec1, spec2}
+      local new =
+        vim.tbl_deep_extend("force", cfg or vim.empty_dict(), unpack(maps))
       return new
     end
   end
