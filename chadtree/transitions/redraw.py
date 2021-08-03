@@ -20,7 +20,7 @@ _FM_HASH_VAR = f"CHAD_HASH_{uuid4()}"
 
 
 class UnrecoverableError(Exception):
-    pass
+    ...
 
 
 def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
