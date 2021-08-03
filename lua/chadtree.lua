@@ -150,7 +150,7 @@ return function(args)
     set_chad_call("CHADhelp")
     vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.CHADhelp(<f-args>)]]
 
-    chad.lsp_ensure_capacities = function(cfg)
+    chad.lsp_ensure_capabilities = function(cfg)
       local spec = {
         capabilities = {
           workspace = {
