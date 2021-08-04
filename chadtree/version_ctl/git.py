@@ -24,7 +24,15 @@ from ..registry import pool
 from .types import VCStatus
 
 _WHITE_SPACES = {*whitespace}
-_GIT_LIST_CMD = ("git", "--no-optional-locks", "status", "--ignored", "--renames", "--porcelain", "-z")
+_GIT_LIST_CMD = (
+    "git",
+    "--no-optional-locks",
+    "status",
+    "--ignored",
+    "--renames",
+    "--porcelain",
+    "-z",
+)
 _GIT_ENV = {"LC_ALL": "C"}
 
 _GIT_SUBMODULE_MARKER = "Entering "
@@ -35,7 +43,10 @@ _UNTRACKED_MARKER = "?"
 
 def root(cwd: PurePath) -> PurePath:
     stdout = check_output(
-        ("git", "--no-optional-locks", "rev-parse", "--show-toplevel"), stderr=PIPE, text=True, cwd=cwd
+        ("git", "--no-optional-locks", "rev-parse", "--show-toplevel"),
+        stderr=PIPE,
+        text=True,
+        cwd=cwd,
     )
     return PurePath(stdout.rstrip())
 
@@ -160,4 +171,3 @@ def status(cwd: PurePath) -> VCStatus:
             return VCStatus()
     else:
         return VCStatus()
-
