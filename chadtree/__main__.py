@@ -105,8 +105,7 @@ if command == "deps":
             This is not an error:
             You can now use :CHADopen
             """
-            msg = dedent(msg)
-            print(msg, file=stderr)
+            print(dedent(msg), file=stderr)
 
 elif command == "run":
     try:
