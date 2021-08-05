@@ -1,8 +1,8 @@
 from argparse import ArgumentParser, Namespace
 from os import name
 from pathlib import Path
-from subprocess import DEVNULL, run
-from sys import executable, exit, stderr, stdout, version_info
+from subprocess import DEVNULL, STDOUT, run
+from sys import executable, exit, stderr, version_info
 from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
@@ -76,7 +76,7 @@ if command == "deps":
                 "pip",
             ),
             stdin=DEVNULL,
-            stderr=stdout,
+            stderr=STDOUT,
         )
         if proc.returncode:
             print("Installation failed, check :message", file=stderr)
@@ -93,7 +93,7 @@ if command == "deps":
                 REQUIREMENTS,
             ),
             stdin=DEVNULL,
-            stderr=stdout,
+            stderr=STDOUT,
         )
         if proc.returncode:
             print("Installation failed, check :message", file=stderr)
@@ -146,4 +146,3 @@ elif command == "run":
 
 else:
     assert False
-
