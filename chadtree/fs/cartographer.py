@@ -1,4 +1,5 @@
 from concurrent.futures import Executor, wait
+from contextlib import suppress
 from fnmatch import fnmatch
 from os import listdir, stat
 from pathlib import PurePath
@@ -83,17 +84,15 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 
 
 def _listdir(path: PurePath) -> Iterator[PurePath]:
-    try:
+    with suppress(NotADirectoryError):
         yield from map(PurePath, listdir(path))
-    except NotADirectoryError:
-        pass
 
 
 def _new(
     roots: Iterable[PurePath], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
 ) -> None:
     for root in roots:
-        try:
+        with suppress(PermissionError):
             mode = _fs_stat(root)
             _ancestors = ancestors(root)
             node = Node(
@@ -107,9 +106,6 @@ def _new(
                 for item in _listdir(root):
                     path = root / item
                     bfs_q.put(path)
-
-        except PermissionError:
-            pass
 
 
 def _join(nodes: SimpleQueue) -> Node:
