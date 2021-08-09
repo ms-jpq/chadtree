@@ -1,3 +1,4 @@
+from concurrent.futures import Executor
 from dataclasses import dataclass
 from pathlib import PurePath
 from typing import AbstractSet, Optional
@@ -18,6 +19,7 @@ class FilterPattern:
 
 @dataclass(frozen=True)
 class State:
+    pool: Executor
     current: Optional[PurePath]
     derived: Derived
     enable_vc: bool
@@ -37,4 +39,3 @@ class Session:
     index: Optional[Index]
     show_hidden: Optional[bool]
     enable_vc: Optional[bool]
-

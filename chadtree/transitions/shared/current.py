@@ -39,7 +39,7 @@ def new_root(
     indices: AbstractSet[PurePath],
 ) -> State:
     index = state.index | ancestors(new_cwd) | {new_cwd} | indices
-    root = new(new_cwd, index=index)
+    root = new(state.pool, root=new_cwd, index=index)
     selection = {path for path in state.selection if root.path in ancestors(path)}
     return forward(
         state, settings=settings, root=root, selection=selection, index=index
@@ -59,4 +59,3 @@ def maybe_path_above(
         return new_root(
             nvim, state=state, settings=settings, new_cwd=new_cwd, indices=indices
         )
-

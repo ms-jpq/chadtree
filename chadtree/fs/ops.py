@@ -1,8 +1,7 @@
+from concurrent.futures import Executor
 from dataclasses import dataclass
 from datetime import datetime
-from os import makedirs
-from os import name as os_name
-from os import readlink
+from os import makedirs, readlink
 from os import remove as rm
 from os import stat
 from pathlib import Path, PurePath
@@ -13,7 +12,6 @@ from stat import S_ISDIR, S_ISLNK, filemode
 from typing import AbstractSet, Iterable, Mapping, Optional
 
 from ..consts import FILE_MODE, FOLDER_MODE
-from ..registry import pool
 
 
 def ancestors(path: PurePath) -> AbstractSet[PurePath]:
@@ -34,16 +32,7 @@ class FSstat:
     link: Optional[str]
 
 
-if os_name == "nt":
-
-    def _get_username(uid: int) -> str:
-        return str(uid)
-
-    def _get_groupname(gid: int) -> str:
-        return str(gid)
-
-
-else:
+try:
     from grp import getgrgid
     from pwd import getpwuid
 
@@ -58,6 +47,15 @@ else:
             return getgrgid(gid).gr_name
         except KeyError:
             return str(gid)
+
+
+except ImportError:
+
+    def _get_username(uid: int) -> str:
+        return str(uid)
+
+    def _get_groupname(gid: int) -> str:
+        return str(gid)
 
 
 def fs_stat(path: PurePath) -> FSstat:
@@ -92,7 +90,7 @@ def _mkdir(path: PurePath) -> None:
     makedirs(path, mode=FOLDER_MODE, exist_ok=True)
 
 
-def mkdir(paths: Iterable[PurePath]) -> None:
+def mkdir(pool: Executor, paths: Iterable[PurePath]) -> None:
     tuple(pool.map(_mkdir, paths))
 
 
@@ -101,7 +99,7 @@ def _new(path: PurePath) -> None:
     Path(path).touch(mode=FILE_MODE, exist_ok=True)
 
 
-def new(paths: Iterable[PurePath]) -> None:
+def new(pool: Executor, paths: Iterable[PurePath]) -> None:
     tuple(pool.map(_new, paths))
 
 
@@ -110,7 +108,7 @@ def _rename(src: PurePath, dest: PurePath) -> None:
     mv(str(src), str(dest))
 
 
-def rename(operations: Mapping[PurePath, PurePath]) -> None:
+def rename(pool: Executor, operations: Mapping[PurePath, PurePath]) -> None:
     _op = lambda op: _rename(*op)
     tuple(pool.map(_op, operations.items()))
 
@@ -123,7 +121,7 @@ def _remove(path: PurePath) -> None:
         rm(path)
 
 
-def remove(paths: Iterable[PurePath]) -> None:
+def remove(pool: Executor, paths: Iterable[PurePath]) -> None:
     tuple(pool.map(_remove, paths))
 
 
@@ -131,7 +129,7 @@ def _cut(src: PurePath, dest: PurePath) -> None:
     mv(str(src), str(dest))
 
 
-def cut(operations: Mapping[PurePath, PurePath]) -> None:
+def cut(pool: Executor, operations: Mapping[PurePath, PurePath]) -> None:
     _op = lambda op: _cut(*op)
     tuple(pool.map(_op, operations.items()))
 
@@ -144,7 +142,6 @@ def _copy(src: PurePath, dest: PurePath) -> None:
         copy2(src, dest, follow_symlinks=False)
 
 
-def copy(operations: Mapping[PurePath, PurePath]) -> None:
+def copy(pool: Executor, operations: Mapping[PurePath, PurePath]) -> None:
     _op = lambda op: _copy(*op)
     tuple(pool.map(_op, operations.items()))
-

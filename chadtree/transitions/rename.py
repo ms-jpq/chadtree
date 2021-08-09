@@ -44,7 +44,7 @@ def _rename(
                 return None
             else:
                 try:
-                    rename(operations)
+                    rename(state.pool, operations=operations)
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
@@ -63,4 +63,3 @@ def _rename(
                     kill_buffers(nvim, paths={node.path}, reopen={node.path: new_path})
                     lsp_moved(nvim, paths=operations)
                     return Stage(next_state, focus=new_path)
-

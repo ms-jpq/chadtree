@@ -47,9 +47,9 @@ def _new(
             else:
                 try:
                     if child.endswith(sep):
-                        mkdir((path,))
+                        mkdir(state.pool, paths=(path,))
                     else:
-                        new((path,))
+                        new(state.pool, paths=(path,))
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
@@ -67,4 +67,3 @@ def _new(
                     )
                     lsp_created(nvim, paths=(path,))
                     return Stage(next_state, focus=path)
-

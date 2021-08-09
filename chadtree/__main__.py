@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, Namespace
 from os import name
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import executable, exit, stderr, version_info
@@ -140,7 +141,8 @@ elif command == "run":
         from .client import ChadClient
 
         nvim = attach("socket", path=args.socket)
-        code = run_client(nvim, client=ChadClient())
+        with ThreadPoolExecutor() as pool:
+            code = run_client(nvim, pool=pool, client=ChadClient(pool=pool))
         exit(code)
 
 else:

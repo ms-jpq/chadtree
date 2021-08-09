@@ -1,3 +1,4 @@
+from concurrent.futures import Executor
 from locale import strxfrm
 from os import linesep
 from pathlib import PurePath
@@ -12,7 +13,7 @@ from pynvim_pp.logging import log
 
 from ..fs.ops import ancestors, remove, unify_ancestors
 from ..lsp.notify import lsp_removed
-from ..registry import enqueue_event, pool, rpc
+from ..registry import enqueue_event, rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
@@ -30,7 +31,7 @@ def _remove(
     state: State,
     settings: Settings,
     is_visual: bool,
-    yeet: Callable[[Iterable[PurePath]], None],
+    yeet: Callable[[Executor, Iterable[PurePath]], None],
 ) -> Optional[Stage]:
     cwd, root = PurePath(get_cwd(nvim)), state.root.path
     nono = {cwd, root} | ancestors(cwd) | ancestors(root)
@@ -62,7 +63,7 @@ def _remove(
             return None
         else:
             try:
-                yeet(unified)
+                yeet(state.pool, unified)
             except Exception as e:
                 write(nvim, e, error=True)
                 return refresh(nvim, state=state, settings=settings)
@@ -90,10 +91,10 @@ def _delete(
     )
 
 
-def _sys_trash(nvim: Nvim) -> Callable[[Iterable[PurePath]], None]:
+def _sys_trash(nvim: Nvim) -> Callable[[Executor, Iterable[PurePath]], None]:
     cwd = PurePath(get_cwd(nvim))
 
-    def cont(paths: Iterable[PurePath]) -> None:
+    def cont(pool: Executor, paths: Iterable[PurePath]) -> None:
         def c1() -> None:
             cmd = "trash"
             if which(cmd):
@@ -126,6 +127,9 @@ def _trash(
     """
 
     return _remove(
-        nvim, state=state, settings=settings, is_visual=is_visual, yeet=_sys_trash(nvim)
+        nvim,
+        state=state,
+        settings=settings,
+        is_visual=is_visual,
+        yeet=_sys_trash(nvim),
     )
-

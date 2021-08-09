@@ -1,3 +1,4 @@
+from concurrent.futures import Executor
 from pathlib import PurePath
 
 from pynvim import Nvim
@@ -11,7 +12,7 @@ from .ops import load_session
 from .types import Selection, State, VCStatus
 
 
-def initial(nvim: Nvim, settings: Settings) -> State:
+def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
     cwd = PurePath(get_cwd(nvim))
 
     session = load_session(cwd, use_xdg=settings.xdg) if settings.session else None
@@ -29,7 +30,7 @@ def initial(nvim: Nvim, settings: Settings) -> State:
     )
 
     selection: Selection = set()
-    node = new(cwd, index=index)
+    node = new(pool, root=cwd, index=index)
     qf = quickfix(nvim)
     vc = VCStatus()
 
@@ -49,6 +50,7 @@ def initial(nvim: Nvim, settings: Settings) -> State:
     )
 
     state = State(
+        pool=pool,
         index=index,
         selection=selection,
         filter_pattern=filter_pattern,
@@ -63,4 +65,3 @@ def initial(nvim: Nvim, settings: Settings) -> State:
         derived=derived,
     )
     return state
-

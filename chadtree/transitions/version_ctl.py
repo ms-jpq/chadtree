@@ -5,7 +5,7 @@ from pynvim import Nvim
 from pynvim_pp.api import get_cwd
 from pynvim_pp.logging import log
 
-from ..registry import enqueue_event, pool, rpc
+from ..registry import enqueue_event, rpc
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
@@ -37,11 +37,10 @@ def vc_refresh(nvim: Nvim, state: State, settings: Settings) -> None:
             else:
                 with _lock:
                     try:
-                        vc = status(cwd)
+                        vc = status(state.pool, cwd=cwd)
                     except Exception as e:
                         log.exception("%s", e)
                     else:
                         enqueue_event(_set_vc, vc)
 
-        pool.submit(cont)
-
+        state.pool.submit(cont)

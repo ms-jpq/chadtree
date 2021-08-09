@@ -35,7 +35,7 @@ def forward(
         Node,
         root
         or (
-            update(state.root, index=new_index, paths=paths)
+            update(state.pool, root=state.root, index=new_index, paths=paths)
             if not isinstance(paths, VoidType)
             else state.root
         ),
@@ -56,6 +56,7 @@ def forward(
     )
 
     new_state = State(
+        pool=state.pool,
         index=new_index,
         selection=new_selection,
         filter_pattern=new_filter_pattern,
@@ -71,4 +72,3 @@ def forward(
     )
 
     return new_state
-

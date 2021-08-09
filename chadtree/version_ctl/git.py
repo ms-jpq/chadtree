@@ -1,4 +1,4 @@
-from concurrent.futures import Future, wait
+from concurrent.futures import Executor, Future, wait
 from itertools import chain
 from locale import strxfrm
 from os import environ, linesep, sep
@@ -20,7 +20,6 @@ from typing import (
 from std2.string import removeprefix, removesuffix
 
 from ..fs.ops import ancestors
-from ..registry import pool
 from .types import VCStatus
 
 _WHITE_SPACES = {*whitespace}
@@ -158,7 +157,7 @@ def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
     return VCStatus(ignored=ignored, status=trimmed)
 
 
-def status(cwd: PurePath) -> VCStatus:
+def status(pool: Executor, cwd: PurePath) -> VCStatus:
     if which("git"):
         try:
             r = pool.submit(root, cwd=cwd)
