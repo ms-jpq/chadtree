@@ -128,7 +128,7 @@ Also check out
 
 - [`sad`](https://github.com/ms-jpq/sad), its a modern `sed` that does previews with syntax highlighting, and lets you pick and choose which chunks to edit.
 
-- [`coq.nvim`](https://github.com/ms-jpq/coq_nvim), it's a fast as FUCK completion client with shit tons of features.
+- [`coq.nvim`](https://github.com/ms-jpq/coq_nvim), it's a FAST AS FUCK completion client with shit tons of features.
 
 - [isomorphic-copy](https://github.com/ms-jpq/isomorphic-copy), it's a cross platform clipboard that is daemonless, and does not require third party support.
 
