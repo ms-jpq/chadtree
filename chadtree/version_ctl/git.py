@@ -1,4 +1,4 @@
-from concurrent.futures import Future, wait
+from concurrent.futures import Executor, Future, wait
 from itertools import chain
 from locale import strxfrm
 from os import environ, linesep, sep
@@ -20,11 +20,18 @@ from typing import (
 from std2.string import removeprefix, removesuffix
 
 from ..fs.ops import ancestors
-from ..registry import pool
 from .types import VCStatus
 
 _WHITE_SPACES = {*whitespace}
-_GIT_LIST_CMD = ("git", "--no-optional-locks", "status", "--ignored", "--renames", "--porcelain", "-z")
+_GIT_LIST_CMD = (
+    "git",
+    "--no-optional-locks",
+    "status",
+    "--ignored",
+    "--renames",
+    "--porcelain",
+    "-z",
+)
 _GIT_ENV = {"LC_ALL": "C"}
 
 _GIT_SUBMODULE_MARKER = "Entering "
@@ -35,7 +42,10 @@ _UNTRACKED_MARKER = "?"
 
 def root(cwd: PurePath) -> PurePath:
     stdout = check_output(
-        ("git", "--no-optional-locks", "rev-parse", "--show-toplevel"), stderr=PIPE, text=True, cwd=cwd
+        ("git", "--no-optional-locks", "rev-parse", "--show-toplevel"),
+        stderr=PIPE,
+        text=True,
+        cwd=cwd,
     )
     return PurePath(stdout.rstrip())
 
@@ -147,7 +157,7 @@ def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
     return VCStatus(ignored=ignored, status=trimmed)
 
 
-def status(cwd: PurePath) -> VCStatus:
+def status(pool: Executor, cwd: PurePath) -> VCStatus:
     if which("git"):
         try:
             r = pool.submit(root, cwd=cwd)
@@ -160,4 +170,3 @@ def status(cwd: PurePath) -> VCStatus:
             return VCStatus()
     else:
         return VCStatus()
-

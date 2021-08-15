@@ -1,8 +1,9 @@
 from argparse import ArgumentParser, Namespace
 from os import name
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from subprocess import DEVNULL, run
-from sys import executable, exit, stderr, stdout, version_info
+from subprocess import DEVNULL, STDOUT, run
+from sys import executable, exit, stderr, version_info
 from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
@@ -76,7 +77,7 @@ if command == "deps":
                 "pip",
             ),
             stdin=DEVNULL,
-            stderr=stdout,
+            stderr=STDOUT,
         )
         if proc.returncode:
             print("Installation failed, check :message", file=stderr)
@@ -93,7 +94,7 @@ if command == "deps":
                 REQUIREMENTS,
             ),
             stdin=DEVNULL,
-            stderr=stdout,
+            stderr=STDOUT,
         )
         if proc.returncode:
             print("Installation failed, check :message", file=stderr)
@@ -105,8 +106,7 @@ if command == "deps":
             This is not an error:
             You can now use :CHADopen
             """
-            msg = dedent(msg)
-            print(msg, file=stderr)
+            print(dedent(msg), file=stderr)
 
 elif command == "run":
     try:
@@ -141,9 +141,9 @@ elif command == "run":
         from .client import ChadClient
 
         nvim = attach("socket", path=args.socket)
-        code = run_client(nvim, client=ChadClient())
+        with ThreadPoolExecutor() as pool:
+            code = run_client(nvim, pool=pool, client=ChadClient(pool=pool))
         exit(code)
 
 else:
     assert False
-

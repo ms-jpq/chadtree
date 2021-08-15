@@ -1,3 +1,4 @@
+from concurrent.futures import Executor
 from itertools import chain
 from locale import strxfrm
 from os import linesep
@@ -39,7 +40,7 @@ def _operation(
     nono: AbstractSet[PurePath],
     op_name: str,
     is_move: bool,
-    action: Callable[[Mapping[PurePath, PurePath]], None],
+    action: Callable[[Executor, Mapping[PurePath, PurePath]], None],
 ) -> Optional[Stage]:
     node = next(indices(nvim, state=state, is_visual=is_visual), None)
     selection = state.selection
@@ -104,7 +105,7 @@ def _operation(
                 return None
             else:
                 try:
-                    action(operations)
+                    action(state.pool, operations)
                 except Exception as e:
                     write(nvim, e, error=True)
                     return refresh(nvim, state=state, settings=settings)
@@ -179,4 +180,3 @@ def _copy(
         action=copy,
         is_move=False,
     )
-

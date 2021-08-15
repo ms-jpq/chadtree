@@ -7,7 +7,7 @@ from pynvim.api.nvim import Nvim
 from pynvim_pp.api import cur_win, win_get_option
 from pynvim_pp.rpc import RpcSpec
 from std2.configparser import hydrate
-from std2.pickle import DecodeError, decode
+from std2.pickle import DecodeError, new_decoder
 from std2.tree import merge
 from yaml import safe_load
 
@@ -78,15 +78,16 @@ def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
 
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
+    a_decode, c_decode = new_decoder(Artifact), new_decoder(_UserConfig)
+
     win = cur_win(nvim)
-    artifacts: Artifact = decode(Artifact, safe_load(ARTIFACT.read_text("UTF-8")))
+    artifacts: Artifact = a_decode(safe_load(ARTIFACT.read_text("UTF-8")))
 
     user_config = nvim.vars.get(SETTINGS_VAR, {})
-    config: _UserConfig = decode(
-        _UserConfig,
+    config: _UserConfig = c_decode(
         merge(
             safe_load(CONFIG_YML.read_text("UTF-8")), hydrate(user_config), replace=True
-        ),
+        )
     )
     options, view, theme = config.options, config.view, config.theme
     win_actual_opts: Mapping[str, Union[bool, str]] = {

@@ -9,7 +9,7 @@ from pynvim_pp.api import buf_get_var, buf_line_count, cur_win, win_get_cursor
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.operators import operator_marks
 from std2.difflib import trans_inplace
-from std2.pickle import DecodeError, decode
+from std2.pickle import DecodeError, new_decoder
 
 from ..consts import FM_NAMESPACE
 from ..state.types import State
@@ -20,15 +20,16 @@ _FM_HASH_VAR = f"CHAD_HASH_{uuid4()}"
 
 
 class UnrecoverableError(Exception):
-    pass
+    ...
+
+
+_DECODER = new_decoder(Sequence[str])
 
 
 def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
     n_hash = derived.hashed
     try:
-        p_hash: Sequence[str] = decode(
-            Sequence[str], buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR)
-        )
+        p_hash: Sequence[str] = _DECODER(buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR))
     except DecodeError:
         p_hash = ("",)
 
@@ -90,4 +91,3 @@ def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
             (a1 + a2 + a3).commit(nvim)
         except NvimError as e:
             raise UnrecoverableError(e)
-

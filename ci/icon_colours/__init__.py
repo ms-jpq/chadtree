@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import Mapping, Optional, Sequence
 
-from chad_types import Hex, IconColours, IconColourSet
-from std2.pickle import decode
+from std2.pickle import new_decoder
 from std2.urllib import urlopen
 from yaml import safe_load
+
+from chad_types import Hex, IconColours, IconColourSet
 
 _LINGUIST = """
 https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
@@ -31,8 +32,10 @@ def _fetch(uri: str) -> str:
 
 
 def load_icon_colours() -> IconColourSet:
+    decode = new_decoder(_GithubSpec, strict=False)
+
     raw = _fetch(_LINGUIST)
-    yaml: _GithubSpec = decode(_GithubSpec, safe_load(raw), strict=False)
+    yaml: _GithubSpec = decode(safe_load(raw))
     github: IconColours = {
         ext: spec.color
         for spec in yaml.values()

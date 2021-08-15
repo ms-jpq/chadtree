@@ -9,7 +9,7 @@ from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log
 
 from ..fs.types import Node
-from ..registry import pool, rpc
+from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
@@ -47,5 +47,4 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
             except Exception as e:
                 log.exception("%s", e)
 
-        pool.submit(cont)
-
+        state.pool.submit(cont)

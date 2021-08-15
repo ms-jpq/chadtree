@@ -1,4 +1,5 @@
-from concurrent.futures import wait
+from concurrent.futures import Executor, wait
+from contextlib import suppress
 from fnmatch import fnmatch
 from os import listdir, stat
 from pathlib import PurePath
@@ -28,7 +29,6 @@ from typing import (
 from std2.itertools import chunk
 
 from ..consts import WALK_PARALLELISM_FACTOR
-from ..registry import pool
 from ..state.types import Index
 from .ops import ancestors
 from .types import Ignored, Mode, Node
@@ -84,17 +84,15 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 
 
 def _listdir(path: PurePath) -> Iterator[PurePath]:
-    try:
+    with suppress(NotADirectoryError):
         yield from map(PurePath, listdir(path))
-    except NotADirectoryError:
-        pass
 
 
 def _new(
     roots: Iterable[PurePath], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
 ) -> None:
     for root in roots:
-        try:
+        with suppress(PermissionError):
             mode = _fs_stat(root)
             _ancestors = ancestors(root)
             node = Node(
@@ -108,9 +106,6 @@ def _new(
                 for item in _listdir(root):
                     path = root / item
                     bfs_q.put(path)
-
-        except PermissionError:
-            pass
 
 
 def _join(nodes: SimpleQueue) -> Node:
@@ -136,7 +131,7 @@ def _join(nodes: SimpleQueue) -> Node:
         return root_node
 
 
-def new(root: PurePath, index: Index) -> Node:
+def new(pool: Executor, root: PurePath, index: Index) -> Node:
     acc: SimpleQueue = SimpleQueue()
     bfs_q: SimpleQueue = SimpleQueue()
 
@@ -155,12 +150,15 @@ def new(root: PurePath, index: Index) -> Node:
     return _join(acc)
 
 
-def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
+def _update(
+    pool: Executor, root: Node, index: Index, paths: AbstractSet[PurePath]
+) -> Node:
     if root.path in paths:
-        return new(root.path, index=index)
+        return new(pool, root=root.path, index=index)
     else:
         children = {
-            k: _update(v, index=index, paths=paths) for k, v in root.children.items()
+            k: _update(pool, root=v, index=index, paths=paths)
+            for k, v in root.children.items()
         }
         return Node(
             path=root.path,
@@ -170,13 +168,14 @@ def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
         )
 
 
-def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
+def update(
+    pool: Executor, root: Node, *, index: Index, paths: AbstractSet[PurePath]
+) -> Node:
     try:
-        return _update(root, index=index, paths=paths)
+        return _update(pool, root=root, index=index, paths=paths)
     except FileNotFoundError:
-        return new(root.path, index=index)
+        return new(pool, root=root.path, index=index)
 
 
 def is_dir(node: Node) -> bool:
     return Mode.folder in node.mode
-

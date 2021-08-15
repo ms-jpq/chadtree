@@ -1,8 +1,9 @@
 from json import dump
 
-from chad_types import ARTIFACT, Artifact
-from std2.pickle import encode
+from std2.pickle.encoder import new_encoder
 from std2.tree import recur_sort
+
+from chad_types import ARTIFACT, Artifact
 
 from .icon_colours import load_icon_colours
 from .ls_colours import load_ls_colours
@@ -10,9 +11,11 @@ from .text_decorations import load_text_decors
 
 
 def main() -> None:
+    encode = new_encoder(Artifact)
     ls_colours = load_ls_colours()
     icon_colours = load_icon_colours()
     icons, text_colours = load_text_decors()
+
     artifact = Artifact(
         icons=icons,
         ls_colours=ls_colours,

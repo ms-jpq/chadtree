@@ -150,7 +150,7 @@ def _open(
                 else PurePath(get_cwd(nvim)) / opts.path
             )
             if not exists(path, follow=True):
-                new((path,))
+                new(state.pool, paths=(path,))
             next_state = (
                 maybe_path_above(nvim, state=new_state, settings=settings, path=path)
                 or new_state
@@ -175,4 +175,3 @@ def _open(
                 if stage
                 else Stage(new_state, focus=curr)
             )
-

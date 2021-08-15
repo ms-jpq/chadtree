@@ -150,11 +150,25 @@ return function(args)
     set_chad_call("CHADhelp")
     vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.CHADhelp(<f-args>)]]
 
-    chad.lsp_ensure_capacities = function(cfg)
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities.workspace.workspaceEdit.changeAnnotationSupport = true
-      local enhancements = {capacities = capacities}
-      vim.tbl_deep_extend("force", cfg, enhancements)
+    chad.lsp_ensure_capabilities = function(cfg)
+      local spec1 = {
+        capabilities = vim.lsp.protocol.make_client_capabilities()
+      }
+      local spec2 = {
+        capabilities = {
+          workspace = {
+            fileOperations = {
+              didCreate = true,
+              didRename = true,
+              didDelete = true
+            }
+          }
+        }
+      }
+      local maps = cfg.capabilities and {spec2} or {spec1, spec2}
+      local new =
+        vim.tbl_deep_extend("force", cfg or vim.empty_dict(), unpack(maps))
+      return new
     end
   end
 end

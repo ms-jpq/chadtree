@@ -1,8 +1,9 @@
 from json import loads
 from pathlib import Path
 
+from std2.pickle import new_decoder
+
 from chad_types import LSColourSet
-from std2.pickle import decode
 
 from ..run import docker_run
 
@@ -10,6 +11,8 @@ _DOCKERFILE = Path(__file__).resolve().parent / "Dockerfile"
 
 
 def load_ls_colours() -> LSColourSet:
+    decode = new_decoder(LSColourSet)
+
     json = loads(docker_run(_DOCKERFILE))
-    lsc: LSColourSet = decode(LSColourSet, json)
+    lsc: LSColourSet = decode(json)
     return lsc

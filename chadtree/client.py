@@ -1,6 +1,6 @@
 from asyncio.events import AbstractEventLoop
+from concurrent.futures import Executor
 from multiprocessing import cpu_count
-from os import linesep
 from pathlib import Path
 from platform import uname
 from string import Template
@@ -22,7 +22,7 @@ from std2.types import AnyFun
 
 from ._registry import ____
 from .consts import RENDER_RETRIES
-from .registry import autocmd, enqueue_event, event_queue, pool, rpc
+from .registry import autocmd, enqueue_event, event_queue, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
 from .settings.types import Settings
@@ -51,7 +51,8 @@ def _profile(nvim: Nvim, t1: float) -> None:
 
 
 class ChadClient(Client):
-    def __init__(self) -> None:
+    def __init__(self, pool: Executor) -> None:
+        self._pool = pool
         self._handlers: MutableMapping[str, RpcCallable] = {}
         self._state: Optional[State] = None
         self._settings: Optional[Settings] = None
@@ -62,8 +63,8 @@ class ChadClient(Client):
 
     def wait(self, nvim: Nvim) -> int:
         def cont() -> bool:
-            if isinstance(nvim.loop, AbstractEventLoop):
-                nvim.loop.set_default_executor(pool)
+            assert isinstance(nvim.loop, AbstractEventLoop)
+            nvim.loop.set_default_executor(self._pool)
 
             atomic, specs = rpc.drain(nvim.channel_id)
             self._handlers.update(specs)
@@ -84,7 +85,9 @@ class ChadClient(Client):
                 hl = highlight(*self._settings.view.hl_context.groups)
                 (atomic + autocmd.drain() + hl).commit(nvim)
 
-                self._state = initial_state(nvim, settings=self._settings)
+                self._state = initial_state(
+                    nvim, pool=self._pool, settings=self._settings
+                )
                 init_locale(self._settings.lang)
                 return True
 
@@ -107,7 +110,7 @@ class ChadClient(Client):
                 enqueue_event(vc_refresh)
                 enqueue_event(save_session)
 
-        pool.submit(sched)
+        self._pool.submit(sched)
 
         while True:
             msg: RpcMsg = event_queue.get()
