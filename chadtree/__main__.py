@@ -1,5 +1,7 @@
 from argparse import ArgumentParser, Namespace
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 from os import name
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, CalledProcessError, run
@@ -46,7 +48,7 @@ _LOCK_FILE = _RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
 _REQ = REQUIREMENTS.read_text()
 
-_IN_VENV = _EXEC_PATH == _RT_PY
+_IN_VENV = RT_PY.is_file() and RT_PY.samefile(_EXEC_PATH)
 
 
 if command == "deps":
@@ -56,13 +58,14 @@ if command == "deps":
         from venv import EnvBuilder
 
         print("...", flush=True)
-        EnvBuilder(
-            system_site_packages=False,
-            with_pip=True,
-            upgrade=True,
-            symlinks=not is_win,
-            clear=True,
-        ).create(_RT_DIR)
+        with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+            EnvBuilder(
+                system_site_packages=False,
+                with_pip=True,
+                upgrade=True,
+                symlinks=not is_win,
+                clear=True,
+            ).create(_RT_DIR)
     except (ImportError, SystemExit, CalledProcessError):
         msg = "Please install python3-venv separately. (apt, yum, apk, etc)"
         print(msg, file=stderr)
