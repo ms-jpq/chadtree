@@ -1,8 +1,8 @@
 from argparse import ArgumentParser, Namespace
-from os import name
 from concurrent.futures import ThreadPoolExecutor
+from os import name
 from pathlib import Path
-from subprocess import DEVNULL, STDOUT, run
+from subprocess import DEVNULL, STDOUT, CalledProcessError, run
 from sys import executable, exit, stderr, version_info
 from textwrap import dedent
 from typing import Union
@@ -63,8 +63,9 @@ if command == "deps":
             symlinks=not is_win,
             clear=True,
         ).create(_RT_DIR)
-    except (ImportError, SystemExit):
-        print("Please install venv separately.", file=stderr)
+    except (ImportError, SystemExit, CalledProcessError):
+        msg = "Please install python3-venv separately. (apt, yum, apk, etc)"
+        print(msg, file=stderr)
         exit(1)
     else:
         proc = run(
