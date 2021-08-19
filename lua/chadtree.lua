@@ -63,13 +63,13 @@ local main = function(is_xdg)
     cwd ..
     (is_win and [[/.vars/runtime/Scripts/python.exe]] or
       "/.vars/runtime/bin/python3")
-  local win_proxy = cwd .. [[/win.bat]]
   local xdg_dir = vim.api.nvim_call_function("getenv", {"XDG_DATA_HOME"})
 
   if is_win then
     if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
       return {v_py}
     else
+      local win_proxy = cwd .. [[/win.bat]]
       return {win_proxy, py3}
     end
   else
