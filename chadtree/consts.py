@@ -1,7 +1,8 @@
-from os import environ, name
-from pathlib import Path
+from os import name
 
 from chad_types import TOP_LEVEL
+
+IS_WIN = name == "nt"
 
 RENDER_RETRIES = 3
 
@@ -26,16 +27,9 @@ STORAGE
 
 _VARS = TOP_LEVEL / ".vars"
 RT_DIR = _VARS / "runtime"
-RT_PY = (
-    RT_DIR / "Scripts" / "python.exe" if name == "nt" else RT_DIR / "bin" / "python3"
-)
+RT_PY = RT_DIR / "Scripts" / "python.exe" if IS_WIN else RT_DIR / "bin" / "python3"
 SESSION_DIR = _VARS / "sessions"
 
-_XDG_DATA_DIR = Path(environ.get("XDG_DATA_HOME", _VARS))
-_XDG_VARS = _XDG_DATA_DIR / "nvim" / "chadtree"
-RT_DIR_XDG = _XDG_VARS / "runtime"
-RT_PY_XDG = RT_DIR_XDG / "bin" / "python3"
-SESSION_DIR_XDG = _XDG_VARS / "sessions"
 
 """
 Docs

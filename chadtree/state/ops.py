@@ -5,13 +5,13 @@ from typing import Any, Optional
 
 from std2.pickle import new_decoder, new_encoder
 
-from ..consts import FOLDER_MODE, SESSION_DIR, SESSION_DIR_XDG
+from ..consts import FOLDER_MODE
 from .types import Session, State
 
 
-def _session_path(cwd: PurePath, use_xdg: bool) -> Path:
+def _session_path(cwd: PurePath, session_store: Path) -> Path:
     hashed = sha1(str(cwd).encode()).hexdigest()
-    part = (SESSION_DIR_XDG if use_xdg else SESSION_DIR) / hashed
+    part = session_store / hashed
     return part.with_suffix(".json")
 
 
@@ -27,8 +27,8 @@ _DECODER = new_decoder(Session)
 _ENCODER = new_encoder(Session)
 
 
-def load_session(cwd: PurePath, use_xdg: bool) -> Session:
-    load_path = _session_path(cwd, use_xdg=use_xdg)
+def load_session(cwd: PurePath, session_store: Path) -> Session:
+    load_path = _session_path(cwd, session_store=session_store)
     try:
         session: Session = _DECODER(_load_json(load_path))
         return session
@@ -36,13 +36,13 @@ def load_session(cwd: PurePath, use_xdg: bool) -> Session:
         return Session(index=None, show_hidden=None, enable_vc=None)
 
 
-def dump_session(state: State, use_xdg: bool) -> None:
+def dump_session(state: State, session_store: Path) -> None:
     session = Session(
         index=state.index, show_hidden=state.show_hidden, enable_vc=state.enable_vc
     )
     json = _ENCODER(session)
 
-    path = _session_path(state.root.path, use_xdg=use_xdg)
+    path = _session_path(state.root.path, session_store=session_store)
     path.parent.mkdir(mode=FOLDER_MODE, parents=True, exist_ok=True)
     json = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
     path.write_text(json, "UTF-8")

@@ -26,7 +26,7 @@ def save_session(nvim: Nvim, state: State, settings: Settings) -> None:
     Save CHADTree state
     """
 
-    dump_session(state, use_xdg=settings.xdg)
+    dump_session(state, session_store=state.session_store)
 
 
 autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"
@@ -93,4 +93,3 @@ def _update_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
 
 
 autocmd("QuickfixCmdPost") << f"lua {_update_quickfix.name}()"
-

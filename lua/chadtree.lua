@@ -63,7 +63,7 @@ local main = function(is_xdg)
     cwd ..
     (is_win and [[/.vars/runtime/Scripts/python.exe]] or
       "/.vars/runtime/bin/python3")
-  local xdg_dir = vim.api.nvim_call_function("getenv", {"XDG_DATA_HOME"})
+  local xdg_dir = vim.api.nvim_call_function("stdpath", {"data"})
 
   if is_win then
     if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then

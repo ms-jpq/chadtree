@@ -1,6 +1,6 @@
 from concurrent.futures import Executor
 from dataclasses import dataclass
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from typing import AbstractSet, Optional
 
 from ..fs.types import Node
@@ -20,6 +20,7 @@ class FilterPattern:
 @dataclass(frozen=True)
 class State:
     pool: Executor
+    session_store: Path
     current: Optional[PurePath]
     derived: Derived
     enable_vc: bool
