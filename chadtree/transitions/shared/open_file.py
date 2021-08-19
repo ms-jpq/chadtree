@@ -22,7 +22,6 @@ from ...state.next import forward
 from ...state.types import State
 from ..types import ClickType, Stage, State
 from .wm import (
-    escape_file_path,
     find_buffers_with_file,
     find_non_fm_windows_in_tab,
     find_window_with_file_in_tab,
@@ -77,7 +76,7 @@ def _show_file(
             win = cur_win(nvim)
 
             if buf is None:
-                escaped = escape_file_path(path)
+                escaped = nvim.funcs.fnameescape(str(path))
                 nvim.command(f"edit! {escaped}")
             else:
                 win_set_buf(nvim, win=win, buf=buf)
@@ -111,4 +110,3 @@ def open_file(
         return Stage(new_state, focus=path)
     else:
         return None
-
