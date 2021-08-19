@@ -48,9 +48,11 @@ _RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
 _RT_PY = RT_PY_XDG if use_xdg else RT_PY
 _LOCK_FILE = _RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
+_EXEC_PATH = _EXEC_PATH.parent.resolve() / _EXEC_PATH.name
 _REQ = REQUIREMENTS.read_text()
 
 _IN_VENV = RT_PY == _EXEC_PATH
+print(RT_PY, _EXEC_PATH)
 
 
 if command == "deps":
@@ -80,22 +82,6 @@ if command == "deps":
                 "pip",
                 "install",
                 "--upgrade",
-                "pip",
-            ),
-            stdin=DEVNULL,
-            stderr=STDOUT,
-        )
-        if proc.returncode:
-            print("Installation failed, check :message", file=stderr)
-            exit(proc.returncode)
-        proc = run(
-            (
-                _RT_PY,
-                "-m",
-                "pip",
-                "install",
-                "--upgrade",
-                "--force-reinstall",
                 "--requirement",
                 REQUIREMENTS,
             ),
