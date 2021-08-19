@@ -30,10 +30,10 @@ def parse_args() -> Namespace:
 
     s_run = sub_parsers.add_parser("run")
     s_run.add_argument("--socket", required=True)
-    s_run.add_argument("--xdg")
+    s_run.add_argument("--xdg", nargs="?")
 
     s_deps = sub_parsers.add_parser("deps")
-    s_deps.add_argument("--xdg")
+    s_deps.add_argument("--xdg", nargs="?")
 
     return parser.parse_args()
 
@@ -54,8 +54,8 @@ _EXEC_PATH = Path(executable)
 _EXEC_PATH = _EXEC_PATH.parent.resolve() / _EXEC_PATH.name
 _REQ = REQUIREMENTS.read_text()
 
-_IN_VENV = RT_PY == _EXEC_PATH
-print(RT_PY, _EXEC_PATH)
+_IN_VENV = _RT_PY == _EXEC_PATH
+print(_RT_PY, _EXEC_PATH)
 
 
 if command == "deps":

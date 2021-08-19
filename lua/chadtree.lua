@@ -57,13 +57,13 @@ end
 
 local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
 local py3 = go and _py3 or (is_win and "python" or "python3")
+local xdg_dir = vim.api.nvim_call_function("stdpath", {"data"})
 
 local main = function(is_xdg)
   local v_py =
     cwd ..
     (is_win and [[/.vars/runtime/Scripts/python.exe]] or
       "/.vars/runtime/bin/python3")
-  local xdg_dir = vim.api.nvim_call_function("stdpath", {"data"})
 
   if is_win then
     if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
@@ -73,8 +73,7 @@ local main = function(is_xdg)
       return {win_proxy, py3}
     end
   else
-    local v_py_xdg =
-      xdg_dir and (xdg_dir .. "/nvim/chadtree/runtime/bin/python3") or v_py
+    local v_py_xdg = xdg_dir .. "/nvim/chadtree/runtime/bin/python3"
     local v_py = is_xdg and v_py_xdg or v_py
     if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
       return {v_py}
@@ -91,7 +90,7 @@ local start = function(deps, ...)
     deps and py3 or main(is_xdg),
     {"-m", "chadtree"},
     {...},
-    (is_xdg and {"--xdg"} or {})
+    (is_xdg and {"--xdg", xdg_dir} or {})
   }
   local params = {
     cwd = cwd,
