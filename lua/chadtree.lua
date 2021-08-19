@@ -66,6 +66,8 @@ local main = function(is_xdg)
       "/.vars/runtime/bin/python3")
 
   if is_win then
+    local v_py_xdg = xdg_dir .. "/chadrt/Scripts/python"
+    local v_py = is_xdg and v_py_xdg or v_py
     if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
       return {v_py}
     else
@@ -73,7 +75,7 @@ local main = function(is_xdg)
       return {win_proxy, py3}
     end
   else
-    local v_py_xdg = xdg_dir .. "/nvim/chadtree/runtime/bin/python3"
+    local v_py_xdg = xdg_dir .. "/chadrt/bin/python3"
     local v_py = is_xdg and v_py_xdg or v_py
     if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
       return {v_py}
