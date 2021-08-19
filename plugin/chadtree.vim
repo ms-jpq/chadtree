@@ -17,4 +17,4 @@ function CHADon_stderr(_, msg, __)
 endfunction
 
 
-call luaeval('require("chadtree")')
+call luaeval('require("chadtree") and 0')

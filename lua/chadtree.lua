@@ -7,7 +7,7 @@ local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
 local cwd = (function()
   local source = debug.getinfo(2, "S").source
   local file = string.match(source, "^@(.*)")
-  return vim.fn.fnamemodify(file, ":p:h:h")
+  return vim.api.nvim_call_function("fnamemodify", {file, ":p:h:h"})
 end)()
 
 local function defer(timeout, callback)
