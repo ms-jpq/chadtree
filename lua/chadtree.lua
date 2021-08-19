@@ -105,7 +105,7 @@ local start = function(deps, ...)
 end
 
 chad.CHADdeps = function()
-  start(true, "deps")
+  start(true, "deps", "--nvim")
 end
 
 vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.CHADdeps()]]

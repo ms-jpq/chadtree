@@ -33,6 +33,7 @@ def parse_args() -> Namespace:
     s_run.add_argument("--xdg", nargs="?")
 
     s_deps = sub_parsers.add_parser("deps")
+    s_deps.add_argument("--nvim", action="store_true")
     s_deps.add_argument("--xdg", nargs="?")
 
     return parser.parse_args()
@@ -55,10 +56,12 @@ _EXEC_PATH = _EXEC_PATH.parent.resolve() / _EXEC_PATH.name
 _REQ = REQUIREMENTS.read_text()
 
 _IN_VENV = _RT_PY == _EXEC_PATH
-print(_RT_PY, _EXEC_PATH)
 
 
 if command == "deps":
+    if not args.nvim:
+        exit(0)
+
     assert not _IN_VENV
 
     try:
