@@ -1,9 +1,10 @@
 from concurrent.futures import Executor
-from pathlib import PurePath
+from pathlib import Path, PurePath
 
 from pynvim import Nvim
 from pynvim_pp.api import get_cwd
 
+from ..consts import SESSION_DIR
 from ..fs.cartographer import new
 from ..nvim.quickfix import quickfix
 from ..settings.types import Settings
@@ -14,8 +15,15 @@ from .types import Selection, State, VCStatus
 
 def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
     cwd = PurePath(get_cwd(nvim))
+    session_store = (
+        Path(nvim.funcs.stdpath("cache")) / "chad_sessions"
+        if settings.xdg
+        else SESSION_DIR
+    )
 
-    session = load_session(cwd, use_xdg=settings.xdg) if settings.session else None
+    session = (
+        load_session(cwd, session_store=session_store) if settings.session else None
+    )
     index = session.index if session and session.index is not None else {cwd}
 
     show_hidden = (
@@ -51,6 +59,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
 
     state = State(
         pool=pool,
+        session_store=session_store,
         index=index,
         selection=selection,
         filter_pattern=filter_pattern,

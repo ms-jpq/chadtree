@@ -57,6 +57,7 @@ def forward(
 
     new_state = State(
         pool=state.pool,
+        session_store=state.session_store,
         index=new_index,
         selection=new_selection,
         filter_pattern=new_filter_pattern,

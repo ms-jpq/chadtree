@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
-from os import name
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, CalledProcessError, run
 from sys import executable, exit, stderr, version_info
@@ -10,16 +9,18 @@ from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
 
-from .consts import MIGRATION_URI, REQUIREMENTS, RT_DIR, RT_DIR_XDG, RT_PY, RT_PY_XDG
+from .consts import IS_WIN, MIGRATION_URI, REQUIREMENTS, RT_DIR, RT_PY
 
-if version_info < (3, 8, 2):
+try:
+    from typing import Literal
+
+    if version_info < (3, 8, 2):
+        raise ImportError()
+except ImportError:
     msg = "For python < 3.8.2 please install using the branch -- legacy"
     print(msg, end="", file=stderr)
     open_w(MIGRATION_URI)
     exit(1)
-
-
-from typing import Literal
 
 
 def parse_args() -> Namespace:
@@ -29,29 +30,38 @@ def parse_args() -> Namespace:
 
     s_run = sub_parsers.add_parser("run")
     s_run.add_argument("--socket", required=True)
-    s_run.add_argument("--xdg", action="store_true")
+    s_run.add_argument("--xdg")
 
     s_deps = sub_parsers.add_parser("deps")
-    s_deps.add_argument("--xdg", action="store_true")
+    s_deps.add_argument("--nvim", action="store_true")
+    s_deps.add_argument("--xdg", nargs="?")
 
     return parser.parse_args()
 
 
-is_win = name == "nt"
 args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
 
-use_xdg = False if is_win else args.xdg
-_RT_DIR = RT_DIR_XDG if use_xdg else RT_DIR
-_RT_PY = RT_PY_XDG if use_xdg else RT_PY
+_XDG = Path(args.xdg) if args.xdg is not None else None
+
+_RT_DIR = _XDG / "chadrt" if _XDG else RT_DIR
+_RT_PY = (
+    (_RT_DIR / "Scripts" / "python.exe" if IS_WIN else _RT_DIR / "bin" / "python3")
+    if _XDG
+    else RT_PY
+)
 _LOCK_FILE = _RT_DIR / "requirements.lock"
 _EXEC_PATH = Path(executable)
+_EXEC_PATH = _EXEC_PATH.parent.resolve() / _EXEC_PATH.name
 _REQ = REQUIREMENTS.read_text()
 
-_IN_VENV = RT_PY == _EXEC_PATH
+_IN_VENV = _RT_PY == _EXEC_PATH
 
 
 if command == "deps":
+    if not args.nvim:
+        exit(0)
+
     assert not _IN_VENV
 
     try:
@@ -63,7 +73,7 @@ if command == "deps":
                 system_site_packages=False,
                 with_pip=True,
                 upgrade=True,
-                symlinks=not is_win,
+                symlinks=not IS_WIN,
                 clear=True,
             ).create(_RT_DIR)
     except (ImportError, SystemExit, CalledProcessError):
@@ -78,22 +88,6 @@ if command == "deps":
                 "pip",
                 "install",
                 "--upgrade",
-                "pip",
-            ),
-            stdin=DEVNULL,
-            stderr=STDOUT,
-        )
-        if proc.returncode:
-            print("Installation failed, check :message", file=stderr)
-            exit(proc.returncode)
-        proc = run(
-            (
-                _RT_PY,
-                "-m",
-                "pip",
-                "install",
-                "--upgrade",
-                "--force-reinstall",
                 "--requirement",
                 REQUIREMENTS,
             ),
