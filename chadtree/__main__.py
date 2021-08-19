@@ -12,14 +12,16 @@ from webbrowser import open as open_w
 
 from .consts import MIGRATION_URI, REQUIREMENTS, RT_DIR, RT_DIR_XDG, RT_PY, RT_PY_XDG
 
-if version_info < (3, 8, 2):
+try:
+    from typing import Literal
+
+    if version_info < (3, 8, 2):
+        raise ImportError()
+except ImportError:
     msg = "For python < 3.8.2 please install using the branch -- legacy"
     print(msg, end="", file=stderr)
     open_w(MIGRATION_URI)
     exit(1)
-
-
-from typing import Literal
 
 
 def parse_args() -> Namespace:
