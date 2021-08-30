@@ -18,7 +18,7 @@ try:
         raise ImportError()
 except ImportError:
     msg = "For python < 3.8.2 please install using the branch -- legacy"
-    print(msg, end="", file=stderr)
+    print(msg, file=stderr)
     open_w(MIGRATION_URI)
     exit(1)
 
