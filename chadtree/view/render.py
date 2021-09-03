@@ -32,7 +32,7 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
                 if sb is Sortby.is_folder:
                     yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
                 elif sb is Sortby.ext:
-                    yield strxfrm(node.path.suffix),
+                    yield "" if is_dir(node) else strxfrm(node.path.suffix)
                 elif sb is Sortby.file_name:
                     yield strxfrm(node.path.name)
                 else:
@@ -270,4 +270,3 @@ def render(
         path_row_lookup=path_row_lookup,
     )
     return derived
-
