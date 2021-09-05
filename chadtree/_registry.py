@@ -9,6 +9,7 @@ from .transitions import (
     focus,
     help,
     new,
+    noop,
     open_system,
     quit,
     refresh,

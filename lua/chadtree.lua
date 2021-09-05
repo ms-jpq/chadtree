@@ -148,6 +148,8 @@ local set_chad_call = function(cmd)
   end
 end
 
+set_chad_call("CHADnoop")
+
 set_chad_call("CHADopen")
 vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.CHADopen(<f-args>)]]
 
@@ -175,4 +177,5 @@ chad.lsp_ensure_capabilities = function(cfg)
   return new
 end
 
+chad.CHADnoop()
 return chad
