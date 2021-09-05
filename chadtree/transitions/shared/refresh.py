@@ -39,4 +39,3 @@ def refresh(
     )
 
     return Stage(new_state)
-

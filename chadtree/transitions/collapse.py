@@ -38,4 +38,3 @@ def _collapse(
         index = (state.index - paths) | {state.root.path}
         new_state = forward(state, settings=settings, index=index, paths=paths)
         return Stage(new_state, focus=path)
-

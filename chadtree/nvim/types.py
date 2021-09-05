@@ -6,4 +6,3 @@ from typing import Mapping
 @dataclass(frozen=True)
 class QuickFix:
     locations: Mapping[PurePath, int]
-

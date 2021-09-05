@@ -30,4 +30,3 @@ def _select(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> St
     selection = state.selection ^ {node.path for node in nodes}
     new_state = forward(state, settings=settings, selection=selection)
     return Stage(new_state)
-

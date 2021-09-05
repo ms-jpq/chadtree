@@ -2,6 +2,10 @@ from itertools import chain
 from os import environ
 from typing import Mapping, Tuple, TypeVar, Union
 
+from pynvim.api.nvim import Nvim
+from pynvim_pp.highlight import HLgroup
+from std2.types import never
+
 from chad_types import (
     Artifact,
     IconColourSetEnum,
@@ -10,9 +14,6 @@ from chad_types import (
     LSColoursEnum,
     TextColourSetEnum,
 )
-from pynvim.api.nvim import Nvim
-from pynvim_pp.highlight import HLgroup
-from std2.types import never
 
 from ..consts import FM_HL_PREFIX
 from .highlight import gen_hl

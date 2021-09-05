@@ -18,4 +18,3 @@ class ClickType(Enum):
 class Stage:
     state: State
     focus: Optional[PurePath] = None
-

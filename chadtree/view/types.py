@@ -66,4 +66,3 @@ class Derived:
     hashed: Sequence[str]
     node_row_lookup: Sequence[Node]
     path_row_lookup: Mapping[PurePath, int]
-

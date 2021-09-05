@@ -1,5 +1,6 @@
 from collections import Counter
 from itertools import chain
+from pathlib import PurePath
 from typing import Iterator
 
 from pynvim import Nvim
@@ -8,7 +9,6 @@ from pynvim_pp.api import get_cwd
 from ..fs.ops import ancestors
 from .types import QuickFix
 
-from pathlib import PurePath
 
 def quickfix(nvim: Nvim) -> QuickFix:
     cwd = PurePath(get_cwd(nvim))

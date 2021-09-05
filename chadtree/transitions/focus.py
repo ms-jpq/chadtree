@@ -110,4 +110,3 @@ def _change_focus_up(
             indices=set(),
         )
         return Stage(new_state, focus=node.path)
-
