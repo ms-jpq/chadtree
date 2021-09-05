@@ -35,10 +35,9 @@ local err_exit = false
 
 chad.on_exit = function(args)
   local code = unpack(args)
-  local msg = " | CHADTree EXITED - " .. code
   if not (code == 0 or code == 143) then
     err_exit = true
-    vim.api.nvim_err_writeln(msg)
+    vim.api.nvim_err_writeln(" | CHADTree EXITED - " .. code)
   else
     err_exit = false
   end
@@ -52,7 +51,11 @@ end
 
 chad.on_stderr = function(args)
   local msg = unpack(args)
-  vim.api.nvim_err_write(table.concat(msg, linesep))
+  if vim.api.nvim_call_function("has", {"nvim-0.5"}) == 1 then
+    vim.api.nvim_echo({{table.concat(msg, linesep), "ErrorMsg"}}, true, {})
+  else
+    vim.api.nvim_err_write(table.concat(msg, linesep))
+  end
 end
 
 local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
