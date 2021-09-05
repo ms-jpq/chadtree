@@ -1,13 +1,10 @@
-from contextlib import suppress
 from os import chdir
 from os.path import isfile
-from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
 from pynvim.api.common import NvimError
-from pynvim_pp.api import get_cwd, win_close
-from pynvim_pp.float_win import list_floatwins
+from pynvim_pp.api import get_cwd
 
 from ..nvim.quickfix import quickfix
 from ..registry import autocmd, rpc
@@ -33,24 +30,12 @@ autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"
 
 
 @rpc(blocking=False)
-def _kill_float_wins(nvim: Nvim, state: State, settings: Settings) -> None:
-    with suppress(NvimError):
-        wins = tuple(list_floatwins(nvim))
-        if len(wins) != 2:
-            for win in wins:
-                win_close(nvim, win=win)
-
-
-autocmd("WinEnter") << f"lua {_kill_float_wins.name}()"
-
-
-@rpc(blocking=False)
 def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
     Follow cwd update
     """
 
-    cwd = PurePath(get_cwd(nvim))
+    cwd = get_cwd(nvim)
     chdir(cwd)
     new_state = new_root(
         nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
