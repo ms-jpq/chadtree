@@ -25,4 +25,3 @@ def refresh(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> St
     vc_refresh(nvim, state=state, settings=settings)
     with with_manual(nvim):
         return _refresh(nvim, state=state, settings=settings)
-

@@ -7,4 +7,3 @@ from typing import AbstractSet, Mapping
 class VCStatus:
     ignored: AbstractSet[PurePath] = frozenset()
     status: Mapping[PurePath, str] = field(default_factory=dict)
-

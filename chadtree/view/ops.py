@@ -12,4 +12,3 @@ def display_path(path: PurePath, state: State) -> str:
         return f"{name}{sep}"
     else:
         return name
-

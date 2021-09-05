@@ -17,4 +17,3 @@ def schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[St
         return Stage(stage.state, focus=stage.focus)
     except NvimError:
         return None
-

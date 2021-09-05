@@ -28,4 +28,3 @@ def lsp_moved(nvim: Nvim, paths: Mapping[PurePath, PurePath]) -> None:
         )
     }
     _notify(nvim, method="workspace/didRenameFiles", params=params)
-

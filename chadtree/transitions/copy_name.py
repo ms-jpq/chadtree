@@ -50,4 +50,3 @@ def _copy_basename(
     """
 
     _cn(nvim, state=state, is_visual=is_visual, al_qaeda=True)
-

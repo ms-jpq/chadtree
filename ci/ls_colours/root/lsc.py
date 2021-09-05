@@ -17,7 +17,7 @@ _PARSING = {
     _SOLARIZED / "dircolors.ansi-light": "solarized_light",
     _SOLARIZED / "dircolors.ansi-universal": "solarized_universal",
     _NORD / "src" / "dir_colors": "nord",
-    _TRAP_DOOR / "LS_COLORS": "trapdoor"
+    _TRAP_DOOR / "LS_COLORS": "trapdoor",
 }
 
 

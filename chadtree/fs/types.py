@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
-from typing import AbstractSet, Mapping, Optional, Sequence
 from pathlib import PurePath
+from typing import AbstractSet, Mapping, Optional, Sequence
 
 
 class Mode(IntEnum):
