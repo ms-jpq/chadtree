@@ -1,6 +1,7 @@
 from contextlib import nullcontext
 from itertools import chain
 from mimetypes import guess_type
+from os.path import normcase
 from pathlib import PurePath
 from typing import Optional
 
@@ -76,7 +77,7 @@ def _show_file(
             win = cur_win(nvim)
 
             if buf is None:
-                escaped = nvim.funcs.fnameescape(str(path))
+                escaped = nvim.funcs.fnameescape(normcase(path))
                 nvim.command(f"edit! {escaped}")
             else:
                 win_set_buf(nvim, win=win, buf=buf)
