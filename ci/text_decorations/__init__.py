@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Mapping, Tuple
 
 from std2.coloursys import hex_inverse
+from std2.graphlib import merge
 from std2.pickle import new_decoder
-from std2.tree import merge
 from yaml import safe_load
 
 from chad_types import ASSETS, Hex, IconGlyphs, IconGlyphSet, TextColours, TextColourSet
@@ -60,20 +60,20 @@ def _make_lightmode(colours: TextColours) -> TextColours:
 
 
 def load_text_decors() -> Tuple[IconGlyphSet, TextColourSet]:
-    i_decode = new_decoder(IconGlyphSet, strict=False)
-    c_decode = new_decoder(TextColourSet, strict=False)
+    i_decode = new_decoder[IconGlyphSet](IconGlyphSet, strict=False)
+    c_decode = new_decoder[TextColourSet](TextColourSet, strict=False)
 
     yaml = safe_load(_ICON_BASE.read_text("UTF-8"))
     json = loads(docker_run(_DOCKERFILE))
     data = merge(json, yaml)
-    icon_spec: IconGlyphSet = i_decode(data)
+    icon_spec = i_decode(data)
 
     icon_set = IconGlyphSet(
         ascii=_process_icons(icon_spec.ascii),
         devicons=_process_icons(icon_spec.devicons),
         emoji=_process_icons(icon_spec.emoji),
     )
-    colour_spec: TextColourSet = c_decode(data)
+    colour_spec = c_decode(data)
     colour_set = TextColourSet(
         nerdtree_syntax_light=_make_lightmode(
             _process_colours(colour_spec.nerdtree_syntax_light)

@@ -23,8 +23,8 @@ def _load_json(path: Path) -> Optional[Any]:
         return None
 
 
-_DECODER = new_decoder(Session)
-_ENCODER = new_encoder(Session)
+_DECODER = new_decoder[Session](Session)
+_ENCODER = new_encoder[Session](Session)
 
 
 def load_session(cwd: PurePath, session_store: Path) -> Session:

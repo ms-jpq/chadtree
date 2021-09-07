@@ -23,7 +23,7 @@ class UnrecoverableError(Exception):
     ...
 
 
-_DECODER = new_decoder(Sequence[str])
+_DECODER = new_decoder[Sequence[str]](Sequence[str])
 
 
 def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:

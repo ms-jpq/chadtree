@@ -1,3 +1,4 @@
+from os.path import normcase
 from pathlib import Path, PurePath
 from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
 
@@ -184,7 +185,7 @@ def kill_buffers(
                 p.touch()
                 with hold_win_pos(nvim):
                     set_cur_win(nvim, win=win)
-                    escaped = nvim.funcs.fnameescape(str(new_path))
+                    escaped = nvim.funcs.fnameescape(normcase(new_path))
                     nvim.command(f"edit! {escaped}")
                     p.unlink(missing_ok=True)
             buf_close(nvim, buf=buf)
