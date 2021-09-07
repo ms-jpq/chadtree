@@ -1,7 +1,7 @@
 from json import dump
 
+from std2.graphlib import recur_sort
 from std2.pickle.encoder import new_encoder
-from std2.tree import recur_sort
 
 from chad_types import ARTIFACT, Artifact
 
@@ -11,7 +11,7 @@ from .text_decorations import load_text_decors
 
 
 def main() -> None:
-    encode = new_encoder(Artifact)
+    encode = new_encoder[Artifact](Artifact)
     ls_colours = load_ls_colours()
     icon_colours = load_icon_colours()
     icons, text_colours = load_text_decors()

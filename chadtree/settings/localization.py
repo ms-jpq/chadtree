@@ -32,7 +32,7 @@ LANG = _Lang({})
 
 
 def init(code: Optional[str]) -> None:
-    decode = new_decoder(Mapping[str, str])
+    decode = new_decoder[Mapping[str, str]](Mapping[str, str])
 
     lang = _get_lang(code, fallback=DEFAULT_LANG)
     lang_path = (LANG_ROOT / lang).with_suffix(".yml")
@@ -42,5 +42,5 @@ def init(code: Optional[str]) -> None:
         else (LANG_ROOT / DEFAULT_LANG).with_suffix(".yml")
     )
 
-    specs: Mapping[str, str] = decode(safe_load(yml_path.read_text("UTF-8")))
+    specs = decode(safe_load(yml_path.read_text("UTF-8")))
     LANG._specs.update(specs)

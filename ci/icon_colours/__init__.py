@@ -32,10 +32,10 @@ def _fetch(uri: str) -> str:
 
 
 def load_icon_colours() -> IconColourSet:
-    decode = new_decoder(_GithubSpec, strict=False)
+    decode = new_decoder[_GithubSpec](_GithubSpec, strict=False)
 
     raw = _fetch(_LINGUIST)
-    yaml: _GithubSpec = decode(safe_load(raw))
+    yaml = decode(safe_load(raw))
     github: IconColours = {
         ext: spec.color
         for spec in yaml.values()

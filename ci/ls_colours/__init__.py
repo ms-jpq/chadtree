@@ -11,8 +11,8 @@ _DOCKERFILE = Path(__file__).resolve().parent / "Dockerfile"
 
 
 def load_ls_colours() -> LSColourSet:
-    decode = new_decoder(LSColourSet)
+    decode = new_decoder[LSColourSet](LSColourSet)
 
     json = loads(docker_run(_DOCKERFILE))
-    lsc: LSColourSet = decode(json)
+    lsc = decode(json)
     return lsc
