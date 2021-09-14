@@ -25,6 +25,7 @@ from pynvim_pp.keymap import Keymap
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
+from ...registry import NAMESPACE
 from ...settings.types import Settings
 
 
@@ -122,11 +123,11 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
         for mapping in mappings:
             (
                 km.n(mapping, noremap=True, silent=True, nowait=True)
-                << f"<cmd>lua {function}(false)<cr>"
+                << f"<cmd>lua {NAMESPACE}.{function}(false)<cr>"
             )
             (
                 km.v(mapping, noremap=True, silent=True, nowait=True)
-                << f"<esc><cmd>lua {function}(true)<cr>"
+                << rf"<c-\><c-n><cmd>lua {NAMESPACE}.{function}(true)<cr>"
             )
 
     km.drain(buf=buf).commit(nvim)
