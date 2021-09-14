@@ -114,7 +114,7 @@ class ChadClient(Client):
 
         while True:
             msg: RpcMsg = event_queue.get()
-            name, (args, *_) = msg
+            name, args = msg
             handler = cast(
                 AnyFun[Optional[Stage]], self._handlers.get(name, nil_handler(name))
             )
