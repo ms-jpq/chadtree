@@ -178,5 +178,5 @@ chad.lsp_ensure_capabilities = function(cfg)
   return new
 end
 
-chad.CHADnoop()
+chad.Noop()
 return chad
