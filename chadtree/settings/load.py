@@ -21,6 +21,7 @@ from chad_types import (
 )
 
 from ..consts import CONFIG_YML, SETTINGS_VAR
+from ..registry import NAMESPACE
 from ..view.load import load_theme
 from ..view.types import HLGroups, Sortby
 from .types import Ignored, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
@@ -73,10 +74,6 @@ class _UserConfig:
     profiling: bool
 
 
-def _key_sort(keys: AbstractSet[str]) -> Sequence[str]:
-    return sorted((key[len("CHAD") :] for key in keys), key=strxfrm)
-
-
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     a_decode, c_decode = new_decoder[Artifact](Artifact), new_decoder[_UserConfig](
         _UserConfig
@@ -115,37 +112,38 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         time_fmt=view.time_format,
     )
 
-    keymap = {f"CHAD{k}": v for k, v in config.keymap.items()}
-    legal_keys = {name for name, _ in specs}
+    keymap = {f"{NAMESPACE}.{k.capitalize()}": v for k, v in config.keymap.items()}
+    legal_keys = {f"{NAMESPACE}.{name.capitalize()}" for name, _ in specs}
     extra_keys = keymap.keys() - legal_keys
 
     if extra_keys:
         raise DecodeError(
-            path=(_UserOptions, _key_sort(legal_keys)),
+            path=(_UserOptions, sorted(legal_keys, key=strxfrm)),
             actual=None,
             missing_keys=(),
-            extra_keys=_key_sort(extra_keys),
+            extra_keys=sorted(extra_keys, key=strxfrm),
         )
 
-    settings = Settings(
-        close_on_open=options.close_on_open,
-        follow=options.follow,
-        ignores=config.ignore,
-        keymap=keymap,
-        lang=options.lang,
-        mime=options.mimetypes,
-        open_left=view.open_direction is _OpenDirection.left,
-        page_increment=options.page_increment,
-        polling_rate=float(options.polling_rate),
-        session=options.session,
-        show_hidden=options.show_hidden,
-        version_ctl=options.version_control,
-        view=view_opts,
-        width=view.width,
-        win_actual_opts=win_actual_opts,
-        win_local_opts=view.window_options,
-        xdg=config.xdg,
-        profiling=config.profiling,
-    )
+    else:
+        settings = Settings(
+            close_on_open=options.close_on_open,
+            follow=options.follow,
+            ignores=config.ignore,
+            keymap=keymap,
+            lang=options.lang,
+            mime=options.mimetypes,
+            open_left=view.open_direction is _OpenDirection.left,
+            page_increment=options.page_increment,
+            polling_rate=float(options.polling_rate),
+            session=options.session,
+            show_hidden=options.show_hidden,
+            version_ctl=options.version_control,
+            view=view_opts,
+            width=view.width,
+            win_actual_opts=win_actual_opts,
+            win_local_opts=view.window_options,
+            xdg=config.xdg,
+            profiling=config.profiling,
+        )
 
-    return settings
+        return settings

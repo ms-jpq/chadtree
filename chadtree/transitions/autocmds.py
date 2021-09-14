@@ -7,7 +7,7 @@ from pynvim.api.common import NvimError
 from pynvim_pp.api import get_cwd
 
 from ..nvim.quickfix import quickfix
-from ..registry import autocmd, rpc
+from ..registry import NAMESPACE, autocmd, rpc
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.ops import dump_session
@@ -26,7 +26,7 @@ def save_session(nvim: Nvim, state: State, settings: Settings) -> None:
     dump_session(state, session_store=state.session_store)
 
 
-autocmd("FocusLost", "ExitPre") << f"lua {save_session.name}()"
+autocmd("FocusLost", "ExitPre") << f"lua {NAMESPACE}.{save_session.name}()"
 
 
 @rpc(blocking=False)
@@ -43,7 +43,7 @@ def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
-autocmd("DirChanged") << f"lua {_changedir.name}()"
+autocmd("DirChanged") << f"lua {NAMESPACE}.{_changedir.name}()"
 
 
 @rpc(blocking=False)
@@ -63,7 +63,7 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
         return None
 
 
-autocmd("BufEnter") << f"lua {_update_follow.name}()"
+autocmd("BufEnter") << f"lua {NAMESPACE}.{_update_follow.name}()"
 
 
 @rpc(blocking=False)
@@ -77,4 +77,4 @@ def _update_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
     return Stage(new_state)
 
 
-autocmd("QuickfixCmdPost") << f"lua {_update_quickfix.name}()"
+autocmd("QuickfixCmdPost") << f"lua {NAMESPACE}.{_update_quickfix.name}()"

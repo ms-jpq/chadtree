@@ -1,3 +1,4 @@
+CHAD = CHAD or {}
 chad = chad or {}
 
 local linesep = "\n"
@@ -107,11 +108,11 @@ local start = function(deps, ...)
   return job_id
 end
 
-chad.CHADdeps = function()
+chad.Deps = function()
   start(true, "deps", "--nvim")
 end
 
-vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.CHADdeps()]]
+vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.Deps()]]
 
 local set_chad_call = function(cmd)
   local t1 = 0
@@ -126,8 +127,8 @@ local set_chad_call = function(cmd)
       job_id = start(false, "run", "--socket", server)
     end
 
-    if not err_exit and _G[cmd] then
-      _G[cmd](args)
+    if not err_exit and CHAD[cmd] then
+      CHAD[cmd](args)
       t2 = vim.loop.now()
       if settings().profiling and t1 >= 0 then
         print("Init       " .. (t2 - t1) .. "ms")
@@ -148,13 +149,13 @@ local set_chad_call = function(cmd)
   end
 end
 
-set_chad_call("CHADnoop")
+set_chad_call("Noop")
 
-set_chad_call("CHADopen")
-vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.CHADopen(<f-args>)]]
+set_chad_call("Open")
+vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.Open(<f-args>)]]
 
-set_chad_call("CHADhelp")
-vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.CHADhelp(<f-args>)]]
+set_chad_call("Help")
+vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.Help(<f-args>)]]
 
 chad.lsp_ensure_capabilities = function(cfg)
   local spec1 = {
