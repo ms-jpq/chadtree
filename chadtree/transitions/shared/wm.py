@@ -116,8 +116,8 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
     buf_set_option(nvim, buf=buf, key="undolevels", val=-1)
 
     km = Keymap()
-    km.n("{") << f"{settings.page_increment}<up>"
-    km.n("}") << f"{settings.page_increment}<down>"
+    km.n("{") << f"{settings.page_increment}g<up>"
+    km.n("}") << f"{settings.page_increment}g<down>"
     for function, mappings in settings.keymap.items():
         for mapping in mappings:
             (
