@@ -1,3 +1,4 @@
+from os.path import normcase
 from pathlib import PurePath
 from typing import Optional
 
@@ -64,7 +65,7 @@ def _change_dir(
         new_state = new_root(
             nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
         )
-        focus = new_state.root.path
+        focus = nvim.funcs.fnameescape(normcase(new_state.root.path))
         nvim.command(f"chdir {focus}")
         write(nvim, LANG("new cwd", cwd=str(focus)))
         return Stage(new_state, focus=focus)
