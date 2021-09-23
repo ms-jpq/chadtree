@@ -1,4 +1,3 @@
-from os import chdir
 from os.path import isfile
 from typing import Optional
 
@@ -36,7 +35,6 @@ def _changedir(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
 
     cwd = get_cwd(nvim)
-    chdir(cwd)
     new_state = new_root(
         nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
     )
