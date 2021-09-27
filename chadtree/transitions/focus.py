@@ -3,7 +3,7 @@ from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.api import get_cwd
+from pynvim_pp.api import get_cwd, chdir
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir
@@ -65,10 +65,9 @@ def _change_dir(
         new_state = new_root(
             nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
         )
-        focus = nvim.funcs.fnameescape(normcase(new_state.root.path))
-        nvim.command(f"chdir {focus}")
-        write(nvim, LANG("new cwd", cwd=str(focus)))
-        return Stage(new_state, focus=focus)
+        chdir(nvim, path=new_state.root.path)
+        write(nvim, LANG("new cwd", cwd=normcase(new_state.root.path)))
+        return Stage(new_state, focus=new_state.root.path)
 
 
 @rpc(blocking=False)
