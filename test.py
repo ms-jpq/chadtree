@@ -5,12 +5,15 @@ from std2.pickle import new_decoder
 from std2.urllib import urlopen
 from yaml import safe_load
 
-from ...chad_types import Hex, IconColours, IconColourSet
+from chad_types import Hex, IconColours, IconColourSet
 
 _LINGUIST = """
 https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
 """
 
+_NONE = """
+
+"""
 
 @dataclass(frozen=True)
 class _GithubColours:
@@ -43,8 +46,15 @@ def load_icon_colours() -> IconColourSet:
         if spec.color
     }
     none: IconColours = {
-
+        ext: spec.color
+        for spec in
+        for ext in spec.extensions
+        if spec.color
     }
-    coloursGH = IconColourSet(github=github)
-    coloursNone = IconColourSet(none=none)
-    return [coloursGH, coloursNone]
+    colours = IconColourSet(github=github, none=none)
+    return colours
+    #coloursNone = IconColourSet(none=none)
+
+coloursGH = load_icon_colours()
+print(coloursGH)
+#print([coloursGH, coloursNone])
