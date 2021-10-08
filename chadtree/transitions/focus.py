@@ -3,7 +3,7 @@ from pathlib import PurePath
 from typing import Optional
 
 from pynvim import Nvim
-from pynvim_pp.api import get_cwd, chdir
+from pynvim_pp.api import chdir, get_cwd
 from pynvim_pp.lib import write
 
 from ..fs.cartographer import is_dir

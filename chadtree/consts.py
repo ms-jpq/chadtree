@@ -2,6 +2,8 @@ from os import name
 
 from chad_types import TOP_LEVEL
 
+GIL_SWITCH = 0.001
+
 IS_WIN = name == "nt"
 
 RENDER_RETRIES = 3
