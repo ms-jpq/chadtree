@@ -73,10 +73,12 @@ IconColours = Mapping[str, Hex]
 @dataclass(frozen=True)
 class IconColourSet:
     github: IconColours
+    none: IconColours
 
 
 class IconColourSetEnum(Enum):
     github = auto()
+    none = auto()
 
 
 """
