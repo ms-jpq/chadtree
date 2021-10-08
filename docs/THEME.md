@@ -129,7 +129,7 @@ You may also disable colouring if you wish.
 
 ```json
 [
-  "github"
+  "github",
   "none"
 ]
 ```
