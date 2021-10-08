@@ -4,12 +4,21 @@ from contextlib import nullcontext, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, CalledProcessError, run
-from sys import executable, exit, stderr, version_info
+from sys import (
+    executable,
+    exit,
+    getswitchinterval,
+    setswitchinterval,
+    stderr,
+    version_info,
+)
 from textwrap import dedent
 from typing import Union
 from webbrowser import open as open_w
 
-from .consts import IS_WIN, MIGRATION_URI, REQUIREMENTS, RT_DIR, RT_PY
+from .consts import GIL_SWITCH, IS_WIN, MIGRATION_URI, REQUIREMENTS, RT_DIR, RT_PY
+
+setswitchinterval(min(getswitchinterval(), GIL_SWITCH))
 
 try:
     from typing import Literal
