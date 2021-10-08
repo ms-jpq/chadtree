@@ -2,7 +2,7 @@ from os import name
 
 from chad_types import TOP_LEVEL
 
-GIL_SWITCH = 0.001
+GIL_SWITCH = 1 / 1000
 
 IS_WIN = name == "nt"
 
