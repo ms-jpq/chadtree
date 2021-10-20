@@ -95,7 +95,6 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     }
 
     icons, hl_context = load_theme(
-        nvim,
         artifact=artifacts,
         particular_mappings=theme.highlights,
         discrete_colours=theme.discrete_colour_map,

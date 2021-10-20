@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Mapping, Optional, Sequence
 
-from std2.pickle import new_decoder
+from std2.pickle.decoder import new_decoder
 from std2.urllib import urlopen
 from yaml import safe_load
 
@@ -11,9 +11,6 @@ _LINGUIST = """
 https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
 """
 
-_NONE = """
-https://raw.githubusercontent.com/satyrnsstuff/chadtree/chad/ci/icon_colours/none.yml
-"""
 
 @dataclass(frozen=True)
 class _GithubColours:
@@ -39,19 +36,12 @@ def load_icon_colours() -> IconColourSet:
 
     rawGH = _fetch(_LINGUIST)
     yamlGH = decode(safe_load(rawGH))
-    rawNone = _fetch(_NONE)
-    yamlNone = decode(safe_load(rawNone))
+
     github: IconColours = {
         ext: spec.color
         for spec in yamlGH.values()
         for ext in spec.extensions
         if spec.color
     }
-    none: IconColours = {
-        ext: spec.color
-        for spec in yamlNone.values()
-        for ext in spec.extensions
-        if spec.color
-    }
-    colours = IconColourSet(github=github, none=none)
+    colours = IconColourSet(github=github)
     return colours
