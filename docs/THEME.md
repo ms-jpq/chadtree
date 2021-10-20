@@ -119,7 +119,7 @@ If you are not happy with that, you can choose one of the many others:
 
 Right now you all the file icons are coloured according to [Github colours](https://github.com/github/linguist).
 
-There is no other options for the time being.
+You may also disable colouring if you wish.
 
 **github:**
 
@@ -128,7 +128,10 @@ There is no other options for the time being.
 **legal keys: one of**
 
 ```json
-["github"]
+[
+  "github",
+  "none"
+]
 ```
 
 **default:**

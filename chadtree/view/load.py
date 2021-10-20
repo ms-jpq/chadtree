@@ -87,7 +87,10 @@ def load_theme(
         name_exact = gen_hl(FM_HL_PREFIX, mapping=text_colour.name_exact)
         name_glob = gen_hl(FM_HL_PREFIX, mapping=text_colour.name_glob)
 
-    icon_exts = gen_hl(FM_HL_PREFIX, mapping=artifact.icon_colours.github)
+    if icon_colour_set is IconColourSetEnum.github:
+        icon_exts = gen_hl(FM_HL_PREFIX, mapping=artifact.icon_colours.github)
+    else:
+        icon_exts = gen_hl(FM_HL_PREFIX, mapping=artifact.icon_colours.none)
 
     groups = tuple(
         chain(

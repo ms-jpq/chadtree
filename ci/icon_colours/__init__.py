@@ -11,6 +11,9 @@ _LINGUIST = """
 https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml
 """
 
+_NONE = """
+https://raw.githubusercontent.com/satyrnsstuff/chadtree/chad/ci/icon_colours/none.yml
+"""
 
 @dataclass(frozen=True)
 class _GithubColours:
@@ -34,13 +37,21 @@ def _fetch(uri: str) -> str:
 def load_icon_colours() -> IconColourSet:
     decode = new_decoder[_GithubSpec](_GithubSpec, strict=False)
 
-    raw = _fetch(_LINGUIST)
-    yaml = decode(safe_load(raw))
+    rawGH = _fetch(_LINGUIST)
+    yamlGH = decode(safe_load(rawGH))
+    rawNone = _fetch(_NONE)
+    yamlNone = decode(safe_load(rawNone))
     github: IconColours = {
         ext: spec.color
-        for spec in yaml.values()
+        for spec in yamlGH.values()
         for ext in spec.extensions
         if spec.color
     }
-    colours = IconColourSet(github=github)
+    none: IconColours = {
+        ext: spec.color
+        for spec in yamlNone.values()
+        for ext in spec.extensions
+        if spec.color
+    }
+    colours = IconColourSet(github=github, none=none)
     return colours
