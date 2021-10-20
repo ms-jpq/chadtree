@@ -2,7 +2,6 @@ from itertools import chain
 from os import environ
 from typing import Mapping, Tuple, TypeVar, Union
 
-from pynvim.api.nvim import Nvim
 from pynvim_pp.highlight import HLgroup
 from std2.types import never
 
@@ -28,7 +27,6 @@ def _trans(mapping: Mapping[T, HLgroup]) -> Mapping[T, str]:
 
 
 def load_theme(
-    nvim: Nvim,
     artifact: Artifact,
     particular_mappings: HLGroups,
     discrete_colours: Mapping[str, str],
@@ -87,7 +85,12 @@ def load_theme(
         name_exact = gen_hl(FM_HL_PREFIX, mapping=text_colour.name_exact)
         name_glob = gen_hl(FM_HL_PREFIX, mapping=text_colour.name_glob)
 
-    icon_exts = gen_hl(FM_HL_PREFIX, mapping=artifact.icon_colours.github)
+    if icon_colour_set is IconColourSetEnum.github:
+        icon_exts = gen_hl(FM_HL_PREFIX, mapping=artifact.icon_colours.github)
+    elif icon_colour_set is IconColourSetEnum.none:
+        icon_exts = gen_hl(FM_HL_PREFIX, mapping={})
+    else:
+        never(icon_colour_set)
 
     groups = tuple(
         chain(

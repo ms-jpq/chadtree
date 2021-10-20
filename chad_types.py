@@ -77,6 +77,7 @@ class IconColourSet:
 
 class IconColourSetEnum(Enum):
     github = auto()
+    none = auto()
 
 
 """
