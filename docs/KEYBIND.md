@@ -349,7 +349,7 @@ Toggle `follow` on and off. See `chadtree_settings.options.follow` for details.
 **default:**
 
 ```json
-[]
+["u"]
 ```
 
 ##### `chadtree_settings.keymap.toggle_version_control`

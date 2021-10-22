@@ -68,7 +68,8 @@ keymap:
   tertiary:
     - <m-enter>
     - <middlemouse>
-  toggle_follow: []
+  toggle_follow:
+    - u
   toggle_hidden:
     - .
   toggle_version_control: []
