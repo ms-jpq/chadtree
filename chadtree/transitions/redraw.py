@@ -9,7 +9,8 @@ from pynvim_pp.api import buf_get_var, buf_line_count, cur_win, win_get_cursor
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.operators import operator_marks
 from std2.difflib import trans_inplace
-from std2.pickle import DecodeError, new_decoder
+from std2.pickle.decoder import new_decoder
+from std2.pickle.types import DecodeError
 
 from ..consts import FM_NAMESPACE
 from ..state.types import State
