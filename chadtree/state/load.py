@@ -6,7 +6,7 @@ from pynvim_pp.api import get_cwd
 
 from ..consts import SESSION_DIR
 from ..fs.cartographer import new
-from ..nvim.quickfix import quickfix
+from ..nvim.markers import markers
 from ..settings.types import Settings
 from ..view.render import render
 from .ops import load_session
@@ -39,7 +39,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
 
     selection: Selection = set()
     node = new(pool, root=cwd, index=index)
-    qf = quickfix(nvim)
+    mks = markers(nvim)
     vc = VCStatus()
 
     current = None
@@ -51,7 +51,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
         index=index,
         selection=selection,
         filter_pattern=filter_pattern,
-        qf=qf,
+        markers=mks,
         vc=vc,
         show_hidden=show_hidden,
         current=current,
@@ -68,7 +68,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
         enable_vc=enable_vc,
         width=settings.width,
         root=node,
-        qf=qf,
+        qf=mks,
         vc=vc,
         current=current,
         derived=derived,

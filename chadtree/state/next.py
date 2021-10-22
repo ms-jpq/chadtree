@@ -7,7 +7,7 @@ from ..fs.cartographer import update
 from ..fs.types import Node
 from ..settings.types import Settings
 from ..view.render import render
-from .types import FilterPattern, Index, QuickFix, Selection, State, VCStatus
+from .types import FilterPattern, Index, Markers, Selection, State, VCStatus
 
 
 def forward(
@@ -22,7 +22,7 @@ def forward(
     follow: Union[bool, VoidType] = Void,
     enable_vc: Union[bool, VoidType] = Void,
     width: Union[int, VoidType] = Void,
-    qf: Union[QuickFix, VoidType] = Void,
+    markers: Union[Markers, VoidType] = Void,
     vc: Union[VCStatus, VoidType] = Void,
     current: Union[PurePath, VoidType] = Void,
     paths: Union[AbstractSet[PurePath], VoidType] = Void,
@@ -40,7 +40,7 @@ def forward(
             else state.root
         ),
     )
-    new_qf = or_else(qf, state.qf)
+    new_qf = or_else(markers, state.qf)
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
     derived = render(
@@ -49,7 +49,7 @@ def forward(
         index=new_index,
         selection=new_selection,
         filter_pattern=new_filter_pattern,
-        qf=new_qf,
+        markers=new_qf,
         vc=new_vc,
         show_hidden=new_hidden,
         current=new_current,

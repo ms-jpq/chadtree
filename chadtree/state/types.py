@@ -4,7 +4,7 @@ from pathlib import Path, PurePath
 from typing import AbstractSet, Optional
 
 from ..fs.types import Node
-from ..nvim.types import QuickFix
+from ..nvim.types import Markers
 from ..version_ctl.types import VCStatus
 from ..view.types import Derived
 
@@ -27,7 +27,7 @@ class State:
     filter_pattern: Optional[FilterPattern]
     follow: bool
     index: Index
-    qf: QuickFix
+    qf: Markers
     root: Node
     selection: Selection
     show_hidden: bool

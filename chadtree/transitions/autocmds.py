@@ -5,7 +5,7 @@ from pynvim import Nvim
 from pynvim.api.common import NvimError
 from pynvim_pp.api import get_cwd
 
-from ..nvim.quickfix import quickfix
+from ..nvim.markers import markers
 from ..registry import NAMESPACE, autocmd, rpc
 from ..settings.types import Settings
 from ..state.next import forward
@@ -65,14 +65,14 @@ autocmd("BufEnter") << f"lua {NAMESPACE}.{_update_follow.name}()"
 
 
 @rpc(blocking=False)
-def _update_quickfix(nvim: Nvim, state: State, settings: Settings) -> Stage:
+def _update_markers(nvim: Nvim, state: State, settings: Settings) -> Stage:
     """
-    Update quickfix list
+    Update markers
     """
 
-    qf = quickfix(nvim)
-    new_state = forward(state, settings=settings, qf=qf)
+    mks = markers(nvim)
+    new_state = forward(state, settings=settings, markers=mks)
     return Stage(new_state)
 
 
-autocmd("QuickfixCmdPost") << f"lua {NAMESPACE}.{_update_quickfix.name}()"
+autocmd("QuickfixCmdPost") << f"lua {NAMESPACE}.{_update_markers.name}()"

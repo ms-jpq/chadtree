@@ -11,7 +11,7 @@ from std2.types import never
 from ..fs.cartographer import is_dir, user_ignored
 from ..fs.types import Mode, Node
 from ..settings.types import Settings
-from ..state.types import FilterPattern, Index, QuickFix, Selection
+from ..state.types import FilterPattern, Index, Markers, Selection
 from ..version_ctl.types import VCStatus
 from .types import Badge, Derived, Highlight, Sortby
 
@@ -55,7 +55,7 @@ def _paint(
     settings: Settings,
     index: Index,
     selection: Selection,
-    qf: QuickFix,
+    qf: Markers,
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[PurePath],
@@ -160,7 +160,7 @@ def _paint(
             yield icons.link.normal
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
-        qf_count = qf.locations[path]
+        qf_count = qf.quick_fix[path]
         stat = vc.status.get(path)
         if qf_count:
             yield Badge(text=f"({qf_count})", group=particular_mappings.quickfix)
@@ -215,7 +215,7 @@ def render(
     index: Index,
     selection: Selection,
     filter_pattern: Optional[FilterPattern],
-    qf: QuickFix,
+    markers: Markers,
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[PurePath],
@@ -224,7 +224,7 @@ def render(
         settings,
         index=index,
         selection=selection,
-        qf=qf,
+        qf=markers,
         vc=vc,
         show_hidden=show_hidden,
         current=current,
