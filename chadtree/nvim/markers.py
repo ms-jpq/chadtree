@@ -16,7 +16,11 @@ from .types import Markers
 def _bookmarks(nvim: Nvim) -> AbstractSet[PurePath]:
     upper = {*ascii_uppercase}
     cwd = get_cwd(nvim)
-    marks = nvim.funcs.getmarklist()
+
+    if nvim.funcs.has("nvim-0.5"):
+        marks = nvim.funcs.getmarklist()
+    else:
+        marks = ()
 
     def it() -> Iterator[PurePath]:
         for mark in marks:
