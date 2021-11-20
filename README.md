@@ -90,7 +90,7 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 ## Install
 
-**Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`
+**Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`, make sure to have `virtualenv` installed (e.g.: `sudo apt install --yes -- python3-venv`)
 
 Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
 
