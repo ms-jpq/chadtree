@@ -210,6 +210,16 @@ Copy names of files under cursor or visual block.
 ["Y"]
 ```
 
+##### `chadtree_settings.keymap.copy_relname`
+
+Copy relative paths of files under cursor or visual block.
+
+**default:**
+
+```json
+["<c-y>"]
+```
+
 ---
 
 ## Filtering
@@ -361,4 +371,3 @@ Toggle version control integration on and off
 ```json
 []
 ```
-

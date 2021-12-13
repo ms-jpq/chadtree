@@ -1,6 +1,8 @@
 from locale import strxfrm
 from os import linesep
-from typing import Iterator
+from os.path import normcase
+from pathlib import PurePath
+from typing import Callable, Iterator
 
 from pynvim import Nvim
 from pynvim_pp.lib import write
@@ -12,16 +14,18 @@ from ..state.types import State
 from .shared.index import indices
 
 
-def _cn(nvim: Nvim, state: State, is_visual: bool, al_qaeda: bool) -> None:
+def _cn(
+    nvim: Nvim, state: State, is_visual: bool, proc: Callable[[PurePath], str]
+) -> None:
     def gen_paths() -> Iterator[str]:
         selection = state.selection
         if not selection:
             nodes = indices(nvim, state=state, is_visual=is_visual)
             for node in nodes:
-                yield node.path.name if al_qaeda else str(node.path)
+                yield proc(node.path)
         else:
             for path in selection:
-                yield path.name if al_qaeda else str(path)
+                yield proc(path)
 
     paths = sorted(gen_paths(), key=strxfrm)
     clip = linesep.join(paths)
@@ -38,7 +42,12 @@ def _copy_name(nvim: Nvim, state: State, settings: Settings, is_visual: bool) ->
     Copy dirname / filename
     """
 
-    _cn(nvim, state=state, is_visual=is_visual, al_qaeda=False)
+    _cn(
+        nvim,
+        state=state,
+        is_visual=is_visual,
+        proc=lambda p: normcase(p.name),
+    )
 
 
 @rpc(blocking=False)
@@ -49,4 +58,25 @@ def _copy_basename(
     Copy basename of dirname / filename
     """
 
-    _cn(nvim, state=state, is_visual=is_visual, al_qaeda=True)
+    _cn(
+        nvim,
+        state=state,
+        is_visual=is_visual,
+        proc=normcase,
+    )
+
+
+@rpc(blocking=False)
+def _copy_relname(
+    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+) -> None:
+    """
+    Copy relname of dirname / filename
+    """
+
+    _cn(
+        nvim,
+        state=state,
+        is_visual=is_visual,
+        proc=lambda p: normcase(p.relative_to(state.root.path)),
+    )

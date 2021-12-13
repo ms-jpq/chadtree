@@ -16,7 +16,7 @@ from pynvim_pp.highlight import highlight
 from pynvim_pp.lib import threadsafe_call, write
 from pynvim_pp.logging import log, with_suppress
 from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
-from std2.pickle import DecodeError
+from std2.pickle.types import DecodeError
 from std2.sched import ticker
 from std2.types import AnyFun
 

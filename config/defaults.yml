@@ -31,6 +31,8 @@ keymap:
     - Y
   copy_name:
     - y
+  copy_relname:
+    - <c-y>
   cut:
     - x
   delete:
