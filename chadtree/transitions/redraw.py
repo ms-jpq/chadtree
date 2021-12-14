@@ -52,11 +52,9 @@ def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
-    derived, current = state.derived, state.current
+    derived = state.derived
     focus_row = derived.path_row_lookup.get(focus) if focus else None
-    current_row = derived.path_row_lookup.get(current) if current else None
 
-    cwin = cur_win(nvim)
     ns = nvim.api.create_namespace(FM_NAMESPACE)
 
     for win, buf in find_fm_windows(nvim):
@@ -67,8 +65,6 @@ def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
 
         if focus_row is not None:
             new_row: Optional[int] = focus_row + 1
-        elif win != cwin and current_row is not None:
-            new_row = current_row + 1
         elif row >= n_count:
             new_row = n_count
         elif p_count != n_count:
