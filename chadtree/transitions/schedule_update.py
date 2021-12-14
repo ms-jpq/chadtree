@@ -14,6 +14,6 @@ from .types import Stage
 def schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     try:
         stage = refresh(nvim, state=state, settings=settings)
-        return Stage(stage.state, focus=stage.focus)
+        return stage
     except NvimError:
         return None
