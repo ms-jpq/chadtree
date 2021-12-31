@@ -37,6 +37,8 @@ def load_theme(
 
     if icon_set is IconGlyphSetEnum.ascii:
         icons = artifact.icons.ascii
+    elif icon_set is IconGlyphSetEnum.ascii_hollow:
+        icons = artifact.icons.ascii_hollow
     elif icon_set is IconGlyphSetEnum.devicons:
         icons = artifact.icons.devicons
     elif icon_set is IconGlyphSetEnum.emoji:

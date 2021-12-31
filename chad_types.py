@@ -50,12 +50,14 @@ class IconGlyphs:
 
 @dataclass(frozen=True)
 class IconGlyphSet:
+    ascii_hollow: IconGlyphs
     ascii: IconGlyphs
     devicons: IconGlyphs
     emoji: IconGlyphs
 
 
 class IconGlyphSetEnum(Enum):
+    ascii_hollow = auto()
     ascii = auto()
     devicons = auto()
     emoji = auto()

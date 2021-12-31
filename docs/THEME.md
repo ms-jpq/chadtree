@@ -76,6 +76,11 @@ Imported from [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-
 
 ![asciicons.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/icons_ascii.png)
 
+**ascii_hollow:**
+
+![ascii_hollow_icons.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/icons_ascii_hollow.png)
+
+
 **default:**
 
 ```json

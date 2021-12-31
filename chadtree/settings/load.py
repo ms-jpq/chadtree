@@ -8,7 +8,8 @@ from pynvim_pp.api import cur_win, win_get_option
 from pynvim_pp.rpc import RpcSpec
 from std2.configparser import hydrate
 from std2.graphlib import merge
-from std2.pickle import DecodeError, new_decoder
+from std2.pickle.decoder import new_decoder
+from std2.pickle.types import DecodeError
 from yaml import safe_load
 
 from chad_types import (
@@ -75,9 +76,8 @@ class _UserConfig:
 
 
 def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
-    a_decode, c_decode = new_decoder[Artifact](Artifact), new_decoder[_UserConfig](
-        _UserConfig
-    )
+    a_decode = new_decoder[Artifact](Artifact)
+    c_decode = new_decoder[_UserConfig](_UserConfig)
 
     win = cur_win(nvim)
     artifacts = a_decode(safe_load(ARTIFACT.read_text("UTF-8")))
@@ -103,11 +103,16 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         text_colour_set=theme.text_colour_set,
     )
 
+    use_icons = theme.icon_glyph_set not in {
+        IconGlyphSetEnum.ascii,
+        IconGlyphSetEnum.ascii_hollow,
+    }
+
     view_opts = ViewOptions(
         hl_context=hl_context,
         icons=icons,
         sort_by=view.sort_by,
-        use_icons=theme.icon_glyph_set is not IconGlyphSetEnum.ascii,
+        use_icons=use_icons,
         time_fmt=view.time_format,
     )
 
