@@ -4,7 +4,7 @@ from typing import Mapping, Tuple
 
 from std2.coloursys import hex_inverse
 from std2.graphlib import merge
-from std2.pickle import new_decoder
+from std2.pickle.decoder import new_decoder
 from yaml import safe_load
 
 from chad_types import ASSETS, Hex, IconGlyphs, IconGlyphSet, TextColours, TextColourSet
@@ -70,6 +70,7 @@ def load_text_decors() -> Tuple[IconGlyphSet, TextColourSet]:
 
     icon_set = IconGlyphSet(
         ascii=_process_icons(icon_spec.ascii),
+        ascii_hollow=_process_icons(icon_spec.ascii_hollow),
         devicons=_process_icons(icon_spec.devicons),
         emoji=_process_icons(icon_spec.emoji),
     )

@@ -744,8 +744,8 @@
       "default_icon": "○",
       "ext_exact": {},
       "folder": {
-        "closed": "",
-        "open": ""
+        "closed": "▷",
+        "open": "▽"
       },
       "link": {
         "broken": "-/->",
