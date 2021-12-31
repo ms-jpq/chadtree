@@ -24,6 +24,8 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 - Quickfix integration
 
+- [Bookmarks](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/bookmarks.png)
+
 ![visual_select.gif](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/visual_select.gif)
 
 ### I like 21st century
