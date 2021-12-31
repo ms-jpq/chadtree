@@ -6,4 +6,4 @@ from typing import AbstractSet, Mapping
 @dataclass(frozen=True)
 class Markers:
     quick_fix: Mapping[PurePath, int]
-    bookmarks: AbstractSet[PurePath]
+    bookmarks: Mapping[PurePath, AbstractSet[str]]

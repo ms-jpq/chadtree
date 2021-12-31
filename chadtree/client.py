@@ -121,8 +121,7 @@ class ChadClient(Client):
 
             def cdraw() -> None:
                 nonlocal has_drawn
-                stage = handler(nvim, self._state, settings, *args)
-                if stage:
+                if stage := handler(nvim, self._state, settings, *args):
                     self._state = stage.state
 
                     for _ in range(RENDER_RETRIES - 1):

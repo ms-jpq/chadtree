@@ -40,7 +40,7 @@ def forward(
             else state.root
         ),
     )
-    new_qf = or_else(markers, state.qf)
+    new_markers = or_else(markers, state.markers)
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
     derived = render(
@@ -49,7 +49,7 @@ def forward(
         index=new_index,
         selection=new_selection,
         filter_pattern=new_filter_pattern,
-        markers=new_qf,
+        markers=new_markers,
         vc=new_vc,
         show_hidden=new_hidden,
         current=new_current,
@@ -66,7 +66,7 @@ def forward(
         enable_vc=or_else(enable_vc, state.enable_vc),
         width=or_else(width, state.width),
         root=new_root,
-        qf=new_qf,
+        markers=new_markers,
         vc=new_vc,
         current=new_current,
         derived=derived,

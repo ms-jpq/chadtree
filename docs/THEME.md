@@ -24,6 +24,16 @@ These are used for files that are ignored by user supplied pattern in `chadtree_
 "Comment"
 ```
 
+#### `chadtree_settings.theme.highlights.bookmarks`
+
+These are used to show bookmarks.
+
+**default:**
+
+```json
+"Title"
+```
+
 #### `chadtree_settings.theme.highlights.quickfix`
 
 These are used to notify the number of times a file / folder appears in the `quickfix` list.
@@ -112,7 +122,6 @@ If you are not happy with that, you can choose one of the many others:
 "env"
 ```
 
-
 ---
 
 ### `chadtree_settings.theme.icon_colour_set`
@@ -128,10 +137,7 @@ You may also disable colouring if you wish.
 **legal keys: one of**
 
 ```json
-[
-  "github",
-  "none"
-]
+["github", "none"]
 ```
 
 **default:**

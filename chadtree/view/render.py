@@ -1,11 +1,11 @@
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
-from os import linesep
 from os.path import sep
 from pathlib import PurePath
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
+from pynvim_pp.lib import encode
 from std2.types import never
 
 from ..fs.cartographer import is_dir, user_ignored
@@ -55,65 +55,44 @@ def _paint(
     settings: Settings,
     index: Index,
     selection: Selection,
-    qf: Markers,
+    markers: Markers,
     vc: VCStatus,
     show_hidden: bool,
     current: Optional[PurePath],
 ) -> Callable[[Node, int], Optional[_Render]]:
     icons = settings.view.icons
     context = settings.view.hl_context
-    (
-        particular_mappings,
-        icon_exts,
-        mode_pre,
-        mode_post,
-        ext_exact,
-        name_exact,
-        name_glob,
-    ) = (
-        context.particular_mappings,
-        context.icon_exts,
-        context.mode_pre,
-        context.mode_post,
-        context.ext_exact,
-        context.name_exact,
-        context.name_glob,
-    )
 
     def search_icon_hl(node: Node, ignored: bool) -> Optional[str]:
         if ignored:
-            return particular_mappings.ignored
+            return context.particular_mappings.ignored
         else:
-            return icon_exts.get(node.path.suffix)
+            return context.icon_exts.get(node.path.suffix)
 
     def search_text_hl(node: Node, ignored: bool) -> Optional[str]:
         if ignored:
-            return particular_mappings.ignored
+            return context.particular_mappings.ignored
 
         s_modes = sorted(node.mode)
         for mode in s_modes:
-            hl = mode_pre.get(mode)
-            if hl:
+            if hl := context.mode_pre.get(mode):
                 return hl
 
-        hl = name_exact.get(node.path.name)
-        if hl:
+        if hl := context.name_exact.get(node.path.name):
             return hl
 
-        for pattern, hl in name_glob.items():
+        for pattern, hl in context.name_glob.items():
             if fnmatch(node.path.name, pattern):
                 return hl
 
-        hl = ext_exact.get(node.path.suffix)
-        if hl:
+        if hl := context.ext_exact.get(node.path.suffix):
             return hl
 
         for mode in s_modes:
-            hl = mode_post.get(mode)
-            if hl:
+            if hl := context.mode_post.get(mode):
                 return hl
         else:
-            return mode_post.get(None)
+            return context.mode_post.get(None)
 
     def gen_status(path: PurePath) -> str:
         selected = (
@@ -146,7 +125,7 @@ def _paint(
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
-        yield node.path.name.replace(linesep, r"\n")
+        yield r"\n".join(node.path.name.splitlines())
         if not settings.view.use_icons and is_dir(node):
             yield sep
 
@@ -160,28 +139,38 @@ def _paint(
             yield icons.link.normal
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
-        qf_count = qf.quick_fix[path]
-        stat = vc.status.get(path)
-        if qf_count:
-            yield Badge(text=f"({qf_count})", group=particular_mappings.quickfix)
-        if stat:
-            yield Badge(text=f" [{stat}]", group=particular_mappings.version_control)
+        if marks := markers.bookmarks.get(path):
+            ordered = "".join(sorted(marks))
+            yield Badge(
+                text=f"<{ordered}>",
+                group=context.particular_mappings.bookmarks,
+            )
+
+        if qf_count := markers.quick_fix.get(path):
+            yield Badge(
+                text=f"({qf_count})",
+                group=context.particular_mappings.quickfix,
+            )
+
+        if stat := vc.status.get(path):
+            yield Badge(
+                text=f" [{stat}]",
+                group=context.particular_mappings.version_control,
+            )
 
     def gen_highlights(
         node: Node, pre: str, icon: str, name: str, ignored: bool
     ) -> Iterator[Highlight]:
-        icon_begin = len(pre.encode())
-        icon_end = icon_begin + len(icon.encode())
+        icon_begin = len(encode(pre))
+        icon_end = icon_begin + len(encode(icon))
         text_begin = icon_end
-        text_end = len(name.encode()) + text_begin
+        text_end = len(encode(name)) + text_begin
 
-        icon_group = search_icon_hl(node, ignored=ignored)
-        if icon_group:
+        if icon_group := search_icon_hl(node, ignored=ignored):
             hl = Highlight(group=icon_group, begin=icon_begin, end=icon_end)
             yield hl
 
-        text_group = search_text_hl(node, ignored=ignored)
-        if text_group:
+        if text_group := search_text_hl(node, ignored=ignored):
             hl = Highlight(group=text_group, begin=text_begin, end=text_end)
             yield hl
 
@@ -224,7 +213,7 @@ def render(
         settings,
         index=index,
         selection=selection,
-        qf=markers,
+        markers=markers,
         vc=vc,
         show_hidden=show_hidden,
         current=current,
@@ -238,9 +227,8 @@ def render(
             or not filter_pattern
             or fnmatch(node.path.name, filter_pattern.pattern)
         )
-        rend = show(node, depth)
 
-        if rend:
+        if rend := show(node, depth):
 
             def gen_children() -> Iterator[_NRender]:
                 for child in sorted(node.children.values(), key=comp):

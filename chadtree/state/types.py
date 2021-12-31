@@ -27,7 +27,7 @@ class State:
     filter_pattern: Optional[FilterPattern]
     follow: bool
     index: Index
-    qf: Markers
+    markers: Markers
     root: Node
     selection: Selection
     show_hidden: bool

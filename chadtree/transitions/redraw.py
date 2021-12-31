@@ -5,7 +5,7 @@ from uuid import uuid4
 from pynvim import Nvim
 from pynvim.api import NvimError
 from pynvim.api.buffer import Buffer
-from pynvim_pp.api import buf_get_var, buf_line_count, cur_win, win_get_cursor
+from pynvim_pp.api import buf_get_var, buf_line_count, win_get_cursor
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.operators import operator_marks
 from std2.difflib import trans_inplace
@@ -30,7 +30,7 @@ _DECODER = new_decoder[Sequence[str]](Sequence[str])
 def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
     n_hash = derived.hashed
     try:
-        p_hash: Sequence[str] = _DECODER(buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR))
+        p_hash = _DECODER(buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR))
     except DecodeError:
         p_hash = ("",)
 
@@ -52,8 +52,7 @@ def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
 
 
 def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
-    derived = state.derived
-    focus_row = derived.path_row_lookup.get(focus) if focus else None
+    focus_row = state.derived.path_row_lookup.get(focus) if focus else None
 
     ns = nvim.api.create_namespace(FM_NAMESPACE)
 
@@ -75,7 +74,7 @@ def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
         a1 = Atomic()
         a1.buf_set_option(buf, "modifiable", True)
 
-        a2 = _update(nvim, buf=buf, ns=ns, derived=derived)
+        a2 = _update(nvim, buf=buf, ns=ns, derived=state.derived)
 
         a3 = Atomic()
         a3.buf_set_option(buf, "modifiable", False)

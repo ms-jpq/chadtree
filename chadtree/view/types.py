@@ -12,6 +12,7 @@ from ..fs.types import Mode, Node
 
 @dataclass(frozen=True)
 class HLGroups:
+    bookmarks: str
     ignored: str
     quickfix: str
     version_control: str
