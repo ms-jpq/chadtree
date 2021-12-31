@@ -104,6 +104,7 @@ theme:
   icon_colour_set: github
   highlights:
     ignored: Comment
+    bookmarks: Title
     quickfix: Label
     version_control: Comment
   discrete_colour_map:

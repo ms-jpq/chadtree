@@ -39,7 +39,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
 
     selection: Selection = set()
     node = new(pool, root=cwd, index=index)
-    mks = markers(nvim)
+    marks = markers(nvim)
     vc = VCStatus()
 
     current = None
@@ -51,7 +51,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
         index=index,
         selection=selection,
         filter_pattern=filter_pattern,
-        markers=mks,
+        markers=marks,
         vc=vc,
         show_hidden=show_hidden,
         current=current,
@@ -68,7 +68,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
         enable_vc=enable_vc,
         width=settings.width,
         root=node,
-        qf=mks,
+        markers=marks,
         vc=vc,
         current=current,
         derived=derived,

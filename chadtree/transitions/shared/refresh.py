@@ -1,5 +1,5 @@
 from pathlib import PurePath
-from typing import AbstractSet, Optional
+from typing import AbstractSet
 
 from pynvim import Nvim
 from std2.types import Void
@@ -7,16 +7,13 @@ from std2.types import Void
 from ...fs.ops import ancestors, exists
 from ...nvim.markers import markers
 from ...settings.types import Settings
-from ...state.next import forward
 from ...state.types import State
-from ...version_ctl.types import VCStatus
+from ...state.next import forward
 from ..shared.wm import find_current_buffer_name
 from ..types import Stage
 
 
-def refresh(
-    nvim: Nvim, state: State, settings: Settings, vc: Optional[VCStatus] = None
-) -> Stage:
+def refresh(nvim: Nvim, state: State, settings: Settings) -> Stage:
     current = find_current_buffer_name(nvim)
     cwd = state.root.path
     paths = {cwd}
