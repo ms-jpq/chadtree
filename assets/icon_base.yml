@@ -1,5 +1,5 @@
 ---
-ascii:
+ascii: &ascii
   default_icon: ●
   folder:
     closed: ▶
@@ -10,29 +10,18 @@ ascii:
   name_exact: {}
   name_glob: {}
   status:
-    active: '>'
-    inactive: ' '
-    not_selected: ' '
-    selected: '*'
+    active: ">"
+    inactive: " "
+    not_selected: " "
+    selected: "*"
   ext_exact: {}
-
 
 ascii_hollow:
+  <<: *ascii
   default_icon: ○
   folder:
-    closed: ' '
-    open: ' '
-  link:
-    broken: -/->
-    normal: ->
-  name_exact: {}
-  name_glob: {}
-  status:
-    active: '>'
-    inactive: ' '
-    not_selected: ' '
-    selected: '*'
-  ext_exact: {}
+    closed: ▷
+    open: ▽
 
 devicons: &devicons
   link:
@@ -40,8 +29,8 @@ devicons: &devicons
     normal: 
   status:
     active: ▶
-    inactive: ' '
-    not_selected: ' '
+    inactive: " "
+    not_selected: " "
     selected: ✸
 
 emoji: *devicons

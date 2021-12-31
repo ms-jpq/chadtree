@@ -41,18 +41,17 @@ def _bookmarks(nvim: Nvim) -> Mapping[PurePath, AbstractSet[str]]:
             _, _, _, path = nvim.api.get_mark(mark_id, {})
             if path:
                 if resolved := _resolve(cwd, path=path):
-                    marks = acc.setdefault(resolved, set())
-                    marks.add(mark_id)
+                    for marked_path in chain((resolved,), ancestors(resolved)):
+                        marks = acc.setdefault(marked_path, set())
+                        marks.add(mark_id)
 
     return acc
 
 
 def _quickfix(nvim: Nvim) -> Mapping[PurePath, int]:
-    cwd = get_cwd(nvim)
-    ql = nvim.funcs.getqflist()
-
     def it() -> Iterator[PurePath]:
-        for q in ql:
+        cwd = get_cwd(nvim)
+        for q in nvim.funcs.getqflist():
             bufnr = q["bufnr"]
             filename = normcase(nvim.funcs.bufname(bufnr))
             yield cwd / filename
