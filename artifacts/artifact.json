@@ -740,6 +740,26 @@
         "selected": "*"
       }
     },
+    "ascii_hollow": {
+      "default_icon": "○",
+      "ext_exact": {},
+      "folder": {
+        "closed": "",
+        "open": ""
+      },
+      "link": {
+        "broken": "-/->",
+        "normal": "->"
+      },
+      "name_exact": {},
+      "name_glob": {},
+      "status": {
+        "active": ">",
+        "inactive": " ",
+        "not_selected": " ",
+        "selected": "*"
+      }
+    },
     "devicons": {
       "default_icon": "",
       "ext_exact": {

@@ -107,7 +107,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
         hl_context=hl_context,
         icons=icons,
         sort_by=view.sort_by,
-        use_icons=theme.icon_glyph_set is not IconGlyphSetEnum.ascii,
+        use_icons=theme.icon_glyph_set is not IconGlyphSetEnum.ascii and theme.icon_glyph_set is not IconGlyphSetEnum.ascii_hollow,
         time_fmt=view.time_format,
     )
 
