@@ -27,15 +27,18 @@ class UnrecoverableError(Exception):
 _DECODER = new_decoder[Sequence[str]](Sequence[str])
 
 
-def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
-    n_hash = derived.hashed
-    try:
-        p_hash = _DECODER(buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR))
-    except DecodeError:
-        p_hash = ("",)
+def _update(
+    use_extmarks: bool,
+    buf: Buffer,
+    ns: int,
+    derived: Derived,
+    hashed_lines: Sequence[str],
+) -> Atomic:
 
     atomic = Atomic()
-    for (i1, i2), (j1, j2) in trans_inplace(src=p_hash, dest=n_hash, unifying=10):
+    for (i1, i2), (j1, j2) in trans_inplace(
+        src=hashed_lines, dest=derived.hashed, unifying=10
+    ):
         atomic.buf_clear_namespace(buf, ns, i1, i2)
         atomic.buf_set_lines(buf, i1, i2, True, derived.lines[j1:j2])
 
@@ -45,9 +48,14 @@ def _update(nvim: Nvim, buf: Buffer, ns: int, derived: Derived) -> Atomic:
 
         for idx, badges in enumerate(derived.badges[j1:j2], start=i1):
             vtxt = tuple((bdg.text, bdg.group) for bdg in badges)
-            atomic.buf_set_virtual_text(buf, ns, idx, vtxt, {})
+            if use_extmarks:
+                atomic.buf_set_extmark(
+                    buf, ns, idx, -1, {"virt_text": vtxt, "hl_mode": "combine"}
+                )
+            else:
+                atomic.buf_set_virtual_text(buf, ns, idx, vtxt, {})
 
-    atomic.buf_set_var(buf, _FM_HASH_VAR, n_hash)
+    atomic.buf_set_var(buf, _FM_HASH_VAR, derived.hashed)
     return atomic
 
 
@@ -55,12 +63,18 @@ def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
     focus_row = state.derived.path_row_lookup.get(focus) if focus else None
 
     ns = nvim.api.create_namespace(FM_NAMESPACE)
+    use_extmarks = nvim.funcs.has("nvim-0.6")
 
     for win, buf in find_fm_windows(nvim):
         p_count = buf_line_count(nvim, buf=buf)
         n_count = len(state.derived.lines)
         row, col = win_get_cursor(nvim, win=win)
         (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
+
+        try:
+            hashed_lines = _DECODER(buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR))
+        except DecodeError:
+            hashed_lines = ("",)
 
         if focus_row is not None:
             new_row: Optional[int] = focus_row + 1
@@ -74,7 +88,13 @@ def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
         a1 = Atomic()
         a1.buf_set_option(buf, "modifiable", True)
 
-        a2 = _update(nvim, buf=buf, ns=ns, derived=state.derived)
+        a2 = _update(
+            use_extmarks,
+            buf=buf,
+            ns=ns,
+            derived=state.derived,
+            hashed_lines=hashed_lines,
+        )
 
         a3 = Atomic()
         a3.buf_set_option(buf, "modifiable", False)
