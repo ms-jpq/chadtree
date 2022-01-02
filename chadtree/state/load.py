@@ -1,5 +1,5 @@
 from concurrent.futures import Executor
-from pathlib import Path, PurePath
+from pathlib import Path
 
 from pynvim import Nvim
 from pynvim_pp.api import get_cwd
@@ -72,5 +72,6 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
         vc=vc,
         current=current,
         derived=derived,
+        window_order={},
     )
     return state

@@ -2,7 +2,7 @@ from typing import Optional
 
 from pynvim import Nvim
 from pynvim.api.common import NvimError
-from pynvim_pp.api import get_cwd
+from pynvim_pp.api import cur_win, get_cwd
 
 from ..fs.ops import is_file
 from ..nvim.markers import markers
@@ -29,13 +29,22 @@ autocmd("FocusLost", "ExitPre") << f"lua {NAMESPACE}.{save_session.name}()"
 
 
 @rpc(blocking=False)
-def _store_win_pos(nvim: Nvim, state: State, settings: Settings) -> None:
+def _record_win_pos(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
     """
-    Store last windows
+    Record last windows
     """
 
+    try:
+        win = cur_win(nvim)
+    except NvimError:
+        return None
+    else:
+        window_order = {**state.window_order, win.number: None}
+        new_state = forward(state, settings=settings, window_order=window_order)
+        return Stage(new_state)
 
-autocmd("WinEnter") << f"lua {NAMESPACE}.{_store_win_pos.name}()"
+
+autocmd("WinEnter") << f"lua {NAMESPACE}.{_record_win_pos.name}()"
 
 
 @rpc(blocking=False)

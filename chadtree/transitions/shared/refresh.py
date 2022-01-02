@@ -2,6 +2,7 @@ from pathlib import PurePath
 from typing import AbstractSet
 
 from pynvim import Nvim
+from pynvim_pp.api import list_wins
 from std2.types import Void
 
 from ...fs.ops import ancestors, exists
@@ -25,6 +26,11 @@ def refresh(nvim: Nvim, state: State, settings: Settings) -> Stage:
     parent_paths: AbstractSet[PurePath] = current_ancestors if state.follow else set()
     new_index = index if new_current else index | parent_paths
 
+    window_ids = {w.number for w in list_wins(nvim)}
+    window_order = {
+        win_id: None for win_id in state.window_order if win_id in window_ids
+    }
+
     mks = markers(nvim)
     new_state = forward(
         state,
@@ -34,6 +40,7 @@ def refresh(nvim: Nvim, state: State, settings: Settings) -> Stage:
         markers=mks,
         paths=paths,
         current=new_current or Void,
+        window_order=window_order,
     )
 
     return Stage(new_state)
