@@ -15,6 +15,7 @@ def docker_run(dockerfile: Path) -> str:
             dockerfile,
             "--progress",
             "plain",
+            "--",
             ".",
         ),
         cwd=parent,
