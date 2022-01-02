@@ -14,8 +14,8 @@
   ${display_paths}
 
 "ask_yesno": |-
-  &确定
-  &取消
+  &Y (确定)
+  &N (取消)
 
 "cannot find version ctl root": |-
   ⚠️  文件系统顶层找不到版本控制
