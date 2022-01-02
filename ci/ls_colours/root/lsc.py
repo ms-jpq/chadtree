@@ -5,11 +5,11 @@ from pathlib import Path
 from subprocess import check_output
 from sys import stdout
 
-_LSC_SH = Path(__file__).parent.resolve() / "lsc.sh"
+_LSC_SH = Path(__file__).parent.resolve(strict=True) / "lsc.sh"
 
-_SOLARIZED = Path("dircolors-solarized").resolve()
-_NORD = Path("nord-dircolors").resolve()
-_TRAP_DOOR = Path("LS_COLORS").resolve()
+_SOLARIZED = Path("dircolors-solarized").resolve(strict=True)
+_NORD = Path("nord-dircolors").resolve(strict=True)
+_TRAP_DOOR = Path("LS_COLORS").resolve(strict=True)
 
 _PARSING = {
     _SOLARIZED / "dircolors.256dark": "solarized_dark_256",

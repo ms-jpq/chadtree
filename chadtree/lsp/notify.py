@@ -3,7 +3,7 @@ from typing import Any, Iterable, Mapping
 
 from pynvim import Nvim
 
-_LUA = (Path(__file__).resolve().parent / "notify.lua").read_text("UTF-8")
+_LUA = (Path(__file__).resolve(strict=True).parent / "notify.lua").read_text("UTF-8")
 
 
 def _notify(nvim: Nvim, method: str, params: Any) -> None:

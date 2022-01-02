@@ -22,6 +22,7 @@ from pynvim_pp.api import (
 )
 from pynvim_pp.hold import hold_win_pos
 from pynvim_pp.keymap import Keymap
+from pynvim_pp.lib import resolve_path
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
@@ -101,10 +102,10 @@ def find_buffers_with_file(nvim: Nvim, file: PurePath) -> Iterator[Buffer]:
             yield buf
 
 
-def find_current_buffer_name(nvim: Nvim) -> PurePath:
+def find_current_buffer_path(nvim: Nvim) -> Optional[PurePath]:
     buf = cur_buf(nvim)
-    name = PurePath(buf_name(nvim, buf=buf))
-    return name
+    name = buf_name(nvim, buf=buf)
+    return resolve_path(None, path=name)
 
 
 def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:

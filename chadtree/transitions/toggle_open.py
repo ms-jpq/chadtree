@@ -27,7 +27,7 @@ from ..version_ctl.git import root as version_ctl_toplv
 from .shared.current import maybe_path_above, new_current_file, new_root
 from .shared.open_file import open_file
 from .shared.wm import (
-    find_current_buffer_name,
+    find_current_buffer_path,
     find_fm_buffers,
     find_fm_windows_in_tab,
     find_windows_in_tab,
@@ -144,11 +144,7 @@ def _open(
             new_state = state
 
         if opts.path:
-            path = (
-                opts.path
-                if opts.path.is_absolute()
-                else get_cwd(nvim) / opts.path
-            )
+            path = opts.path if opts.path.is_absolute() else get_cwd(nvim) / opts.path
             if not exists(path, follow=True):
                 new(state.pool, paths=(path,))
             next_state = (
@@ -165,9 +161,11 @@ def _open(
             )
             return Stage(next_state, focus=path)
         else:
-            curr = find_current_buffer_name(nvim)
-            stage = new_current_file(
-                nvim, state=new_state, settings=settings, current=curr
+            curr = find_current_buffer_path(nvim)
+            stage = (
+                new_current_file(nvim, state=new_state, settings=settings, current=curr)
+                if curr
+                else None
             )
             _open_fm_window(nvim, settings=settings, opts=opts, width=new_state.width)
             return (

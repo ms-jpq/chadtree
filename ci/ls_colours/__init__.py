@@ -1,13 +1,13 @@
 from json import loads
 from pathlib import Path
 
-from std2.pickle import new_decoder
+from std2.pickle.decoder import new_decoder
 
 from chad_types import LSColourSet
 
 from ..run import docker_run
 
-_DOCKERFILE = Path(__file__).resolve().parent / "Dockerfile"
+_DOCKERFILE = Path(__file__).resolve(strict=True).parent / "Dockerfile"
 
 
 def load_ls_colours() -> LSColourSet:
