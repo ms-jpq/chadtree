@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Optional
 
 from pynvim import Nvim
@@ -29,22 +30,25 @@ autocmd("FocusLost", "ExitPre") << f"lua {NAMESPACE}.{save_session.name}()"
 
 
 @rpc(blocking=False)
-def _record_win_pos(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+def _record_win_pos(nvim: Nvim, state: State, settings: Settings, win_id: int) -> Stage:
     """
     Record last windows
     """
 
-    try:
-        win = cur_win(nvim)
-    except NvimError:
-        return None
-    else:
-        window_order = {**state.window_order, win.handle: None}
-        new_state = forward(state, settings=settings, window_order=window_order)
-        return Stage(new_state)
+    window_order = {
+        wid: None
+        for wid in chain(
+            (wid for wid in state.window_order if wid != win_id), (win_id,)
+        )
+    }
+    new_state = forward(state, settings=settings, window_order=window_order)
+    return Stage(new_state)
 
 
-autocmd("WinEnter") << f"lua {NAMESPACE}.{_record_win_pos.name}()"
+(
+    autocmd("WinEnter")
+    << f"lua {NAMESPACE}.{_record_win_pos.name}(vim.api.nvim_get_current_win())"
+)
 
 
 @rpc(blocking=False)

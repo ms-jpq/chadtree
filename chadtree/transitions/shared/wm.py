@@ -43,14 +43,14 @@ def is_fm_window(nvim: Nvim, win: Window) -> bool:
 def find_windows_in_tab(
     nvim: Nvim, last_used: Mapping[int, None], no_secondary: bool
 ) -> Iterator[Window]:
-    ordering = {win_id: -idx for idx, win_id in enumerate(last_used)}
+    ordering = {win_id: idx for idx, win_id in enumerate(reversed(last_used))}
 
     def key_by(win: Window) -> Tuple[float, int, int]:
         """
         -> sort by last_used, then row, then col
         """
 
-        pos = ordering.get(win.handle, -inf)
+        pos = ordering.get(win.handle, inf)
         row, col = nvim.funcs.win_screenpos(win.number)
         return pos, col, row
 
