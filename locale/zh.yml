@@ -1,9 +1,9 @@
 ---
 "already_exists": |-
-  ⚠️  Exists: ${name}
+  ⚠️  已存在: ${name}
 
 "paths already exist": |-
-  ⚠️  -- ${operation} : path(s) already exist! ::
+  ⚠️  -- ${operation} : 路径已存在! ::
   ${paths}
 
 "new cwd": |-
@@ -14,17 +14,17 @@
   ${display_paths}
 
 "ask_yesno": |-
-  &Yes
-  &No
+  &确定
+  &取消
 
 "cannot find version ctl root": |-
-  ⚠️  Cannot find version control top level
+  ⚠️  文件系统顶层找不到版本控制
 
 "operation not permitted on root": |-
-  ⚠️  Operation not permitted on root or parent(s) of root
+  ⚠️  此操作不可文件系统顶层(以上)
 
 "render time warning": |-
-  ⚠️  Warning: Render time is slow @${duration}s, consider closing some folders
+  ⚠️  警告: 渲染时间有点慢 @${duration}s, 考虑关闭一些文件夹
 
 "copy": |-
   🖇
@@ -40,44 +40,43 @@
   ${paths}
 
 "dead_link": |-
-  ⚠️  cannot open dead link: ${name}
+  ⚠️  打不开死链接: ${name}
 
 "filter_click": |-
-  ⚠️  cannot click on folders while filtering
+  ⚠️  不可在过滤时点击文件夹
 
 "follow_mode_indi": |-
-  🐶 follow mode: ${follow}
+  🐶 跟随模式: ${follow}
 
 "hourglass": |-
   ⏳...⌛️
 
 "mime_warn": |-
-  ${name} have possible mimetype ${mime}, continue?
+  ${name} 文件猜到 mimetype ${mime}, 继续?
 
 "new_filter": |-
-  New Filter:
+  新过滤:
 
 "new_search": |-
   🔍:
 
 "nothing_select": |-
-  ⚠️  -- nothing selected!
+  ⚠️  -- 选择是空的!
 
 "ok_sym": |-
   ✅
 
 "path_exists_err": |-
-  ⚠️  Path exist!!! Rename:
+  ⚠️  路径已存在!!! 重新命名:
 
 "pencil": |-
   ✏️  :
 
 "sys_open_err": |-
-  ⚠️  Error -- cannot find system opener
+  ⚠️  错误 -- 找不到系统开启程序
 
 "sys_trash_err": |-
-  ⚠️  Error -- cannot find trash program
+  ⚠️  错误 -- 找不到垃圾(trash)程序
 
 "version_control_indi": |-
-  🐶 enable version control: ${enable_vc}
-
+  🐶 版本控制: ${enable_vc}
