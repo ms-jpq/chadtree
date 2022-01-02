@@ -37,7 +37,7 @@ def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> 
     if not node:
         return None
     else:
-        cwd = PurePath(get_cwd(nvim))
+        cwd = get_cwd(nvim)
 
         def cont() -> None:
             try:

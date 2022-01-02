@@ -41,7 +41,7 @@ def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> S
     Follow cwd update
     """
 
-    cwd = PurePath(get_cwd(nvim))
+    cwd = get_cwd(nvim)
     new_state = new_root(
         nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
     )

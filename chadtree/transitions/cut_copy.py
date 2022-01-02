@@ -148,7 +148,7 @@ def _cut(
     Cut selected
     """
 
-    cwd, root = PurePath(get_cwd(nvim)), state.root.path
+    cwd, root = get_cwd(nvim), state.root.path
     nono = {cwd, root} | ancestors(cwd) | ancestors(root)
     return _operation(
         nvim,

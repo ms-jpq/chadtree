@@ -14,7 +14,7 @@ from .types import Selection, State, VCStatus
 
 
 def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
-    cwd = PurePath(get_cwd(nvim))
+    cwd = get_cwd(nvim)
     session_store = (
         Path(nvim.funcs.stdpath("cache")) / "chad_sessions"
         if settings.xdg

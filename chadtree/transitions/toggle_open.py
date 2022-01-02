@@ -147,7 +147,7 @@ def _open(
             path = (
                 opts.path
                 if opts.path.is_absolute()
-                else PurePath(get_cwd(nvim)) / opts.path
+                else get_cwd(nvim) / opts.path
             )
             if not exists(path, follow=True):
                 new(state.pool, paths=(path,))
