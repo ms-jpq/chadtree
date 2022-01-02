@@ -3,7 +3,7 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Mapping
 
-TOP_LEVEL = Path(__file__).resolve().parent
+TOP_LEVEL = Path(__file__).resolve(strict=True).parent
 ASSETS = TOP_LEVEL / "assets"
 ARTIFACT = TOP_LEVEL / "artifacts" / "artifact.json"
 

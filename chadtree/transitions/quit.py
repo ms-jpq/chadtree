@@ -17,5 +17,5 @@ def _quit(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None
     if len(wins) <= 1:
         nvim.api.command("quit")
     else:
-        for win in find_fm_windows_in_tab(nvim):
+        for win in find_fm_windows_in_tab(nvim, last_used=state.window_order):
             win_close(nvim, win=win)

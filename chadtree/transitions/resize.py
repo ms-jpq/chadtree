@@ -22,7 +22,7 @@ def _resize(
         w_width = win.width
         width = max(direction(w_width, 10), 1)
         new_state = forward(state, settings=settings, width=width)
-        resize_fm_windows(nvim, width=new_state.width)
+        resize_fm_windows(nvim, last_used=new_state.window_order, width=new_state.width)
         return Stage(new_state)
 
 

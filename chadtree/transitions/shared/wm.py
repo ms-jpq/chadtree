@@ -1,3 +1,4 @@
+from math import inf
 from os.path import normcase
 from pathlib import Path, PurePath
 from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
@@ -22,6 +23,7 @@ from pynvim_pp.api import (
 )
 from pynvim_pp.hold import hold_win_pos
 from pynvim_pp.keymap import Keymap
+from pynvim_pp.lib import resolve_path
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
@@ -38,19 +40,25 @@ def is_fm_window(nvim: Nvim, win: Window) -> bool:
     return is_fm_buffer(nvim, buf=buf)
 
 
-def find_windows_in_tab(nvim: Nvim, no_secondary: bool) -> Iterator[Window]:
-    def key_by(win: Window) -> Tuple[int, int]:
+def find_windows_in_tab(
+    nvim: Nvim, last_used: Mapping[int, None], no_secondary: bool
+) -> Iterator[Window]:
+    ordering = {win_id: idx for idx, win_id in enumerate(reversed(last_used))}
+
+    def key_by(win: Window) -> Tuple[float, int, int]:
         """
-        -> sort by row, then col
+        -> sort by last_used, then row, then col
         """
 
+        pos = ordering.get(win.handle, inf)
         row, col = nvim.funcs.win_screenpos(win.number)
-        return col, row
+        return pos, col, row
 
     tab = cur_tab(nvim)
     wins = tab_list_wins(nvim, tab=tab)
+    ordered = sorted(wins, key=key_by)
 
-    for win in sorted(wins, key=key_by):
+    for win in ordered:
         is_preview: bool = win_get_option(nvim, win=win, key="previewwindow")
         buf = win_get_buf(nvim, win)
         ft = buf_filetype(nvim, buf=buf)
@@ -66,22 +74,28 @@ def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
             yield win, buf
 
 
-def find_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, no_secondary=True):
+def find_fm_windows_in_tab(
+    nvim: Nvim, last_used: Mapping[int, None]
+) -> Iterator[Window]:
+    for win in find_windows_in_tab(nvim, last_used=last_used, no_secondary=True):
         buf = win_get_buf(nvim, win=win)
         if is_fm_buffer(nvim, buf=buf):
             yield win
 
 
-def find_non_fm_windows_in_tab(nvim: Nvim) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, no_secondary=True):
+def find_non_fm_windows_in_tab(
+    nvim: Nvim, last_used: Mapping[int, None]
+) -> Iterator[Window]:
+    for win in find_windows_in_tab(nvim, last_used=last_used, no_secondary=True):
         buf = win_get_buf(nvim, win=win)
         if not is_fm_buffer(nvim, buf=buf):
             yield win
 
 
-def find_window_with_file_in_tab(nvim: Nvim, file: PurePath) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, no_secondary=True):
+def find_window_with_file_in_tab(
+    nvim: Nvim, last_used: Mapping[int, None], file: PurePath
+) -> Iterator[Window]:
+    for win in find_windows_in_tab(nvim, last_used=last_used, no_secondary=True):
         buf = win_get_buf(nvim, win=win)
         name = PurePath(buf_name(nvim, buf=buf))
         if name == file:
@@ -101,10 +115,10 @@ def find_buffers_with_file(nvim: Nvim, file: PurePath) -> Iterator[Buffer]:
             yield buf
 
 
-def find_current_buffer_name(nvim: Nvim) -> PurePath:
+def find_current_buffer_path(nvim: Nvim) -> Optional[PurePath]:
     buf = cur_buf(nvim)
-    name = PurePath(buf_name(nvim, buf=buf))
-    return name
+    name = buf_name(nvim, buf=buf)
+    return resolve_path(None, path=name)
 
 
 def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
@@ -136,13 +150,14 @@ def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
 def new_window(
     nvim: Nvim,
     *,
+    last_used: Mapping[int, None],
     win_local: Mapping[str, Union[bool, str]],
     open_left: bool,
     width: Optional[int],
 ) -> Window:
     split_r = nvim.options["splitright"]
 
-    wins = tuple(find_windows_in_tab(nvim, no_secondary=False))
+    wins = tuple(find_windows_in_tab(nvim, last_used=last_used, no_secondary=False))
     focus_win = wins[0] if open_left else wins[-1]
     direction = False if open_left else True
 
@@ -159,16 +174,25 @@ def new_window(
     return win
 
 
-def resize_fm_windows(nvim: Nvim, width: int) -> None:
-    for window in find_fm_windows_in_tab(nvim):
+def resize_fm_windows(nvim: Nvim, last_used: Mapping[int, None], width: int) -> None:
+    for window in find_fm_windows_in_tab(nvim, last_used=last_used):
         window.width = width
 
 
 def kill_buffers(
-    nvim: Nvim, paths: AbstractSet[PurePath], reopen: Mapping[PurePath, PurePath]
+    nvim: Nvim,
+    last_used: Mapping[int, None],
+    paths: AbstractSet[PurePath],
+    reopen: Mapping[PurePath, PurePath],
 ) -> None:
     active = (
-        {win_get_buf(nvim, win=win): win for win in find_non_fm_windows_in_tab(nvim)}
+        {
+            win_get_buf(nvim, win=win): win
+            for win in find_non_fm_windows_in_tab(
+                nvim,
+                last_used=last_used,
+            )
+        }
         if reopen
         else {}
     )

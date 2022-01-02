@@ -1,5 +1,5 @@
 from pathlib import PurePath
-from typing import AbstractSet, Optional, Union, cast
+from typing import AbstractSet, Mapping, Optional, Union, cast
 
 from std2.types import Void, VoidType, or_else
 
@@ -26,6 +26,7 @@ def forward(
     vc: Union[VCStatus, VoidType] = Void,
     current: Union[PurePath, VoidType] = Void,
     paths: Union[AbstractSet[PurePath], VoidType] = Void,
+    window_order: Union[Mapping[int, None], VoidType] = Void,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
@@ -70,6 +71,7 @@ def forward(
         vc=new_vc,
         current=new_current,
         derived=derived,
+        window_order=or_else(window_order, state.window_order),
     )
 
     return new_state

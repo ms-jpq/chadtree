@@ -29,7 +29,7 @@ def vc_refresh(nvim: Nvim, state: State, settings: Settings) -> None:
     """
 
     if state.enable_vc:
-        cwd = PurePath(get_cwd(nvim))
+        cwd = get_cwd(nvim)
 
         def cont() -> None:
             if _lock.locked():

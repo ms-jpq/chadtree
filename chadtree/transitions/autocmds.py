@@ -1,10 +1,11 @@
-from os.path import isfile
+from itertools import chain
 from typing import Optional
 
 from pynvim import Nvim
 from pynvim.api.common import NvimError
-from pynvim_pp.api import get_cwd
+from pynvim_pp.api import cur_win, get_cwd
 
+from ..fs.ops import is_file
 from ..nvim.markers import markers
 from ..registry import NAMESPACE, autocmd, rpc
 from ..settings.types import Settings
@@ -12,7 +13,7 @@ from ..state.next import forward
 from ..state.ops import dump_session
 from ..state.types import State
 from .shared.current import new_current_file, new_root
-from .shared.wm import find_current_buffer_name
+from .shared.wm import find_current_buffer_path
 from .types import Stage
 
 
@@ -26,6 +27,28 @@ def save_session(nvim: Nvim, state: State, settings: Settings) -> None:
 
 
 autocmd("FocusLost", "ExitPre") << f"lua {NAMESPACE}.{save_session.name}()"
+
+
+@rpc(blocking=False)
+def _record_win_pos(nvim: Nvim, state: State, settings: Settings, win_id: int) -> Stage:
+    """
+    Record last windows
+    """
+
+    window_order = {
+        wid: None
+        for wid in chain(
+            (wid for wid in state.window_order if wid != win_id), (win_id,)
+        )
+    }
+    new_state = forward(state, settings=settings, window_order=window_order)
+    return Stage(new_state)
+
+
+(
+    autocmd("WinEnter")
+    << f"lua {NAMESPACE}.{_record_win_pos.name}(vim.api.nvim_get_current_win())"
+)
 
 
 @rpc(blocking=False)
@@ -51,8 +74,8 @@ def _update_follow(nvim: Nvim, state: State, settings: Settings) -> Optional[Sta
     """
 
     try:
-        curr = find_current_buffer_name(nvim)
-        if isfile(curr):
+
+        if (curr := find_current_buffer_path(nvim)) and is_file(state.pool, path=curr):
             stage = new_current_file(nvim, state=state, settings=settings, current=curr)
             return stage
         else:

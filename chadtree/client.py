@@ -45,7 +45,7 @@ def _profile(nvim: Nvim, t1: float) -> None:
     Cores      {cpu_count()}
     System     {info.system}
     Version    {info.version}
-    Python     {Path(executable).resolve()}
+    Python     {Path(executable).resolve(strict=True)}
     """
     write(nvim, dedent(msg))
 

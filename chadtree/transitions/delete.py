@@ -33,7 +33,7 @@ def _remove(
     is_visual: bool,
     yeet: Callable[[Executor, Iterable[PurePath]], None],
 ) -> Optional[Stage]:
-    cwd, root = PurePath(get_cwd(nvim)), state.root.path
+    cwd, root = get_cwd(nvim), state.root.path
     nono = {cwd, root} | ancestors(cwd) | ancestors(root)
 
     selection = state.selection or {
@@ -73,7 +73,9 @@ def _remove(
                     state, settings=settings, selection=set(), paths=paths
                 )
 
-                kill_buffers(nvim, paths=selection, reopen={})
+                kill_buffers(
+                    nvim, last_used=new_state.window_order, paths=selection, reopen={}
+                )
                 lsp_removed(nvim, paths=unified)
                 return Stage(new_state)
 
@@ -92,7 +94,7 @@ def _delete(
 
 
 def _sys_trash(nvim: Nvim) -> Callable[[Executor, Iterable[PurePath]], None]:
-    cwd = PurePath(get_cwd(nvim))
+    cwd = get_cwd(nvim)
 
     def cont(pool: Executor, paths: Iterable[PurePath]) -> None:
         def c1() -> None:

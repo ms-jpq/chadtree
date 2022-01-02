@@ -1,7 +1,7 @@
 from concurrent.futures import Executor
 from dataclasses import dataclass
 from pathlib import Path, PurePath
-from typing import AbstractSet, Optional
+from typing import AbstractSet, Mapping, Optional
 
 from ..fs.types import Node
 from ..nvim.types import Markers
@@ -33,6 +33,7 @@ class State:
     show_hidden: bool
     vc: VCStatus
     width: int
+    window_order: Mapping[int, None]
 
 
 @dataclass(frozen=True)

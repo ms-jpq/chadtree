@@ -4,6 +4,7 @@ from datetime import datetime
 from os import makedirs, readlink
 from os import remove as rm
 from os import stat
+from os.path import isfile
 from pathlib import Path, PurePath
 from shutil import copy2, copytree
 from shutil import move as mv
@@ -48,7 +49,6 @@ try:
         except KeyError:
             return str(gid)
 
-
 except ImportError:
 
     def _get_username(uid: int) -> str:
@@ -84,6 +84,11 @@ def exists(path: PurePath, follow: bool) -> bool:
         return False
     else:
         return True
+
+
+def is_file(pool: Executor, path: PurePath) -> bool:
+    fut = pool.submit(isfile, path)
+    return fut.result()
 
 
 def _mkdir(path: PurePath) -> None:
