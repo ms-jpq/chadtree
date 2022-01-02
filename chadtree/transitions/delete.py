@@ -73,7 +73,9 @@ def _remove(
                     state, settings=settings, selection=set(), paths=paths
                 )
 
-                kill_buffers(nvim, paths=selection, reopen={})
+                kill_buffers(
+                    nvim, last_used=new_state.window_order, paths=selection, reopen={}
+                )
                 lsp_removed(nvim, paths=unified)
                 return Stage(new_state)
 

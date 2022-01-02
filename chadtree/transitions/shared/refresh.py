@@ -26,7 +26,7 @@ def refresh(nvim: Nvim, state: State, settings: Settings) -> Stage:
     parent_paths: AbstractSet[PurePath] = current_ancestors if state.follow else set()
     new_index = index if new_current else index | parent_paths
 
-    window_ids = {w.number for w in list_wins(nvim)}
+    window_ids = {w.handle for w in list_wins(nvim)}
     window_order = {
         win_id: None for win_id in state.window_order if win_id in window_ids
     }

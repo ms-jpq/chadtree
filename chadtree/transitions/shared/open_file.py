@@ -45,16 +45,21 @@ def _show_file(
         hold = click_type is ClickType.secondary
         mgr = hold_win_pos(nvim) if hold else nullcontext()
         with mgr:
-            non_fm_windows = tuple(find_non_fm_windows_in_tab(nvim))
+            non_fm_windows = tuple(
+                find_non_fm_windows_in_tab(nvim, last_used=state.window_order)
+            )
             buf = next(find_buffers_with_file(nvim, file=path), None)
             win = next(
                 chain(
-                    find_window_with_file_in_tab(nvim, file=path),
+                    find_window_with_file_in_tab(
+                        nvim, last_used=state.window_order, file=path
+                    ),
                     non_fm_windows,
                 ),
                 None,
             ) or new_window(
                 nvim,
+                last_used=state.window_order,
                 win_local=settings.win_actual_opts,
                 open_left=not settings.open_left,
                 width=None
@@ -82,7 +87,7 @@ def _show_file(
             else:
                 win_set_buf(nvim, win=win, buf=buf)
 
-            resize_fm_windows(nvim, state.width)
+            resize_fm_windows(nvim, last_used=state.window_order, width=state.width)
             nvim.api.command("filetype detect")
 
 

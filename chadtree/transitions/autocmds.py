@@ -39,7 +39,7 @@ def _record_win_pos(nvim: Nvim, state: State, settings: Settings) -> Optional[St
     except NvimError:
         return None
     else:
-        window_order = {**state.window_order, win.number: None}
+        window_order = {**state.window_order, win.handle: None}
         new_state = forward(state, settings=settings, window_order=window_order)
         return Stage(new_state)
 

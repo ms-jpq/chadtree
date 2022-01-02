@@ -60,6 +60,11 @@ def _rename(
                     next_state = forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
-                    kill_buffers(nvim, paths={node.path}, reopen={node.path: new_path})
+                    kill_buffers(
+                        nvim,
+                        last_used=new_state.window_order,
+                        paths={node.path},
+                        reopen={node.path: new_path},
+                    )
                     lsp_moved(nvim, paths=operations)
                     return Stage(next_state, focus=new_path)

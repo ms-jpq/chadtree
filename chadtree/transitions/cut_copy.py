@@ -133,7 +133,12 @@ def _operation(
                     )
 
                     if is_move:
-                        kill_buffers(nvim, paths=selection, reopen={})
+                        kill_buffers(
+                            nvim,
+                            last_used=new_state.window_order,
+                            paths=selection,
+                            reopen={},
+                        )
                         lsp_moved(nvim, paths=operations)
                     else:
                         lsp_created(nvim, paths=new_selection)
