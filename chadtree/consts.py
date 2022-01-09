@@ -1,5 +1,5 @@
 from os import name
-from stat import S_IRGRP, S_IROTH, S_IRUSR, S_IWUSR, S_IXGRP, S_IXOTH, S_IXUSR
+from stat import S_IRGRP, S_IROTH, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR, S_IXOTH
 
 from chad_types import TOP_LEVEL
 
@@ -9,7 +9,6 @@ REQUIREMENTS = TOP_LEVEL / "requirements.txt"
 
 FOLDER_MODE = (S_IRUSR | S_IWUSR | S_IXUSR) | (S_IRGRP | S_IXGRP) | (S_IROTH | S_IXOTH)
 FILE_MODE = (S_IRUSR | S_IWUSR) | (S_IRGRP) | (S_IROTH)
-
 
 WALK_PARALLELISM_FACTOR = 100
 RENDER_RETRIES = 3
