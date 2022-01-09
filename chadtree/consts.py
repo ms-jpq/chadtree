@@ -1,18 +1,20 @@
 from os import name
+from stat import S_IRGRP, S_IROTH, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR, S_IXOTH
 
 from chad_types import TOP_LEVEL
 
 GIL_SWITCH = 1 / 1000
-
 IS_WIN = name == "nt"
+REQUIREMENTS = TOP_LEVEL / "requirements.txt"
 
-RENDER_RETRIES = 3
+FOLDER_MODE = (S_IRUSR | S_IWUSR | S_IXUSR) | (S_IRGRP | S_IXGRP) | (S_IROTH | S_IXOTH)
+FILE_MODE = (S_IRUSR | S_IWUSR) | (S_IRGRP) | (S_IROTH)
+
+print(format(FOLDER_MODE, "o"), flush=True)
+print(format(FILE_MODE, "o"), flush=True)
 
 WALK_PARALLELISM_FACTOR = 100
-FOLDER_MODE = 0o755
-FILE_MODE = 0o644
-
-REQUIREMENTS = TOP_LEVEL / "requirements.txt"
+RENDER_RETRIES = 3
 
 FM_FILETYPE = "CHADTree"
 FM_NAMESPACE = "chadtree_ns"
