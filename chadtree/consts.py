@@ -3,16 +3,12 @@ from os import name
 from chad_types import TOP_LEVEL
 
 GIL_SWITCH = 1 / 1000
-
 IS_WIN = name == "nt"
+REQUIREMENTS = TOP_LEVEL / "requirements.txt"
 
-RENDER_RETRIES = 3
 
 WALK_PARALLELISM_FACTOR = 100
-FOLDER_MODE = 0o755
-FILE_MODE = 0o644
-
-REQUIREMENTS = TOP_LEVEL / "requirements.txt"
+RENDER_RETRIES = 3
 
 FM_FILETYPE = "CHADTree"
 FM_NAMESPACE = "chadtree_ns"

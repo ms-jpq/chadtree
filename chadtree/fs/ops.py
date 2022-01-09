@@ -12,7 +12,10 @@ from shutil import rmtree
 from stat import S_ISDIR, S_ISLNK, filemode
 from typing import AbstractSet, Iterable, Mapping, Optional
 
-from ..consts import FILE_MODE, FOLDER_MODE
+from std2.stat import RW_R__R__, RWXR_XR_X
+
+_FOLDER_MODE = RWXR_XR_X
+_FILE_MODE = RW_R__R__
 
 
 def ancestors(path: PurePath) -> AbstractSet[PurePath]:
@@ -92,7 +95,7 @@ def is_file(pool: Executor, path: PurePath) -> bool:
 
 
 def _mkdir(path: PurePath) -> None:
-    makedirs(path, mode=FOLDER_MODE, exist_ok=True)
+    makedirs(path, mode=_FOLDER_MODE, exist_ok=True)
 
 
 def mkdir(pool: Executor, paths: Iterable[PurePath]) -> None:
@@ -100,8 +103,8 @@ def mkdir(pool: Executor, paths: Iterable[PurePath]) -> None:
 
 
 def _new(path: PurePath) -> None:
-    makedirs(path.parent, mode=FOLDER_MODE, exist_ok=True)
-    Path(path).touch(mode=FILE_MODE, exist_ok=True)
+    makedirs(path.parent, mode=_FOLDER_MODE, exist_ok=True)
+    Path(path).touch(mode=_FILE_MODE, exist_ok=True)
 
 
 def new(pool: Executor, paths: Iterable[PurePath]) -> None:
@@ -109,7 +112,7 @@ def new(pool: Executor, paths: Iterable[PurePath]) -> None:
 
 
 def _rename(src: PurePath, dest: PurePath) -> None:
-    makedirs(dest.parent, mode=FOLDER_MODE, exist_ok=True)
+    makedirs(dest.parent, mode=_FOLDER_MODE, exist_ok=True)
     mv(str(src), str(dest))
 
 

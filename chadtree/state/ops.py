@@ -3,9 +3,9 @@ from json import dumps, loads
 from pathlib import Path, PurePath
 from typing import Any, Optional
 
-from std2.pickle import new_decoder, new_encoder
+from std2.pickle.decoder import new_decoder
+from std2.pickle.encoder import new_encoder
 
-from ..consts import FOLDER_MODE
 from .types import Session, State
 
 
@@ -43,6 +43,6 @@ def dump_session(state: State, session_store: Path) -> None:
     json = _ENCODER(session)
 
     path = _session_path(state.root.path, session_store=session_store)
-    path.parent.mkdir(mode=FOLDER_MODE, parents=True, exist_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
     json = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
     path.write_text(json, "UTF-8")
