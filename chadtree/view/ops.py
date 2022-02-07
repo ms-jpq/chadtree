@@ -7,7 +7,7 @@ from ..state.types import State
 
 def display_path(path: PurePath, state: State) -> str:
     raw = relpath(path, start=state.root.path)
-    name = r"\n".join(raw.splitlines())
+    name = raw.encode("unicode_escape").decode("utf-8")
     if Path(path).is_dir():
         return f"{name}{sep}"
     else:

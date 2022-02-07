@@ -125,7 +125,7 @@ def _paint(
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
-        yield r"\n".join(node.path.name.splitlines())
+        yield node.path.name.encode("unicode_escape").decode("utf-8")
         if not settings.view.use_icons and is_dir(node):
             yield sep
 
