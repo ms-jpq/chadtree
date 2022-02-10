@@ -13,6 +13,7 @@ from ..fs.types import Mode, Node
 from ..settings.types import Settings
 from ..state.types import FilterPattern, Index, Markers, Selection
 from ..version_ctl.types import VCStatus
+from .ops import encode_for_display
 from .types import Badge, Derived, Highlight, Sortby
 
 
@@ -125,7 +126,7 @@ def _paint(
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
-        yield node.path.name.encode("unicode_escape").decode("utf-8")
+        yield encode_for_display(node.path.name)
         if not settings.view.use_icons and is_dir(node):
             yield sep
 

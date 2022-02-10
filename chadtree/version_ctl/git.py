@@ -1,7 +1,7 @@
 from concurrent.futures import Executor, Future, wait
 from itertools import chain
 from locale import strxfrm
-from os import environ, linesep, sep
+from os import environ, linesep
 from pathlib import PurePath
 from shutil import which
 from string import whitespace
@@ -17,6 +17,7 @@ from typing import (
     cast,
 )
 
+from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
 
 from ..fs.ops import ancestors
@@ -83,7 +84,7 @@ def _stat_sub_modules(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
 
     def cont() -> Iterator[Tuple[str, PurePath]]:
         it = iter(stdout)
-        sub_module = PurePath(sep)
+        sub_module = ROOT
         acc: MutableSequence[str] = []
 
         for char in it:

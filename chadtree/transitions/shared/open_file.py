@@ -1,7 +1,7 @@
 from contextlib import nullcontext
 from itertools import chain
 from mimetypes import guess_type
-from os.path import normcase
+from os.path import altsep, normcase, sep
 from pathlib import PurePath
 from typing import Optional
 
@@ -95,7 +95,7 @@ def open_file(
     nvim: Nvim, state: State, settings: Settings, path: PurePath, click_type: ClickType
 ) -> Optional[Stage]:
     mime, _ = guess_type(path.name, strict=False)
-    m_type, _, _ = (mime or "").partition("/")
+    m_type, _, _ = (mime or "").partition(altsep or sep)
 
     question = LANG("mime_warn", name=path.name, mime=str(mime))
 
