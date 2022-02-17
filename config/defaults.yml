@@ -5,6 +5,7 @@ ignore:
     - .DS_Store
     - .directory
     - .git
+    - .localized
     - thumbs.db
   name_glob: []
   path_glob: []
