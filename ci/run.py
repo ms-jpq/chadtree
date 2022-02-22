@@ -8,13 +8,13 @@ def docker_run(dockerfile: Path) -> str:
     check_call(
         (
             "docker",
-            "build",
+            "buildx",
+            "--progress",
+            "plain",
             "--tag",
             name,
             "--file",
             dockerfile,
-            "--progress",
-            "plain",
             "--",
             ".",
         ),
