@@ -9,6 +9,9 @@ def docker_run(dockerfile: Path) -> str:
         (
             "docker",
             "buildx",
+            "build",
+            "--progress",
+            "plain",
             "--tag",
             name,
             "--file",
