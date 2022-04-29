@@ -135,7 +135,7 @@ def new(pool: Executor, root: PurePath, index: Index) -> Node:
     acc: SimpleQueue = SimpleQueue()
     bfs_q: SimpleQueue = SimpleQueue()
 
-    def drain() -> Iterator[str]:
+    def drain() -> Iterator[PurePath]:
         while not bfs_q.empty():
             yield bfs_q.get()
 

@@ -51,7 +51,7 @@ def root(cwd: PurePath) -> PurePath:
     return PurePath(stdout.rstrip())
 
 
-def _stat_main(cwd: str) -> Sequence[Tuple[str, PurePath]]:
+def _stat_main(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
     stdout = check_output(_GIT_LIST_CMD, stdin=DEVNULL, stderr=PIPE, text=True, cwd=cwd)
 
     def cont() -> Iterator[Tuple[str, PurePath]]:

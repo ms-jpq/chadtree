@@ -1,7 +1,7 @@
 from pathlib import PurePath
 from shutil import which
 from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
-from typing import Sequence, cast
+from typing import Sequence, Union, cast
 
 from pynvim import Nvim
 from pynvim_pp.api import get_cwd
@@ -17,14 +17,16 @@ from .shared.index import indices
 
 
 def _open_gui(path: PurePath, cwd: PurePath) -> None:
-    if which("open"):
-        command: Sequence[str] = ("open", "--", str(path))
-        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
-    elif which("xdg-open"):
-        command = ("xdg-open", str(path))
-        check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
+    if cmd := which("open"):
+        command: Sequence[Union[PurePath, str]] = (cmd, "--", path)
+    elif cmd := which("xdg-open"):
+        command = (cmd, path)
+    elif cmd := which("start"):
+        command = (cmd, path)
     else:
         raise LookupError(LANG("sys_open_err"))
+
+    check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
 
 
 @rpc(blocking=False)
