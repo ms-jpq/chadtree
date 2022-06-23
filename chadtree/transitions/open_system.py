@@ -22,7 +22,7 @@ def _open_gui(path: PurePath, cwd: PurePath) -> None:
     elif cmd := which("xdg-open"):
         command = (cmd, path)
     elif cmd := which("start"):
-        command = (cmd, path)
+        command = (cmd, "", path)
     else:
         raise LookupError(LANG("sys_open_err"))
 
