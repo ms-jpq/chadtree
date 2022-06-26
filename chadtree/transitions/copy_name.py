@@ -1,6 +1,6 @@
 from locale import strxfrm
 from os import linesep
-from os.path import normcase
+from os.path import normpath
 from pathlib import PurePath
 from typing import Callable, Iterator
 
@@ -46,7 +46,7 @@ def _copy_name(nvim: Nvim, state: State, settings: Settings, is_visual: bool) ->
         nvim,
         state=state,
         is_visual=is_visual,
-        proc=lambda p: normcase(p.name),
+        proc=lambda p: normpath(p.name),
     )
 
 
@@ -62,7 +62,7 @@ def _copy_basename(
         nvim,
         state=state,
         is_visual=is_visual,
-        proc=normcase,
+        proc=normpath,
     )
 
 
@@ -78,5 +78,5 @@ def _copy_relname(
         nvim,
         state=state,
         is_visual=is_visual,
-        proc=lambda p: normcase(p.relative_to(state.root.path)),
+        proc=lambda p: normpath(p.relative_to(state.root.path)),
     )
