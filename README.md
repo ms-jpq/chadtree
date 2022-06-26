@@ -92,17 +92,37 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 ## Install
 
-**Minimum version**: `python`: 3.8.2, `nvim`: `0.4.3`, make sure to have `virtualenv` installed (e.g.: `sudo apt install --yes -- python3-venv`)
+**Minimum version**: `python`: `3.8.2`, `nvim`: `0.4.3`, make sure to have `virtualenv` installed (e.g.: `sudo apt install --yes -- python3-venv`)
 
-Install the usual way, ie. [VimPlug](https://github.com/junegunn/vim-plug), [Vundle](https://github.com/VundleVim/Vundle.vim), etc
+Install the usual way, ie.
 
+[VimPlug](https://github.com/junegunn/vim-plug)
 ```vim
 Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
+Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps', 'do': ':CHADdeps'}
 ```
 
 You will have to run `:CHADdeps` when installing / updating. This will install CHADTree's dependencies locally inside `chadtree/.vars/runtime`.
+[Packer](https://github.com/wbthomason/packer.nvim)
+```vim
+{ "ms-jpq/chadtree", { branch = 'chad', run = 'python3 -m chadtree deps', cmd = 'CHADdeps' }}
+```
 
-doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
+The `CHADdeps` command is run to install all of CHADTree's dependencies locallyinside `chadtree/.vars/runtime`.
+You can also remove the hook from the install command and run it yourself.
+
+Doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
+
+[Vundle](https://github.com/VundleVim/Vundle.vim) doesn't support installing from custom branches or hooking post commands.
+If you want to install CHADTree using Vundle, you need to clone it to some directory:
+```bash
+git clone https://github.com/ms-jpq/chadtree --depth 1
+```
+"pin" it like so:
+```vim
+Plugin 'file://path/to/chadtree, { 'pinned': 1 }
+```
+And then run `:CHADdeps` manually.
 
 ## Usage
 
