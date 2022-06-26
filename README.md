@@ -98,18 +98,15 @@ Install the usual way, ie.
 
 [VimPlug](https://github.com/junegunn/vim-plug)
 ```vim
-Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'}
-Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps', 'do': ':CHADdeps'}
+Plug 'ms-jpq/chadtree', { 'branch': 'chad', 'do': 'python3 -m chadtree deps' }
+```
+
+[Packer](https://github.com/wbthomason/packer.nvim)
+```vim
+{ "ms-jpq/chadtree", { branch = 'chad', run = 'python3 -m chadtree deps' }}
 ```
 
 You will have to run `:CHADdeps` when installing / updating. This will install CHADTree's dependencies locally inside `chadtree/.vars/runtime`.
-[Packer](https://github.com/wbthomason/packer.nvim)
-```vim
-{ "ms-jpq/chadtree", { branch = 'chad', run = 'python3 -m chadtree deps', cmd = 'CHADdeps' }}
-```
-
-The `CHADdeps` command is run to install all of CHADTree's dependencies locallyinside `chadtree/.vars/runtime`.
-You can also remove the hook from the install command and run it yourself.
 
 Doing `rm -rf chadtree/` will cleanly remove everything CHADTree uses on your computer.
 
