@@ -72,7 +72,7 @@ class ChadClient(Client):
                 self._settings = initial_settings(nvim, specs)
             except DecodeError as e:
                 tpl = """
-                Some options may hanve changed.
+                Some options may have changed.
                 See help doc on Github under [docs/CONFIGURATION.md]
 
 
