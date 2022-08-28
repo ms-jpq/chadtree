@@ -24,7 +24,7 @@ local load_rtp = function(src)
 end
 
 local load_viml = function(src)
-  vim.api.nvim_command("source " .. "/root/" .. src)
+  vim.cmd("source " .. "/root/" .. src)
 end
 
 load_viml "vim-devicons/plugin/webdevicons.vim"
