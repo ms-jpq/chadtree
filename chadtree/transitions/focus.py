@@ -1,4 +1,4 @@
-from os.path import normcase
+from os.path import normpath
 from pathlib import PurePath
 from typing import Optional
 
@@ -66,7 +66,7 @@ def _change_dir(
             nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
         )
         chdir(nvim, path=new_state.root.path)
-        write(nvim, LANG("new cwd", cwd=normcase(new_state.root.path)))
+        write(nvim, LANG("new cwd", cwd=normpath(new_state.root.path)))
         return Stage(new_state, focus=new_state.root.path)
 
 
