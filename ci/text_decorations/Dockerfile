@@ -2,11 +2,8 @@ FROM ubuntu:latest
 
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends software-properties-common && \
-    add-apt-repository ppa:neovim-ppa/unstable && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends -- neovim git && \
-    rm -rf /var/lib/apt/lists/*
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -- neovim git ca-certificates && \
+    rm -rf -- /var/lib/apt/lists/*
 
 
 WORKDIR /root

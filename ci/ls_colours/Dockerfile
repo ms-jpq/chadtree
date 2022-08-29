@@ -2,8 +2,9 @@ FROM ubuntu:latest
 
 
 RUN apt-get update && \
-    apt-get install -y git python3 && \
-    rm -rf /var/lib/apt/lists/*
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -- python3 git ca-certificates && \
+    rm -rf -- /var/lib/apt/lists/* && \
+    update-ca-certificates
 
 
 WORKDIR /root
