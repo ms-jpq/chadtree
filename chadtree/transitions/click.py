@@ -51,7 +51,7 @@ def _click(
                     click_type=click_type,
                 )
 
-                if settings.close_on_open:
+                if settings.close_on_open and click_type != ClickType.secondary:
                     for win, _ in find_fm_windows(nvim):
                         win_close(nvim, win=win)
 
