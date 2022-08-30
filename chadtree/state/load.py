@@ -8,9 +8,10 @@ from ..consts import SESSION_DIR
 from ..fs.cartographer import new
 from ..nvim.markers import markers
 from ..settings.types import Settings
+from ..version_ctl.types import VCStatus
 from ..view.render import render
 from .ops import load_session
-from .types import Selection, State, VCStatus
+from .types import Selection, State
 
 
 def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:

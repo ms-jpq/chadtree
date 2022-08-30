@@ -14,7 +14,7 @@ from ..state.types import State
 from .shared.index import indices
 from .shared.open_file import open_file
 from .shared.wm import find_fm_windows
-from .types import ClickType, Stage, State
+from .types import ClickType, Stage
 
 
 def _click(

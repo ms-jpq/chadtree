@@ -5,9 +5,11 @@ from std2.types import Void, VoidType, or_else
 
 from ..fs.cartographer import update
 from ..fs.types import Node
+from ..nvim.types import Markers
 from ..settings.types import Settings
+from ..version_ctl.types import VCStatus
 from ..view.render import render
-from .types import FilterPattern, Index, Markers, Selection, State, VCStatus
+from .types import FilterPattern, Index, Selection, State
 
 
 def forward(

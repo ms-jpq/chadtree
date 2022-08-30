@@ -21,7 +21,7 @@ from ...settings.localization import LANG
 from ...settings.types import Settings
 from ...state.next import forward
 from ...state.types import State
-from ..types import ClickType, Stage, State
+from ..types import ClickType, Stage
 from .wm import (
     find_buffers_with_file,
     find_non_fm_windows_in_tab,

@@ -10,8 +10,9 @@ from std2.types import never
 
 from ..fs.cartographer import is_dir, user_ignored
 from ..fs.types import Mode, Node
+from ..nvim.types import Markers
 from ..settings.types import Settings
-from ..state.types import FilterPattern, Index, Markers, Selection
+from ..state.types import FilterPattern, Index, Selection
 from ..version_ctl.types import VCStatus
 from .ops import encode_for_display
 from .types import Badge, Derived, Highlight, Sortby

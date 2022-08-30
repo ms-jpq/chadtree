@@ -17,7 +17,7 @@ from pynvim_pp.highlight import HLgroup
 from std2.coloursys import rgb_to_hex
 
 from ..consts import FM_HL_PREFIX
-from .types import Mode
+from ..fs.types import Mode
 
 
 class _Style(IntEnum):

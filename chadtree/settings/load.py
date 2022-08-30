@@ -22,10 +22,11 @@ from chad_types import (
 )
 
 from ..consts import CONFIG_YML, SETTINGS_VAR
+from ..fs.types import Ignored
 from ..registry import NAMESPACE
 from ..view.load import load_theme
-from ..view.types import HLGroups, Sortby
-from .types import Ignored, MimetypeOptions, Settings, VersionCtlOpts, ViewOptions
+from ..view.types import HLGroups, Sortby, ViewOptions
+from .types import MimetypeOptions, Settings, VersionCtlOpts
 
 
 class _OpenDirection(Enum):
