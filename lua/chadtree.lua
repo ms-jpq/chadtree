@@ -75,7 +75,7 @@ local main = function(is_xdg)
     if vim.api.nvim_call_function("filereadable", {v_py}) == 1 then
       return {v_py}
     else
-      local win_proxy = cwd .. [[/win.bat]]
+      local win_proxy = cwd .. [[/win.cmd]]
       return {win_proxy, py3}
     end
   else
