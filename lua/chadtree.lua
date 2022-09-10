@@ -101,15 +101,32 @@ local start = function(deps, ...)
   local params = {
     cwd = cwd,
     on_exit = "CHADon_exit",
-    on_stdout = "CHADon_stdout",
-    on_stderr = "CHADon_stderr"
+    on_stdout = (function()
+      if deps then
+        return nil
+      else
+        return "CHADon_stdout"
+      end
+    end)(),
+    on_stderr = (function()
+      if deps then
+        return nil
+      else
+        return "CHADon_stderr"
+      end
+    end)()
   }
-  local job_id = vim.api.nvim_call_function("jobstart", {args, params})
-  return job_id
+  if deps then
+    vim.api.nvim_command [[new]]
+    vim.api.nvim_call_function("termopen", {args, params})
+  else
+    local job_id = vim.api.nvim_call_function("jobstart", {args, params})
+    return job_id
+  end
 end
 
 chad.Deps = function()
-  start(true, "deps", "--nvim")
+  start(true, "deps")
 end
 
 vim.api.nvim_command [[command! -nargs=0 CHADdeps lua chad.Deps()]]
@@ -124,12 +141,20 @@ local set_chad_call = function(cmd)
 
     if not job_id then
       local server = vim.api.nvim_call_function("serverstart", {})
-      job_id = start(false, "run", "--socket", server)
+      job_id =
+        start(
+        false,
+        "run",
+        "--ppid",
+        vim.api.nvim_call_function("getpid", {}),
+        "--socket",
+        server
+      )
     end
 
     if not err_exit and CHAD[cmd] then
       CHAD[cmd](args)
-      t2 = vim.loop.now()
+      local t2 = vim.loop.now()
       if settings().profiling and t1 >= 0 then
         print("Init       " .. (t2 - t1) .. "ms")
       end

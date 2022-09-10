@@ -1,11 +1,22 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from locale import strxfrm
-from typing import AbstractSet, Mapping, Optional, Sequence, SupportsFloat, Union, cast
+from typing import (
+    AbstractSet,
+    Any,
+    Iterable,
+    Mapping,
+    Optional,
+    Sequence,
+    SupportsFloat,
+    Union,
+    cast,
+)
 
-from pynvim.api.nvim import Nvim
-from pynvim_pp.api import cur_win, win_get_option
-from pynvim_pp.rpc import RpcSpec
+from pynvim_pp.atomic import Atomic
+from pynvim_pp.nvim import Nvim
+from pynvim_pp.types import NoneType, RPCallable
+from pynvim_pp.window import Window
 from std2.configparser import hydrate
 from std2.graphlib import merge
 from std2.pickle.decoder import new_decoder
@@ -76,24 +87,28 @@ class _UserConfig:
     profiling: bool
 
 
-def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
+async def initial(specs: Iterable[RPCallable]) -> Settings:
     a_decode = new_decoder[Artifact](Artifact)
     c_decode = new_decoder[_UserConfig](_UserConfig)
 
-    win = cur_win(nvim)
+    win = await Window.get_current()
     artifacts = a_decode(safe_load(ARTIFACT.read_text("UTF-8")))
 
-    user_config = nvim.vars.get(SETTINGS_VAR, {})
+    user_config = cast(
+        Mapping[str, Any], await Nvim.vars.get(NoneType, SETTINGS_VAR) or {}
+    )
     config = c_decode(
         merge(
             safe_load(CONFIG_YML.read_text("UTF-8")), hydrate(user_config), replace=True
         )
     )
     options, view, theme = config.options, config.view, config.theme
-    win_actual_opts: Mapping[str, Union[bool, str]] = {
-        opt: cast(Union[bool, str], win_get_option(nvim, win=win, key=opt))
-        for opt in view.window_options
-    }
+
+    atomic = Atomic()
+    for opt in view.window_options:
+        atomic.win_get_option(win, opt)
+    win_opts = cast(Sequence[Union[bool, str]], await atomic.commit(NoneType))
+    win_actual_opts = {k: v for k, v in zip(view.window_options, win_opts)}
 
     icons, hl_context = load_theme(
         artifact=artifacts,
@@ -118,7 +133,7 @@ def initial(nvim: Nvim, specs: Sequence[RpcSpec]) -> Settings:
     )
 
     keymap = {f"{NAMESPACE}.{k.capitalize()}": v for k, v in config.keymap.items()}
-    legal_keys = {f"{NAMESPACE}.{name.capitalize()}" for name, _ in specs}
+    legal_keys = {f"{NAMESPACE}.{spec.method.capitalize()}" for spec in specs}
     extra_keys = keymap.keys() - legal_keys
 
     if extra_keys:

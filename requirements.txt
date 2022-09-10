@@ -1,6 +1,3 @@
-setuptools
-wheel
-std2@https://github.com/ms-jpq/std2/archive/7014b4a5f873284efbc19c61d863eb29c2de4529.tar.gz
-pynvim_pp@https://github.com/ms-jpq/pynvim_pp/archive/a7b06e7e727cc820807aa77cde404201d2d80c53.tar.gz
-pynvim==0.4.2
+std2@https://github.com/ms-jpq/std2/archive/e37992cc1cea2d3a3dda8abcfd1b7cb7fbf1b5b5.tar.gz
+pynvim_pp@https://github.com/ms-jpq/pynvim_pp/archive/95298d00fcc27f3437fac0636ea51db00adee4ae.tar.gz
 PyYAML==5.4.1

@@ -1,8 +1,7 @@
-from concurrent.futures import Executor
+from asyncio import gather
 from pathlib import Path
 
-from pynvim import Nvim
-from pynvim_pp.api import get_cwd
+from pynvim_pp.nvim import Nvim
 
 from ..consts import SESSION_DIR
 from ..fs.cartographer import new
@@ -14,16 +13,18 @@ from .ops import load_session
 from .types import Selection, State
 
 
-def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
-    cwd = get_cwd(nvim)
+async def initial(settings: Settings) -> State:
+    cwd, marks = await gather(Nvim.getcwd(), markers())
     session_store = (
-        Path(nvim.funcs.stdpath("cache")) / "chad_sessions"
+        Path(await Nvim.fn.stdpath(str, "cache")) / "chad_sessions"
         if settings.xdg
         else SESSION_DIR
     )
 
     session = (
-        load_session(cwd, session_store=session_store) if settings.session else None
+        await load_session(cwd, session_store=session_store)
+        if settings.session
+        else None
     )
     index = session.index if session and session.index is not None else {cwd}
 
@@ -39,8 +40,7 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
     )
 
     selection: Selection = set()
-    node = new(pool, root=cwd, index=index)
-    marks = markers(nvim)
+    node = await new(cwd, index=index)
     vc = VCStatus()
 
     current = None
@@ -59,7 +59,6 @@ def initial(nvim: Nvim, pool: Executor, settings: Settings) -> State:
     )
 
     state = State(
-        pool=pool,
         session_store=session_store,
         index=index,
         selection=selection,

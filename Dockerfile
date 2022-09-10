@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:focal
 
 ENV TERM=xterm-256color
 RUN apt-get update && \
@@ -6,8 +6,8 @@ RUN apt-get update && \
     rm -rf -- /var/lib/apt/lists/*
 
 
-ADD https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim /root/.config/nvim/autoload/plug.vim
 COPY ./docker /
-COPY . /root/.config/nvim/plugged/chadtree
+WORKDIR /root/.config/nvim/pack/modules/start/chadtree
+COPY . .
 
-WORKDIR /root/.config/nvim/plugged/chadtree
+RUN python3 -m chadtree deps --xdg ~/.local/share/nvim

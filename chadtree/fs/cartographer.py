@@ -1,9 +1,8 @@
-from concurrent.futures import Executor, wait
+from asyncio import Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
-from os import listdir, stat
+from os import scandir, stat
 from pathlib import PurePath
-from queue import SimpleQueue
 from stat import (
     S_IEXEC,
     S_ISDIR,
@@ -19,13 +18,16 @@ from stat import (
 from typing import (
     AbstractSet,
     Iterable,
+    AsyncIterator,
     Iterator,
     Mapping,
     MutableMapping,
     Optional,
+    Sequence,
     cast,
 )
 
+from std2.asyncio import to_thread
 from std2.itertools import chunk
 
 from ..consts import WALK_PARALLELISM_FACTOR
@@ -56,64 +58,64 @@ def _fs_modes(stat: int) -> Iterator[Mode]:
             yield mode
 
 
-def _fs_stat(path: PurePath) -> AbstractSet[Mode]:
-    try:
-        info = stat(path, follow_symlinks=False)
-    except FileNotFoundError:
-        return {Mode.orphan_link}
-    else:
-        if S_ISLNK(info.st_mode):
-            try:
-                link_info = stat(path, follow_symlinks=True)
-            except (FileNotFoundError, NotADirectoryError):
-                return {Mode.orphan_link}
-            else:
-                mode = {*_fs_modes(link_info.st_mode)}
-                return mode | {Mode.link}
+async def _fs_stat(path: PurePath) -> AbstractSet[Mode]:
+    def cont() -> AbstractSet[Mode]:
+        try:
+            info = stat(path, follow_symlinks=False)
+        except FileNotFoundError:
+            return {Mode.orphan_link}
         else:
-            mode = {*_fs_modes(info.st_mode)}
-            return mode
+            if S_ISLNK(info.st_mode):
+                try:
+                    link_info = stat(path, follow_symlinks=True)
+                except (FileNotFoundError, NotADirectoryError):
+                    return {Mode.orphan_link}
+                else:
+                    mode = {*_fs_modes(link_info.st_mode)}
+                    return mode | {Mode.link}
+            else:
+                mode = {*_fs_modes(info.st_mode)}
+                return mode
+
+    return await to_thread(cont)
 
 
-def user_ignored(node: Node, ignores: Ignored) -> bool:
-    return (
-        node.path.name in ignores.name_exact
-        or any(fnmatch(node.path.name, pattern) for pattern in ignores.name_glob)
-        or any(fnmatch(str(node.path), pattern) for pattern in ignores.path_glob)
-    )
-
-
-def _listdir(path: PurePath) -> Iterator[PurePath]:
+async def _listdir(path: PurePath) -> AsyncIterator[Sequence[PurePath]]:
     with suppress(NotADirectoryError):
-        yield from map(PurePath, listdir(path))
+        with await to_thread(lambda: scandir(path)) as it:
+            chunked = chunk(it, WALK_PARALLELISM_FACTOR)
+            while True:
+                if chunks := await to_thread(lambda: next(chunked, None)):
+                    yield tuple(map(PurePath, chunks))
+                else:
+                    break
 
 
-def _new(
-    roots: Iterable[PurePath], index: Index, acc: SimpleQueue, bfs_q: SimpleQueue
+async def _new(
+    roots: Iterable[PurePath], index: Index, acc: Queue, bfs_q: Queue
 ) -> None:
     for root in roots:
         with suppress(PermissionError):
-            mode = _fs_stat(root)
+            mode = await _fs_stat(root)
             _ancestors = ancestors(root)
             node = Node(
                 path=root,
                 mode=mode,
                 ancestors=_ancestors,
             )
-            acc.put(node)
+            await acc.put(node)
 
             if root in index:
-                for item in _listdir(root):
-                    path = root / item
-                    bfs_q.put(path)
+                async for paths in _listdir(root):
+                    await bfs_q.put(paths)
 
 
-def _join(nodes: SimpleQueue) -> Node:
+async def _join(nodes: Queue) -> Node:
     root_node: Optional[Node] = None
     acc: MutableMapping[PurePath, Node] = {}
 
     while not nodes.empty():
-        node: Node = nodes.get()
+        node: Node = await nodes.get()
         path = node.path
         acc[path] = node
 
@@ -131,33 +133,30 @@ def _join(nodes: SimpleQueue) -> Node:
         return root_node
 
 
-def new(pool: Executor, root: PurePath, index: Index) -> Node:
-    acc: SimpleQueue = SimpleQueue()
-    bfs_q: SimpleQueue = SimpleQueue()
+async def new(root: PurePath, index: Index) -> Node:
+    acc: Queue = Queue()
+    bfs_q: Queue = Queue()
 
-    def drain() -> Iterator[PurePath]:
+    async def drain() -> AsyncIterator[Sequence[PurePath]]:
         while not bfs_q.empty():
-            yield bfs_q.get()
+            yield await bfs_q.get()
 
-    bfs_q.put(root)
+    await bfs_q.put((root,))
     while not bfs_q.empty():
-        tasks = tuple(
-            pool.submit(_new, roots=paths, index=index, acc=acc, bfs_q=bfs_q)
-            for paths in chunk(drain(), n=WALK_PARALLELISM_FACTOR)
-        )
-        wait(tasks)
+        tasks = [
+            _new(paths, index=index, acc=acc, bfs_q=bfs_q) async for paths in drain()
+        ]
+        await gather(*tasks)
 
-    return _join(acc)
+    return await _join(acc)
 
 
-def _update(
-    pool: Executor, root: Node, index: Index, paths: AbstractSet[PurePath]
-) -> Node:
+async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
     if root.path in paths:
-        return new(pool, root=root.path, index=index)
+        return await new(root.path, index=index)
     else:
         children = {
-            k: _update(pool, root=v, index=index, paths=paths)
+            k: await _update(v, index=index, paths=paths)
             for k, v in root.children.items()
         }
         return Node(
@@ -168,13 +167,19 @@ def _update(
         )
 
 
-def update(
-    pool: Executor, root: Node, *, index: Index, paths: AbstractSet[PurePath]
-) -> Node:
+def user_ignored(node: Node, ignores: Ignored) -> bool:
+    return (
+        node.path.name in ignores.name_exact
+        or any(fnmatch(node.path.name, pattern) for pattern in ignores.name_glob)
+        or any(fnmatch(str(node.path), pattern) for pattern in ignores.path_glob)
+    )
+
+
+async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
     try:
-        return _update(pool, root=root, index=index, paths=paths)
+        return await _update(root, index=index, paths=paths)
     except FileNotFoundError:
-        return new(pool, root=root.path, index=index)
+        return await new(root.path, index=index)
 
 
 def is_dir(node: Node) -> bool:

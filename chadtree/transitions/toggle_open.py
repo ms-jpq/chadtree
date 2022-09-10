@@ -1,21 +1,12 @@
 from dataclasses import dataclass
 from pathlib import PurePath
-from shutil import which
 from subprocess import CalledProcessError
 from typing import Mapping, Optional, Sequence
 
-from pynvim import Nvim
-from pynvim.api import Window
-from pynvim_pp.api import (
-    cur_win,
-    get_cwd,
-    list_wins,
-    set_cur_win,
-    win_close,
-    win_set_buf,
-    win_set_option,
-)
-from pynvim_pp.lib import write
+from pynvim_pp.nvim import Nvim
+from pynvim_pp.types import ExtData
+from pynvim_pp.window import Window
+from std2 import anext
 from std2.argparse import ArgparseError, ArgParser
 
 from ..fs.ops import exists, new
@@ -24,6 +15,7 @@ from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
 from ..version_ctl.git import root as version_ctl_toplv
+from .open_system import which
 from .shared.current import maybe_path_above, new_current_file, new_root
 from .shared.open_file import open_file
 from .shared.wm import (
@@ -69,69 +61,68 @@ def _parse_args(args: Sequence[str]) -> _Args:
     return opts
 
 
-def _ensure_side_window(
-    nvim: Nvim,
+async def _ensure_side_window(
     *,
     settings: Settings,
-    window_order: Mapping[int, None],
+    window_order: Mapping[ExtData, None],
     width: int,
     window: Window,
 ) -> None:
     open_left = settings.open_left
-    windows = tuple(
-        find_windows_in_tab(nvim, last_used=window_order, no_secondary=False)
-    )
+    windows = [
+        win
+        async for win in find_windows_in_tab(last_used=window_order, no_secondary=False)
+    ]
     target = windows[0] if open_left else windows[-1]
-    if window.number != target.number:
+    if window.data != target.data:
         if open_left:
-            nvim.api.command("wincmd H")
+            await Nvim.exec("wincmd H")
         else:
-            nvim.api.command("wincmd L")
-        resize_fm_windows(nvim, last_used=window_order, width=width)
+            await Nvim.exec("wincmd L")
+        await resize_fm_windows(last_used=window_order, width=width)
 
 
-def _open_fm_window(
-    nvim: Nvim,
+async def _open_fm_window(
     settings: Settings,
-    window_order: Mapping[int, None],
+    window_order: Mapping[ExtData, None],
     opts: _Args,
     width: int,
 ) -> None:
-    cwin = cur_win(nvim)
-    win = next(find_fm_windows_in_tab(nvim, last_used=window_order), None)
+    cwin = await Window.get_current()
+    win = await anext(find_fm_windows_in_tab(last_used=window_order), None)
     if win:
         if opts.toggle:
-            wins = list_wins(nvim)
+            wins = await Window.list()
             if len(wins) > 1:
-                win_close(nvim, win=win)
+                await win.close()
         else:
-            set_cur_win(nvim, win=win)
+            await Window.set_current(win)
     else:
-        buf = next(find_fm_buffers(nvim), None)
-        if buf is None:
-            buf = new_fm_buffer(nvim, settings=settings)
+        buf = await anext(find_fm_buffers(), None)
+        if not buf:
+            buf = await new_fm_buffer(settings=settings)
 
-        win = new_window(
-            nvim,
+        win = await new_window(
             last_used=window_order,
             win_local=settings.win_actual_opts,
             open_left=settings.open_left,
             width=width,
         )
         for key, val in settings.win_local_opts.items():
-            win_set_option(nvim, win=win, key=key, val=val)
-        win_set_buf(nvim, win=win, buf=buf)
+            await win.opts.set(key, val=val)
 
-        _ensure_side_window(
-            nvim, window=win, settings=settings, window_order=window_order, width=width
+        await win.set_buf(buf)
+
+        await _ensure_side_window(
+            window=win, settings=settings, window_order=window_order, width=width
         )
         if not opts.focus:
-            set_cur_win(nvim, win=cwin)
+            await Window.set_current(cwin)
 
 
 @rpc(blocking=False)
-def _open(
-    nvim: Nvim, state: State, settings: Settings, args: Sequence[str]
+async def _open(
+    state: State, settings: Settings, args: Sequence[str]
 ) -> Optional[Stage]:
     """
     Toggle sidebar
@@ -140,42 +131,44 @@ def _open(
     try:
         opts = _parse_args(args)
     except ArgparseError as e:
-        write(nvim, e, error=True)
+        await Nvim.write(e, error=True)
         return None
     else:
         if opts.version_ctl:
-            if which("git"):
+            if git := which("git"):
                 try:
-                    cwd = version_ctl_toplv(state.root.path)
-                    new_state = new_root(
-                        nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
+                    cwd = await version_ctl_toplv(git, cwd=state.root.path)
+                    new_state = await new_root(
+                        state=state, settings=settings, new_cwd=cwd, indices=set()
                     )
                 except CalledProcessError:
-                    write(nvim, LANG("cannot find version ctl root"), error=True)
+                    await Nvim.write(LANG("cannot find version ctl root"), error=True)
                     return None
             else:
-                write(nvim, LANG("cannot find version ctl root"), error=True)
+                await Nvim.write(LANG("cannot find version ctl root"), error=True)
                 return None
         else:
             new_state = state
 
         if opts.path:
-            path = opts.path if opts.path.is_absolute() else get_cwd(nvim) / opts.path
+            path = (
+                opts.path
+                if opts.path.is_absolute()
+                else await Nvim.getcwd() / opts.path
+            )
             if not exists(path, follow=True):
-                new(state.pool, paths=(path,))
+                await new((path,))
             next_state = (
-                maybe_path_above(nvim, state=new_state, settings=settings, path=path)
+                await maybe_path_above(new_state, settings=settings, path=path)
                 or new_state
             )
-            _open_fm_window(
-                nvim,
+            await _open_fm_window(
                 settings=settings,
                 opts=opts,
                 window_order=new_state.window_order,
                 width=next_state.width,
             )
-            open_file(
-                nvim,
+            await open_file(
                 state=state,
                 settings=settings,
                 path=path,
@@ -183,14 +176,13 @@ def _open(
             )
             return Stage(next_state, focus=path)
         else:
-            curr = find_current_buffer_path(nvim)
+            curr = await find_current_buffer_path()
             stage = (
-                new_current_file(nvim, state=new_state, settings=settings, current=curr)
+                await new_current_file(state=new_state, settings=settings, current=curr)
                 if curr
                 else None
             )
-            _open_fm_window(
-                nvim,
+            await _open_fm_window(
                 settings=settings,
                 opts=opts,
                 window_order=new_state.window_order,

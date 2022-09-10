@@ -1,21 +1,15 @@
-from contextlib import nullcontext
-from itertools import chain
 from mimetypes import guess_type
 from os.path import altsep, normpath, sep
 from pathlib import PurePath
-from typing import Optional
+from typing import AsyncContextManager, Optional, cast
 
-from pynvim import Nvim
-from pynvim_pp.api import (
-    ask_mc,
-    buf_set_option,
-    cur_buf,
-    cur_win,
-    set_cur_win,
-    win_set_buf,
-    win_set_option,
-)
-from pynvim_pp.hold import hold_win_pos
+from pynvim_pp.buffer import Buffer
+from pynvim_pp.hold import hold_win
+from pynvim_pp.nvim import Nvim
+from pynvim_pp.window import Window
+from std2 import anext
+from std2.aitertools import achain, to_async
+from std2.contextlib import nullacontext
 
 from ...settings.localization import LANG
 from ...settings.types import Settings
@@ -31,68 +25,74 @@ from .wm import (
 )
 
 
-def _show_file(
-    nvim: Nvim, *, state: State, settings: Settings, click_type: ClickType
+async def _show_file(
+    *, state: State, settings: Settings, click_type: ClickType
 ) -> None:
     if click_type is ClickType.tertiary:
-        nvim.api.command("tabnew")
-        win = cur_win(nvim)
+        await Nvim.exec("tabnew")
+        win = await Window.get_current()
         for key, val in settings.win_actual_opts.items():
-            win_set_option(nvim, win=win, key=key, val=val)
+            await win.opts.set(key, val=val)
 
     path = state.current
     if path:
         hold = click_type is ClickType.secondary
-        mgr = hold_win_pos(nvim) if hold else nullcontext()
-        with mgr:
-            non_fm_windows = tuple(
-                find_non_fm_windows_in_tab(nvim, last_used=state.window_order)
-            )
-            buf = next(find_buffers_with_file(nvim, file=path), None)
-            win = next(
-                chain(
+        mgr = (
+            cast(AsyncContextManager[None], hold_win(win=None))
+            if hold
+            else nullacontext(None)
+        )
+        async with mgr:
+            non_fm_windows = [
+                win
+                async for win in find_non_fm_windows_in_tab(
+                    last_used=state.window_order
+                )
+            ]
+            buf = await anext(find_buffers_with_file(file=path), None)
+            win = await anext(
+                achain(
                     find_window_with_file_in_tab(
-                        nvim, last_used=state.window_order, file=path
+                        last_used=state.window_order, file=path
                     ),
-                    non_fm_windows,
+                    to_async(non_fm_windows),
                 ),
-                None,
-            ) or new_window(
-                nvim,
+                cast(Window, None),
+            ) or await new_window(
                 last_used=state.window_order,
                 win_local=settings.win_actual_opts,
                 open_left=not settings.open_left,
                 width=None
                 if len(non_fm_windows)
-                else nvim.options["columns"] - state.width - 1,
+                else await Nvim.opts.get(int, "columns") - state.width - 1,
             )
 
-            set_cur_win(nvim, win=win)
+            await Window.set_current(win)
             non_fm_count = len(non_fm_windows)
 
             if click_type is ClickType.v_split and non_fm_count:
-                nvim.api.command("vnew")
-                temp_buf = cur_buf(nvim)
-                buf_set_option(nvim, buf=temp_buf, key="bufhidden", val="wipe")
+                await Nvim.exec("vnew")
+                temp_buf = await Buffer.get_current()
+                await temp_buf.opts.set("bufhidden", val="wipe")
             elif click_type is ClickType.h_split and non_fm_count:
-                nvim.api.command("new")
-                temp_buf = cur_buf(nvim)
-                buf_set_option(nvim, buf=temp_buf, key="bufhidden", val="wipe")
+                await Nvim.exec("new")
+                temp_buf = await Buffer.get_current()
+                await temp_buf.opts.set("bufhidden", val="wipe")
 
-            win = cur_win(nvim)
+            win = await Window.get_current()
 
             if buf is None:
-                escaped = nvim.funcs.fnameescape(normpath(path))
-                nvim.command(f"edit! {escaped}")
+                escaped = await Nvim.fn.fnameescape(str, normpath(path))
+                await Nvim.exec(f"edit! {escaped}")
             else:
-                win_set_buf(nvim, win=win, buf=buf)
+                await win.set_buf(buf)
 
-            resize_fm_windows(nvim, last_used=state.window_order, width=state.width)
-            nvim.api.command("filetype detect")
+            await resize_fm_windows(last_used=state.window_order, width=state.width)
+            await Nvim.exec("filetype detect")
 
 
-def open_file(
-    nvim: Nvim, state: State, settings: Settings, path: PurePath, click_type: ClickType
+async def open_file(
+    state: State, settings: Settings, path: PurePath, click_type: ClickType
 ) -> Optional[Stage]:
     mime, _ = guess_type(path.name, strict=False)
     m_type, _, _ = (mime or "").partition(altsep or sep)
@@ -100,8 +100,7 @@ def open_file(
     question = LANG("mime_warn", name=path.name, mime=str(mime))
 
     go = (
-        ask_mc(
-            nvim,
+        await Nvim.confirm(
             question=question,
             answers=LANG("ask_yesno"),
             answer_key={1: True, 2: False},
@@ -111,8 +110,8 @@ def open_file(
     )
 
     if go:
-        new_state = forward(state, settings=settings, current=path)
-        _show_file(nvim, state=new_state, settings=settings, click_type=click_type)
+        new_state = await forward(state, settings=settings, current=path)
+        await _show_file(state=new_state, settings=settings, click_type=click_type)
         return Stage(new_state, focus=path)
     else:
         return None

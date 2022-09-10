@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, Namespace
-from concurrent.futures import ThreadPoolExecutor
+from asyncio import run as arun
 from contextlib import nullcontext, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -38,6 +38,7 @@ def parse_args() -> Namespace:
     sub_parsers = parser.add_subparsers(dest="command", required=True)
 
     with nullcontext(sub_parsers.add_parser("run")) as p:
+        p.add_argument("--ppid", type=int)
         p.add_argument("--socket", required=True)
         p.add_argument("--xdg")
 
@@ -68,9 +69,6 @@ _IN_VENV = _RT_PY == _EXEC_PATH
 
 
 if command == "deps":
-    if not args.nvim:
-        exit(0)
-
     assert not _IN_VENV
 
     io_out = StringIO()
@@ -112,7 +110,6 @@ if command == "deps":
             _LOCK_FILE.write_text(_REQ)
             msg = """
             ---
-            This is not an error:
             You can now use :CHADopen
             """
             print(dedent(msg), file=stderr)
@@ -128,10 +125,11 @@ elif command == "run":
         elif lock != _REQ:
             raise ImportError()
         else:
-            import pynvim
             import pynvim_pp
-            import std2
             import yaml
+            from std2.sys import suicide
+
+            from .client import init
     except ImportError:
         msg = """
         Please update dependencies using :CHADdeps
@@ -144,15 +142,13 @@ elif command == "run":
         print(msg, end="", file=stderr)
         exit(1)
     else:
-        from pynvim import attach
-        from pynvim_pp.client import run_client
 
-        from .client import ChadClient
+        async def main() -> None:
+            async with suicide(args.ppid):
+                await init(args.socket)
 
-        nvim = attach("socket", path=args.socket)
-        with ThreadPoolExecutor() as pool:
-            code = run_client(nvim, pool=pool, client=ChadClient(pool=pool))
-        exit(code)
+        arun(main())
+
 
 else:
     assert False

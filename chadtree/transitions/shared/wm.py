@@ -1,215 +1,228 @@
+from contextlib import asynccontextmanager
 from math import inf
 from os.path import normpath
 from pathlib import Path, PurePath
-from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
-
-from pynvim.api import Buffer, Nvim, Window
-from pynvim_pp.api import (
-    buf_close,
-    buf_filetype,
-    buf_name,
-    buf_set_option,
-    create_buf,
-    cur_buf,
-    cur_tab,
-    cur_win,
-    list_bufs,
-    list_wins,
-    set_cur_win,
-    tab_list_wins,
-    win_get_buf,
-    win_get_option,
-    win_set_option,
+from typing import (
+    AbstractSet,
+    AsyncIterator,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
 )
-from pynvim_pp.hold import hold_win_pos
+
+from pynvim_pp.atomic import Atomic
+from pynvim_pp.buffer import Buffer
+from pynvim_pp.hold import hold_win
 from pynvim_pp.keymap import Keymap
 from pynvim_pp.lib import resolve_path
+from pynvim_pp.nvim import Nvim
+from pynvim_pp.tabpage import Tabpage
+from pynvim_pp.types import ExtData, NoneType
+from pynvim_pp.window import Window
 
 from ...consts import FM_FILETYPE
 from ...fs.ops import ancestors
 from ...settings.types import Settings
 
 
-def is_fm_buffer(nvim: Nvim, buf: Buffer) -> bool:
-    ft = buf_filetype(nvim, buf=buf)
+async def is_fm_buffer(buf: Buffer) -> bool:
+    ft = await buf.filetype()
     return ft == FM_FILETYPE
 
 
-def is_fm_window(nvim: Nvim, win: Window) -> bool:
-    buf = win_get_buf(nvim, win=win)
-    return is_fm_buffer(nvim, buf=buf)
+async def is_fm_window(win: Window) -> bool:
+    buf = await win.get_buf()
+    return await is_fm_buffer(buf)
 
 
-def find_windows_in_tab(
-    nvim: Nvim, last_used: Mapping[int, None], no_secondary: bool
-) -> Iterator[Window]:
-    ordering = {win_id: idx for idx, win_id in enumerate(reversed(last_used))}
+async def find_windows_in_tab(
+    last_used: Mapping[ExtData, None], no_secondary: bool
+) -> AsyncIterator[Window]:
+    ordering = {win_id: idx for idx, win_id in enumerate(reversed(last_used.keys()))}
+    tab = await Tabpage.get_current()
+    wins = await tab.list_wins()
 
-    def key_by(win: Window) -> Tuple[float, int, int]:
+    atomic = Atomic()
+    for win in wins:
+        atomic.win_get_position(win)
+    pos = cast(Sequence[Tuple[int, int]], await atomic.commit(NoneType))
+    positions = {win.data: rc for win, rc in zip(wins, pos)}
+
+    def key_by(win: Window) -> Tuple[float, float, float]:
         """
         -> sort by last_used, then row, then col
         """
 
-        pos = ordering.get(win.handle, inf)
-        row, col = nvim.funcs.win_screenpos(win.number)
-        return pos, col, row
+        order = ordering.get(win.data, inf)
+        row, col = positions.get(win.data, (inf, inf))
+        return order, col, row
 
-    tab = cur_tab(nvim)
-    wins = tab_list_wins(nvim, tab=tab)
     ordered = sorted(wins, key=key_by)
 
     for win in ordered:
-        is_preview: bool = win_get_option(nvim, win=win, key="previewwindow")
-        buf = win_get_buf(nvim, win)
-        ft = buf_filetype(nvim, buf=buf)
+        is_preview = await win.opts.get(bool, "previewwindow")
+        buf = await win.get_buf()
+        ft = await buf.filetype()
         is_secondary = is_preview or ft == "qf"
         if not is_secondary or not no_secondary:
             yield win
 
 
-def find_fm_windows(nvim: Nvim) -> Iterator[Tuple[Window, Buffer]]:
-    for win in list_wins(nvim):
-        buf = win_get_buf(nvim, win=win)
-        if is_fm_buffer(nvim, buf=buf):
+async def find_fm_windows() -> AsyncIterator[Tuple[Window, Buffer]]:
+    for win in await Window.list():
+        buf = await win.get_buf()
+        if await is_fm_buffer(buf):
             yield win, buf
 
 
-def find_fm_windows_in_tab(
-    nvim: Nvim, last_used: Mapping[int, None]
-) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, last_used=last_used, no_secondary=True):
-        buf = win_get_buf(nvim, win=win)
-        if is_fm_buffer(nvim, buf=buf):
+async def find_fm_windows_in_tab(
+    last_used: Mapping[ExtData, None]
+) -> AsyncIterator[Window]:
+    async for win in find_windows_in_tab(last_used, no_secondary=True):
+        buf = await win.get_buf()
+        if await is_fm_buffer(buf):
             yield win
 
 
-def find_non_fm_windows_in_tab(
-    nvim: Nvim, last_used: Mapping[int, None]
-) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, last_used=last_used, no_secondary=True):
-        buf = win_get_buf(nvim, win=win)
-        if not is_fm_buffer(nvim, buf=buf):
+async def find_non_fm_windows_in_tab(
+    last_used: Mapping[ExtData, None]
+) -> AsyncIterator[Window]:
+    async for win in find_windows_in_tab(last_used, no_secondary=True):
+        buf = await win.get_buf()
+        if not await is_fm_buffer(buf):
             yield win
 
 
-def find_window_with_file_in_tab(
-    nvim: Nvim, last_used: Mapping[int, None], file: PurePath
-) -> Iterator[Window]:
-    for win in find_windows_in_tab(nvim, last_used=last_used, no_secondary=True):
-        buf = win_get_buf(nvim, win=win)
-        name = PurePath(buf_name(nvim, buf=buf))
-        if name == file:
-            yield win
+async def find_window_with_file_in_tab(
+    last_used: Mapping[ExtData, None], file: PurePath
+) -> AsyncIterator[Window]:
+    async for win in find_windows_in_tab(last_used, no_secondary=True):
+        buf = await win.get_buf()
+        if name := await buf.get_name():
+            if PurePath(name) == file:
+                yield win
 
 
-def find_fm_buffers(nvim: Nvim) -> Iterator[Buffer]:
-    for buf in list_bufs(nvim, listed=True):
-        if is_fm_buffer(nvim, buf=buf):
+async def find_fm_buffers() -> AsyncIterator[Buffer]:
+    for buf in await Buffer.list(listed=True):
+        if await is_fm_buffer(buf):
             yield buf
 
 
-def find_buffers_with_file(nvim: Nvim, file: PurePath) -> Iterator[Buffer]:
-    for buf in list_bufs(nvim, listed=True):
-        name = PurePath(buf_name(nvim, buf=buf))
-        if name == file:
-            yield buf
+async def find_buffers_with_file(file: PurePath) -> AsyncIterator[Buffer]:
+    for buf in await Buffer.list(listed=True):
+        if name := await buf.get_name():
+            if PurePath(name) == file:
+                yield buf
 
 
-def find_current_buffer_path(nvim: Nvim) -> Optional[PurePath]:
-    buf = cur_buf(nvim)
-    name = buf_name(nvim, buf=buf)
-    return resolve_path(None, path=name)
+async def find_current_buffer_path() -> Optional[PurePath]:
+    buf = await Buffer.get_current()
+    if name := await buf.get_name():
+        return await resolve_path(None, path=name)
+    else:
+        return None
 
 
-def new_fm_buffer(nvim: Nvim, settings: Settings) -> Buffer:
-    buf = create_buf(
-        nvim, listed=False, scratch=True, wipe=False, nofile=True, noswap=True
+async def new_fm_buffer(settings: Settings) -> Buffer:
+    buf = await Buffer.create(
+        listed=False, scratch=True, wipe=False, nofile=True, noswap=True
     )
-    buf_set_option(nvim, buf=buf, key="modifiable", val=False)
-    buf_set_option(nvim, buf=buf, key="filetype", val=FM_FILETYPE)
-    buf_set_option(nvim, buf=buf, key="undolevels", val=-1)
+    await buf.opts.set("modifiable", val=False)
+    await buf.opts.set("filetype", val=FM_FILETYPE)
+    await buf.opts.set("undolevels", val=-1)
 
     km = Keymap()
-    km.n("{") << f"{settings.page_increment}g<up>"
-    km.n("}") << f"{settings.page_increment}g<down>"
+    _ = km.n("{") << f"{settings.page_increment}g<up>"
+    _ = km.n("}") << f"{settings.page_increment}g<down>"
     for function, mappings in settings.keymap.items():
         for mapping in mappings:
-            (
+            _ = (
                 km.n(mapping, noremap=True, silent=True, nowait=True)
                 << f"<cmd>lua {function}(false)<cr>"
             )
-            (
+            _ = (
                 km.v(mapping, noremap=True, silent=True, nowait=True)
                 << rf"<c-\><c-n><cmd>lua {function}(true)<cr>"
             )
 
-    km.drain(buf=buf).commit(nvim)
+    await km.drain(buf=buf).commit(NoneType)
     return buf
 
 
-def new_window(
-    nvim: Nvim,
+async def new_window(
     *,
-    last_used: Mapping[int, None],
+    last_used: Mapping[ExtData, None],
     win_local: Mapping[str, Union[bool, str]],
     open_left: bool,
     width: Optional[int],
 ) -> Window:
-    split_r = nvim.options["splitright"]
+    split_r = await Nvim.opts.get(bool, "splitright")
 
-    wins = tuple(find_windows_in_tab(nvim, last_used=last_used, no_secondary=False))
+    wins = [win async for win in find_windows_in_tab(last_used, no_secondary=False)]
     focus_win = wins[0] if open_left else wins[-1]
     direction = False if open_left else True
 
-    nvim.options["splitright"] = direction
-    set_cur_win(nvim, win=focus_win)
-    nvim.command(f"{width}vnew" if width else "vnew")
-    nvim.options["splitright"] = split_r
+    await Nvim.opts.set("splitright", val=direction)
+    await Window.set_current(focus_win)
+    await Nvim.exec(f"{width}vnew" if width else "vnew")
+    await Nvim.opts.set("splitright", val=split_r)
 
-    win = cur_win(nvim)
-    buf = win_get_buf(nvim, win)
+    win = await Window.get_current()
+    buf = await win.get_buf()
     for key, val in win_local.items():
-        win_set_option(nvim, win=win, key=key, val=val)
-    buf_set_option(nvim, buf=buf, key="bufhidden", val="wipe")
+        await win.opts.set(key, val=val)
+    await buf.opts.set("bufhidden", val="wipe")
     return win
 
 
-def resize_fm_windows(nvim: Nvim, last_used: Mapping[int, None], width: int) -> None:
-    for window in find_fm_windows_in_tab(nvim, last_used=last_used):
-        window.width = width
+async def resize_fm_windows(last_used: Mapping[ExtData, None], width: int) -> None:
+    async for win in find_fm_windows_in_tab(last_used):
+        await win.set_width(width)
 
 
-def kill_buffers(
-    nvim: Nvim,
-    last_used: Mapping[int, None],
+@asynccontextmanager
+async def _tmp(name: PurePath) -> AsyncIterator[None]:
+    p = Path(name)
+    try:
+        p.touch()
+        yield
+    finally:
+        p.unlink(missing_ok=True)
+
+
+async def kill_buffers(
+    last_used: Mapping[ExtData, None],
     paths: AbstractSet[PurePath],
     reopen: Mapping[PurePath, PurePath],
 ) -> None:
     active = (
         {
-            win_get_buf(nvim, win=win): win
-            for win in find_non_fm_windows_in_tab(
-                nvim,
-                last_used=last_used,
+            await win.get_buf(): win
+            async for win in find_non_fm_windows_in_tab(
+                last_used,
             )
         }
         if reopen
         else {}
     )
 
-    for buf in list_bufs(nvim, listed=True):
-        name = PurePath(buf_name(nvim, buf=buf))
-        buf_paths = ancestors(name) | {name}
+    for buf in await Buffer.list(listed=True):
+        if bufname := await buf.get_name():
+            name = PurePath(bufname)
+            buf_paths = ancestors(name) | {name}
 
-        if not buf_paths.isdisjoint(paths):
-            win = active.get(buf)
-            new_path = reopen.get(name)
-            if reopen and win and new_path:
-                p = Path(name)
-                p.touch()
-                with hold_win_pos(nvim):
-                    set_cur_win(nvim, win=win)
-                    escaped = nvim.funcs.fnameescape(normpath(new_path))
-                    nvim.command(f"edit! {escaped}")
-                    p.unlink(missing_ok=True)
-            buf_close(nvim, buf=buf)
+            if not buf_paths.isdisjoint(paths):
+                win = active.get(buf)
+                new_path = reopen.get(name)
+                if reopen and win and new_path:
+                    async with hold_win(win=None):
+                        await Window.set_current(win)
+                        escaped = await Nvim.fn.fnameescape(str, normpath(new_path))
+                        async with _tmp(name):
+                            await Nvim.exec(f"edit! {escaped}")
+
+                await buf.delete()

@@ -3,9 +3,8 @@ from os.path import abspath
 from pathlib import PurePath
 from typing import Optional
 
-from pynvim import Nvim
-from pynvim_pp.api import ask
-from pynvim_pp.lib import write
+from pynvim_pp.nvim import Nvim
+from std2 import anext
 
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors, exists, mkdir, new
@@ -22,48 +21,44 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _new(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _new(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
     """
     new file / folder
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
     if not node:
         return None
     else:
         parent = node.path if is_dir(node) else node.path.parent
 
-        child = ask(nvim, question=LANG("pencil"), default="")
+        child = await Nvim.input(question=LANG("pencil"), default="")
 
         if not child:
             return None
         else:
             path = PurePath(abspath(parent / child))
-            if exists(path, follow=False):
-                write(nvim, LANG("already_exists", name=str(path)), error=True)
+            if await exists(path, follow=False):
+                await Nvim.write(LANG("already_exists", name=str(path)), error=True)
                 return None
             else:
                 try:
                     if child.endswith(sep):
-                        mkdir(state.pool, paths=(path,))
+                        await mkdir((path,))
                     else:
-                        new(state.pool, paths=(path,))
+                        await new((path,))
                 except Exception as e:
-                    write(nvim, e, error=True)
-                    return refresh(nvim, state=state, settings=settings)
+                    await Nvim.write(e, error=True)
+                    return await refresh(state=state, settings=settings)
                 else:
                     new_state = (
-                        maybe_path_above(
-                            nvim, state=state, settings=settings, path=path
-                        )
+                        await maybe_path_above(state, settings=settings, path=path)
                         or state
                     )
                     paths = ancestors(path)
                     index = state.index | paths
-                    next_state = forward(
+                    next_state = await forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
-                    lsp_created(nvim, paths=(path,))
+                    await lsp_created((path,))
                     return Stage(next_state, focus=path)

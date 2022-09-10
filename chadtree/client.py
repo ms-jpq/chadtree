@@ -1,41 +1,41 @@
-from asyncio.events import AbstractEventLoop
-from concurrent.futures import Executor
+from asyncio import gather
+from functools import wraps
 from multiprocessing import cpu_count
-from pathlib import Path
+from pathlib import Path, PurePath
 from platform import uname
 from string import Template
-from sys import executable
+from sys import executable, exit
 from textwrap import dedent
 from time import monotonic
-from typing import Any, MutableMapping, Optional, cast
+from typing import Any, MutableMapping, Optional, Sequence, Tuple, cast
 
-from pynvim import Nvim
-from pynvim.api.common import NvimError
-from pynvim_pp.client import Client
 from pynvim_pp.highlight import highlight
-from pynvim_pp.lib import threadsafe_call, write
-from pynvim_pp.logging import log, with_suppress
-from pynvim_pp.rpc import RpcCallable, RpcMsg, nil_handler
+from pynvim_pp.logging import log, suppress_and_log
+from pynvim_pp.nvim import Nvim, conn
+from pynvim_pp.rpc import MsgType
+from pynvim_pp.types import Method, NoneType, NvimError, RPCallable
 from std2.pickle.types import DecodeError
-from std2.sched import ticker
-from std2.types import AnyFun
+from std2.sched import aticker
 
 from ._registry import ____
 from .consts import RENDER_RETRIES
-from .registry import autocmd, enqueue_event, event_queue, rpc
+from .registry import autocmd, enqueue_event, queue, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
-from .state.types import State
 from .transitions.autocmds import save_session
 from .transitions.redraw import redraw
-from .transitions.schedule_update import schedule_update
+from .transitions.schedule_update import scheduled_update
 from .transitions.types import Stage
 from .transitions.version_ctl import vc_refresh
 
+assert ____ or True
 
-def _profile(nvim: Nvim, t1: float) -> None:
+_CB = RPCallable[Optional[Stage]]
+
+
+async def _profile(t1: float) -> None:
     t2 = monotonic()
     info = uname()
     msg = f"""
@@ -47,99 +47,90 @@ def _profile(nvim: Nvim, t1: float) -> None:
     Version    {info.version}
     Python     {Path(executable).resolve(strict=True)}
     """
-    write(nvim, dedent(msg))
+    await Nvim.write(dedent(msg))
 
 
-class ChadClient(Client):
-    def __init__(self, pool: Executor) -> None:
-        self._pool = pool
-        self._handlers: MutableMapping[str, RpcCallable] = {}
-        self._state: Optional[State] = None
-        self._settings: Optional[Settings] = None
+async def _sched(settings: Settings) -> None:
+    await enqueue_event(vc_refresh.method)
 
-    def on_msg(self, nvim: Nvim, msg: RpcMsg) -> Any:
-        event_queue.put(msg)
-        return None
-
-    def wait(self, nvim: Nvim) -> int:
-        def cont() -> bool:
-            assert isinstance(nvim.loop, AbstractEventLoop)
-            nvim.loop.set_default_executor(self._pool)
-
-            atomic, specs = rpc.drain(nvim.channel_id)
-            self._handlers.update(specs)
-            try:
-                self._settings = initial_settings(nvim, specs)
-            except DecodeError as e:
-                tpl = """
-                Some options may have changed.
-                See help doc on Github under [docs/CONFIGURATION.md]
+    async for _ in aticker(settings.polling_rate, immediately=False):
+        await enqueue_event(scheduled_update.method)
+        await enqueue_event(vc_refresh.method)
+        await enqueue_event(save_session.method)
 
 
-                ${e}
-                """
-                ms = Template(dedent(tpl)).substitute(e=e)
-                write(nvim, ms, error=True)
-                return False
-            else:
-                hl = highlight(*self._settings.view.hl_context.groups)
-                (atomic + autocmd.drain() + hl).commit(nvim)
+def _trans(handler: _CB) -> _CB:
+    @wraps(handler)
+    async def f(*params: Any) -> None:
+        await enqueue_event(handler.method, *params)
 
-                self._state = initial_state(
-                    nvim, pool=self._pool, settings=self._settings
-                )
-                init_locale(self._settings.lang)
-                return True
+    return cast(_CB, f)
 
+
+async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
+    await enqueue_event(method, *params)
+
+
+async def init(socket: PurePath) -> None:
+    async with conn(socket, default=_default) as client:
+        atomic, handlers = rpc.drain()
         try:
-            go = threadsafe_call(nvim, cont)
-        except Exception as e:
-            log.exception("%s", e)
-            return 1
+            settings = await initial_settings(handlers.values())
+        except DecodeError as e:
+            tpl = """
+            Some options may have changed.
+            See help doc on Github under [docs/CONFIGURATION.md]
+
+
+            ${e}
+            """
+            ms = Template(dedent(tpl)).substitute(e=e)
+            await Nvim.write(ms, error=True)
+            exit(1)
         else:
-            if not go:
-                return 1
-            else:
-                settings = cast(Settings, self._settings)
+            hl = highlight(*settings.view.hl_context.groups)
+            await (atomic + autocmd.drain() + hl).commit(NoneType)
+            state = await initial_state(settings)
+
+            init_locale(settings.lang)
+
+            transitions: MutableMapping[Method, _CB] = {}
+
+            for f in handlers.values():
+                ff = _trans(f)
+                client.register(ff)
+                transitions[ff.method] = ff
+
+            async def cont() -> None:
+                nonlocal state
                 t1, has_drawn = monotonic(), False
 
-        def sched() -> None:
-            enqueue_event(vc_refresh)
-            for _ in ticker(settings.polling_rate, immediately=False):
-                enqueue_event(schedule_update)
-                enqueue_event(vc_refresh)
-                enqueue_event(save_session)
+                while True:
+                    with suppress_and_log():
+                        msg: Tuple[Method, Sequence[Any]] = await queue().get()
+                        method, params = msg
+                        if handler := cast(Optional[_CB], handlers.get(method)):
+                            if stage := await handler(state, settings, *params):
+                                state = stage.state
 
-        self._pool.submit(sched)
+                                for _ in range(RENDER_RETRIES - 1):
+                                    try:
+                                        await redraw(state, focus=stage.focus)
+                                    except NvimError:
+                                        pass
+                                    else:
+                                        break
+                                else:
+                                    try:
+                                        await redraw(state, focus=stage.focus)
+                                    except NvimError as e:
+                                        log.warn("%s", e)
 
-        while True:
-            msg: RpcMsg = event_queue.get()
-            name, args = msg
-            handler = cast(
-                AnyFun[Optional[Stage]], self._handlers.get(name, nil_handler(name))
-            )
+                                if settings.profiling and not has_drawn:
+                                    has_drawn = True
+                                    await _profile(t1=t1)
 
-            def cdraw() -> None:
-                nonlocal has_drawn
-                if stage := handler(nvim, self._state, settings, *args):
-                    self._state = stage.state
-
-                    for _ in range(RENDER_RETRIES - 1):
-                        try:
-                            redraw(nvim, state=self._state, focus=stage.focus)
-                        except NvimError:
-                            pass
                         else:
-                            break
-                    else:
-                        try:
-                            redraw(nvim, state=self._state, focus=stage.focus)
-                        except NvimError as e:
-                            log.warn("%s", e)
+                            assert False, msg
 
-                    if settings.profiling and not has_drawn:
-                        has_drawn = True
-                        _profile(nvim, t1=t1)
-
-            with with_suppress():
-                threadsafe_call(nvim, cdraw)
+            await gather(cont(), _sched(settings))

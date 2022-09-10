@@ -1,8 +1,7 @@
 from operator import add, sub
 from typing import Callable, Optional
 
-from pynvim import Nvim
-from pynvim_pp.api import cur_win
+from pynvim_pp.window import Window
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -12,37 +11,35 @@ from .shared.wm import is_fm_window, resize_fm_windows
 from .types import Stage
 
 
-def _resize(
-    nvim: Nvim, state: State, settings: Settings, direction: Callable[[int, int], int]
+async def _resize(
+    state: State, settings: Settings, direction: Callable[[int, int], int]
 ) -> Optional[Stage]:
-    win = cur_win(nvim)
-    if not is_fm_window(nvim, win=win):
+    win = await Window.get_current()
+    if not await is_fm_window(win):
         return None
     else:
-        w_width = win.width
-        width = max(direction(w_width, 10), 1)
-        new_state = forward(state, settings=settings, width=width)
-        resize_fm_windows(nvim, last_used=new_state.window_order, width=new_state.width)
+        old_width = await win.get_width()
+        new_width = max(direction(old_width, 10), 1)
+        new_state = await forward(state, settings=settings, width=new_width)
+        await resize_fm_windows(new_state.window_order, width=new_state.width)
         return Stage(new_state)
 
 
 @rpc(blocking=False)
-def _bigger(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _bigger(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
     """
     Bigger sidebar
     """
 
-    return _resize(nvim, state=state, settings=settings, direction=add)
+    return await _resize(state, settings=settings, direction=add)
 
 
 @rpc(blocking=False)
-def _smaller(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _smaller(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Smaller sidebar
     """
 
-    return _resize(nvim, state=state, settings=settings, direction=sub)
+    return await _resize(state, settings=settings, direction=sub)

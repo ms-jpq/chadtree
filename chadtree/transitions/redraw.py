@@ -2,26 +2,25 @@ from pathlib import PurePath
 from typing import Optional, Sequence
 from uuid import uuid4
 
-from pynvim import Nvim
-from pynvim.api import NvimError
-from pynvim.api.buffer import Buffer
-from pynvim_pp.api import buf_get_var, buf_line_count, win_get_cursor
 from pynvim_pp.atomic import Atomic
+from pynvim_pp.buffer import Buffer
+from pynvim_pp.nvim import Nvim
 from pynvim_pp.operators import operator_marks
+from pynvim_pp.types import NoneType, NvimError
 from std2.difflib import trans_inplace
 from std2.pickle.decoder import new_decoder
 from std2.pickle.types import DecodeError
 
-from ..consts import FM_NAMESPACE
 from ..state.types import State
 from ..view.types import Derived
 from .shared.wm import find_fm_windows
 
-_FM_HASH_VAR = f"CHAD_HASH_{uuid4()}"
-
 
 class UnrecoverableError(Exception):
     ...
+
+
+_NS = uuid4()
 
 
 _DECODER = new_decoder[Sequence[str]](Sequence[str])
@@ -55,24 +54,25 @@ def _update(
             else:
                 atomic.buf_set_virtual_text(buf, ns, idx, vtxt, {})
 
-    atomic.buf_set_var(buf, _FM_HASH_VAR, derived.hashed)
+    atomic.buf_set_var(buf, str(_NS), derived.hashed)
     return atomic
 
 
-def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
+async def redraw(state: State, focus: Optional[PurePath]) -> None:
     focus_row = state.derived.path_row_lookup.get(focus) if focus else None
 
-    ns = nvim.api.create_namespace(FM_NAMESPACE)
-    use_extmarks = nvim.funcs.has("nvim-0.6")
+    ns = await Nvim.create_namespace(_NS)
+    use_extmarks = await Nvim.api.has("nvim-0.6")
 
-    for win, buf in find_fm_windows(nvim):
-        p_count = buf_line_count(nvim, buf=buf)
+    async for win, buf in find_fm_windows():
+        p_count = await buf.line_count()
         n_count = len(state.derived.lines)
-        row, col = win_get_cursor(nvim, win=win)
-        (r1, c1), (r2, c2) = operator_marks(nvim, buf=buf, visual_type=None)
+        row, col = await win.get_cursor()
+        (r1, c1), (r2, c2) = await operator_marks(buf, visual_type=None)
+        buf_var = await buf.vars.get(NoneType, str(_NS))
 
         try:
-            hashed_lines = _DECODER(buf_get_var(nvim, buf=buf, key=_FM_HASH_VAR))
+            hashed_lines = _DECODER(buf_var)
         except DecodeError:
             hashed_lines = ("",)
 
@@ -99,11 +99,11 @@ def redraw(nvim: Nvim, state: State, focus: Optional[PurePath]) -> None:
         a3 = Atomic()
         a3.buf_set_option(buf, "modifiable", False)
         a3.call_function("setpos", ("'<", (buf.number, r1 + 1, c1 + 1, 0)))
-        a3.call_function("setpos", ("'>", (buf.number, r2 + 1, c2 + 1, 0)))
+        a3.call_function("setpos", ("'>", (buf.number, r2 + 1, c2, 0)))
         if new_row is not None:
             a3.win_set_cursor(win, (new_row, col))
 
         try:
-            (a1 + a2 + a3).commit(nvim)
+            await (a1 + a2 + a3).commit(NoneType)
         except NvimError as e:
             raise UnrecoverableError(e)

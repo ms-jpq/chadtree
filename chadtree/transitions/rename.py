@@ -2,9 +2,8 @@ from os.path import abspath
 from pathlib import PurePath
 from typing import Optional
 
-from pynvim import Nvim
-from pynvim_pp.api import ask
-from pynvim_pp.lib import write
+from pynvim_pp.nvim import Nvim
+from std2 import anext
 
 from ..fs.ops import ancestors, exists, rename
 from ..lsp.notify import lsp_moved
@@ -21,50 +20,45 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _rename(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
     """
     rename file / folder
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
     if not node:
         return None
     else:
 
-        child = ask(nvim, question=LANG("pencil"), default=str(node.path.name))
+        child = await Nvim.input(question=LANG("pencil"), default=str(node.path.name))
         if not child:
             return None
         else:
             new_path = PurePath(abspath(node.path.parent / child))
             operations = {node.path: new_path}
-            if exists(new_path, follow=False):
-                write(nvim, LANG("already_exists", name=str(new_path)), error=True)
+            if await exists(new_path, follow=False):
+                await Nvim.write(LANG("already_exists", name=str(new_path)), error=True)
                 return None
             else:
                 try:
-                    rename(state.pool, operations=operations)
+                    await rename(operations)
                 except Exception as e:
-                    write(nvim, e, error=True)
-                    return refresh(nvim, state=state, settings=settings)
+                    await Nvim.write(e, error=True)
+                    return await refresh(state=state, settings=settings)
                 else:
                     new_state = (
-                        maybe_path_above(
-                            nvim, state=state, settings=settings, path=new_path
-                        )
+                        await maybe_path_above(state, settings=settings, path=new_path)
                         or state
                     )
                     paths = ancestors(new_path)
                     index = state.index | paths
-                    next_state = forward(
+                    next_state = await forward(
                         new_state, settings=settings, index=index, paths=paths
                     )
-                    kill_buffers(
-                        nvim,
+                    await kill_buffers(
                         last_used=new_state.window_order,
                         paths={node.path},
                         reopen={node.path: new_path},
                     )
-                    lsp_moved(nvim, paths=operations)
+                    await lsp_moved(operations)
                     return Stage(next_state, focus=new_path)

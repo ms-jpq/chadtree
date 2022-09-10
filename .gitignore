@@ -1,5 +1,7 @@
+/.git/
 /.venv/
 __pycache__/
+.mypy_cache/
 /.vars/
 /temp/
 /.vscode/

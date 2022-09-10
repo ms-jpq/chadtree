@@ -1,5 +1,5 @@
-from pynvim import Nvim
-from pynvim_pp.api import list_wins, win_close
+from pynvim_pp.nvim import Nvim
+from pynvim_pp.window import Window
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -8,14 +8,14 @@ from .shared.wm import find_fm_windows_in_tab
 
 
 @rpc(blocking=False)
-def _quit(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None:
+async def _quit(state: State, settings: Settings, is_visual: bool) -> None:
     """
     Close sidebar
     """
 
-    wins = list_wins(nvim)
+    wins = await Window.list()
     if len(wins) <= 1:
-        nvim.api.command("quit")
+        await Nvim.exec("quit")
     else:
-        for win in find_fm_windows_in_tab(nvim, last_used=state.window_order):
-            win_close(nvim, win=win)
+        async for win in find_fm_windows_in_tab(state.window_order):
+            await win.close()

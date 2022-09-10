@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pynvim import Nvim
+from std2 import anext
 
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors
@@ -13,14 +13,14 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _collapse(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _collapse(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Collapse folder
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
     if not node:
         return None
     else:
@@ -36,5 +36,5 @@ def _collapse(
         }
 
         index = (state.index - paths) | {state.root.path}
-        new_state = forward(state, settings=settings, index=index, paths=paths)
+        new_state = await forward(state, settings=settings, index=index, paths=paths)
         return Stage(new_state, focus=path)
