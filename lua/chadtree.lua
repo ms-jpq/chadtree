@@ -120,7 +120,7 @@ local start = function(deps, ...)
     vim.api.nvim_command [[new]]
     vim.api.nvim_call_function("termopen", {args, params})
   else
-    local job_id = vim.api.nvim_call_function("jobstart", {args, params})
+    job_id = vim.api.nvim_call_function("jobstart", {args, params})
     return job_id
   end
 end
