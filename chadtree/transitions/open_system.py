@@ -5,6 +5,7 @@ from shutil import which as _which
 from subprocess import CalledProcessError
 from typing import Optional, Sequence, Union
 
+from pynvim_pp.logging import suppress_and_log
 from pynvim_pp.nvim import Nvim
 from std2 import anext
 from std2.asyncio.subprocess import call
@@ -26,20 +27,21 @@ def which(path: PurePath) -> Optional[PurePath]:
 
 
 async def _open_gui(path: PurePath, cwd: PurePath) -> None:
-    if os is OS.macos and (arg0 := _which("open")):
-        argv: Sequence[Union[PurePath, str]] = (arg0, "--", path)
-    elif os is OS.linux and (arg0 := _which("xdg-open")):
-        argv = (arg0, path)
-    elif os is OS.windows and (arg0 := _which("start")):
-        argv = (arg0, "", path)
-    else:
-        await Nvim.write(LANG("sys_open_err"))
-        return
+    with suppress_and_log():
+        if os is OS.macos and (arg0 := _which("open")):
+            argv: Sequence[Union[PurePath, str]] = (arg0, "--", path)
+        elif os is OS.linux and (arg0 := _which("xdg-open")):
+            argv = (arg0, path)
+        elif os is OS.windows and (arg0 := _which("start")):
+            argv = (arg0, "", path)
+        else:
+            await Nvim.write(LANG("sys_open_err"))
+            return
 
-    try:
-        await call(*argv, cwd=cwd)
-    except CalledProcessError as e:
-        await Nvim.write(e, e.stderr, e.stdout, error=True)
+        try:
+            await call(*argv, cwd=cwd)
+        except CalledProcessError as e:
+            await Nvim.write(e, e.stderr, e.stdout, error=True)
 
 
 @rpc(blocking=False)
