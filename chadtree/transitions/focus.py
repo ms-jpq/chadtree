@@ -1,10 +1,8 @@
-from os.path import normpath
-from pathlib import PurePath
+from os.path import normcase, normpath
 from typing import Optional
 
-from pynvim import Nvim
-from pynvim_pp.api import chdir, get_cwd
-from pynvim_pp.lib import write
+from pynvim_pp.nvim import Nvim
+from std2 import anext
 
 from ..fs.cartographer import is_dir
 from ..registry import rpc
@@ -17,18 +15,17 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _jump_to_current(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _jump_to_current(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Jump to active file
     """
 
-    curr = state.current
-    if not curr:
+    if not (curr := state.current):
         return None
     else:
-        stage = new_current_file(nvim, state=state, settings=settings, current=curr)
+        stage = await new_current_file(state, settings=settings, current=curr)
         if not stage:
             return None
         else:
@@ -36,75 +33,71 @@ def _jump_to_current(
 
 
 @rpc(blocking=False)
-def _refocus(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> Stage:
+async def _refocus(state: State, settings: Settings, is_visual: bool) -> Stage:
     """
     Follow cwd update
     """
 
-    cwd = get_cwd(nvim)
-    new_state = new_root(
-        nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
-    )
+    cwd = await Nvim.getcwd()
+    new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=set())
     focus = new_state.root.path
     return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
-def _change_dir(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _change_dir(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Change root directory
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
     if not node:
         return None
     else:
         cwd = node.path if is_dir(node) else node.path.parent
-        new_state = new_root(
-            nvim, state=state, settings=settings, new_cwd=cwd, indices=set()
-        )
-        chdir(nvim, path=new_state.root.path)
-        write(nvim, LANG("new cwd", cwd=normpath(new_state.root.path)))
+        new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=set())
+        escaped = await Nvim.fn.fnameescape(str, normcase(new_state.root.path))
+        await Nvim.exec(f"chdir {escaped}")
+        await Nvim.write(LANG("new cwd", cwd=normpath(new_state.root.path)))
         return Stage(new_state, focus=new_state.root.path)
 
 
 @rpc(blocking=False)
-def _change_focus(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _change_focus(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Refocus root directory
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
     if not node:
         return None
     else:
         new_base = node.path if is_dir(node) else node.path.parent
-        new_state = new_root(
-            nvim, state=state, settings=settings, new_cwd=new_base, indices=set()
+        new_state = await new_root(
+            state, settings=settings, new_cwd=new_base, indices=set()
         )
         focus = node.path
         return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
-def _change_focus_up(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _change_focus_up(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Refocus root directory up
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
     if not node:
         return None
     else:
-        new_state = new_root(
-            nvim,
-            state=state,
+        new_state = await new_root(
+            state,
             settings=settings,
             new_cwd=state.root.path.parent,
             indices=set(),

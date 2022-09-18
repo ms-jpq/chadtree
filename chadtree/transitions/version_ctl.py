@@ -1,46 +1,25 @@
-from pathlib import PurePath
-from threading import Lock
+from typing import Optional
 
-from pynvim import Nvim
-from pynvim_pp.api import get_cwd
-from pynvim_pp.logging import log
+from pynvim_pp.nvim import Nvim
 
-from ..registry import enqueue_event, rpc
+from ..registry import rpc
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from ..version_ctl.git import status
-from ..version_ctl.types import VCStatus
 from .types import Stage
 
-_lock = Lock()
-
 
 @rpc(blocking=False)
-def _set_vc(nvim: Nvim, state: State, settings: Settings, vc: VCStatus) -> Stage:
-    new_state = forward(state, settings=settings, vc=vc)
-    return Stage(new_state)
-
-
-@rpc(blocking=False)
-def vc_refresh(nvim: Nvim, state: State, settings: Settings) -> None:
+async def vc_refresh(state: State, settings: Settings) -> Optional[Stage]:
     """
     VC Refresh
     """
 
     if state.enable_vc:
-        cwd = get_cwd(nvim)
-
-        def cont() -> None:
-            if _lock.locked():
-                pass
-            else:
-                with _lock:
-                    try:
-                        vc = status(state.pool, cwd=cwd)
-                    except Exception as e:
-                        log.exception("%s", e)
-                    else:
-                        enqueue_event(_set_vc, vc)
-
-        state.pool.submit(cont)
+        cwd = await Nvim.getcwd()
+        vc = await status(cwd)
+        new_state = await forward(state, settings=settings, vc=vc)
+        return Stage(new_state)
+    else:
+        return None

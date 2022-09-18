@@ -1,7 +1,6 @@
 from pathlib import PurePath
 from typing import AbstractSet, Optional
 
-from pynvim import Nvim
 from std2.pathlib import is_relative_to, longest_common_path
 
 from ...fs.cartographer import new
@@ -12,8 +11,8 @@ from ...state.types import State
 from ..types import Stage
 
 
-def new_current_file(
-    nvim: Nvim, state: State, settings: Settings, current: PurePath
+async def new_current_file(
+    state: State, settings: Settings, current: PurePath
 ) -> Optional[Stage]:
     """
     New file focused in buf
@@ -21,33 +20,31 @@ def new_current_file(
 
     parents = ancestors(current)
     if state.root.path in parents:
-        paths: AbstractSet[PurePath] = parents if state.follow else set()
-        index = state.index | paths
-        new_state = forward(
-            state, settings=settings, index=index, paths=paths, current=current
+        index = state.index | parents
+        new_state = await forward(
+            state, settings=settings, index=index, paths=parents, current=current
         )
         return Stage(new_state)
     else:
         return None
 
 
-def new_root(
-    nvim: Nvim,
+async def new_root(
     state: State,
     settings: Settings,
     new_cwd: PurePath,
     indices: AbstractSet[PurePath],
 ) -> State:
     index = state.index | ancestors(new_cwd) | {new_cwd} | indices
-    root = new(state.pool, root=new_cwd, index=index)
+    root = await new(new_cwd, index=index)
     selection = {path for path in state.selection if root.path in ancestors(path)}
-    return forward(
+    return await forward(
         state, settings=settings, root=root, selection=selection, index=index
     )
 
 
-def maybe_path_above(
-    nvim: Nvim, state: State, settings: Settings, path: PurePath
+async def maybe_path_above(
+    state: State, settings: Settings, path: PurePath
 ) -> Optional[State]:
     root = state.root.path
     if is_relative_to(path, root):
@@ -56,6 +53,6 @@ def maybe_path_above(
         lcp = longest_common_path(path, root)
         new_cwd = lcp if lcp else path.parent
         indices = ancestors(path)
-        return new_root(
-            nvim, state=state, settings=settings, new_cwd=new_cwd, indices=indices
+        return await new_root(
+            state=state, settings=settings, new_cwd=new_cwd, indices=indices
         )

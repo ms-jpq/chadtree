@@ -1,6 +1,7 @@
 from pathlib import PurePath
 from typing import AbstractSet, Mapping, Optional, Union, cast
 
+from pynvim_pp.types import ExtData
 from std2.types import Void, VoidType, or_else
 
 from ..fs.cartographer import update
@@ -12,7 +13,7 @@ from ..view.render import render
 from .types import FilterPattern, Index, Selection, State
 
 
-def forward(
+async def forward(
     state: State,
     *,
     settings: Settings,
@@ -28,7 +29,7 @@ def forward(
     vc: Union[VCStatus, VoidType] = Void,
     current: Union[PurePath, VoidType] = Void,
     paths: Union[AbstractSet[PurePath], VoidType] = Void,
-    window_order: Union[Mapping[int, None], VoidType] = Void,
+    window_order: Union[Mapping[ExtData, None], VoidType] = Void,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
@@ -38,7 +39,7 @@ def forward(
         Node,
         root
         or (
-            update(state.pool, root=state.root, index=new_index, paths=paths)
+            await update(state.root, index=new_index, paths=paths)
             if not isinstance(paths, VoidType)
             else state.root
         ),
@@ -59,7 +60,6 @@ def forward(
     )
 
     new_state = State(
-        pool=state.pool,
         session_store=state.session_store,
         index=new_index,
         selection=new_selection,

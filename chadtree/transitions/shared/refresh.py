@@ -1,11 +1,10 @@
 from pathlib import PurePath
 from typing import AbstractSet
 
-from pynvim import Nvim
-from pynvim_pp.api import list_wins
+from pynvim_pp.window import Window
 from std2.types import Void
 
-from ...fs.ops import ancestors, exists
+from ...fs.ops import ancestors, exists_many
 from ...nvim.markers import markers
 from ...settings.types import Settings
 from ...state.next import forward
@@ -14,25 +13,37 @@ from ..shared.wm import find_current_buffer_path
 from ..types import Stage
 
 
-def refresh(nvim: Nvim, state: State, settings: Settings) -> Stage:
-    current = find_current_buffer_path(nvim)
+async def refresh(state: State, settings: Settings) -> Stage:
+    current = await find_current_buffer_path()
     cwd = state.root.path
     paths = {cwd}
     current_ancestors = ancestors(current) if current else set()
     new_current = current if cwd in current_ancestors else None
 
-    index = {path for path in state.index if exists(path, follow=True)} | paths
-    selection = {s for s in state.selection if exists(s, follow=False)}
+    index = {
+        path
+        for path, exists in (await exists_many(state.index, follow=True)).items()
+        if exists
+    } | paths
+
+    selection = {
+        selected
+        for selected, exists in (
+            await exists_many(state.selection, follow=False)
+        ).items()
+        if exists
+    }
+
     parent_paths: AbstractSet[PurePath] = current_ancestors if state.follow else set()
     new_index = index if new_current else index | parent_paths
 
-    window_ids = {w.handle for w in list_wins(nvim)}
+    window_ids = {w.data for w in await Window.list()}
     window_order = {
         win_id: None for win_id in state.window_order if win_id in window_ids
     }
 
-    mks = markers(nvim)
-    new_state = forward(
+    mks = await markers()
+    new_state = await forward(
         state,
         settings=settings,
         index=new_index,

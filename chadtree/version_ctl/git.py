@@ -1,11 +1,11 @@
-from concurrent.futures import Executor, Future, wait
+from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from os import environ, linesep
 from pathlib import PurePath
 from shutil import which
 from string import whitespace
-from subprocess import DEVNULL, PIPE, CalledProcessError, check_output
+from subprocess import CalledProcessError
 from typing import (
     Iterable,
     Iterator,
@@ -14,9 +14,10 @@ from typing import (
     MutableSet,
     Sequence,
     Tuple,
-    cast,
 )
 
+from pynvim_pp.lib import decode
+from std2.asyncio.subprocess import call
 from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
 
@@ -25,7 +26,6 @@ from .types import VCStatus
 
 _WHITE_SPACES = {*whitespace}
 _GIT_LIST_CMD = (
-    "git",
     "--no-optional-locks",
     "status",
     "--ignored",
@@ -41,21 +41,22 @@ _IGNORED_MARKER = "I"
 _UNTRACKED_MARKER = "?"
 
 
-def root(cwd: PurePath) -> PurePath:
-    stdout = check_output(
-        ("git", "--no-optional-locks", "rev-parse", "--show-toplevel"),
-        stderr=PIPE,
-        text=True,
+async def root(git: PurePath, cwd: PurePath) -> PurePath:
+    proc = await call(
+        git,
+        "--no-optional-locks",
+        "rev-parse",
+        "--show-toplevel",
         cwd=cwd,
     )
-    return PurePath(stdout.rstrip())
+    return PurePath(decode(proc.stdout.rstrip()))
 
 
-def _stat_main(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
-    stdout = check_output(_GIT_LIST_CMD, stdin=DEVNULL, stderr=PIPE, text=True, cwd=cwd)
+async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
+    proc = await call(git, *_GIT_LIST_CMD, cwd=cwd)
 
     def cont() -> Iterator[Tuple[str, PurePath]]:
-        it = iter(stdout.split("\0"))
+        it = iter(decode(proc.stdout).split("\0"))
         for line in it:
             prefix, file = line[:2], line[3:]
             yield prefix, PurePath(file)
@@ -66,23 +67,22 @@ def _stat_main(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
     return tuple(cont())
 
 
-def _stat_sub_modules(cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
-    stdout = check_output(
-        (
-            "git",
-            "submodule",
-            "foreach",
-            "--recursive",
-            *_GIT_LIST_CMD,
-        ),
+async def _stat_sub_modules(
+    git: PurePath, cwd: PurePath
+) -> Sequence[Tuple[str, PurePath]]:
+    proc = await call(
+        git,
+        "submodule",
+        "foreach",
+        "--recursive",
+        git,
+        *_GIT_LIST_CMD,
         env={**environ, **_GIT_ENV},
-        stdin=DEVNULL,
-        stderr=PIPE,
-        text=True,
         cwd=cwd,
     )
 
     def cont() -> Iterator[Tuple[str, PurePath]]:
+        stdout = decode(proc.stdout)
         it = iter(stdout)
         sub_module = ROOT
         acc: MutableSequence[str] = []
@@ -158,15 +158,17 @@ def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
     return VCStatus(ignored=ignored, status=trimmed)
 
 
-def status(pool: Executor, cwd: PurePath) -> VCStatus:
-    if which("git"):
+async def status(cwd: PurePath) -> VCStatus:
+    if git := which("git"):
         try:
-            r = pool.submit(root, cwd=cwd)
-            s_main = pool.submit(_stat_main, cwd=cwd)
-            s_sub = pool.submit(_stat_sub_modules, cwd=cwd)
+            bin = PurePath(git)
+            git_root, *stats = await gather(
+                root(bin, cwd=cwd),
+                _stat_main(bin, cwd=cwd),
+                _stat_sub_modules(bin, cwd=cwd),
+            )
 
-            wait(cast(Sequence[Future], (r, s_main, s_sub)))
-            return _parse(r.result(), stats=chain(s_main.result(), s_sub.result()))
+            return _parse(git_root, stats=chain.from_iterable(stats))
         except CalledProcessError:
             return VCStatus()
     else:

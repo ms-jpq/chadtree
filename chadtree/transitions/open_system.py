@@ -1,14 +1,16 @@
+from asyncio import create_task
+from functools import lru_cache
 from pathlib import PurePath
-from shutil import which
-from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
-from typing import Sequence, Union, cast
+from shutil import which as _which
+from subprocess import CalledProcessError
+from typing import Optional, Sequence, Union
 
-from pynvim import Nvim
-from pynvim_pp.api import get_cwd
-from pynvim_pp.lib import threadsafe_call, write
-from pynvim_pp.logging import log
+from pynvim_pp.logging import suppress_and_log
+from pynvim_pp.nvim import Nvim
+from std2 import anext
+from std2.asyncio.subprocess import call
+from std2.platform import OS, os
 
-from ..fs.types import Node
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -16,37 +18,41 @@ from ..state.types import State
 from .shared.index import indices
 
 
-def _open_gui(path: PurePath, cwd: PurePath) -> None:
-    if cmd := which("open"):
-        command: Sequence[Union[PurePath, str]] = (cmd, "--", path)
-    elif cmd := which("xdg-open"):
-        command = (cmd, path)
-    elif cmd := which("start"):
-        command = (cmd, "", path)
+@lru_cache(maxsize=None)
+def which(path: PurePath) -> Optional[PurePath]:
+    if bin := _which(path):
+        return PurePath(bin)
     else:
-        raise LookupError(LANG("sys_open_err"))
+        return None
 
-    check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
+
+async def _open_gui(path: PurePath, cwd: PurePath) -> None:
+    with suppress_and_log():
+        if os is OS.macos and (arg0 := _which("open")):
+            argv: Sequence[Union[PurePath, str]] = (arg0, "--", path)
+        elif os is OS.linux and (arg0 := _which("xdg-open")):
+            argv = (arg0, path)
+        elif os is OS.windows and (arg0 := _which("start")):
+            argv = (arg0, "", path)
+        else:
+            await Nvim.write(LANG("sys_open_err"))
+            return
+
+        try:
+            await call(*argv, cwd=cwd)
+        except CalledProcessError as e:
+            await Nvim.write(e, e.stderr, e.stdout, error=True)
 
 
 @rpc(blocking=False)
-def _open_sys(nvim: Nvim, state: State, settings: Settings, is_visual: bool) -> None:
+async def _open_sys(state: State, settings: Settings, is_visual: bool) -> None:
     """
     Open using finder / dolphin, etc
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
     if not node:
         return None
     else:
-        cwd = get_cwd(nvim)
-
-        def cont() -> None:
-            try:
-                _open_gui(cast(Node, node).path, cwd=cwd)
-            except (CalledProcessError, LookupError) as e:
-                threadsafe_call(nvim, write, nvim, e, error=True)
-            except Exception as e:
-                log.exception("%s", e)
-
-        state.pool.submit(cont)
+        cwd = await Nvim.getcwd()
+        create_task(_open_gui(node.path, cwd=cwd))

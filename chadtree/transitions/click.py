@@ -1,8 +1,7 @@
 from typing import Optional
 
-from pynvim import Nvim
-from pynvim_pp.api import win_close
-from pynvim_pp.lib import write
+from pynvim_pp.nvim import Nvim
+from std2 import anext
 
 from ..fs.cartographer import is_dir
 from ..fs.types import Mode
@@ -17,59 +16,57 @@ from .shared.wm import find_fm_windows
 from .types import ClickType, Stage
 
 
-def _click(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool, click_type: ClickType
+async def _click(
+    state: State, settings: Settings, is_visual: bool, click_type: ClickType
 ) -> Optional[Stage]:
-    node = next(indices(nvim, state=state, is_visual=is_visual), None)
+    node = await anext(indices(state, is_visual=is_visual), None)
 
     if not node:
         return None
     else:
         if Mode.orphan_link in node.mode:
-            write(nvim, LANG("dead_link", name=node.path.name), error=True)
+            await Nvim.write(LANG("dead_link", name=node.path.name), error=True)
             return None
         else:
             if is_dir(node):
                 if node.path == state.root.path:
                     return None
                 elif state.filter_pattern:
-                    write(nvim, LANG("filter_click"))
+                    await Nvim.write(LANG("filter_click"))
                     return None
                 else:
                     paths = {node.path}
                     index = state.index ^ paths
-                    new_state = forward(
+                    new_state = await forward(
                         state, settings=settings, index=index, paths=paths
                     )
                     return Stage(new_state)
             else:
-                nxt = open_file(
-                    nvim,
-                    state=state,
+                nxt = await open_file(
+                    state,
                     settings=settings,
                     path=node.path,
                     click_type=click_type,
                 )
 
                 if settings.close_on_open and click_type != ClickType.secondary:
-                    for win, _ in find_fm_windows(nvim):
-                        win_close(nvim, win=win)
+                    async for win, _ in find_fm_windows():
+                        await win.close()
 
                 return nxt
 
 
 @rpc(blocking=False)
-def _primary(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _primary(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open
     """
 
-    return _click(
-        nvim,
-        state=state,
+    return await _click(
+        state,
         settings=settings,
         is_visual=is_visual,
         click_type=ClickType.primary,
@@ -77,17 +74,16 @@ def _primary(
 
 
 @rpc(blocking=False)
-def _secondary(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _secondary(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> preview
     """
 
-    return _click(
-        nvim,
-        state=state,
+    return await _click(
+        state,
         settings=settings,
         is_visual=is_visual,
         click_type=ClickType.secondary,
@@ -95,17 +91,16 @@ def _secondary(
 
 
 @rpc(blocking=False)
-def _tertiary(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _tertiary(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in new tab
     """
 
-    return _click(
-        nvim,
-        state=state,
+    return await _click(
+        state,
         settings=settings,
         is_visual=is_visual,
         click_type=ClickType.tertiary,
@@ -113,17 +108,16 @@ def _tertiary(
 
 
 @rpc(blocking=False)
-def _v_split(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _v_split(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in vertical split
     """
 
-    return _click(
-        nvim,
-        state=state,
+    return await _click(
+        state,
         settings=settings,
         is_visual=is_visual,
         click_type=ClickType.v_split,
@@ -131,18 +125,14 @@ def _v_split(
 
 
 @rpc(blocking=False)
-def _h_split(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _h_split(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in horizontal split
     """
 
-    return _click(
-        nvim,
-        state=state,
-        settings=settings,
-        is_visual=is_visual,
-        click_type=ClickType.h_split,
+    return await _click(
+        state, settings=settings, is_visual=is_visual, click_type=ClickType.h_split
     )

@@ -1,5 +1,1 @@
-/.git/
-/.venv/
-__pycache__/
-/docs/img/
-/.vars/
+./.gitignore

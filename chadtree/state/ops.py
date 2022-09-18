@@ -3,6 +3,8 @@ from json import dumps, loads
 from pathlib import Path, PurePath
 from typing import Any, Optional
 
+from pynvim_pp.lib import decode
+from std2.asyncio import to_thread
 from std2.pickle.decoder import new_decoder
 from std2.pickle.encoder import new_encoder
 
@@ -15,28 +17,33 @@ def _session_path(cwd: PurePath, session_store: Path) -> Path:
     return part.with_suffix(".json")
 
 
-def _load_json(path: Path) -> Optional[Any]:
-    if path.exists():
-        json = path.read_text("UTF-8")
-        return loads(json)
-    else:
-        return None
+async def _load_json(path: Path) -> Optional[Any]:
+    def cont() -> Optional[Any]:
+
+        try:
+            json = decode(path.read_bytes())
+        except FileNotFoundError:
+            return None
+        else:
+            return loads(json)
+
+    return await to_thread(cont)
 
 
 _DECODER = new_decoder[Session](Session)
 _ENCODER = new_encoder[Session](Session)
 
 
-def load_session(cwd: PurePath, session_store: Path) -> Session:
+async def load_session(cwd: PurePath, session_store: Path) -> Session:
     load_path = _session_path(cwd, session_store=session_store)
     try:
-        session: Session = _DECODER(_load_json(load_path))
+        session = _DECODER(await _load_json(load_path))
         return session
     except Exception:
         return Session(index=None, show_hidden=None, enable_vc=None)
 
 
-def dump_session(state: State, session_store: Path) -> None:
+async def dump_session(state: State, session_store: Path) -> None:
     session = Session(
         index=state.index, show_hidden=state.show_hidden, enable_vc=state.enable_vc
     )

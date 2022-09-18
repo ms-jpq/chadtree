@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
-from pynvim import Nvim
-from pynvim_pp.lib import write
+from pynvim_pp.nvim import Nvim
+from std2 import anext
 from std2.types import Void, VoidType
 
 from ..registry import rpc
@@ -15,42 +15,40 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def _toggle_hidden(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _toggle_hidden(
+    state: State, settings: Settings, is_visual: bool
 ) -> Optional[Stage]:
     """
     Toggle hidden
     """
 
-    node = next(indices(nvim, state=state, is_visual=is_visual))
+    node = await anext(indices(state, is_visual=is_visual))
     if not node:
         return None
     else:
         focus = node.path
         show_hidden = not state.show_hidden
         selection: Selection = state.selection if show_hidden else set()
-        new_state = forward(
+        new_state = await forward(
             state, settings=settings, show_hidden=show_hidden, selection=selection
         )
         return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
-def _toggle_follow(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Stage:
+async def _toggle_follow(state: State, settings: Settings, is_visual: bool) -> Stage:
     """
     Toggle follow
     """
 
-    new_state = forward(state, settings=settings, follow=not state.follow)
-    write(nvim, LANG("follow_mode_indi", follow=str(new_state.follow)))
+    new_state = await forward(state, settings=settings, follow=not state.follow)
+    await Nvim.write(LANG("follow_mode_indi", follow=str(new_state.follow)))
     return Stage(new_state)
 
 
 @rpc(blocking=False)
-def _toggle_version_control(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
+async def _toggle_version_control(
+    state: State, settings: Settings, is_visual: bool
 ) -> Stage:
     """
     Toggle version control
@@ -58,6 +56,6 @@ def _toggle_version_control(
 
     enable_vc = not state.enable_vc
     vc: Union[VoidType, VCStatus] = Void if enable_vc else VCStatus()
-    new_state = forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
-    write(nvim, LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
+    new_state = await forward(state, settings=settings, enable_vc=enable_vc, vc=vc)
+    await Nvim.write(LANG("version_control_indi", enable_vc=str(new_state.enable_vc)))
     return Stage(new_state)

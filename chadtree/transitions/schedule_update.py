@@ -1,7 +1,6 @@
 from typing import Optional
 
-from pynvim import Nvim
-from pynvim.api.common import NvimError
+from pynvim_pp.types import NvimError
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -11,9 +10,10 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-def schedule_update(nvim: Nvim, state: State, settings: Settings) -> Optional[Stage]:
+async def scheduled_update(state: State, settings: Settings) -> Optional[Stage]:
     try:
-        stage = refresh(nvim, state=state, settings=settings)
-        return stage
+        stage = await refresh(state=state, settings=settings)
     except NvimError:
         return None
+    else:
+        return stage

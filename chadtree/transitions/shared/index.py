@@ -1,8 +1,7 @@
-from typing import Iterator, Optional
+from typing import AsyncIterator, Optional
 
-from pynvim.api import Nvim
-from pynvim_pp.api import cur_win, win_get_buf, win_get_cursor
 from pynvim_pp.operators import operator_marks
+from pynvim_pp.window import Window
 
 from ...fs.types import Node
 from ...state.types import State
@@ -16,23 +15,21 @@ def _row_index(state: State, row: int) -> Optional[Node]:
         return None
 
 
-def indices(nvim: Nvim, state: State, is_visual: bool) -> Iterator[Node]:
-    win = cur_win(nvim)
-    buf = win_get_buf(nvim, win=win)
+async def indices(state: State, is_visual: bool) -> AsyncIterator[Node]:
+    win = await Window.get_current()
+    buf = await win.get_buf()
 
-    if not is_fm_buffer(nvim, buf=buf):
-        return None
+    if not await is_fm_buffer(buf):
+        return
     else:
-        row, _ = win_get_cursor(nvim, win=win)
-        node = _row_index(state, row)
-        if node:
+        row, _ = await win.get_cursor()
+        if node := _row_index(state, row):
             yield node
 
         if is_visual:
-            (row1, _), (row2, _) = operator_marks(nvim, buf=buf, visual_type=None)
+            (row1, _), (row2, _) = await operator_marks(buf, visual_type=None)
 
             for r in range(row1, row2 + 1):
                 if r != row:
-                    node = _row_index(state, r)
-                    if node:
+                    if node := _row_index(state, r):
                         yield node

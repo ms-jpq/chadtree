@@ -1,50 +1,45 @@
-from concurrent.futures import Executor
 from locale import strxfrm
 from os import linesep
 from pathlib import PurePath
-from shutil import which
-from subprocess import DEVNULL, PIPE, CalledProcessError, check_call
-from typing import Callable, Iterable, Optional
+from subprocess import CalledProcessError
+from typing import Awaitable, Callable, Iterable, Optional
 
-from pynvim.api import Nvim
-from pynvim_pp.api import ask_mc, get_cwd
-from pynvim_pp.lib import threadsafe_call, write
-from pynvim_pp.logging import log
+from pynvim_pp.nvim import Nvim
+from std2.asyncio.subprocess import call
 
 from ..fs.ops import ancestors, remove, unify_ancestors
 from ..lsp.notify import lsp_removed
-from ..registry import enqueue_event, rpc
+from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path
-from .refresh import refresh as _refresh
+from .open_system import which
 from .shared.index import indices
 from .shared.refresh import refresh
 from .shared.wm import kill_buffers
 from .types import Stage
 
 
-def _remove(
-    nvim: Nvim,
+async def _remove(
     state: State,
     settings: Settings,
     is_visual: bool,
-    yeet: Callable[[Executor, Iterable[PurePath]], None],
+    yeet: Callable[[Iterable[PurePath]], Awaitable[None]],
 ) -> Optional[Stage]:
-    cwd, root = get_cwd(nvim), state.root.path
+    cwd, root = await Nvim.getcwd(), state.root.path
     nono = {cwd, root} | ancestors(cwd) | ancestors(root)
 
     selection = state.selection or {
-        node.path for node in indices(nvim, state=state, is_visual=is_visual)
+        node.path async for node in indices(state, is_visual=is_visual)
     }
     unified = unify_ancestors(selection)
 
     if not unified:
         return None
     elif not unified.isdisjoint(nono):
-        write(nvim, LANG("operation not permitted on root"), error=True)
+        await Nvim.write(LANG("operation not permitted on root"), error=True)
         return None
     else:
         display_paths = linesep.join(
@@ -52,8 +47,7 @@ def _remove(
         )
 
         question = LANG("ask_trash", display_paths=display_paths)
-        ans = ask_mc(
-            nvim,
+        ans = await Nvim.confirm(
             question=question,
             answers=LANG("ask_yesno"),
             answer_key={1: True, 2: False},
@@ -63,75 +57,54 @@ def _remove(
             return None
         else:
             try:
-                yeet(state.pool, unified)
+                await yeet(unified)
             except Exception as e:
-                write(nvim, e, error=True)
-                return refresh(nvim, state=state, settings=settings)
+                await Nvim.write(e, error=True)
+                return await refresh(state, settings=settings)
             else:
                 paths = {path.parent for path in unified}
-                new_state = forward(
+                new_state = await forward(
                     state, settings=settings, selection=set(), paths=paths
                 )
 
-                kill_buffers(
-                    nvim, last_used=new_state.window_order, paths=selection, reopen={}
+                await kill_buffers(
+                    last_used=new_state.window_order, paths=selection, reopen={}
                 )
-                lsp_removed(nvim, paths=unified)
+                await lsp_removed(unified)
                 return Stage(new_state)
 
 
 @rpc(blocking=False)
-def _delete(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _delete(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
     """
     Delete selected
     """
 
-    return _remove(
-        nvim, state=state, settings=settings, is_visual=is_visual, yeet=remove
-    )
+    return await _remove(state, settings=settings, is_visual=is_visual, yeet=remove)
 
 
-def _sys_trash(nvim: Nvim) -> Callable[[Executor, Iterable[PurePath]], None]:
-    cwd = get_cwd(nvim)
+async def _sys_trash(paths: Iterable[PurePath]) -> None:
+    cwd = await Nvim.getcwd()
 
-    def cont(pool: Executor, paths: Iterable[PurePath]) -> None:
-        def c1() -> None:
-            cmd = "trash"
-            if which(cmd):
-                command = (cmd, "--", *map(str, paths))
-                check_call(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, cwd=cwd)
-            else:
-                raise LookupError(LANG("sys_trash_err"))
+    if arg0 := which("trash"):
+        try:
+            await call(arg0, "--", *map(str, paths), cwd=cwd)
+        except CalledProcessError as e:
+            await Nvim.write(e, e.stderr, e.stdout, error=True)
 
-        def c2() -> None:
-            try:
-                c1()
-            except (CalledProcessError, LookupError) as e:
-                threadsafe_call(nvim, write, nvim, e, error=True)
-            except Exception as e:
-                log.exception("%s", e)
-            else:
-                enqueue_event(_refresh, True)
-
-        pool.submit(c2)
-
-    return cont
+    else:
+        await Nvim.write(LANG("sys_trash_err"), error=True)
 
 
 @rpc(blocking=False)
-def _trash(
-    nvim: Nvim, state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _trash(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
     """
     Delete selected
     """
 
-    return _remove(
-        nvim,
-        state=state,
+    return await _remove(
+        state,
         settings=settings,
         is_visual=is_visual,
-        yeet=_sys_trash(nvim),
+        yeet=_sys_trash,
     )
