@@ -140,7 +140,8 @@ local set_chad_call = function(cmd)
     end
 
     if not job_id then
-      local server = vim.api.nvim_call_function("serverstart", {})
+      local srv = is_win and {"localhost:0"} or {}
+      local server = vim.api.nvim_call_function("serverstart", srv)
       job_id =
         start(
         false,

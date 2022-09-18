@@ -12,7 +12,7 @@ from typing import Any, MutableMapping, Optional, Sequence, Tuple, cast
 from pynvim_pp.highlight import highlight
 from pynvim_pp.logging import log, suppress_and_log
 from pynvim_pp.nvim import Nvim, conn
-from pynvim_pp.rpc import MsgType
+from pynvim_pp.rpc import MsgType, ServerAddr
 from pynvim_pp.types import Method, NoneType, NvimError, RPCallable
 from std2.pickle.types import DecodeError
 from std2.sched import aticker
@@ -71,7 +71,7 @@ async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
     await enqueue_event(method, *params)
 
 
-async def init(socket: PurePath) -> None:
+async def init(socket: ServerAddr) -> None:
     async with conn(socket, default=_default) as client:
         atomic, handlers = rpc.drain()
         try:
