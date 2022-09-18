@@ -184,21 +184,11 @@ async def resize_fm_windows(last_used: Mapping[ExtData, None], width: int) -> No
         await win.set_width(width)
 
 
-@asynccontextmanager
-async def _tmp(name: PurePath) -> AsyncIterator[None]:
-    p = Path(name)
-    try:
-        p.touch()
-        yield
-    finally:
-        p.unlink(missing_ok=True)
-
-
 async def kill_buffers(
     last_used: Mapping[ExtData, None],
     paths: AbstractSet[PurePath],
     reopen: Mapping[PurePath, PurePath],
-) -> None:
+) -> Mapping[Window, PurePath]:
     active = (
         {
             await win.get_buf(): win
@@ -210,19 +200,27 @@ async def kill_buffers(
         else {}
     )
 
-    for buf in await Buffer.list(listed=True):
-        if bufname := await buf.get_name():
-            name = PurePath(bufname)
-            buf_paths = ancestors(name) | {name}
+    async def cont() -> AsyncIterator[Tuple[Window, PurePath]]:
+        for buf in await Buffer.list(listed=True):
+            if bufname := await buf.get_name():
+                name = PurePath(bufname)
+                buf_paths = ancestors(name) | {name}
 
-            if not buf_paths.isdisjoint(paths):
-                win = active.get(buf)
-                new_path = reopen.get(name)
-                if reopen and win and new_path:
-                    async with hold_win(win=None):
-                        await Window.set_current(win)
-                        escaped = await Nvim.fn.fnameescape(str, normpath(new_path))
-                        async with _tmp(name):
-                            await Nvim.exec(f"edit! {escaped}")
+                if not buf_paths.isdisjoint(paths):
+                    if (
+                        reopen
+                        and (win := active.get(buf))
+                        and (new_path := reopen.get(name))
+                    ):
+                        tmp = await Buffer.create(
+                            listed=False,
+                            scratch=True,
+                            wipe=True,
+                            nofile=True,
+                            noswap=True,
+                        )
+                        await win.set_buf(tmp)
+                        yield win, new_path
+                    await buf.delete()
 
-                await buf.delete()
+    return {win: path async for win, path in cont()}

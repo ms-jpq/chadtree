@@ -1,8 +1,10 @@
-from os.path import abspath
+from os.path import abspath, normpath
 from pathlib import PurePath
 from typing import Optional
 
+from pynvim_pp.hold import hold_win
 from pynvim_pp.nvim import Nvim
+from pynvim_pp.window import Window
 from std2 import anext
 
 from ..fs.ops import ancestors, exists, rename
@@ -40,12 +42,23 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                 await Nvim.write(LANG("already_exists", name=str(new_path)), error=True)
                 return None
             else:
+                killed = await kill_buffers(
+                    last_used=state.window_order,
+                    paths={node.path},
+                    reopen={node.path: new_path},
+                )
                 try:
                     await rename(operations)
                 except Exception as e:
                     await Nvim.write(e, error=True)
                     return await refresh(state=state, settings=settings)
                 else:
+                    async with hold_win(win=None):
+                        for win, new_path in killed.items():
+                            await Window.set_current(win)
+                            escaped = await Nvim.fn.fnameescape(str, normpath(new_path))
+                            await Nvim.exec(f"edit! {escaped}")
+
                     new_state = (
                         await maybe_path_above(state, settings=settings, path=new_path)
                         or state
@@ -54,11 +67,6 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                     index = state.index | paths
                     next_state = await forward(
                         new_state, settings=settings, index=index, paths=paths
-                    )
-                    await kill_buffers(
-                        last_used=new_state.window_order,
-                        paths={node.path},
-                        reopen={node.path: new_path},
                     )
                     await lsp_moved(operations)
                     return Stage(next_state, focus=new_path)
