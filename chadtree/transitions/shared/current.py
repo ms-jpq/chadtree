@@ -13,7 +13,7 @@ from ..types import Stage
 
 async def new_current_file(
     state: State, settings: Settings, current: PurePath
-) -> Optional[Stage]:
+) -> Stage:
     """
     New file focused in buf
     """
@@ -24,9 +24,10 @@ async def new_current_file(
         new_state = await forward(
             state, settings=settings, index=index, paths=parents, current=current
         )
-        return Stage(new_state)
     else:
-        return None
+        new_state = await forward(state, settings=settings, current=current)
+
+    return Stage(new_state)
 
 
 async def new_root(
