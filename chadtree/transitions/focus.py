@@ -9,7 +9,7 @@ from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
-from .shared.current import maybe_path_above, new_root
+from .shared.current import maybe_path_above, new_current_file, new_root
 from .shared.index import indices
 from .types import Stage
 
@@ -23,10 +23,14 @@ async def _jump_to_current(
     """
 
     if not (curr := state.current):
+
+        print("NO CURR", flush=True)
         return None
     else:
         if new_state := await maybe_path_above(state, settings=settings, path=curr):
             return Stage(new_state, focus=new_state.current)
+        elif stage := await new_current_file(state, settings=settings, current=curr):
+            return Stage(stage.state, focus=curr)
         else:
             return None
 
