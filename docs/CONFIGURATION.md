@@ -238,7 +238,7 @@ Files whose full path match these [glob patterns](https://en.wikipedia.org/wiki/
 
 ### chadtree_settings.view
 
-Some options to change CHADTree's apperance
+Some options to change CHADTree's appearance
 
 #### `chadtree_settings.view.open_direction`
 

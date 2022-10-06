@@ -99,8 +99,8 @@ async def exists(path: PurePath, follow: bool) -> bool:
 async def exists_many(
     paths: Iterable[PurePath], follow: bool
 ) -> Mapping[PurePath, bool]:
-    existance = await gather(*(exists(path, follow=follow) for path in paths))
-    return {path: exi for path, exi in zip(paths, existance)}
+    existence = await gather(*(exists(path, follow=follow) for path in paths))
+    return {path: exi for path, exi in zip(paths, existence)}
 
 
 async def is_file(path: PurePath) -> bool:

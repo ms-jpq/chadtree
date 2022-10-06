@@ -8,7 +8,7 @@ In fact, `pynvim` doesn't even run in the main thread.
 
 All RPC notifications from the `nvim` server are sent to a global message queue, which is then processed in order of arrival after initialization code.
 
-No futher messages can be processed until the previous ones have.
+No further messages can be processed until the previous ones have.
 
 `nvim` never blocks on the notifications. The CHADTree client has no blocking API.
 
@@ -18,7 +18,7 @@ CHADTree uses a traditional threadpool for parallelizable operations, this inclu
 
 The fs walk is done using a native parallel BFS strategy with a chunking step to avoid flooding the thread pool. This is not optimal since a [Fork Join](https://en.wikipedia.org/wiki/Fork%E2%80%93join_model) model should be more efficient.
 
-However, as benchmarked, the performance bottleneck is infact not the filesystem, but text & decorations rendering.
+However, as benchmarked, the performance bottleneck is in fact not the filesystem, but text & decorations rendering.
 
 ## Virtual Rendering
 

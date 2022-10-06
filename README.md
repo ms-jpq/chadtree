@@ -82,7 +82,7 @@ _You can read more about my [performance optimization](https://github.com/ms-jpq
 
 ### I like documentation
 
-- Build-in help command in a floating window!
+- Built-in help command in a floating window!
 
 - Over 1000 lines of meticulous docs covering every option / function!
 

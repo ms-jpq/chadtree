@@ -59,17 +59,17 @@ Nothing will pollute the global namespace for python.
 
 ### Isolated Process
 
-CHADTree now runs inside an isolated process! Not only will it start faster, it will also be isolated from your other python plugins. Incase of errors or crashes, they will not affect each other nearly as much!
+CHADTree now runs inside an isolated process! Not only will it start faster, it will also be isolated from your other python plugins. In case of errors or crashes, they will not affect each other nearly as much!
 
 ### New Vaildating Config Parser
 
-CHADTree will now vaildate your typos and mis-understandings on how to configure it! No more silent failures. If you make a typo in the config, it will tell you loud and clear!
+CHADTree will now validate your typos and misunderstandings on how to configure it! No more silent failures. If you make a typo in the config, it will tell you loud and clear!
 
 New `property.sub_property` syntax also supported on a recursive level.
 
 ### Faster startup
 
-CHADTree started up kinda of slowly before. I have made it perceptibly faster through various marginal improvments.
+CHADTree started up kinda of slowly before. I have made it perceptibly faster through various marginal improvements.
 
 ### Bigly Improved Documentation
 
@@ -91,7 +91,7 @@ See [design document here](https://github.com/ms-jpq/chadtree/tree/chad/docs/ARC
 
 You know how React is famous because it only renders what needs to be changed?
 
-CHADTree now uses a React-like virtual rendering target. It only re-renders the minimal amount of lines. CHADTree can now handle thousands of visible files and still be reasonablly performant!
+CHADTree now uses a React-like virtual rendering target. It only re-renders the minimal amount of lines. CHADTree can now handle thousands of visible files and still be reasonably performant!
 
 _This is only visible when you have 1000+ files visible. The old ways was fast enough for most tasks._
 
@@ -105,7 +105,7 @@ Go see `:CHADhelp theme` for [details](https://github.com/ms-jpq/chadtree/tree/c
 
 - Maintain cursor position in many circumstances, ie. move root up / down, filtering for files, renaming, creating files, etc
 
-- Selection of hidden / invisble files no longer possible.
+- Selection of hidden / invisible files no longer possible.
 
 - Retain selection when copying or moving files.
 
@@ -113,4 +113,4 @@ Go see `:CHADhelp theme` for [details](https://github.com/ms-jpq/chadtree/tree/c
 
 ### Even Higher Quality Code
 
-Yes the quailty of code is a feature. The better the code, the easier it is for me and other people to add in future improvements.
+Yes the quality of code is a feature. The better the code, the easier it is for me and other people to add in future improvements.
