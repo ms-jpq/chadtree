@@ -1,19 +1,20 @@
-from asyncio import gather
+from asyncio import create_task, gather
 from functools import wraps
 from multiprocessing import cpu_count
-from pathlib import Path, PurePath
+from pathlib import Path
 from platform import uname
 from string import Template
 from sys import executable, exit
 from textwrap import dedent
 from time import monotonic
-from typing import Any, MutableMapping, Optional, Sequence, Tuple, cast
+from typing import Any, Optional, Sequence, Tuple, cast
 
 from pynvim_pp.highlight import highlight
 from pynvim_pp.logging import log, suppress_and_log
 from pynvim_pp.nvim import Nvim, conn
 from pynvim_pp.rpc import MsgType, ServerAddr
 from pynvim_pp.types import Method, NoneType, NvimError, RPCallable
+from std2.asyncio import cancel
 from std2.pickle.types import DecodeError
 from std2.sched import aticker
 
@@ -94,23 +95,24 @@ async def init(socket: ServerAddr) -> None:
 
             init_locale(settings.lang)
 
-            transitions: MutableMapping[Method, _CB] = {}
-
             for f in handlers.values():
                 ff = _trans(f)
                 client.register(ff)
-                transitions[ff.method] = ff
 
             async def cont() -> None:
                 nonlocal state
                 t1, has_drawn = monotonic(), False
 
+                task = None
                 while True:
                     with suppress_and_log():
                         msg: Tuple[Method, Sequence[Any]] = await queue().get()
                         method, params = msg
                         if handler := cast(Optional[_CB], handlers.get(method)):
-                            if stage := await handler(state, settings, *params):
+                            if task:
+                                await cancel(task)
+                            task = create_task(handler(state, settings, *params))
+                            if stage := await task:
                                 state = stage.state
 
                                 for _ in range(RENDER_RETRIES - 1):
