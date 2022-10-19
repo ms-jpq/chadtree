@@ -1,4 +1,4 @@
-from asyncio import create_task, gather
+from asyncio import Task, create_task, gather
 from functools import wraps
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -103,7 +103,7 @@ async def init(socket: ServerAddr) -> None:
                 nonlocal state
                 t1, has_drawn = monotonic(), False
 
-                task = None
+                task: Optional[Task] = None
                 while True:
                     with suppress_and_log():
                         msg: Tuple[Method, Sequence[Any]] = await queue().get()
@@ -111,8 +111,9 @@ async def init(socket: ServerAddr) -> None:
                         if handler := cast(Optional[_CB], handlers.get(method)):
                             if task:
                                 await cancel(task)
-                            task = create_task(handler(state, settings, *params))
-                            if stage := await task:
+                            if stage := await (
+                                task := create_task(handler(state, settings, *params))
+                            ):
                                 state = stage.state
 
                                 for _ in range(RENDER_RETRIES - 1):
