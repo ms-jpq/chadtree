@@ -1,4 +1,5 @@
-from asyncio import Task, create_task, gather
+from asyncio import CancelledError, Task, create_task, gather
+from contextlib import suppress
 from functools import wraps
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -105,7 +106,7 @@ async def init(socket: ServerAddr) -> None:
 
                 task: Optional[Task] = None
                 while True:
-                    with suppress_and_log():
+                    with suppress(CancelledError), suppress_and_log():
                         msg: Tuple[Method, Sequence[Any]] = await queue().get()
                         method, params = msg
                         if handler := cast(Optional[_CB], handlers.get(method)):
