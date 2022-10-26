@@ -1,4 +1,4 @@
-from asyncio import CancelledError, Task, create_task, gather
+from asyncio import Event, Lock, Task, create_task, gather
 from contextlib import suppress
 from functools import wraps
 from multiprocessing import cpu_count
@@ -16,6 +16,7 @@ from pynvim_pp.nvim import Nvim, conn
 from pynvim_pp.rpc import MsgType, ServerAddr
 from pynvim_pp.types import Method, NoneType, NvimError, RPCallable
 from std2.asyncio import cancel
+from std2.cell import RefCell
 from std2.pickle.types import DecodeError
 from std2.sched import aticker
 
@@ -53,24 +54,24 @@ async def _profile(t1: float) -> None:
 
 
 async def _sched(settings: Settings) -> None:
-    await enqueue_event(vc_refresh.method)
+    await enqueue_event(False, method=vc_refresh.method)
 
     async for _ in aticker(settings.polling_rate, immediately=False):
-        await enqueue_event(scheduled_update.method)
-        await enqueue_event(vc_refresh.method)
-        await enqueue_event(save_session.method)
+        await enqueue_event(False, method=scheduled_update.method)
+        await enqueue_event(False, method=vc_refresh.method)
+        await enqueue_event(False, method=save_session.method)
 
 
 def _trans(handler: _CB) -> _CB:
     @wraps(handler)
     async def f(*params: Any) -> None:
-        await enqueue_event(handler.method, *params)
+        await enqueue_event(True, method=handler.method, params=params)
 
     return cast(_CB, f)
 
 
 async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
-    await enqueue_event(method, *params)
+    await enqueue_event(True, method=method, params=params)
 
 
 async def init(socket: ServerAddr) -> None:
@@ -92,7 +93,7 @@ async def init(socket: ServerAddr) -> None:
         else:
             hl = highlight(*settings.view.hl_context.groups)
             await (atomic + autocmd.drain() + hl).commit(NoneType)
-            state = await initial_state(settings)
+            state = RefCell(await initial_state(settings))
 
             init_locale(settings.lang)
 
@@ -100,29 +101,53 @@ async def init(socket: ServerAddr) -> None:
                 ff = _trans(f)
                 client.register(ff)
 
-            async def cont() -> None:
-                nonlocal state
-                t1, has_drawn = monotonic(), False
+            staged = RefCell[Optional[Stage]](None)
+            event = Event()
+            lock = Lock()
 
+            async def step(
+                prev: Optional[Task], method: Method, params: Sequence[Any]
+            ) -> None:
+                if prev:
+                    await cancel(prev)
+
+                if handler := cast(Optional[_CB], handlers.get(method)):
+                    with suppress_and_log():
+                        async with lock:
+                            if stage := await handler(state.val, settings, *params):
+                                state.val = stage.state
+                                staged.val = stage
+                                event.set()
+                else:
+                    assert False, (method, params)
+
+            async def c1() -> None:
                 task: Optional[Task] = None
                 while True:
-                    with suppress(CancelledError), suppress_and_log():
-                        msg: Tuple[Method, Sequence[Any]] = await queue().get()
-                        method, params = msg
-                        if handler := cast(Optional[_CB], handlers.get(method)):
-                            if task:
-                                await cancel(task)
-                            if stage := await (
-                                task := create_task(handler(state, settings, *params))
-                            ):
+                    msg: Tuple[bool, Method, Sequence[Any]] = await queue().get()
+                    sync, method, params = msg
+                    t = create_task(
+                        step(
+                            task,
+                            method=method,
+                            params=params,
+                        )
+                    )
+                    task = t if not sync else task
+
+            async def c2() -> None:
+                t1, has_drawn = monotonic(), False
+
+                while True:
+                    with suppress_and_log():
+                        await event.wait()
+                        try:
+                            if stage := staged.val:
                                 state = stage.state
 
                                 for _ in range(RENDER_RETRIES - 1):
-                                    try:
+                                    with suppress(NvimError):
                                         await redraw(state, focus=stage.focus)
-                                    except NvimError:
-                                        pass
-                                    else:
                                         break
                                 else:
                                     try:
@@ -133,8 +158,7 @@ async def init(socket: ServerAddr) -> None:
                                 if settings.profiling and not has_drawn:
                                     has_drawn = True
                                     await _profile(t1=t1)
+                        finally:
+                            event.clear()
 
-                        else:
-                            assert False, msg
-
-            await gather(cont(), _sched(settings))
+            await gather(c1(), c2(), _sched(settings))
