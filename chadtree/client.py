@@ -27,7 +27,6 @@ from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
-from .transitions.autocmds import save_session
 from .transitions.redraw import redraw
 from .transitions.schedule_update import scheduled_update
 from .transitions.types import Stage
@@ -58,8 +57,6 @@ async def _sched(settings: Settings) -> None:
 
     async for _ in aticker(settings.polling_rate, immediately=False):
         await enqueue_event(False, method=scheduled_update.method)
-        await enqueue_event(False, method=vc_refresh.method)
-        await enqueue_event(False, method=save_session.method)
 
 
 def _trans(handler: _CB) -> _CB:
