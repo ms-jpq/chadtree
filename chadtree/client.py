@@ -105,32 +105,33 @@ async def init(socket: ServerAddr) -> None:
             async def step(
                 prev: Optional[Task], method: Method, params: Sequence[Any]
             ) -> None:
-                if prev:
-                    await cancel(prev)
+                with suppress_and_log():
+                    if prev:
+                        await cancel(prev)
 
-                if handler := cast(Optional[_CB], handlers.get(method)):
-                    with suppress_and_log():
+                    if handler := cast(Optional[_CB], handlers.get(method)):
                         async with lock:
                             if stage := await handler(state.val, settings, *params):
                                 state.val = stage.state
                                 staged.val = stage
                                 event.set()
-                else:
-                    assert False, (method, params)
+                    else:
+                        assert False, (method, params)
 
             async def c1() -> None:
                 task: Optional[Task] = None
                 while True:
-                    msg: Tuple[bool, Method, Sequence[Any]] = await queue().get()
-                    sync, method, params = msg
-                    t = create_task(
-                        step(
-                            task,
-                            method=method,
-                            params=params,
+                    with suppress_and_log():
+                        msg: Tuple[bool, Method, Sequence[Any]] = await queue().get()
+                        sync, method, params = msg
+                        t = create_task(
+                            step(
+                                task,
+                                method=method,
+                                params=params,
+                            )
                         )
-                    )
-                    task = t if not sync else task
+                        task = t if not sync else task
 
             async def c2() -> None:
                 t1, has_drawn = monotonic(), False
