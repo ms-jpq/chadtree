@@ -47,9 +47,13 @@ async def dump_session(state: State, session_store: Path) -> None:
     session = Session(
         index=state.index, show_hidden=state.show_hidden, enable_vc=state.enable_vc
     )
-    json = _ENCODER(session)
 
+    json = _ENCODER(session)
     path = _session_path(state.root.path, session_store=session_store)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    json = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
-    path.write_text(json, "UTF-8")
+
+    def cont() -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        dumped = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
+        path.write_text(dumped, "UTF-8")
+
+    await to_thread(cont)
