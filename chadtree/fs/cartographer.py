@@ -1,6 +1,7 @@
-from asyncio import Queue, gather
+from asyncio import Lock, Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
+from functools import lru_cache
 from os import scandir, stat
 from pathlib import PurePath
 from stat import (
@@ -42,6 +43,11 @@ _FILE_MODES: Mapping[int, Mode] = {
     S_ISGID: Mode.set_gid,
     S_ISUID: Mode.set_uid,
 }
+
+
+@lru_cache(maxsize=None)
+def _lock() -> Lock:
+    return Lock()
 
 
 def _fs_modes(stat: int) -> Iterator[Mode]:
@@ -91,7 +97,7 @@ async def _listdir(path: PurePath) -> AsyncIterator[Sequence[PurePath]]:
                     break
 
 
-async def _new(
+async def _next(
     roots: Iterable[PurePath], index: Index, acc: Queue, bfs_q: Queue
 ) -> None:
     for root in roots:
@@ -133,7 +139,7 @@ async def _join(nodes: Queue) -> Node:
         return root_node
 
 
-async def new(root: PurePath, index: Index) -> Node:
+async def _new(root: PurePath, index: Index) -> Node:
     acc: Queue = Queue()
     bfs_q: Queue = Queue()
 
@@ -144,16 +150,21 @@ async def new(root: PurePath, index: Index) -> Node:
     await bfs_q.put((root,))
     while not bfs_q.empty():
         tasks = [
-            _new(paths, index=index, acc=acc, bfs_q=bfs_q) async for paths in drain()
+            _next(paths, index=index, acc=acc, bfs_q=bfs_q) async for paths in drain()
         ]
         await gather(*tasks)
 
     return await _join(acc)
 
 
+async def new(root: PurePath, index: Index) -> Node:
+    async with _lock():
+        return await _new(root, index=index)
+
+
 async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
     if root.path in paths:
-        return await new(root.path, index=index)
+        return await _new(root.path, index=index)
     else:
         children = {
             k: await _update(v, index=index, paths=paths)
@@ -176,10 +187,11 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 
 
 async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
-    try:
-        return await _update(root, index=index, paths=paths)
-    except FileNotFoundError:
-        return await new(root.path, index=index)
+    async with _lock():
+        try:
+            return await _update(root, index=index, paths=paths)
+        except FileNotFoundError:
+            return await _new(root.path, index=index)
 
 
 def is_dir(node: Node) -> bool:
