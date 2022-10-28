@@ -1,6 +1,7 @@
-from asyncio import gather
+from asyncio import Lock, gather
 from dataclasses import dataclass
 from datetime import datetime
+from functools import lru_cache
 from os import makedirs, readlink
 from os import remove as rm
 from os import stat
@@ -35,6 +36,11 @@ class FSstat:
     date_mod: datetime
     size: int
     link: Optional[str]
+
+
+@lru_cache(maxsize=None)
+def _lock() -> Lock:
+    return Lock()
 
 
 try:
@@ -99,12 +105,14 @@ async def exists(path: PurePath, follow: bool) -> bool:
 async def exists_many(
     paths: Iterable[PurePath], follow: bool
 ) -> Mapping[PurePath, bool]:
-    existance = await gather(*(exists(path, follow=follow) for path in paths))
+    async with _lock():
+        existance = await gather(*(exists(path, follow=follow) for path in paths))
     return {path: exi for path, exi in zip(paths, existance)}
 
 
 async def is_file(path: PurePath) -> bool:
-    return await to_thread(lambda: isfile(path))
+    async with _lock():
+        return await to_thread(lambda: isfile(path))
 
 
 async def _mkdir(path: PurePath) -> None:
@@ -127,7 +135,8 @@ async def _new(path: PurePath) -> None:
 
 
 async def new(paths: Iterable[PurePath]) -> None:
-    await gather(*map(_new, paths))
+    async with _lock():
+        await gather(*map(_new, paths))
 
 
 async def _rename(src: PurePath, dst: PurePath) -> None:
@@ -139,7 +148,8 @@ async def _rename(src: PurePath, dst: PurePath) -> None:
 
 
 async def rename(operations: Mapping[PurePath, PurePath]) -> None:
-    await gather(*(_rename(src, dst) for src, dst in operations.items()))
+    async with _lock():
+        await gather(*(_rename(src, dst) for src, dst in operations.items()))
 
 
 async def _remove(path: PurePath) -> None:
@@ -154,7 +164,8 @@ async def _remove(path: PurePath) -> None:
 
 
 async def remove(paths: Iterable[PurePath]) -> None:
-    await gather(*map(_remove, paths))
+    async with _lock():
+        await gather(*map(_remove, paths))
 
 
 async def _cut(src: PurePath, dest: PurePath) -> None:
@@ -165,7 +176,8 @@ async def _cut(src: PurePath, dest: PurePath) -> None:
 
 
 async def cut(operations: Mapping[PurePath, PurePath]) -> None:
-    await gather(*(_cut(src, dst) for src, dst in operations.items()))
+    async with _lock():
+        await gather(*(_cut(src, dst) for src, dst in operations.items()))
 
 
 async def _copy(src: PurePath, dst: PurePath) -> None:
@@ -180,4 +192,5 @@ async def _copy(src: PurePath, dst: PurePath) -> None:
 
 
 async def copy(operations: Mapping[PurePath, PurePath]) -> None:
-    await gather(*(_copy(src, dst) for src, dst in operations.items()))
+    async with _lock():
+        await gather(*(_copy(src, dst) for src, dst in operations.items()))
