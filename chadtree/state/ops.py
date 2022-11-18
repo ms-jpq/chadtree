@@ -1,7 +1,6 @@
 from hashlib import sha1
 from json import dumps, loads
 from pathlib import Path, PurePath
-from threading import Lock
 from typing import Any, Optional
 
 from pynvim_pp.lib import decode
@@ -33,7 +32,6 @@ async def _load_json(path: Path) -> Optional[Any]:
 
 _DECODER = new_decoder[Session](Session)
 _ENCODER = new_encoder[Session](Session)
-_LOCK = Lock()
 
 
 async def load_session(cwd: PurePath, session_store: Path) -> Session:
@@ -54,9 +52,8 @@ async def dump_session(state: State, session_store: Path) -> None:
     path = _session_path(state.root.path, session_store=session_store)
 
     def cont() -> None:
-        with _LOCK:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            dumped = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
-            path.write_text(dumped, "UTF-8")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        dumped = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
+        path.write_text(dumped, "UTF-8")
 
     await to_thread(cont)
