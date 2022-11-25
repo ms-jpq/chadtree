@@ -1,7 +1,6 @@
-from asyncio import Lock, Queue, gather
+from asyncio import Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
-from functools import lru_cache
 from os import scandir, stat
 from pathlib import PurePath
 from stat import (
@@ -81,12 +80,12 @@ async def _fs_stat(path: PurePath) -> AbstractSet[Mode]:
     return await to_thread(cont)
 
 
-async def _listdir(path: PurePath) -> AsyncIterator[Sequence[PurePath]]:
+def _listdir(path: PurePath) -> Iterator[Sequence[PurePath]]:
     with suppress(NotADirectoryError):
-        with await to_thread(lambda: scandir(path)) as it:
+        with scandir(path) as it:
             chunked = chunk(it, WALK_PARALLELISM_FACTOR)
             while True:
-                if chunks := await to_thread(lambda: next(chunked, None)):
+                if chunks := next(chunked, None):
                     yield tuple(map(PurePath, chunks))
                 else:
                     break
@@ -107,7 +106,7 @@ async def _next(
             await acc.put(node)
 
             if root in index:
-                async for paths in _listdir(root):
+                for paths in await to_thread(lambda: tuple(_listdir(root))):
                     await bfs_q.put(paths)
 
 
