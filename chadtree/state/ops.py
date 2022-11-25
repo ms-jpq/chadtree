@@ -1,6 +1,7 @@
 from hashlib import sha1
 from json import dumps, loads
 from pathlib import Path, PurePath
+from threading import Lock
 from typing import Any, Optional
 
 from pynvim_pp.lib import decode
@@ -8,8 +9,9 @@ from std2.asyncio import to_thread
 from std2.pickle.decoder import new_decoder
 from std2.pickle.encoder import new_encoder
 
-from ..fs.ops import lock
 from .types import Session, State
+
+_LOCK = Lock()
 
 
 def _session_path(cwd: PurePath, session_store: Path) -> Path:
@@ -53,9 +55,9 @@ async def dump_session(state: State, session_store: Path) -> None:
     path = _session_path(state.root.path, session_store=session_store)
 
     def cont() -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        dumped = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
-        path.write_text(dumped, "UTF-8")
+        with _LOCK:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            dumped = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
+            path.write_text(dumped, "UTF-8")
 
-    async with lock():
-        await to_thread(cont)
+    await to_thread(cont)
