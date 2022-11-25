@@ -1,5 +1,4 @@
-from asyncio import Lock, gather
-from functools import lru_cache
+from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from os import environ, linesep
@@ -40,11 +39,6 @@ _GIT_SUBMODULE_MARKER = "Entering "
 _SUBMODULE_MARKER = "S"
 _IGNORED_MARKER = "I"
 _UNTRACKED_MARKER = "?"
-
-
-@lru_cache(maxsize=None)
-def _lock() -> Lock:
-    return Lock()
 
 
 async def root(git: PurePath, cwd: PurePath) -> PurePath:
@@ -166,17 +160,16 @@ def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
 
 async def status(cwd: PurePath) -> VCStatus:
     if git := which("git"):
-        async with _lock():
-            try:
-                bin = PurePath(git)
-                git_root, *stats = await gather(
-                    root(bin, cwd=cwd),
-                    _stat_main(bin, cwd=cwd),
-                    _stat_sub_modules(bin, cwd=cwd),
-                )
+        try:
+            bin = PurePath(git)
+            git_root, *stats = await gather(
+                root(bin, cwd=cwd),
+                _stat_main(bin, cwd=cwd),
+                _stat_sub_modules(bin, cwd=cwd),
+            )
 
-                return _parse(git_root, stats=chain.from_iterable(stats))
-            except CalledProcessError:
-                return VCStatus()
+            return _parse(git_root, stats=chain.from_iterable(stats))
+        except CalledProcessError:
+            return VCStatus()
     else:
         return VCStatus()

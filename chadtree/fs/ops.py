@@ -39,7 +39,7 @@ class FSstat:
 
 
 @lru_cache(maxsize=None)
-def _lock() -> Lock:
+def lock() -> Lock:
     return Lock()
 
 
@@ -105,13 +105,13 @@ async def exists(path: PurePath, follow: bool) -> bool:
 async def exists_many(
     paths: Iterable[PurePath], follow: bool
 ) -> Mapping[PurePath, bool]:
-    async with _lock():
+    async with lock():
         existance = await gather(*(exists(path, follow=follow) for path in paths))
     return {path: exi for path, exi in zip(paths, existance)}
 
 
 async def is_file(path: PurePath) -> bool:
-    async with _lock():
+    async with lock():
         return await to_thread(lambda: isfile(path))
 
 
@@ -135,7 +135,7 @@ async def _new(path: PurePath) -> None:
 
 
 async def new(paths: Iterable[PurePath]) -> None:
-    async with _lock():
+    async with lock():
         await gather(*map(_new, paths))
 
 
@@ -148,7 +148,7 @@ async def _rename(src: PurePath, dst: PurePath) -> None:
 
 
 async def rename(operations: Mapping[PurePath, PurePath]) -> None:
-    async with _lock():
+    async with lock():
         await gather(*(_rename(src, dst) for src, dst in operations.items()))
 
 
@@ -164,7 +164,7 @@ async def _remove(path: PurePath) -> None:
 
 
 async def remove(paths: Iterable[PurePath]) -> None:
-    async with _lock():
+    async with lock():
         await gather(*map(_remove, paths))
 
 
@@ -176,7 +176,7 @@ async def _cut(src: PurePath, dest: PurePath) -> None:
 
 
 async def cut(operations: Mapping[PurePath, PurePath]) -> None:
-    async with _lock():
+    async with lock():
         await gather(*(_cut(src, dst) for src, dst in operations.items()))
 
 
@@ -192,5 +192,5 @@ async def _copy(src: PurePath, dst: PurePath) -> None:
 
 
 async def copy(operations: Mapping[PurePath, PurePath]) -> None:
-    async with _lock():
+    async with lock():
         await gather(*(_copy(src, dst) for src, dst in operations.items()))

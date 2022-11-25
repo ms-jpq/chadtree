@@ -33,7 +33,7 @@ from std2.itertools import chunk
 
 from ..consts import WALK_PARALLELISM_FACTOR
 from ..state.types import Index
-from .ops import ancestors
+from .ops import ancestors, lock
 from .types import Ignored, Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
@@ -43,11 +43,6 @@ _FILE_MODES: Mapping[int, Mode] = {
     S_ISGID: Mode.set_gid,
     S_ISUID: Mode.set_uid,
 }
-
-
-@lru_cache(maxsize=None)
-def _lock() -> Lock:
-    return Lock()
 
 
 def _fs_modes(stat: int) -> Iterator[Mode]:
@@ -158,7 +153,7 @@ async def _new(root: PurePath, index: Index) -> Node:
 
 
 async def new(root: PurePath, index: Index) -> Node:
-    async with _lock():
+    async with lock():
         return await _new(root, index=index)
 
 
@@ -187,7 +182,7 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 
 
 async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
-    async with _lock():
+    async with lock():
         try:
             return await _update(root, index=index, paths=paths)
         except FileNotFoundError:

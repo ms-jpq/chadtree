@@ -1,5 +1,3 @@
-from asyncio import Lock
-from functools import lru_cache
 from hashlib import sha1
 from json import dumps, loads
 from pathlib import Path, PurePath
@@ -10,12 +8,8 @@ from std2.asyncio import to_thread
 from std2.pickle.decoder import new_decoder
 from std2.pickle.encoder import new_encoder
 
+from ..fs.ops import lock
 from .types import Session, State
-
-
-@lru_cache(maxsize=None)
-def _lock() -> Lock:
-    return Lock()
 
 
 def _session_path(cwd: PurePath, session_store: Path) -> Path:
@@ -63,5 +57,5 @@ async def dump_session(state: State, session_store: Path) -> None:
         dumped = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
         path.write_text(dumped, "UTF-8")
 
-    async with _lock():
+    async with lock():
         await to_thread(cont)
