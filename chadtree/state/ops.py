@@ -1,17 +1,15 @@
 from hashlib import sha1
 from json import dumps, loads
 from pathlib import Path, PurePath
-from threading import Lock
+from tempfile import NamedTemporaryFile
 from typing import Any, Optional
 
-from pynvim_pp.lib import decode
+from pynvim_pp.lib import decode, encode
 from std2.asyncio import to_thread
 from std2.pickle.decoder import new_decoder
 from std2.pickle.encoder import new_encoder
 
 from .types import Session, State
-
-_LOCK = Lock()
 
 
 def _session_path(cwd: PurePath, session_store: Path) -> Path:
@@ -53,11 +51,14 @@ async def dump_session(state: State, session_store: Path) -> None:
 
     json = _ENCODER(session)
     path = _session_path(state.root.path, session_store=session_store)
+    parent = path.parent
+    dumped = encode(dumps(json, ensure_ascii=False, check_circular=False, indent=2))
 
     def cont() -> None:
-        with _LOCK:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            dumped = dumps(json, ensure_ascii=False, check_circular=False, indent=2)
-            path.write_text(dumped, "UTF-8")
+        parent.mkdir(parents=True, exist_ok=True)
+        with NamedTemporaryFile("wb", dir=parent, delete=False) as f:
+            f.write(dumped)
+
+        Path(f.name).replace(path)
 
     await to_thread(cont)
