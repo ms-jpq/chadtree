@@ -134,7 +134,6 @@ elif command == "run":
         else:
             import pynvim_pp
             import yaml
-            from std2.sys import suicide
 
             from .client import init
     except ImportError:
@@ -151,8 +150,7 @@ elif command == "run":
     else:
 
         async def main() -> None:
-            async with suicide(args.ppid):
-                await init(args.socket)
+            await init(args.socket, ppid=args.ppid)
 
         arun(main())
 

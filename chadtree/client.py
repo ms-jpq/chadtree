@@ -1,5 +1,5 @@
 from asyncio import Event, Lock, Task, create_task, gather
-from contextlib import suppress
+from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -17,8 +17,11 @@ from pynvim_pp.rpc import MsgType, ServerAddr
 from pynvim_pp.types import Method, NoneType, NvimError, RPCallable
 from std2.asyncio import cancel
 from std2.cell import RefCell
+from std2.contextlib import nullacontext
 from std2.pickle.types import DecodeError
+from std2.platform import OS, os
 from std2.sched import aticker
+from std2.sys import suicide
 
 from ._registry import ____
 from .consts import RENDER_RETRIES
@@ -35,6 +38,13 @@ from .transitions.version_ctl import vc_refresh
 assert ____ or True
 
 _CB = RPCallable[Optional[Stage]]
+
+
+def _suicide(ppid: int) -> AbstractAsyncContextManager:
+    if os is OS.windows:
+        return nullacontext(None)
+    else:
+        return suicide(ppid)
 
 
 async def _profile(t1: float) -> None:
@@ -71,92 +81,95 @@ async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
     await enqueue_event(True, method=method, params=params)
 
 
-async def init(socket: ServerAddr) -> None:
-    async with conn(socket, default=_default) as client:
-        atomic, handlers = rpc.drain()
-        try:
-            settings = await initial_settings(handlers.values())
-        except DecodeError as e:
-            tpl = """
-            Some options may have changed.
-            See help doc on Github under [docs/CONFIGURATION.md]
+async def init(socket: ServerAddr, ppid: int) -> None:
+    async with suicide(ppid):
+        async with conn(socket, default=_default) as client:
+            atomic, handlers = rpc.drain()
+            try:
+                settings = await initial_settings(handlers.values())
+            except DecodeError as e:
+                tpl = """
+                Some options may have changed.
+                See help doc on Github under [docs/CONFIGURATION.md]
 
 
-            ${e}
-            """
-            ms = Template(dedent(tpl)).substitute(e=e)
-            await Nvim.write(ms, error=True)
-            exit(1)
-        else:
-            hl = highlight(*settings.view.hl_context.groups)
-            await (atomic + autocmd.drain() + hl).commit(NoneType)
-            state = RefCell(await initial_state(settings))
+                ${e}
+                """
+                ms = Template(dedent(tpl)).substitute(e=e)
+                await Nvim.write(ms, error=True)
+                exit(1)
+            else:
+                hl = highlight(*settings.view.hl_context.groups)
+                await (atomic + autocmd.drain() + hl).commit(NoneType)
+                state = RefCell(await initial_state(settings))
 
-            init_locale(settings.lang)
+                init_locale(settings.lang)
 
-            for f in handlers.values():
-                ff = _trans(f)
-                client.register(ff)
+                for f in handlers.values():
+                    ff = _trans(f)
+                    client.register(ff)
 
-            staged = RefCell[Optional[Stage]](None)
-            event = Event()
-            lock = Lock()
+                staged = RefCell[Optional[Stage]](None)
+                event = Event()
+                lock = Lock()
 
-            async def step(
-                prev: Optional[Task], method: Method, params: Sequence[Any]
-            ) -> None:
-                with suppress_and_log():
-                    if prev:
-                        await cancel(prev)
-
-                    if handler := cast(Optional[_CB], handlers.get(method)):
-                        async with lock:
-                            if stage := await handler(state.val, settings, *params):
-                                state.val = stage.state
-                                staged.val = stage
-                                event.set()
-                    else:
-                        assert False, (method, params)
-
-            async def c1() -> None:
-                task: Optional[Task] = None
-                while True:
+                async def step(
+                    prev: Optional[Task], method: Method, params: Sequence[Any]
+                ) -> None:
                     with suppress_and_log():
-                        msg: Tuple[bool, Method, Sequence[Any]] = await queue().get()
-                        sync, method, params = msg
-                        t = create_task(
-                            step(
-                                task,
-                                method=method,
-                                params=params,
+                        if prev:
+                            await cancel(prev)
+
+                        if handler := cast(Optional[_CB], handlers.get(method)):
+                            async with lock:
+                                if stage := await handler(state.val, settings, *params):
+                                    state.val = stage.state
+                                    staged.val = stage
+                                    event.set()
+                        else:
+                            assert False, (method, params)
+
+                async def c1() -> None:
+                    task: Optional[Task] = None
+                    while True:
+                        with suppress_and_log():
+                            msg: Tuple[
+                                bool, Method, Sequence[Any]
+                            ] = await queue().get()
+                            sync, method, params = msg
+                            t = create_task(
+                                step(
+                                    task,
+                                    method=method,
+                                    params=params,
+                                )
                             )
-                        )
-                        task = t if not sync else task
+                            task = t if not sync else task
 
-            async def c2() -> None:
-                t1, has_drawn = monotonic(), False
+                async def c2() -> None:
+                    t1, has_drawn = monotonic(), False
 
-                while True:
-                    with suppress_and_log():
-                        await event.wait()
-                        try:
-                            if stage := staged.val:
-                                state = stage.state
+                    while True:
+                        with suppress_and_log():
+                            await event.wait()
+                            try:
+                                if stage := staged.val:
+                                    state = stage.state
 
-                                for _ in range(RENDER_RETRIES - 1):
-                                    with suppress(NvimError):
-                                        await redraw(state, focus=stage.focus)
-                                        break
-                                else:
-                                    try:
-                                        await redraw(state, focus=stage.focus)
-                                    except NvimError as e:
-                                        log.warn("%s", e)
+                                    for _ in range(RENDER_RETRIES - 1):
+                                        with suppress(NvimError):
+                                            await redraw(state, focus=stage.focus)
+                                            break
+                                    else:
+                                        try:
+                                            await redraw(state, focus=stage.focus)
+                                        except NvimError as e:
+                                            log.warn("%s", e)
 
-                                if settings.profiling and not has_drawn:
-                                    has_drawn = True
-                                    await _profile(t1=t1)
-                        finally:
-                            event.clear()
+                                    if settings.profiling and not has_drawn:
+                                        has_drawn = True
+                                        await _profile(t1=t1)
+                            finally:
+                                event.clear()
 
-            await gather(c1(), c2(), _sched(settings))
+                await gather(c1(), c2(), _sched(settings))
