@@ -82,7 +82,7 @@ async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
 
 
 async def init(socket: ServerAddr, ppid: int) -> None:
-    async with suicide(ppid):
+    async with _suicide(ppid):
         async with conn(socket, default=_default) as client:
             atomic, handlers = rpc.drain()
             try:
