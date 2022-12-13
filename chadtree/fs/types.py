@@ -10,6 +10,17 @@ from typing import AbstractSet, Mapping, Sequence
 @unique
 class Mode(IntEnum):
     orphan_link = auto()
+    link = auto()
+
+    sticky_other_writable = auto()
+    other_writable = auto()
+    sticky = auto()
+    folder = auto()
+
+    pipe = auto()
+    socket = auto()
+    block_device = auto()
+    char_device = auto()
 
     set_uid = auto()
     set_gid = auto()
@@ -18,16 +29,6 @@ class Mode(IntEnum):
     multi_hardlink = auto()
     file = auto()
 
-    sticky_other_writable = auto()
-    other_writable = auto()
-    sticky = auto()
-    folder = auto()
-
-    link = auto()
-    pipe = auto()
-    socket = auto()
-    block_device = auto()
-    char_device = auto()
     door = auto()
 
 

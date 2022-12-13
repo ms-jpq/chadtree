@@ -158,7 +158,6 @@ _SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "ca": Mode.file_w_capacity,
     "cd": Mode.char_device,
     "di": Mode.folder,
-    "do": Mode.door,
     "ex": Mode.executable,
     "ln": Mode.link,
     "mh": Mode.multi_hardlink,
@@ -172,6 +171,13 @@ _SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "tw": Mode.sticky_other_writable,
 }
 
+
+_SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
+    # "do": Mode.door,
+    "fi": Mode.file,
+    "no": None,
+}
+
 _UNUSED = {
     "mi": "colour of missing symlink pointee",
     "cl": "ANSI clear",
@@ -182,12 +188,6 @@ _UNUSED = {
 }
 
 assert _UNUSED
-
-
-_SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
-    "fi": Mode.file,
-    "no": None,
-}
 
 
 _HL_STYLE_TABLE: Mapping[_Style, Optional[str]] = {
