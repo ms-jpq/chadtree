@@ -141,21 +141,16 @@ async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats
         return raw_root, raw_stats
     else:
         proc = await call(cygpath, "--windows", "--", _raw_conv(raw_root))
-        cwd = decode(proc.stdout.rstrip())
-        stdin = encode(
-            "\n".join(map(_raw_conv, (raw_root, *(path for _, path in raw_stats))))
-        )
+        root = PurePath(decode(proc.stdout.rstrip()))
+        stdin = encode("\n".join(map(_raw_conv, (path for _, path in raw_stats))))
         proc = await call(
-            cygpath, "--windows", "--absolute", "--file", "-", cwd=cwd, stdin=stdin
+            cygpath, "--windows", "--absolute", "--file", "-", cwd=root, stdin=stdin
         )
-        stdout = tuple(map(decode, proc.stdout.splitlines()))
-        if not stdout:
-            return raw_root, raw_stats
-        else:
-            root, *paths = map(PurePath, stdout)
-            return root, tuple(
-                (stat, path) for (stat, _), path in zip(raw_stats, paths)
-            )
+        stats = tuple(
+            (stat, PurePath(path))
+            for (stat, _), path in zip(raw_stats, decode(proc.stdout).splitlines())
+        )
+        return root, stats
 
 
 def _parse(root: PurePath, stats: _Stats) -> VCStatus:
