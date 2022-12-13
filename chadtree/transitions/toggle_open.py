@@ -9,13 +9,12 @@ from pynvim_pp.window import Window
 from std2 import anext
 from std2.argparse import ArgparseError, ArgParser
 
-from ..fs.ops import exists, new
+from ..fs.ops import exists, new, which
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
 from ..state.types import State
 from ..version_ctl.git import root as version_ctl_toplv
-from .open_system import which
 from .shared.current import maybe_path_above, new_current_file, new_root
 from .shared.open_file import open_file
 from .shared.wm import (
