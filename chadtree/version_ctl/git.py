@@ -137,7 +137,7 @@ def _raw_conv(path: PurePath) -> str:
 
 
 async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats]:
-    if not (cygpath := which("cygpath")):
+    if (not (cygpath := which("cygpath"))) or (altsep not in str(raw_stats)):
         return raw_root, raw_stats
     else:
         proc = await call(cygpath, "--windows", "--", _raw_conv(raw_root))
