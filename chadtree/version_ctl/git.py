@@ -47,9 +47,14 @@ def _path_conv(path: str) -> PurePath:
     if not which("cygpath"):
         return PurePath(path)
     else:
-        empty, drive, p = path.split(sep, maxsplit=2)
-        assert not empty
-        return PurePath(f"{drive}:") / p
+        splits = path.split(sep, maxsplit=2)
+        if len(splits) >= 2:
+            empty, drive, p = splits
+            assert not empty
+            return PurePath(f"{drive}:") / p
+        else:
+            print(splits)
+            return PurePath(path)
 
 
 async def root(git: PurePath, cwd: PurePath) -> PurePath:
