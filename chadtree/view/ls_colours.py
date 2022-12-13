@@ -155,22 +155,33 @@ _PARSE_TABLE: Mapping[
 
 _SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "bd": Mode.block_device,
+    "ca": Mode.file_w_capacity,
     "cd": Mode.char_device,
+    "di": Mode.folder,
     "do": Mode.door,
     "ex": Mode.executable,
-    "ca": Mode.file_w_capacity,
-    "di": Mode.folder,
     "ln": Mode.link,
     "mh": Mode.multi_hardlink,
     "or": Mode.orphan_link,
     "ow": Mode.other_writable,
     "pi": Mode.pipe,
+    "sg": Mode.set_gid,
     "so": Mode.socket,
     "st": Mode.sticky_dir,
-    "tw": Mode.sticky_writable,
-    "sg": Mode.set_gid,
     "su": Mode.set_uid,
+    "tw": Mode.sticky_writable,
 }
+
+_UNUSED = {
+    "mi": "colour of missing symlink pointee",
+    "cl": "ANSI clear",
+    "ec": "ANSI end_code",
+    "lc": "ANSI left_code",
+    "rc": "ANSI right_code",
+    "rs": "ANSI reset",
+}
+
+assert _UNUSED
 
 
 _SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
@@ -272,19 +283,14 @@ def parse_lsc(ls_colours: str, discrete_colours: Mapping[str, str]) -> LSC:
     }
 
     mode_pre = {
-        key: val
-        for key, val in (
-            (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_PRE_TABLE.items()
-        )
-        if val
+        mode: hl
+        for indicator, mode in _SPECIAL_PRE_TABLE.items()
+        if (hl := hl_lookup.pop(indicator, None))
     }
-
     mode_post = {
-        key: val
-        for key, val in (
-            (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_POST_TABLE.items()
-        )
-        if val
+        mode: hl
+        for indicator, mode in _SPECIAL_POST_TABLE.items()
+        if (hl := hl_lookup.pop(indicator, None))
     }
 
     _ext_keys = tuple(
