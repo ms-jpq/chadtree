@@ -2,13 +2,12 @@ from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from os import environ, linesep
+from os.path import normpath
 from pathlib import PurePath
 from string import whitespace
 from subprocess import CalledProcessError
 from typing import (
-    Iterable,
     Iterator,
-    Mapping,
     MutableMapping,
     MutableSequence,
     MutableSet,
@@ -136,11 +135,10 @@ async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats
     if not (cygpath := which("cygpath")):
         return raw_root, raw_stats
     else:
-        proc = await call(cygpath, "--windows", "--", raw_root)
+        proc = await call(cygpath, "--windows", "--", normpath(raw_root))
         cwd = decode(proc.stdout.rstrip())
-        print(raw_root,cwd)
         stdin = encode(
-            "\n".join(map(str, (raw_root, *(path for _, path in raw_stats))))
+            "\n".join(map(normpath, (raw_root, *(path for _, path in raw_stats))))
         )
         proc = await call(
             cygpath, "--windows", "--absolute", "--file", "-", cwd=cwd, stdin=stdin
