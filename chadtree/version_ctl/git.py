@@ -1,6 +1,7 @@
 from asyncio import gather
 from itertools import chain
 from locale import strxfrm
+from ntpath import altsep, sep
 from os import environ, linesep
 from os.path import normpath
 from pathlib import PurePath
@@ -131,15 +132,18 @@ def _stat_name(stat: str) -> str:
     return markers.get(stat, stat)
 
 
+def _raw_conv(path: PurePath) -> str:
+    return normpath(path).replace(sep, altsep)
+
+
 async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats]:
     if not (cygpath := which("cygpath")):
         return raw_root, raw_stats
     else:
-        proc = await call(cygpath, "--windows", "--", normpath(raw_root))
+        proc = await call(cygpath, "--windows", "--", _raw_conv(raw_root))
         cwd = decode(proc.stdout.rstrip())
-        print(raw_root, cwd)
         stdin = encode(
-            "\n".join(map(normpath, (raw_root, *(path for _, path in raw_stats))))
+            "\n".join(map(_raw_conv, (raw_root, *(path for _, path in raw_stats))))
         )
         proc = await call(
             cygpath, "--windows", "--absolute", "--file", "-", cwd=cwd, stdin=stdin
