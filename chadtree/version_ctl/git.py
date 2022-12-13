@@ -4,7 +4,7 @@ from locale import strxfrm
 from ntpath import altsep, sep
 from os import environ, linesep
 from os.path import normpath
-from pathlib import PurePath
+from pathlib import PurePath, PureWindowsPath
 from string import whitespace
 from subprocess import CalledProcessError
 from typing import (
@@ -137,7 +137,11 @@ def _raw_conv(path: PurePath) -> str:
 
 
 async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats]:
-    if (cygpath := which("cygpath")) and (altsep in str(raw_stats)):
+    if (
+        (cygpath := which("cygpath"))
+        and isinstance(raw_root, PureWindowsPath)
+        and (altsep in str(raw_stats))
+    ):
         proc = await call(cygpath, "--windows", "--", _raw_conv(raw_root))
         root = PurePath(decode(proc.stdout.rstrip()))
         stdin = encode("\n".join(map(_raw_conv, (path for _, path in raw_stats))))
