@@ -6,25 +6,29 @@ from pathlib import PurePath
 from typing import AbstractSet, Mapping, Sequence
 
 
+# https://github.com/coreutils/coreutils/blob/master/src/ls.c
 @unique
 class Mode(IntEnum):
+    orphan_link = auto()
+
+    set_uid = auto()
+    set_gid = auto()
+    file_w_capacity = auto()
+    executable = auto()
+    multi_hardlink = auto()
     file = auto()
+
+    sticky_other_writable = auto()
+    other_writable = auto()
+    sticky = auto()
     folder = auto()
+
     link = auto()
     pipe = auto()
     socket = auto()
     block_device = auto()
     char_device = auto()
-    orphan_link = auto()
-    executable = auto()
     door = auto()
-    set_uid = auto()
-    set_gid = auto()
-    sticky_dir = auto()
-    other_writable = auto()
-    sticky_writable = auto()
-    file_w_capacity = auto()
-    multi_hardlink = auto()
 
 
 @dataclass(frozen=True)

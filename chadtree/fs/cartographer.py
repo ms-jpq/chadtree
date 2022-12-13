@@ -1,10 +1,13 @@
 from asyncio import Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
-from os import scandir, stat
+from os import scandir, stat, stat_result
 from pathlib import PurePath
 from stat import (
     S_IEXEC,
+    S_IFDOOR,
+    S_ISBLK,
+    S_ISCHR,
     S_ISDIR,
     S_ISFIFO,
     S_ISGID,
@@ -37,24 +40,33 @@ from .types import Ignored, Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
     S_IEXEC: Mode.executable,
-    S_IWOTH: Mode.other_writable,
-    S_ISVTX: Mode.sticky_dir,
+    S_IFDOOR: Mode.door,
     S_ISGID: Mode.set_gid,
     S_ISUID: Mode.set_uid,
+    S_ISVTX: Mode.sticky,
+    S_IWOTH: Mode.other_writable,
+    S_IWOTH | S_ISVTX: Mode.sticky_other_writable,
 }
 
 
-def _fs_modes(stat: int) -> Iterator[Mode]:
-    if S_ISDIR(stat):
+def _fs_modes(stat: stat_result) -> Iterator[Mode]:
+    st_mode = stat.st_mode
+    if S_ISDIR(st_mode):
         yield Mode.folder
-    if S_ISREG(stat):
+    if S_ISREG(st_mode):
         yield Mode.file
-    if S_ISFIFO(stat):
+    if S_ISFIFO(st_mode):
         yield Mode.pipe
-    if S_ISSOCK(stat):
+    if S_ISSOCK(st_mode):
         yield Mode.socket
+    if S_ISCHR(st_mode):
+        yield Mode.char_device
+    if S_ISBLK(st_mode):
+        yield Mode.block_device
+    if stat.st_nlink > 1:
+        yield Mode.multi_hardlink
     for bit, mode in _FILE_MODES.items():
-        if stat & bit == bit:
+        if st_mode & bit == bit:
             yield mode
 
 
@@ -71,10 +83,10 @@ async def _fs_stat(path: PurePath) -> AbstractSet[Mode]:
                 except (FileNotFoundError, NotADirectoryError):
                     return {Mode.orphan_link}
                 else:
-                    mode = {*_fs_modes(link_info.st_mode)}
+                    mode = {*_fs_modes(link_info)}
                     return mode | {Mode.link}
             else:
-                mode = {*_fs_modes(info.st_mode)}
+                mode = {*_fs_modes(info)}
                 return mode
 
     return await to_thread(cont)

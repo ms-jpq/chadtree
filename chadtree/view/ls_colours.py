@@ -167,9 +167,9 @@ _SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "pi": Mode.pipe,
     "sg": Mode.set_gid,
     "so": Mode.socket,
-    "st": Mode.sticky_dir,
+    "st": Mode.sticky,
     "su": Mode.set_uid,
-    "tw": Mode.sticky_writable,
+    "tw": Mode.sticky_other_writable,
 }
 
 _UNUSED = {
