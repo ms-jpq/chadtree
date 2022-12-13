@@ -137,9 +137,7 @@ def _raw_conv(path: PurePath) -> str:
 
 
 async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats]:
-    if (not (cygpath := which("cygpath"))) or (altsep not in str(raw_stats)):
-        return raw_root, raw_stats
-    else:
+    if (cygpath := which("cygpath")) and (sep in str(raw_stats)):
         proc = await call(cygpath, "--windows", "--", _raw_conv(raw_root))
         root = PurePath(decode(proc.stdout.rstrip()))
         stdin = encode("\n".join(map(_raw_conv, (path for _, path in raw_stats))))
@@ -151,6 +149,8 @@ async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats
             for (stat, _), path in zip(raw_stats, decode(proc.stdout).splitlines())
         )
         return root, stats
+    else:
+        return raw_root, raw_stats
 
 
 def _parse(root: PurePath, stats: _Stats) -> VCStatus:
