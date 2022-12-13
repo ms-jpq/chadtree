@@ -1,15 +1,14 @@
 from asyncio import gather
-from functools import lru_cache
 from itertools import chain
 from locale import strxfrm
 from os import environ, linesep
 from pathlib import PurePath
-from posixpath import sep
 from string import whitespace
 from subprocess import CalledProcessError
 from typing import (
     Iterable,
     Iterator,
+    Mapping,
     MutableMapping,
     MutableSequence,
     MutableSet,
@@ -17,13 +16,15 @@ from typing import (
     Tuple,
 )
 
-from pynvim_pp.lib import decode
+from pynvim_pp.lib import decode, encode
 from std2.asyncio.subprocess import call
 from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
 
 from ..fs.ops import ancestors, which
 from .types import VCStatus
+
+_Stats = Sequence[Tuple[str, PurePath]]
 
 _WHITE_SPACES = {*whitespace}
 _GIT_LIST_CMD = (
@@ -42,14 +43,6 @@ _IGNORED_MARKER = "I"
 _UNTRACKED_MARKER = "?"
 
 
-@lru_cache(maxsize=6969)
-def _path_conv(path: str) -> PurePath:
-    if not which("cygpath"):
-        return PurePath(path)
-    else:
-        return PurePath(path)
-
-
 async def root(git: PurePath, cwd: PurePath) -> PurePath:
     proc = await call(
         git,
@@ -58,7 +51,7 @@ async def root(git: PurePath, cwd: PurePath) -> PurePath:
         "--show-toplevel",
         cwd=cwd,
     )
-    return _path_conv(decode(proc.stdout.rstrip()))
+    return PurePath(decode(proc.stdout.rstrip()))
 
 
 async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
@@ -68,7 +61,7 @@ async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePa
         it = iter(decode(proc.stdout).split("\0"))
         for line in it:
             prefix, file = line[:2], line[3:]
-            yield prefix, _path_conv(file)
+            yield prefix, PurePath(file)
 
             if "R" in prefix:
                 next(it, None)
@@ -108,7 +101,7 @@ async def _stat_sub_modules(
                     if not (quoted.startswith("'") and quoted.endswith("'")):
                         raise ValueError(stdout)
                     else:
-                        sub_module = _path_conv(
+                        sub_module = PurePath(
                             removesuffix(removeprefix(quoted, prefix="'"), suffix="'")
                         )
                         yield _SUBMODULE_MARKER, sub_module
@@ -139,7 +132,27 @@ def _stat_name(stat: str) -> str:
     return markers.get(stat, stat)
 
 
-def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
+async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats]:
+    if not (cygpath := which("cygpath")):
+        return raw_root, raw_stats
+    else:
+        stdin = encode(
+            "\n".join(map(str, (raw_root, *(path for _, path in raw_stats))))
+        )
+        proc = await call(
+            cygpath, "--windows", "--absolute", "--file", "-", cwd=raw_root, stdin=stdin
+        )
+        stdout = tuple(map(decode, proc.stdout.splitlines()))
+        if not stdout:
+            return raw_root, raw_stats
+        else:
+            root, *paths = map(PurePath, stdout)
+            return root, tuple(
+                (stat, path) for (stat, _), path in zip(raw_stats, paths)
+            )
+
+
+def _parse(root: PurePath, stats: _Stats) -> VCStatus:
     above = ancestors(root)
     ignored: MutableSet[PurePath] = set()
     status: MutableMapping[PurePath, str] = {}
@@ -171,14 +184,17 @@ async def status(cwd: PurePath) -> VCStatus:
     if git := which("git"):
         bin = PurePath(git)
         try:
-            git_root, *stats = await gather(
+            raw_root, *raw_stats = await gather(
                 root(bin, cwd=cwd),
                 _stat_main(bin, cwd=cwd),
                 _stat_sub_modules(bin, cwd=cwd),
             )
+            parsed_root, stats = await _conv(
+                raw_root, raw_stats=tuple(chain.from_iterable(raw_stats))
+            )
         except CalledProcessError:
             return VCStatus()
         else:
-            return _parse(git_root, stats=chain.from_iterable(stats))
+            return _parse(parsed_root, stats=stats)
     else:
         return VCStatus()
