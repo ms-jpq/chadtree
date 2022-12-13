@@ -48,12 +48,12 @@ def _path_conv(path: str) -> PurePath:
         return PurePath(path)
     else:
         splits = path.split(sep, maxsplit=2)
+        print(splits)
         if len(splits) > 2:
             empty, drive, p = splits
-            assert not empty
+            # assert not empty
             return PurePath(f"{drive}:") / p
         else:
-            print(splits)
             return PurePath(path)
 
 
