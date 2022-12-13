@@ -136,11 +136,13 @@ async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats
     if not (cygpath := which("cygpath")):
         return raw_root, raw_stats
     else:
+        proc = await call(cygpath, "--windows", "--", raw_root)
+        cwd = decode(proc.stdout)
         stdin = encode(
             "\n".join(map(str, (raw_root, *(path for _, path in raw_stats))))
         )
         proc = await call(
-            cygpath, "--windows", "--absolute", "--file", "-", cwd=raw_root, stdin=stdin
+            cygpath, "--windows", "--absolute", "--file", "-", cwd=cwd, stdin=stdin
         )
         stdout = tuple(map(decode, proc.stdout.splitlines()))
         if not stdout:
