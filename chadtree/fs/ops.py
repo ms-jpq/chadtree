@@ -10,6 +10,7 @@ from pathlib import Path, PurePath
 from shutil import copy2, copytree
 from shutil import move as mv
 from shutil import rmtree
+from shutil import which as _which
 from stat import S_ISDIR, S_ISLNK, filemode
 from typing import AbstractSet, Iterable, Mapping, Optional
 
@@ -66,6 +67,14 @@ except ImportError:
 
     def _get_groupname(gid: int) -> str:
         return str(gid)
+
+
+@lru_cache(maxsize=None)
+def which(path: PurePath) -> Optional[PurePath]:
+    if bin := _which(path):
+        return PurePath(bin)
+    else:
+        return None
 
 
 async def fs_stat(path: PurePath) -> FSstat:

@@ -1,9 +1,7 @@
 from asyncio import create_task
-from functools import lru_cache
 from pathlib import PurePath
-from shutil import which as _which
 from subprocess import CalledProcessError
-from typing import Optional, Sequence, Union
+from typing import Sequence, Union
 
 from pynvim_pp.logging import suppress_and_log
 from pynvim_pp.nvim import Nvim
@@ -11,6 +9,7 @@ from std2 import anext
 from std2.asyncio.subprocess import call
 from std2.platform import OS, os
 
+from ..fs.ops import which
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -18,21 +17,13 @@ from ..state.types import State
 from .shared.index import indices
 
 
-@lru_cache(maxsize=None)
-def which(path: PurePath) -> Optional[PurePath]:
-    if bin := _which(path):
-        return PurePath(bin)
-    else:
-        return None
-
-
 async def _open_gui(path: PurePath, cwd: PurePath) -> None:
     with suppress_and_log():
-        if os is OS.macos and (arg0 := _which("open")):
+        if os is OS.macos and (arg0 := which("open")):
             argv: Sequence[Union[PurePath, str]] = (arg0, "--", path)
-        elif os is OS.linux and (arg0 := _which("xdg-open")):
+        elif os is OS.linux and (arg0 := which("xdg-open")):
             argv = (arg0, path)
-        elif os is OS.windows and (arg0 := _which("start")):
+        elif os is OS.windows and (arg0 := which("start")):
             argv = (arg0, "", path)
         else:
             await Nvim.write(LANG("sys_open_err"))

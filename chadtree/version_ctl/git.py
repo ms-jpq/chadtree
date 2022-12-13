@@ -1,9 +1,10 @@
 from asyncio import gather
+from functools import lru_cache
 from itertools import chain
 from locale import strxfrm
 from os import environ, linesep
 from pathlib import PurePath
-from shutil import which
+from posixpath import sep
 from string import whitespace
 from subprocess import CalledProcessError
 from typing import (
@@ -21,7 +22,7 @@ from std2.asyncio.subprocess import call
 from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
 
-from ..fs.ops import ancestors
+from ..fs.ops import ancestors, which
 from .types import VCStatus
 
 _WHITE_SPACES = {*whitespace}
@@ -41,6 +42,16 @@ _IGNORED_MARKER = "I"
 _UNTRACKED_MARKER = "?"
 
 
+@lru_cache(maxsize=6969)
+def _path_conv(path: str) -> PurePath:
+    if not which("cygpath"):
+        return PurePath(path)
+    else:
+        empty, drive, p = path.split(sep, maxsplit=2)
+        assert not empty
+        return PurePath(f"{drive}:") / p
+
+
 async def root(git: PurePath, cwd: PurePath) -> PurePath:
     proc = await call(
         git,
@@ -49,7 +60,7 @@ async def root(git: PurePath, cwd: PurePath) -> PurePath:
         "--show-toplevel",
         cwd=cwd,
     )
-    return PurePath(decode(proc.stdout.rstrip()))
+    return _path_conv(decode(proc.stdout.rstrip()))
 
 
 async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
@@ -59,7 +70,7 @@ async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePa
         it = iter(decode(proc.stdout).split("\0"))
         for line in it:
             prefix, file = line[:2], line[3:]
-            yield prefix, PurePath(file)
+            yield prefix, _path_conv(file)
 
             if "R" in prefix:
                 next(it, None)
@@ -99,7 +110,7 @@ async def _stat_sub_modules(
                     if not (quoted.startswith("'") and quoted.endswith("'")):
                         raise ValueError(stdout)
                     else:
-                        sub_module = PurePath(
+                        sub_module = _path_conv(
                             removesuffix(removeprefix(quoted, prefix="'"), suffix="'")
                         )
                         yield _SUBMODULE_MARKER, sub_module
@@ -160,16 +171,16 @@ def _parse(root: PurePath, stats: Iterable[Tuple[str, PurePath]]) -> VCStatus:
 
 async def status(cwd: PurePath) -> VCStatus:
     if git := which("git"):
+        bin = PurePath(git)
         try:
-            bin = PurePath(git)
             git_root, *stats = await gather(
                 root(bin, cwd=cwd),
                 _stat_main(bin, cwd=cwd),
                 _stat_sub_modules(bin, cwd=cwd),
             )
-
-            return _parse(git_root, stats=chain.from_iterable(stats))
         except CalledProcessError:
             return VCStatus()
+        else:
+            return _parse(git_root, stats=chain.from_iterable(stats))
     else:
         return VCStatus()
