@@ -6,6 +6,7 @@ from pathlib import PurePath
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
 
 from pynvim_pp.lib import encode
+from std2.platform import OS, os
 from std2.types import never
 
 from ..fs.cartographer import is_dir, user_ignored
@@ -77,7 +78,9 @@ def _paint(
 
         s_modes = sorted(node.mode)
         for mode in s_modes:
-            if hl := context.mode_pre.get(mode):
+            if os is OS.windows and mode is Mode.other_writable:
+                pass
+            elif hl := context.mode_pre.get(mode):
                 return hl
 
         if hl := context.name_exact.get(node.path.name):
