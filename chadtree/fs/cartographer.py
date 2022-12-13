@@ -66,7 +66,7 @@ def _fs_modes(stat: stat_result) -> Iterator[Mode]:
     if stat.st_nlink > 1:
         yield Mode.multi_hardlink
     for bit, mode in _FILE_MODES.items():
-        if st_mode & bit == bit:
+        if bit and st_mode & bit == bit:
             yield mode
 
 

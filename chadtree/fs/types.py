@@ -21,6 +21,7 @@ class Mode(IntEnum):
     socket = auto()
     block_device = auto()
     char_device = auto()
+    door = auto()
 
     set_uid = auto()
     set_gid = auto()
@@ -29,7 +30,6 @@ class Mode(IntEnum):
     multi_hardlink = auto()
     file = auto()
 
-    door = auto()
 
 
 @dataclass(frozen=True)

@@ -158,6 +158,7 @@ _SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "ca": Mode.file_w_capacity,
     "cd": Mode.char_device,
     "di": Mode.folder,
+    "do": Mode.door,
     "ex": Mode.executable,
     "ln": Mode.link,
     "mh": Mode.multi_hardlink,
@@ -173,7 +174,6 @@ _SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
 
 
 _SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
-    # "do": Mode.door,
     "fi": Mode.file,
     "no": None,
 }
