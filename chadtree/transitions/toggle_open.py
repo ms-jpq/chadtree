@@ -155,7 +155,7 @@ async def _open(
                 if opts.path.is_absolute()
                 else await Nvim.getcwd() / opts.path
             )
-            if not exists(path, follow=True):
+            if not await exists(path, follow=True):
                 await new((path,))
             next_state = (
                 await maybe_path_above(new_state, settings=settings, path=path)
