@@ -1,4 +1,3 @@
-from contextlib import suppress
 from mimetypes import guess_type
 from os.path import altsep, normpath, sep
 from pathlib import PurePath
@@ -6,6 +5,7 @@ from typing import AsyncContextManager, Optional, cast
 
 from pynvim_pp.buffer import Buffer
 from pynvim_pp.hold import hold_win
+from pynvim_pp.logging import log
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.types import NvimError
 from pynvim_pp.window import Window
@@ -90,8 +90,10 @@ async def _show_file(
                 await win.set_buf(buf)
 
             await resize_fm_windows(last_used=state.window_order, width=state.width)
-            with suppress(NvimError):
+            try:
                 await Nvim.exec("filetype detect")
+            except NvimError as e:
+                log.warn("%s", e)
 
 
 async def open_file(
