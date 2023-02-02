@@ -83,11 +83,11 @@ async def _show_file(
 
             win = await Window.get_current()
 
-            if buf is None:
+            if buf:
+                await win.set_buf(buf)
+            else:
                 escaped = await Nvim.fn.fnameescape(str, normpath(path))
                 await Nvim.exec(f"edit! {escaped}")
-            else:
-                await win.set_buf(buf)
 
             await resize_fm_windows(last_used=state.window_order, width=state.width)
             try:
