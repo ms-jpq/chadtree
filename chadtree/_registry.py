@@ -18,6 +18,7 @@ from .transitions import (
     schedule_update,
     selection,
     stat,
+    toggle_exec,
     toggle_open,
     toggles,
     version_ctl,

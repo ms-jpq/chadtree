@@ -296,6 +296,18 @@ Rename file under cursor.
 ["r"]
 ```
 
+##### `chadtree_settings.keymap.toggle_exec`
+
+Toggle all the `+x` bits of the selected / highlighted files.
+
+Except for directories, where `-x` will prevent reading.
+
+**default:**
+
+```json
+["X"]
+```
+
 ##### `chadtree_settings.keymap.copy`
 
 Copy the selected files to location under cursor.

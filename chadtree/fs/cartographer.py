@@ -4,7 +4,6 @@ from fnmatch import fnmatch
 from os import scandir, stat, stat_result
 from pathlib import PurePath
 from stat import (
-    S_IEXEC,
     S_IFDOOR,
     S_ISBLK,
     S_ISCHR,
@@ -17,6 +16,7 @@ from stat import (
     S_ISUID,
     S_ISVTX,
     S_IWOTH,
+    S_IXUSR,
 )
 from typing import (
     AbstractSet,
@@ -39,7 +39,7 @@ from .ops import ancestors, lock
 from .types import Ignored, Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
-    S_IEXEC: Mode.executable,
+    S_IXUSR: Mode.executable,
     S_IFDOOR: Mode.door,
     S_ISGID: Mode.set_gid,
     S_ISUID: Mode.set_uid,
