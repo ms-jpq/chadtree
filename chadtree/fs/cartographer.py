@@ -2,6 +2,7 @@ from asyncio import Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
 from os import scandir, stat, stat_result
+from os.path import realpath
 from pathlib import PurePath
 from stat import (
     S_IFDOOR,
@@ -27,6 +28,7 @@ from typing import (
     MutableMapping,
     Optional,
     Sequence,
+    Tuple,
     cast,
 )
 
@@ -70,24 +72,25 @@ def _fs_modes(stat: stat_result) -> Iterator[Mode]:
             yield mode
 
 
-async def _fs_stat(path: PurePath) -> AbstractSet[Mode]:
-    def cont() -> AbstractSet[Mode]:
+async def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
+    def cont() -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
         try:
             info = stat(path, follow_symlinks=False)
         except FileNotFoundError:
-            return {Mode.orphan_link}
+            return {Mode.orphan_link}, None
         else:
             if S_ISLNK(info.st_mode):
                 try:
-                    link_info = stat(path, follow_symlinks=True)
+                    pointed = realpath(path, strict=True)
+                    link_info = stat(pointed, follow_symlinks=False)
                 except (FileNotFoundError, NotADirectoryError):
-                    return {Mode.orphan_link}
+                    return {Mode.orphan_link}, None
                 else:
                     mode = {*_fs_modes(link_info)}
-                    return mode | {Mode.link}
+                    return mode | {Mode.link}, PurePath(pointed)
             else:
                 mode = {*_fs_modes(info)}
-                return mode
+                return mode, None
 
     return await to_thread(cont)
 
@@ -108,11 +111,12 @@ async def _next(
 ) -> None:
     for root in roots:
         with suppress(PermissionError):
-            mode = await _fs_stat(root)
+            mode, pointed = await _fs_stat(root)
             _ancestors = ancestors(root)
             node = Node(
                 path=root,
                 mode=mode,
+                pointed=pointed,
                 ancestors=_ancestors,
             )
             await acc.put(node)
@@ -179,6 +183,7 @@ async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Nod
         return Node(
             path=root.path,
             mode=root.mode,
+            pointed=root.pointed,
             ancestors=root.ancestors,
             children=children,
         )
