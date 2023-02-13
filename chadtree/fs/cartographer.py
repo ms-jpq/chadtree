@@ -2,8 +2,7 @@ from asyncio import Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
 from os import scandir, stat, stat_result
-from os.path import realpath
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from stat import (
     S_IFDOOR,
     S_ISBLK,
@@ -81,13 +80,13 @@ async def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath
         else:
             if S_ISLNK(info.st_mode):
                 try:
-                    pointed = realpath(path, strict=True)
+                    pointed = Path(path).resolve(strict=True)
                     link_info = stat(pointed, follow_symlinks=False)
                 except (FileNotFoundError, NotADirectoryError):
                     return {Mode.orphan_link}, None
                 else:
                     mode = {*_fs_modes(link_info)}
-                    return mode | {Mode.link}, PurePath(pointed)
+                    return mode | {Mode.link}, pointed
             else:
                 mode = {*_fs_modes(info)}
                 return mode, None
