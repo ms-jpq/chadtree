@@ -47,7 +47,8 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
 
 
 def _vc_ignored(node: Node, vc: VCStatus) -> bool:
-    return not vc.ignored.isdisjoint(node.ancestors | {node.pointed})
+    pointer = node.pointed or node.path
+    return not vc.ignored.isdisjoint({pointer} | {*map(PurePath, pointer.parents)})
 
 
 def _gen_spacer(depth: int) -> str:
