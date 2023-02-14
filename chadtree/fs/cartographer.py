@@ -82,7 +82,7 @@ async def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath
                 try:
                     pointed = Path(path).resolve(strict=True)
                     link_info = stat(pointed, follow_symlinks=False)
-                except (FileNotFoundError, NotADirectoryError):
+                except (FileNotFoundError, NotADirectoryError, RuntimeError):
                     return {Mode.orphan_link}, None
                 else:
                     mode = {*_fs_modes(link_info)}
