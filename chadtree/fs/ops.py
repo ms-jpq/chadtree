@@ -5,7 +5,7 @@ from functools import lru_cache
 from os import makedirs, readlink
 from os import remove as rm
 from os import stat
-from os.path import isfile
+from os.path import isdir, isfile
 from pathlib import Path, PurePath
 from shutil import copy2, copytree
 from shutil import move as mv
@@ -117,6 +117,11 @@ async def exists_many(
     async with lock():
         existance = await gather(*(exists(path, follow=follow) for path in paths))
     return {path: exi for path, exi in zip(paths, existance)}
+
+
+async def is_dir(path: PurePath) -> bool:
+    async with lock():
+        return await to_thread(lambda: isdir(path))
 
 
 async def is_file(path: PurePath) -> bool:

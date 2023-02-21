@@ -1,12 +1,14 @@
 from locale import strxfrm
 from os import linesep
-from os.path import normpath
+from os.path import normpath, sep
 from pathlib import PurePath
 from typing import AsyncIterator, Callable
 
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.types import NoneType
 
+from ..fs.cartographer import is_dir
+from ..fs.ops import is_dir as iis_dir
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
@@ -16,14 +18,15 @@ from .shared.index import indices
 
 async def _cn(state: State, is_visual: bool, proc: Callable[[PurePath], str]) -> None:
     async def gen_paths() -> AsyncIterator[str]:
-        selection = state.selection
-        if not selection:
+        if selection := state.selection:
+            for path in selection:
+                suffix = sep if await iis_dir(path) else ""
+                yield proc(path) + suffix
+        else:
             nodes = indices(state, is_visual=is_visual)
             async for node in nodes:
-                yield proc(node.path)
-        else:
-            for path in selection:
-                yield proc(path)
+                suffix = sep if is_dir(node) else ""
+                yield proc(node.path) + suffix
 
     paths = sorted([path async for path in gen_paths()], key=strxfrm)
     clip = linesep.join(paths)
