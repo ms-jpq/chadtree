@@ -95,7 +95,7 @@ async def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath
 
 
 def _listdir(path: PurePath) -> Iterator[Sequence[PurePath]]:
-    with suppress(NotADirectoryError):
+    with suppress(NotADirectoryError, FileNotFoundError):
         with scandir(path) as it:
             chunked = chunk(it, WALK_PARALLELISM_FACTOR)
             while True:
