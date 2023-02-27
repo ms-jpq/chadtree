@@ -1,5 +1,5 @@
-from os.path import normpath
-from pathlib import PurePath
+from os.path import normpath, relpath
+from pathlib import Path, PurePath
 from typing import MutableMapping, Optional
 
 from pynvim_pp.nvim import Nvim
@@ -31,19 +31,25 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
     else:
         selection = state.selection or {node.path}
         operations: MutableMapping[PurePath, PurePath] = {}
-        for src in selection:
-            display = display_path(src, state=state)
+        for selected in selection:
+            display = display_path(selected, state=state)
             if child := await Nvim.input(
                 question=LANG("link", src=display), default=""
             ):
-                dst = node.path.parent / child
-                if dst in operations or await exists(dst, follow=False):
-                    await Nvim.write(
-                        LANG("already_exists", name=normpath(dst)), error=True
-                    )
+                try:
+                    dst = Path(node.path.parent / child).resolve()
+                except Exception as e:
+                    await Nvim.write(e, error=True)
                     return None
                 else:
-                    operations[dst] = src
+                    if dst in operations or await exists(dst, follow=False):
+                        await Nvim.write(
+                            LANG("already_exists", name=normpath(dst)), error=True
+                        )
+                        return None
+                    else:
+                        src = PurePath(relpath(selected, start=dst.parent))
+                        operations[dst] = src
             else:
                 return None
 

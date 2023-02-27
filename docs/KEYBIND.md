@@ -286,6 +286,20 @@ ie. `uwu/owo/` under `unix` will create `uwu/` then `owo/` under it. Both are fo
 ["a"]
 ```
 
+##### `chadtree_settings.keymap.link`
+
+Create links at location under cursor from selection.
+
+Links are always relative.
+
+Intermediary folders are created automatically.
+
+**default:**
+
+```json
+["A"]
+```
+
 ##### `chadtree_settings.keymap.rename`
 
 Rename file under cursor.

@@ -52,7 +52,7 @@
   ⏳...⌛️
 
 "link": |-
-  🔗 ${src} 👉:
+  🔗 ${src} 👉 :
 
 "mime_warn": |-
   ${name} have possible mimetype ${mime}, continue?

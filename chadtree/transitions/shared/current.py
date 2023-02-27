@@ -1,4 +1,3 @@
-from itertools import chain
 from pathlib import PurePath
 from typing import AbstractSet, Iterator, Optional
 
