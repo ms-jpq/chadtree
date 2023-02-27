@@ -19,13 +19,15 @@ async def scheduled_update(state: State, settings: Settings) -> Optional[Stage]:
     cwd = await Nvim.getcwd()
 
     try:
-        stage, vc, _ = await gather(
+        stage, vc, session = await gather(
             refresh(state=state, settings=settings),
             status(cwd),
-            dump_session(state, session_store=state.session_store),
+            dump_session(state),
         )
     except NvimError:
         return None
     else:
-        new_state = await forward(stage.state, settings=settings, vc=vc)
+        new_state = await forward(
+            stage.state, settings=settings, vc=vc, session=session
+        )
         return Stage(new_state, focus=stage.focus)

@@ -10,7 +10,7 @@ from ..nvim.types import Markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
 from ..view.render import render
-from .types import FilterPattern, Index, Selection, State
+from .types import FilterPattern, Index, Selection, Session, State
 
 
 async def forward(
@@ -30,6 +30,7 @@ async def forward(
     current: Union[PurePath, VoidType] = Void,
     paths: Union[AbstractSet[PurePath], VoidType] = Void,
     window_order: Union[Mapping[ExtData, None], VoidType] = Void,
+    session: Union[Session, VoidType] = Void,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
@@ -60,7 +61,7 @@ async def forward(
     )
 
     new_state = State(
-        session_store=state.session_store,
+        session=or_else(session, state.session),
         index=new_index,
         selection=new_selection,
         filter_pattern=new_filter_pattern,

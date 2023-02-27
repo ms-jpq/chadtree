@@ -18,12 +18,14 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-async def save_session(state: State, settings: Settings) -> None:
+async def save_session(state: State, settings: Settings) -> Stage:
     """
     Save CHADTree state
     """
 
-    await dump_session(state, session_store=state.session_store)
+    session = await dump_session(state)
+    new_state = await forward(state, settings=settings, session=session)
+    return Stage(new_state)
 
 
 _ = autocmd("FocusLost", "ExitPre") << f"lua {NAMESPACE}.{save_session.method}()"

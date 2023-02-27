@@ -19,8 +19,14 @@ class FilterPattern:
 
 
 @dataclass(frozen=True)
+class Session:
+    workdir: PurePath
+    storage: Path
+
+
+@dataclass(frozen=True)
 class State:
-    session_store: Path
+    session: Session
     current: Optional[PurePath]
     derived: Derived
     enable_vc: bool
@@ -37,7 +43,7 @@ class State:
 
 
 @dataclass(frozen=True)
-class Session:
+class StoredSession:
     index: Optional[Index]
     show_hidden: Optional[bool]
     enable_vc: Optional[bool]
