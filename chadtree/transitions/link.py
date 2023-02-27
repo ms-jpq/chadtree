@@ -2,8 +2,9 @@ from pathlib import PurePath
 from typing import MutableMapping, Optional
 
 from pynvim_pp.nvim import Nvim
+from std2.locale import pathsort_key
 
-from ..fs.ops import exists, link
+from ..fs.ops import ancestors, exists, link
 from ..lsp.notify import lsp_created
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -45,13 +46,15 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
             await Nvim.write(e, error=True)
             return await refresh(state=state, settings=settings)
         else:
+            paths = operations.keys()
             new_state = (
-                await maybe_path_above(state, settings=settings, path=path) or state
+                await maybe_path_above(state, settings=settings, paths=paths) or state
             )
-            paths = ancestors(path)
-            index = state.index | paths
+            await lsp_created(paths)
+            focus, *_ = sorted(paths, key=pathsort_key)
+            ancestry = ancestors(*paths)
+            index = state.index | ancestry
             next_state = await forward(
-                new_state, settings=settings, index=index, paths=paths
+                new_state, settings=settings, index=index, paths=ancestry
             )
-            await lsp_created((path,))
-            return Stage(next_state, focus=path)
+            return Stage(next_state, focus=focus)

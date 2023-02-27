@@ -52,7 +52,7 @@ async def _new(state: State, settings: Settings, is_visual: bool) -> Optional[St
                     return await refresh(state=state, settings=settings)
                 else:
                     new_state = (
-                        await maybe_path_above(state, settings=settings, path=path)
+                        await maybe_path_above(state, settings=settings, paths={path})
                         or state
                     )
                     paths = ancestors(path)

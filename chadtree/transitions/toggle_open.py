@@ -158,7 +158,7 @@ async def _open(
             if not await exists(path, follow=True):
                 await new((path,))
             next_state = (
-                await maybe_path_above(new_state, settings=settings, path=path)
+                await maybe_path_above(new_state, settings=settings, paths={path})
                 or new_state
             )
             await _open_fm_window(

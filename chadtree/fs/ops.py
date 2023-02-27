@@ -2,6 +2,7 @@ from asyncio import Lock, gather
 from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
+from itertools import chain
 from os import makedirs, readlink
 from os import remove as rm
 from os import stat, symlink
@@ -21,8 +22,8 @@ _FOLDER_MODE = RWXR_XR_X
 _FILE_MODE = RW_R__R__
 
 
-def ancestors(path: PurePath) -> AbstractSet[PurePath]:
-    return {p for p in PurePath(path).parents}
+def ancestors(*paths: PurePath) -> AbstractSet[PurePath]:
+    return {*chain.from_iterable(PurePath(path).parents for path in paths)}
 
 
 def unify_ancestors(paths: AbstractSet[PurePath]) -> AbstractSet[PurePath]:

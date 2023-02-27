@@ -1,6 +1,8 @@
+from itertools import chain
 from pathlib import PurePath
-from typing import AbstractSet, Optional
+from typing import AbstractSet, Iterator, Optional
 
+from std2.locale import pathsort_key
 from std2.pathlib import is_relative_to, longest_common_path
 
 from ...fs.cartographer import new
@@ -45,15 +47,21 @@ async def new_root(
 
 
 async def maybe_path_above(
-    state: State, settings: Settings, path: PurePath
+    state: State, settings: Settings, paths: AbstractSet[PurePath]
 ) -> Optional[State]:
     root = state.root.path
-    if is_relative_to(path, root):
+    if all(is_relative_to(path, root) for path in paths):
         return None
     else:
-        lcp = longest_common_path(path, root)
-        new_cwd = lcp if lcp else path.parent
-        indices = ancestors(path)
+
+        def cont() -> Iterator[PurePath]:
+            for path in paths:
+                lcp = longest_common_path(path, root)
+                yield lcp if lcp else path.parent
+
+        ordered = sorted(cont(), key=pathsort_key)
+        indices = ancestors(*ordered)
+        new_cwd, *_ = ordered
         return await new_root(
             state=state, settings=settings, new_cwd=new_cwd, indices=indices
         )

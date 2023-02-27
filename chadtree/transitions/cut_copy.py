@@ -1,11 +1,11 @@
 from itertools import chain
-from locale import strxfrm
 from os import linesep
 from pathlib import PurePath
 from typing import AbstractSet, Awaitable, Callable, Mapping, MutableMapping, Optional
 
 from pynvim_pp.nvim import Nvim
 from std2 import anext
+from std2.locale import pathsort_key
 
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors, copy, cut, exists, unify_ancestors
@@ -73,7 +73,7 @@ async def _operation(
             msg = linesep.join(
                 f"{display_path(s, state=state)} -> {display_path(d, state=state)}"
                 for s, d in sorted(
-                    pre_existing.items(), key=lambda t: strxfrm(str(t[0]))
+                    pre_existing.items(), key=lambda t: pathsort_key(t[0])
                 )
             )
             await Nvim.write(
@@ -86,7 +86,7 @@ async def _operation(
             operations = {**pre_operations, **new_operations}
             msg = linesep.join(
                 f"{display_path(s, state=state)} -> {display_path(d, state=state)}"
-                for s, d in sorted(operations.items(), key=lambda t: strxfrm(str(t[0])))
+                for s, d in sorted(operations.items(), key=lambda t: pathsort_key(t[0]))
             )
 
             question = LANG("confirm op", operation=op_name, paths=msg)
@@ -118,12 +118,7 @@ async def _operation(
                         paths=paths,
                     )
                     focus = next(
-                        iter(
-                            sorted(
-                                new_selection,
-                                key=lambda p: tuple(map(strxfrm, p.parts)),
-                            ),
-                        ),
+                        iter(sorted(new_selection, key=pathsort_key)),
                         None,
                     )
 
@@ -146,7 +141,7 @@ async def _cut(state: State, settings: Settings, is_visual: bool) -> Optional[St
     """
 
     cwd, root = await Nvim.getcwd(), state.root.path
-    nono = {cwd, root} | ancestors(cwd) | ancestors(root)
+    nono = {cwd, root} | ancestors(cwd, root)
     return await _operation(
         state=state,
         settings=settings,

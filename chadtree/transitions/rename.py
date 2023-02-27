@@ -31,7 +31,6 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
     if not node:
         return None
     else:
-
         child = await Nvim.input(question=LANG("pencil"), default=str(node.path.name))
         if not child:
             return None
@@ -60,7 +59,9 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                             await Nvim.exec(f"edit! {escaped}")
 
                     new_state = (
-                        await maybe_path_above(state, settings=settings, path=new_path)
+                        await maybe_path_above(
+                            state, settings=settings, paths={new_path}
+                        )
                         or state
                     )
                     paths = ancestors(new_path)

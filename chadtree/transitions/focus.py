@@ -27,7 +27,7 @@ async def _jump_to_current(
         print("NO CURR", flush=True)
         return None
     else:
-        if new_state := await maybe_path_above(state, settings=settings, path=curr):
+        if new_state := await maybe_path_above(state, settings=settings, paths={curr}):
             return Stage(new_state, focus=new_state.current)
         elif stage := await new_current_file(state, settings=settings, current=curr):
             return Stage(stage.state, focus=curr)
