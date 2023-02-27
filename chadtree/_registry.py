@@ -1,6 +1,7 @@
 from .transitions import (
     autocmds,
     click,
+    link,
     collapse,
     copy_name,
     cut_copy,
@@ -33,6 +34,7 @@ assert delete
 assert filter
 assert focus
 assert help
+assert link
 assert new
 assert noop
 assert open_system
@@ -44,6 +46,7 @@ assert resize
 assert schedule_update
 assert selection
 assert stat
+assert toggle_exec
 assert toggle_open
 assert toggles
 assert version_ctl

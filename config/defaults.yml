@@ -44,6 +44,8 @@ keymap:
     - W
   jump_to_current:
     - J
+  link:
+    - A
   new:
     - a
   open_sys:

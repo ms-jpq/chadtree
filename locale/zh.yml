@@ -51,6 +51,9 @@
 "hourglass": |-
   ⏳...⌛️
 
+"link": |-
+  🔗
+
 "mime_warn": |-
   ${name} 文件猜到 mimetype ${mime}, 继续?
 

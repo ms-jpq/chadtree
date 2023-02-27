@@ -51,6 +51,9 @@
 "hourglass": |-
   ⏳...⌛️
 
+"link": |-
+  🔗
+
 "mime_warn": |-
   ${name} have possible mimetype ${mime}, continue?
 
@@ -80,4 +83,3 @@
 
 "version_control_indi": |-
   🐶 enable version control: ${enable_vc}
-
