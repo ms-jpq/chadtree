@@ -1,11 +1,12 @@
 from os.path import normpath, relpath
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from typing import MutableMapping, Optional
 
 from pynvim_pp.nvim import Nvim
+from std2 import anext
 from std2.locale import pathsort_key
 
-from ..fs.ops import ancestors, exists, link
+from ..fs.ops import ancestors, exists, link, resolve
 from ..lsp.notify import lsp_created
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -37,7 +38,7 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
                 question=LANG("link", src=display), default=""
             ):
                 try:
-                    dst = Path(node.path.parent / child).resolve()
+                    dst = await resolve(node.path.parent / child, strict=False)
                 except Exception as e:
                     await Nvim.write(e, error=True)
                     return None

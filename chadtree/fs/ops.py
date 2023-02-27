@@ -100,6 +100,13 @@ async def fs_stat(path: PurePath) -> FSstat:
     return await to_thread(cont)
 
 
+async def resolve(path: PurePath, strict: bool) -> Path:
+    def cont() -> Path:
+        return Path(path).resolve(strict=strict)
+
+    return await to_thread(cont)
+
+
 async def exists(path: PurePath, follow: bool) -> bool:
     def cont() -> bool:
         try:
