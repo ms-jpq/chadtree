@@ -1,5 +1,6 @@
 from hashlib import sha1
 from json import dumps, loads
+from os.path import normcase
 from pathlib import Path, PurePath
 from tempfile import NamedTemporaryFile
 from typing import Any, Optional
@@ -13,14 +14,13 @@ from .types import Session, State
 
 
 def _session_path(cwd: PurePath, session_store: Path) -> Path:
-    hashed = sha1(str(cwd).encode()).hexdigest()
+    hashed = sha1(normcase(cwd).encode()).hexdigest()
     part = session_store / hashed
     return part.with_suffix(".json")
 
 
 async def _load_json(path: Path) -> Optional[Any]:
     def cont() -> Optional[Any]:
-
         try:
             json = decode(path.read_bytes())
         except FileNotFoundError:

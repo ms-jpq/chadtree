@@ -1,6 +1,7 @@
 from asyncio import Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
+from os.path import normcase
 from os import scandir, stat, stat_result
 from pathlib import Path, PurePath
 from stat import (
@@ -192,7 +193,7 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
     return (
         node.path.name in ignores.name_exact
         or any(fnmatch(node.path.name, pattern) for pattern in ignores.name_glob)
-        or any(fnmatch(str(node.path), pattern) for pattern in ignores.path_glob)
+        or any(fnmatch(normcase(node.path), pattern) for pattern in ignores.path_glob)
     )
 
 

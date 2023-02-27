@@ -1,5 +1,5 @@
 from os import sep
-from os.path import abspath
+from os.path import abspath, normpath
 from pathlib import PurePath
 from typing import Optional
 
@@ -39,7 +39,7 @@ async def _new(state: State, settings: Settings, is_visual: bool) -> Optional[St
         else:
             path = PurePath(abspath(parent / child))
             if await exists(path, follow=False):
-                await Nvim.write(LANG("already_exists", name=str(path)), error=True)
+                await Nvim.write(LANG("already_exists", name=normpath(path)), error=True)
                 return None
             else:
                 try:

@@ -52,7 +52,7 @@
   Wait...
 
 "link": |-
-  Link:
+  Link ${src} ->:
 
 "mime_warn": |-
   ${name} have possible mimetype ${mime}, continue?

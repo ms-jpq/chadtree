@@ -31,14 +31,14 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
     if not node:
         return None
     else:
-        child = await Nvim.input(question=LANG("pencil"), default=str(node.path.name))
+        child = await Nvim.input(question=LANG("pencil"), default=node.path.name)
         if not child:
             return None
         else:
             new_path = PurePath(abspath(node.path.parent / child))
             operations = {node.path: new_path}
             if await exists(new_path, follow=False):
-                await Nvim.write(LANG("already_exists", name=str(new_path)), error=True)
+                await Nvim.write(LANG("already_exists", name=normpath(new_path)), error=True)
                 return None
             else:
                 killed = await kill_buffers(
