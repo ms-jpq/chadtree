@@ -6,6 +6,7 @@ from pynvim_pp.nvim import Nvim
 from std2 import anext
 from std2.locale import pathsort_key
 
+from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors, exists, link, resolve
 from ..lsp.notify import lsp_created
 from ..registry import rpc
@@ -30,6 +31,7 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
     if node is None:
         return None
     else:
+        parent = node.path if is_dir(node) else node.path.parent
         selection = state.selection or {node.path}
         operations: MutableMapping[PurePath, PurePath] = {}
         for selected in selection:
@@ -38,7 +40,7 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
                 question=LANG("link", src=display), default=""
             ):
                 try:
-                    dst = await resolve(node.path.parent / child, strict=False)
+                    dst = await resolve(parent / child, strict=False)
                 except Exception as e:
                     await Nvim.write(e, error=True)
                     return None
@@ -70,6 +72,10 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
             index = state.index | ancestry
             new_selection = paths if state.selection else set()
             next_state = await forward(
-                new_state, settings=settings, index=index, paths=ancestry, selection=new_selection
+                new_state,
+                settings=settings,
+                index=index,
+                paths=ancestry,
+                selection=new_selection,
             )
             return Stage(next_state, focus=focus)
