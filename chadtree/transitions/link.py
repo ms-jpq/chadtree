@@ -69,6 +69,6 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
             ancestry = ancestors(*paths)
             index = state.index | ancestry
             next_state = await forward(
-                new_state, settings=settings, index=index, paths=ancestry
+                new_state, settings=settings, index=index, paths=ancestry, selection=paths
             )
             return Stage(next_state, focus=focus)
