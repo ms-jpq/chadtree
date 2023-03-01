@@ -39,7 +39,9 @@ async def _new(state: State, settings: Settings, is_visual: bool) -> Optional[St
         else:
             path = PurePath(abspath(parent / child))
             if await exists(path, follow=False):
-                await Nvim.write(LANG("already_exists", name=normpath(path)), error=True)
+                await Nvim.write(
+                    LANG("already_exists", name=normpath(path)), error=True
+                )
                 return None
             else:
                 try:
@@ -57,8 +59,13 @@ async def _new(state: State, settings: Settings, is_visual: bool) -> Optional[St
                     )
                     paths = ancestors(path)
                     index = state.index | paths
+                    new_selection = {path} if state.selection else set()
                     next_state = await forward(
-                        new_state, settings=settings, index=index, paths=paths
+                        new_state,
+                        settings=settings,
+                        index=index,
+                        paths=paths,
+                        selection=new_selection,
                     )
                     await lsp_created((path,))
                     return Stage(next_state, focus=path)

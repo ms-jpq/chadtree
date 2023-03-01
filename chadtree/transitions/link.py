@@ -68,7 +68,8 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
             focus, *_ = sorted(paths, key=pathsort_key)
             ancestry = ancestors(*paths)
             index = state.index | ancestry
+            new_selection = paths if state.selection else set()
             next_state = await forward(
-                new_state, settings=settings, index=index, paths=ancestry, selection=paths
+                new_state, settings=settings, index=index, paths=ancestry, selection=new_selection
             )
             return Stage(next_state, focus=focus)
