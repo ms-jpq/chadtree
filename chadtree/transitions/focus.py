@@ -17,7 +17,7 @@ from .types import Stage
 
 async def _jump(state: State, settings: Settings, path: PurePath) -> Optional[Stage]:
     if new_state := await maybe_path_above(state, settings=settings, paths={path}):
-        return Stage(new_state, focus=new_state.current)
+        return Stage(new_state, focus=path)
     elif stage := await new_current_file(state, settings=settings, current=path):
         return Stage(stage.state, focus=path)
     else:
