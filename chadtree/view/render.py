@@ -1,9 +1,10 @@
+from collections import UserString
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
-from os.path import sep
+from os.path import extsep, sep
 from pathlib import PurePath
-from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, cast
+from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 
 from pynvim_pp.lib import encode
 from std2.platform import OS, os
@@ -24,8 +25,26 @@ class _CompVals(IntEnum):
     FILE = auto()
 
 
+_Str = Union[str, UserString]
 _Render = Tuple[str, Sequence[Highlight], Sequence[Badge]]
 _NRender = Tuple[Node, str, Sequence[Highlight], Sequence[Badge]]
+
+
+class _str(UserString):
+    def __lt__(self, _: _Str) -> bool:
+        return False
+
+    def __gt__(self, _: _Str) -> bool:
+        return True
+
+
+def _suffixx(path: PurePath) -> _Str:
+    if path.suffix:
+        return strxfrm(path.suffix)
+    elif path.stem.startswith(extsep):
+        return strxfrm(path.stem)
+    else:
+        return _str("")
 
 
 def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
@@ -35,7 +54,7 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
                 if sb is Sortby.is_folder:
                     yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
                 elif sb is Sortby.ext:
-                    yield "" if is_dir(node) else strxfrm(node.path.suffix)
+                    yield "" if is_dir(node) else _suffixx(node.path)
                 elif sb is Sortby.file_name:
                     yield strxfrm(node.path.name)
                 else:
