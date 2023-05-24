@@ -23,7 +23,7 @@ async def initial(settings: Settings) -> State:
 
     session = Session(workdir=cwd, storage=storage)
     stored = await load_session(session) if settings.session else None
-    index = stored.index if stored and stored.index is not None else {cwd}
+    index = {cwd} | (stored.index if stored else frozenset())
 
     show_hidden = (
         stored.show_hidden
@@ -36,7 +36,7 @@ async def initial(settings: Settings) -> State:
         else settings.version_ctl.enable
     )
 
-    selection: Selection = set()
+    selection: Selection = frozenset()
     node = await new(cwd, index=index)
     vc = VCStatus()
 

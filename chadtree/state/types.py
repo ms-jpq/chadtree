@@ -44,6 +44,6 @@ class State:
 
 @dataclass(frozen=True)
 class StoredSession:
-    index: Optional[Index]
+    index: Index
     show_hidden: Optional[bool]
     enable_vc: Optional[bool]

@@ -17,7 +17,7 @@ async def refresh(state: State, settings: Settings) -> Stage:
     current = await find_current_buffer_path()
     cwd = state.root.path
     paths = {cwd}
-    current_ancestors = ancestors(current) if current else set()
+    current_ancestors = ancestors(current) if current else frozenset()
     new_current = current if cwd in current_ancestors else None
 
     index = {
@@ -34,7 +34,9 @@ async def refresh(state: State, settings: Settings) -> Stage:
         if exists
     }
 
-    parent_paths: AbstractSet[PurePath] = current_ancestors if state.follow else set()
+    parent_paths: AbstractSet[PurePath] = (
+        current_ancestors if state.follow else frozenset()
+    )
     new_index = index if new_current else index | parent_paths
 
     window_ids = {w.data for w in await Window.list()}

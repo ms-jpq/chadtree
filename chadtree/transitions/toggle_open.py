@@ -138,7 +138,7 @@ async def _open(
                 try:
                     cwd = await version_ctl_toplv(git, cwd=state.root.path)
                     new_state = await new_root(
-                        state=state, settings=settings, new_cwd=cwd, indices=set()
+                        state=state, settings=settings, new_cwd=cwd, indices=frozenset()
                     )
                 except CalledProcessError:
                     await Nvim.write(LANG("cannot find version ctl root"), error=True)

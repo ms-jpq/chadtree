@@ -44,7 +44,7 @@ async def _filter(state: State, settings: Settings, is_visual: bool) -> Optional
         pattern = await Nvim.input(question=LANG("new_filter"), default=old_p)
 
         filter_pattern = FilterPattern(pattern=pattern) if pattern else None
-        selection: Selection = state.selection if filter_pattern else set()
+        selection: Selection = state.selection if filter_pattern else frozenset()
         new_state = await forward(
             state, settings=settings, selection=selection, filter_pattern=filter_pattern
         )

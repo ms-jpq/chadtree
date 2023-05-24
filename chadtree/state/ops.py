@@ -39,7 +39,7 @@ async def load_session(session: Session) -> StoredSession:
     try:
         sessions = _DECODER(await _load_json(load_path))
     except Exception:
-        return StoredSession(index=None, show_hidden=None, enable_vc=None)
+        return StoredSession(index=frozenset(), show_hidden=None, enable_vc=None)
     else:
         return sessions
 

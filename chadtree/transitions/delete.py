@@ -63,7 +63,7 @@ async def _remove(
             else:
                 paths = {path.parent for path in unified}
                 new_state = await forward(
-                    state, settings=settings, selection=set(), paths=paths
+                    state, settings=settings, selection=frozenset(), paths=paths
                 )
 
                 await kill_buffers(

@@ -12,7 +12,7 @@ async def _clear_selection(state: State, settings: Settings, is_visual: bool) ->
     Clear selected
     """
 
-    new_state = await forward(state, settings=settings, selection=set())
+    new_state = await forward(state, settings=settings, selection=frozenset())
     return Stage(new_state)
 
 

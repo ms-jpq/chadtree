@@ -163,7 +163,7 @@ async def _copy(state: State, settings: Settings, is_visual: bool) -> Optional[S
         state=state,
         settings=settings,
         is_visual=is_visual,
-        nono=set(),
+        nono=frozenset(),
         op_name=LANG("copy"),
         action=copy,
         is_move=False,

@@ -42,7 +42,7 @@ async def _refocus(state: State, settings: Settings, is_visual: bool) -> Stage:
     """
 
     cwd = await Nvim.getcwd()
-    new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=set())
+    new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=frozenset())
     focus = new_state.root.path
     return Stage(new_state, focus=focus)
 
@@ -60,7 +60,7 @@ async def _change_dir(
         return None
     else:
         cwd = node.path if is_dir(node) else node.path.parent
-        new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=set())
+        new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=frozenset())
         escaped = await Nvim.fn.fnameescape(str, normcase(new_state.root.path))
         await Nvim.exec(f"chdir {escaped}")
         await Nvim.write(LANG("new cwd", cwd=normpath(new_state.root.path)))
@@ -81,7 +81,7 @@ async def _change_focus(
     else:
         new_base = node.path if is_dir(node) else node.path.parent
         new_state = await new_root(
-            state, settings=settings, new_cwd=new_base, indices=set()
+            state, settings=settings, new_cwd=new_base, indices=frozenset()
         )
         focus = node.path
         return Stage(new_state, focus=focus)
@@ -103,6 +103,6 @@ async def _change_focus_up(
             state,
             settings=settings,
             new_cwd=state.root.path.parent,
-            indices=set(),
+            indices=frozenset(),
         )
         return Stage(new_state, focus=node.path)

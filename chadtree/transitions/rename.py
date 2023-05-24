@@ -68,7 +68,7 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                     )
                     paths = ancestors(new_path)
                     index = state.index | paths
-                    new_selection = {new_path} if state.selection else set()
+                    new_selection = {new_path} if state.selection else frozenset()
                     next_state = await forward(
                         new_state,
                         settings=settings,

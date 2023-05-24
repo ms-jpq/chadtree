@@ -2,12 +2,13 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
 from itertools import chain, repeat
 from typing import (
+    AbstractSet,
     Callable,
     Iterator,
     Mapping,
     MutableMapping,
+    MutableSet,
     Optional,
-    Set,
     Tuple,
     Union,
 )
@@ -66,7 +67,7 @@ class _Colour:
 
 @dataclass(frozen=True)
 class _Styling:
-    styles: Set[_Style]
+    styles: AbstractSet[_Style]
     foreground: Union[_AnsiColour, _Colour, None]
     background: Union[_AnsiColour, _Colour, None]
 
@@ -100,7 +101,7 @@ _COLOUR_TABLE: Mapping[str, _AnsiColour] = {
     )
 }
 
-_RGB_TABLE: Set[str] = {"38", "48"}
+_RGB_TABLE: AbstractSet[str] = {"38", "48"}
 
 _E_BASIC_TABLE: Mapping[int, _AnsiColour] = {i: c for i, c in enumerate(_AnsiColour)}
 
@@ -226,7 +227,7 @@ def _parse_codes(
 
 
 def _parse_styling(codes: str) -> _Styling:
-    styles: Set[_Style] = set()
+    styles: MutableSet[_Style] = set()
     colours: MutableMapping[_Ground, Union[_AnsiColour, _Colour]] = {}
     for ret in _parse_codes(codes):
         if isinstance(ret, _Style):

@@ -60,7 +60,9 @@ async def _changedir(state: State, settings: Settings) -> Stage:
     """
 
     cwd = await Nvim.getcwd()
-    new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=set())
+    new_state = await new_root(
+        state, settings=settings, new_cwd=cwd, indices=frozenset()
+    )
     return Stage(new_state)
 
 
