@@ -36,12 +36,10 @@ async def _show_file(
         for key, val in settings.win_actual_opts.items():
             await win.opts.set(key, val=val)
 
-    path = state.current
-    if path:
-        hold = click_type is ClickType.secondary
+    if path := state.current:
         mgr = (
             cast(AsyncContextManager[None], hold_win(win=None))
-            if hold
+            if click_type is ClickType.secondary
             else nullacontext(None)
         )
         async with mgr:
