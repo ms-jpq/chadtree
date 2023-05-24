@@ -75,6 +75,12 @@
 "pencil": |-
   ✏️  :
 
+"clear_bookmarks": |-
+  ${idx}. 🔖 Clear! 
+
+"no_bookmarks": |-
+  ⚠️  Error - no bookmarks found
+
 "sys_open_err": |-
   ⚠️  Error -- cannot find system opener
 

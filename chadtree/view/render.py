@@ -4,7 +4,19 @@ from fnmatch import fnmatch
 from locale import strxfrm
 from os.path import extsep, sep
 from pathlib import PurePath
-from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSet,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 from pynvim_pp.lib import encode
 from std2.platform import OS, os
@@ -77,6 +89,7 @@ def _gen_spacer(depth: int) -> str:
 def _paint(
     settings: Settings,
     index: Index,
+    bookmarks: Mapping[PurePath, Sequence[int]],
     selection: Selection,
     markers: Markers,
     vc: VCStatus,
@@ -164,6 +177,12 @@ def _paint(
             yield icons.link.normal
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
+        if bm := bookmarks.get(path):
+            yield Badge(
+                text=f">{bm}<",
+                group=context.particular_mappings.bookmarks,
+            )
+
         if marks := markers.bookmarks.get(path):
             ordered = "".join(sorted(marks))
             yield Badge(
@@ -222,11 +241,19 @@ def _paint(
     return show
 
 
+def _bookmarks(bookmarks: Mapping[int, PurePath]) -> Mapping[PurePath, Sequence[int]]:
+    acc: MutableMapping[PurePath, MutableSet[int]] = {}
+    for idx, path in bookmarks.items():
+        acc.setdefault(path, set()).add(idx)
+    return {k: sorted(v) for k, v in acc.items()}
+
+
 def render(
     node: Node,
     *,
     settings: Settings,
     index: Index,
+    bookmarks: Mapping[int, PurePath],
     selection: Selection,
     filter_pattern: Optional[FilterPattern],
     markers: Markers,
@@ -234,9 +261,11 @@ def render(
     show_hidden: bool,
     current: Optional[PurePath],
 ) -> Derived:
+    bm = _bookmarks(bookmarks)
     show = _paint(
         settings,
         index=index,
+        bookmarks=bm,
         selection=selection,
         markers=markers,
         vc=vc,

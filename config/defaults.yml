@@ -12,6 +12,10 @@ keymap:
   bigger:
     - +
     - "="
+  bookmark_goto:
+    - m
+  bookmark_set:
+    - M
   change_dir:
     - b
   change_focus:

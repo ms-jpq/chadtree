@@ -35,6 +35,7 @@ class State:
     index: Index
     markers: Markers
     root: Node
+    bookmarks: Mapping[int, PurePath]
     selection: Selection
     show_hidden: bool
     vc: VCStatus
@@ -45,5 +46,6 @@ class State:
 @dataclass(frozen=True)
 class StoredSession:
     index: Index
+    bookmarks: Mapping[int, PurePath]
     show_hidden: Optional[bool]
     enable_vc: Optional[bool]

@@ -3,7 +3,7 @@ from json import dumps, loads
 from os.path import normcase
 from pathlib import Path, PurePath
 from tempfile import NamedTemporaryFile
-from typing import Any, Optional
+from typing import Any, MutableMapping, Optional
 
 from pynvim_pp.lib import decode, encode
 from std2.asyncio import to_thread
@@ -37,9 +37,15 @@ async def _load_json(path: Path) -> Optional[Any]:
 async def load_session(session: Session) -> StoredSession:
     load_path = _session_path(session.workdir, storage=session.storage)
     try:
-        sessions = _DECODER(await _load_json(load_path))
+        json = await _load_json(load_path)
+        if isinstance(json, MutableMapping):
+            bm = "bookmarks"
+            json[bm] = {int(k): v for k, v in json.get(bm, {})}
+        sessions = _DECODER(json)
     except Exception:
-        return StoredSession(index=frozenset(), show_hidden=None, enable_vc=None)
+        return StoredSession(
+            index=frozenset(), bookmarks={}, show_hidden=None, enable_vc=None
+        )
     else:
         return sessions
 
@@ -47,6 +53,7 @@ async def load_session(session: Session) -> StoredSession:
 async def dump_session(state: State) -> Session:
     stored = StoredSession(
         index=state.index,
+        bookmarks=state.bookmarks,
         show_hidden=state.show_hidden,
         enable_vc=state.enable_vc,
     )

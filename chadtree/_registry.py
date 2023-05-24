@@ -1,7 +1,7 @@
 from .transitions import (
     autocmds,
+    bookmark,
     click,
-    link,
     collapse,
     copy_name,
     cut_copy,
@@ -9,6 +9,7 @@ from .transitions import (
     filter,
     focus,
     help,
+    link,
     new,
     noop,
     open_system,
@@ -26,6 +27,7 @@ from .transitions import (
 )
 
 assert autocmds
+assert bookmark
 assert click
 assert collapse
 assert copy_name

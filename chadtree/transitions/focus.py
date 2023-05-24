@@ -1,4 +1,5 @@
 from os.path import normcase, normpath
+from pathlib import PurePath
 from typing import Optional
 
 from pynvim_pp.nvim import Nvim
@@ -14,6 +15,15 @@ from .shared.index import indices
 from .types import Stage
 
 
+async def _jump(state: State, settings: Settings, path: PurePath) -> Optional[Stage]:
+    if new_state := await maybe_path_above(state, settings=settings, paths={path}):
+        return Stage(new_state, focus=new_state.current)
+    elif stage := await new_current_file(state, settings=settings, current=path):
+        return Stage(stage.state, focus=path)
+    else:
+        return None
+
+
 @rpc(blocking=False)
 async def _jump_to_current(
     state: State, settings: Settings, is_visual: bool
@@ -23,16 +33,9 @@ async def _jump_to_current(
     """
 
     if not (curr := state.current):
-
-        print("NO CURR", flush=True)
         return None
     else:
-        if new_state := await maybe_path_above(state, settings=settings, paths={curr}):
-            return Stage(new_state, focus=new_state.current)
-        elif stage := await new_current_file(state, settings=settings, current=curr):
-            return Stage(stage.state, focus=curr)
-        else:
-            return None
+        return await _jump(state, settings=settings, path=curr)
 
 
 @rpc(blocking=False)
@@ -42,7 +45,9 @@ async def _refocus(state: State, settings: Settings, is_visual: bool) -> Stage:
     """
 
     cwd = await Nvim.getcwd()
-    new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=frozenset())
+    new_state = await new_root(
+        state, settings=settings, new_cwd=cwd, indices=frozenset()
+    )
     focus = new_state.root.path
     return Stage(new_state, focus=focus)
 
@@ -60,7 +65,9 @@ async def _change_dir(
         return None
     else:
         cwd = node.path if is_dir(node) else node.path.parent
-        new_state = await new_root(state, settings=settings, new_cwd=cwd, indices=frozenset())
+        new_state = await new_root(
+            state, settings=settings, new_cwd=cwd, indices=frozenset()
+        )
         escaped = await Nvim.fn.fnameescape(str, normcase(new_state.root.path))
         await Nvim.exec(f"chdir {escaped}")
         await Nvim.write(LANG("new cwd", cwd=normpath(new_state.root.path)))
