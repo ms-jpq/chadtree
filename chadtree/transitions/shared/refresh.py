@@ -1,6 +1,8 @@
+from asyncio import gather
 from pathlib import PurePath
-from typing import AbstractSet
+from typing import AbstractSet, Mapping
 
+from pynvim_pp.types import ExtData
 from pynvim_pp.window import Window
 from std2.types import Void
 
@@ -13,19 +15,29 @@ from ..shared.wm import find_current_buffer_path
 from ..types import Stage
 
 
-async def refresh(state: State, settings: Settings) -> Stage:
-    current = await find_current_buffer_path()
-    cwd = state.root.path
-    paths = {cwd}
-    current_ancestors = ancestors(current) if current else frozenset()
-    new_current = current if cwd in current_ancestors else None
+async def _bookmarks(state: State) -> Mapping[int, PurePath]:
+    existing = {
+        bookmarked
+        for bookmarked, exists in (
+            await exists_many(state.bookmarks.values(), follow=False)
+        ).items()
+        if exists
+    }
+    bookmarks = {k: v for k, v in state.bookmarks.items() if v in existing}
+    return bookmarks
 
+
+async def _index(state: State, paths: AbstractSet[PurePath]) -> AbstractSet[PurePath]:
     index = {
         path
         for path, exists in (await exists_many(state.index, follow=True)).items()
         if exists
     } | paths
 
+    return index
+
+
+async def _selection(state: State) -> AbstractSet[PurePath]:
     selection = {
         selected
         for selected, exists in (
@@ -34,21 +46,42 @@ async def refresh(state: State, settings: Settings) -> Stage:
         if exists
     }
 
+    return selection
+
+
+async def _window_order(state: State) -> Mapping[ExtData, None]:
+    window_ids = {w.data for w in await Window.list()}
+    window_order = {
+        win_id: None for win_id in state.window_order if win_id in window_ids
+    }
+    return window_order
+
+
+async def refresh(state: State, settings: Settings) -> Stage:
+    cwd = state.root.path
+    paths = {cwd}
+
+    current, index, bookmarks, selection, window_order, mks = await gather(
+        find_current_buffer_path(),
+        _index(state, paths=paths),
+        _bookmarks(state),
+        _selection(state),
+        _window_order(state),
+        markers(),
+    )
+    current_ancestors = ancestors(current) if current else frozenset()
+    new_current = current if cwd in current_ancestors else None
+
     parent_paths: AbstractSet[PurePath] = (
         current_ancestors if state.follow else frozenset()
     )
     new_index = index if new_current else index | parent_paths
 
-    window_ids = {w.data for w in await Window.list()}
-    window_order = {
-        win_id: None for win_id in state.window_order if win_id in window_ids
-    }
-
-    mks = await markers()
     new_state = await forward(
         state,
         settings=settings,
         index=new_index,
+        bookmarks=bookmarks,
         selection=selection,
         markers=mks,
         paths=paths,

@@ -40,7 +40,7 @@ async def load_session(session: Session) -> StoredSession:
         json = await _load_json(load_path)
         if isinstance(json, MutableMapping):
             bm = "bookmarks"
-            json[bm] = {int(k): v for k, v in json.get(bm, {})}
+            json[bm] = {int(k): v for k, v in json.get(bm, {}).items()}
         sessions = _DECODER(json)
     except Exception:
         return StoredSession(
