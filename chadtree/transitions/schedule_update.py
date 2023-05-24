@@ -3,6 +3,7 @@ from typing import Optional
 
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.types import NvimError
+from std2.asyncio import pure
 
 from ..registry import rpc
 from ..settings.types import Settings
@@ -10,6 +11,7 @@ from ..state.next import forward
 from ..state.ops import dump_session
 from ..state.types import State
 from ..version_ctl.git import status
+from ..version_ctl.types import VCStatus
 from .shared.refresh import refresh
 from .types import Stage
 
@@ -21,7 +23,7 @@ async def scheduled_update(state: State, settings: Settings) -> Optional[Stage]:
     try:
         stage, vc, session = await gather(
             refresh(state=state, settings=settings),
-            status(cwd),
+            status(cwd) if state.enable_vc else pure(VCStatus()),
             dump_session(state),
         )
     except NvimError:

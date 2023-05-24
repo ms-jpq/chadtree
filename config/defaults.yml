@@ -78,7 +78,8 @@ keymap:
     - u
   toggle_hidden:
     - .
-  toggle_version_control: []
+  toggle_version_control:
+    - i
   trash:
     - t
   v_split:

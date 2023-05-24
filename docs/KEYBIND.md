@@ -395,5 +395,5 @@ Toggle version control integration on and off
 **default:**
 
 ```json
-[]
+["i"]
 ```
