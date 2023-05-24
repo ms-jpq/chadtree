@@ -2,6 +2,7 @@ from itertools import chain
 from typing import Optional
 
 from pynvim_pp.nvim import Nvim
+from std2 import anext
 
 from ..registry import rpc
 from ..settings.localization import LANG
