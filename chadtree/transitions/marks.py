@@ -39,7 +39,18 @@ async def _bookmark_set(
             )
         }
         if (mark := await Nvim.input_list(opts)) is not None:
-            bookmarks = {**state.bookmarks, mark: node.path} if mark else {}
+            print(node.path, state.bookmarks.values())
+            if not mark:
+                bookmarks = {}
+            else:
+                bookmarks = {
+                    **{k: v for k, v in state.bookmarks.items() if v != node.path},
+                    **(
+                        {}
+                        if state.bookmarks.get(mark) == node.path
+                        else {mark: node.path}
+                    ),
+                }
             new_state = await forward(state, settings=settings, bookmarks=bookmarks)
             return Stage(new_state)
         else:

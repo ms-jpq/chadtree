@@ -129,6 +129,7 @@ theme:
   highlights:
     bookmarks: Title
     ignored: Comment
+    marks: Keyword
     quickfix: Label
     version_control: Comment
   icon_colour_set: github

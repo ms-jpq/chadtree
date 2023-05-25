@@ -1,6 +1,5 @@
 from .transitions import (
     autocmds,
-    bookmark,
     click,
     collapse,
     copy_name,
@@ -10,6 +9,7 @@ from .transitions import (
     focus,
     help,
     link,
+    marks,
     new,
     noop,
     open_system,
@@ -27,7 +27,6 @@ from .transitions import (
 )
 
 assert autocmds
-assert bookmark
 assert click
 assert collapse
 assert copy_name
@@ -37,6 +36,7 @@ assert filter
 assert focus
 assert help
 assert link
+assert marks
 assert new
 assert noop
 assert open_system
