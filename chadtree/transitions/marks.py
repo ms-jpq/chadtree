@@ -67,14 +67,9 @@ async def _bookmark_goto(
     Goto bookmark
     """
 
-    if state.bookmarks:
-        opts = {
-            _display_path(state, idx=i): state.bookmarks.get(i) for i in range(1, 10)
-        }
-        if mark := await Nvim.input_list(opts):
-            return await _jump(state, settings=settings, path=mark)
-        else:
-            return None
+    opts = {_display_path(state, idx=i): state.bookmarks.get(i) for i in range(1, 10)}
+    if mark := await Nvim.input_list(opts):
+        return await _jump(state, settings=settings, path=mark)
     else:
         await Nvim.write(LANG("no_bookmarks"), error=True)
         return None
