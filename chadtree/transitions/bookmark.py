@@ -56,8 +56,10 @@ async def _bookmark_goto(
     Goto bookmark
     """
 
-    if marks := sorted(state.bookmarks.items()):
-        opts = {_display_path(state, idx=i): p for i, p in marks}
+    if state.bookmarks:
+        opts = {
+            _display_path(state, idx=i): state.bookmarks.get(i) for i in range(1, 10)
+        }
         if mark := await Nvim.input_list(opts):
             return await _jump(state, settings=settings, path=mark)
         else:
