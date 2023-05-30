@@ -34,7 +34,6 @@ def load_theme(
     icon_colour_set: IconColourSetEnum,
     text_colour_set: Union[LSColoursEnum, TextColourSetEnum],
 ) -> Tuple[IconGlyphs, HLcontext]:
-
     if icon_set is IconGlyphSetEnum.ascii:
         icons = artifact.icons.ascii
     elif icon_set is IconGlyphSetEnum.ascii_hollow:

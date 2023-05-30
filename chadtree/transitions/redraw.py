@@ -33,7 +33,6 @@ def _update(
     derived: Derived,
     hashed_lines: Sequence[str],
 ) -> Atomic:
-
     atomic = Atomic()
     for (i1, i2), (j1, j2) in trans_inplace(
         src=hashed_lines, dest=derived.hashed, unifying=10

@@ -28,7 +28,7 @@ async def _remove(
     yeet: Callable[[Iterable[PurePath]], Awaitable[None]],
 ) -> Optional[Stage]:
     cwd, root = await Nvim.getcwd(), state.root.path
-    nono = {cwd, root} | ancestors(cwd,root)
+    nono = {cwd, root} | ancestors(cwd, root)
 
     selection = state.selection or {
         node.path async for node in indices(state, is_visual=is_visual)

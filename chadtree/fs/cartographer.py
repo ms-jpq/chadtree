@@ -1,8 +1,8 @@
 from asyncio import Queue, gather
 from contextlib import suppress
 from fnmatch import fnmatch
-from os.path import normcase
 from os import scandir, stat, stat_result
+from os.path import normcase
 from pathlib import Path, PurePath
 from stat import (
     S_IFDOOR,
