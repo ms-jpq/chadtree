@@ -17,14 +17,20 @@ def _git_identity() -> None:
 
 
 def _get_branch() -> str:
-    ref = environ["GITHUB_REF"]
-    return ref.replace("refs/heads/", "")
+    if ref := environ.get("GITHUB_REF"):
+        return ref.replace("refs/heads/", "")
+    else:
+        br = check_output(("git", "branch", "--show-current"), text=True, cwd=_TOP_LV)
+        return br.strip()
 
 
 def _git_clone(path: Path) -> None:
     if not path.is_dir():
-        token = environ["CI_TOKEN"]
-        uri = f"https://ms-jpq:{token}@github.com/ms-jpq/chadtree.git"
+        if token := environ.get("CI_TOKEN"):
+            uri = f"https://ms-jpq:{token}@github.com/ms-jpq/chadtree.git"
+        else:
+            uri = "git@github.com:ms-jpq/chadtree.git"
+
         branch = _get_branch()
         check_call(("git", "clone", "--branch", branch, uri, path))
 
@@ -51,6 +57,7 @@ def _git_alert(cwd: Path) -> None:
         check_call(("git", "push", "--delete", "origin", *refs), cwd=cwd)
 
     proc = run(("git", "diff", "--exit-code"), cwd=cwd)
+    print(proc)
     if proc.returncode:
         time = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
         brname = f"{prefix}--{time}"
@@ -62,10 +69,11 @@ def _git_alert(cwd: Path) -> None:
 
 def main() -> None:
     cwd = Path() / "temp"
-    _git_identity()
+    if "CI" in environ:
+        _git_identity()
     _git_clone(cwd)
     _build()
-    _git_alert(cwd)
+    _git_alert(_TOP_LV)
 
 
 main()
