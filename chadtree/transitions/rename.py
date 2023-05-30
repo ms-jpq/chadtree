@@ -31,15 +31,16 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
     if not node:
         return None
     else:
-
-        child = await Nvim.input(question=LANG("pencil"), default=str(node.path.name))
+        child = await Nvim.input(question=LANG("pencil"), default=node.path.name)
         if not child:
             return None
         else:
             new_path = PurePath(abspath(node.path.parent / child))
             operations = {node.path: new_path}
             if await exists(new_path, follow=False):
-                await Nvim.write(LANG("already_exists", name=str(new_path)), error=True)
+                await Nvim.write(
+                    LANG("already_exists", name=normpath(new_path)), error=True
+                )
                 return None
             else:
                 killed = await kill_buffers(
@@ -60,13 +61,20 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                             await Nvim.exec(f"edit! {escaped}")
 
                     new_state = (
-                        await maybe_path_above(state, settings=settings, path=new_path)
+                        await maybe_path_above(
+                            state, settings=settings, paths={new_path}
+                        )
                         or state
                     )
                     paths = ancestors(new_path)
                     index = state.index | paths
+                    new_selection = {new_path} if state.selection else frozenset()
                     next_state = await forward(
-                        new_state, settings=settings, index=index, paths=paths
+                        new_state,
+                        settings=settings,
+                        index=index,
+                        paths=paths,
+                        selection=new_selection,
                     )
                     await lsp_moved(operations)
                     return Stage(next_state, focus=new_path)

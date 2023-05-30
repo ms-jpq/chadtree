@@ -1,28 +1,33 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import IntEnum, auto
+from enum import IntEnum, auto, unique
 from pathlib import PurePath
-from typing import AbstractSet, Mapping, Sequence
+from typing import AbstractSet, Mapping, Optional, Sequence
 
 
+# https://github.com/coreutils/coreutils/blob/master/src/ls.c
+@unique
 class Mode(IntEnum):
     orphan_link = auto()
     link = auto()
-    sticky_writable = auto()
-    sticky_dir = auto()
-    folder = auto()
+
+    pipe = auto()
+    socket = auto()
     block_device = auto()
     char_device = auto()
     door = auto()
+
+    sticky_other_writable = auto()
+    other_writable = auto()
+    sticky = auto()
+    folder = auto()
+
+    set_uid = auto()
+    set_gid = auto()
+    file_w_capacity = auto()
     executable = auto()
     multi_hardlink = auto()
-    other_writable = auto()
-    pipe = auto()
-    set_gid = auto()
-    set_uid = auto()
-    socket = auto()
-    file_w_capacity = auto()
     file = auto()
 
 
@@ -30,6 +35,7 @@ class Mode(IntEnum):
 class Node:
     mode: AbstractSet[Mode]
     path: PurePath
+    pointed: Optional[PurePath]
     ancestors: AbstractSet[PurePath]
     children: Mapping[PurePath, Node] = field(default_factory=dict)
 

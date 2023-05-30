@@ -1,7 +1,5 @@
-from contextlib import asynccontextmanager
 from math import inf
-from os.path import normpath
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from typing import (
     AbstractSet,
     AsyncIterator,
@@ -15,7 +13,6 @@ from typing import (
 
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.buffer import Buffer
-from pynvim_pp.hold import hold_win
 from pynvim_pp.keymap import Keymap
 from pynvim_pp.lib import resolve_path
 from pynvim_pp.nvim import Nvim

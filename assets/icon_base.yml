@@ -1,6 +1,7 @@
 ---
 ascii: &ascii
   default_icon: ●
+  ext_exact: {}
   folder:
     closed: ▶
     open: ▼
@@ -14,7 +15,6 @@ ascii: &ascii
     inactive: " "
     not_selected: " "
     selected: "*"
-  ext_exact: {}
 
 ascii_hollow:
   <<: *ascii

@@ -28,7 +28,7 @@ async def _toggle_hidden(
     else:
         focus = node.path
         show_hidden = not state.show_hidden
-        selection: Selection = state.selection if show_hidden else set()
+        selection: Selection = state.selection if show_hidden else frozenset()
         new_state = await forward(
             state, settings=settings, show_hidden=show_hidden, selection=selection
         )

@@ -17,9 +17,10 @@ async def _bookmarks() -> Mapping[PurePath, AbstractSet[Marker]]:
     acc: MutableMapping[PurePath, MutableSet[Marker]] = {}
     bookmarks = await Nvim.list_bookmarks()
     for marker, (path, _, _) in bookmarks.items():
-        for marked_path in chain((path,), ancestors(path)):
-            marks = acc.setdefault(marked_path, set())
-            marks.add(marker)
+        if path:
+            for marked_path in chain((path,), ancestors(path)):
+                marks = acc.setdefault(marked_path, set())
+                marks.add(marker)
 
     return acc
 

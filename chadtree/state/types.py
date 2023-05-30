@@ -19,8 +19,14 @@ class FilterPattern:
 
 
 @dataclass(frozen=True)
+class Session:
+    workdir: PurePath
+    storage: Path
+
+
+@dataclass(frozen=True)
 class State:
-    session_store: Path
+    session: Session
     current: Optional[PurePath]
     derived: Derived
     enable_vc: bool
@@ -29,6 +35,7 @@ class State:
     index: Index
     markers: Markers
     root: Node
+    bookmarks: Mapping[int, PurePath]
     selection: Selection
     show_hidden: bool
     vc: VCStatus
@@ -37,7 +44,8 @@ class State:
 
 
 @dataclass(frozen=True)
-class Session:
-    index: Optional[Index]
+class StoredSession:
+    index: Index
+    bookmarks: Mapping[int, PurePath]
     show_hidden: Optional[bool]
     enable_vc: Optional[bool]

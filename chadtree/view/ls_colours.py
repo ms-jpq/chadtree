@@ -2,12 +2,13 @@ from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
 from itertools import chain, repeat
 from typing import (
+    AbstractSet,
     Callable,
     Iterator,
     Mapping,
     MutableMapping,
+    MutableSet,
     Optional,
-    Set,
     Tuple,
     Union,
 )
@@ -66,7 +67,7 @@ class _Colour:
 
 @dataclass(frozen=True)
 class _Styling:
-    styles: Set[_Style]
+    styles: AbstractSet[_Style]
     foreground: Union[_AnsiColour, _Colour, None]
     background: Union[_AnsiColour, _Colour, None]
 
@@ -100,7 +101,7 @@ _COLOUR_TABLE: Mapping[str, _AnsiColour] = {
     )
 }
 
-_RGB_TABLE: Set[str] = {"38", "48"}
+_RGB_TABLE: AbstractSet[str] = {"38", "48"}
 
 _E_BASIC_TABLE: Mapping[int, _AnsiColour] = {i: c for i, c in enumerate(_AnsiColour)}
 
@@ -155,21 +156,21 @@ _PARSE_TABLE: Mapping[
 
 _SPECIAL_PRE_TABLE: Mapping[str, Mode] = {
     "bd": Mode.block_device,
+    "ca": Mode.file_w_capacity,
     "cd": Mode.char_device,
+    "di": Mode.folder,
     "do": Mode.door,
     "ex": Mode.executable,
-    "ca": Mode.file_w_capacity,
-    "di": Mode.folder,
     "ln": Mode.link,
     "mh": Mode.multi_hardlink,
     "or": Mode.orphan_link,
     "ow": Mode.other_writable,
     "pi": Mode.pipe,
-    "so": Mode.socket,
-    "st": Mode.sticky_dir,
-    "tw": Mode.sticky_writable,
     "sg": Mode.set_gid,
+    "so": Mode.socket,
+    "st": Mode.sticky,
     "su": Mode.set_uid,
+    "tw": Mode.sticky_other_writable,
 }
 
 
@@ -177,6 +178,17 @@ _SPECIAL_POST_TABLE: Mapping[str, Optional[Mode]] = {
     "fi": Mode.file,
     "no": None,
 }
+
+_UNUSED = {
+    "mi": "colour of missing symlink pointee",
+    "cl": "ANSI clear",
+    "ec": "ANSI end_code",
+    "lc": "ANSI left_code",
+    "rc": "ANSI right_code",
+    "rs": "ANSI reset",
+}
+
+assert _UNUSED
 
 
 _HL_STYLE_TABLE: Mapping[_Style, Optional[str]] = {
@@ -215,7 +227,7 @@ def _parse_codes(
 
 
 def _parse_styling(codes: str) -> _Styling:
-    styles: Set[_Style] = set()
+    styles: MutableSet[_Style] = set()
     colours: MutableMapping[_Ground, Union[_AnsiColour, _Colour]] = {}
     for ret in _parse_codes(codes):
         if isinstance(ret, _Style):
@@ -272,19 +284,14 @@ def parse_lsc(ls_colours: str, discrete_colours: Mapping[str, str]) -> LSC:
     }
 
     mode_pre = {
-        key: val
-        for key, val in (
-            (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_PRE_TABLE.items()
-        )
-        if val
+        mode: hl
+        for indicator, mode in _SPECIAL_PRE_TABLE.items()
+        if (hl := hl_lookup.pop(indicator, None))
     }
-
     mode_post = {
-        key: val
-        for key, val in (
-            (v, hl_lookup.pop(k, None)) for k, v in _SPECIAL_POST_TABLE.items()
-        )
-        if val
+        mode: hl
+        for indicator, mode in _SPECIAL_POST_TABLE.items()
+        if (hl := hl_lookup.pop(indicator, None))
     }
 
     _ext_keys = tuple(

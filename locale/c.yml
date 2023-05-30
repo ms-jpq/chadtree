@@ -51,6 +51,9 @@
 "hourglass": |-
   Wait...
 
+"link": |-
+  Link ${src} ->:
+
 "mime_warn": |-
   ${name} have possible mimetype ${mime}, continue?
 
@@ -72,6 +75,12 @@
 "pencil": |-
   Input:
 
+"clear_bookmarks": |-
+  ${idx}. Clear!
+
+"no_bookmarks": |-
+  !! Error - no bookmarks found
+
 "sys_open_err": |-
   !! Error -- cannot find system opener
 
@@ -80,4 +89,3 @@
 
 "version_control_indi": |-
   🐶 enable version control: ${enable_vc}
-

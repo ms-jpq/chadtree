@@ -1,5 +1,4 @@
 ---
-profiling: false
 ignore:
   name_exact:
     - .DS_Store
@@ -13,6 +12,10 @@ keymap:
   bigger:
     - +
     - "="
+  bookmark_goto:
+    - m
+  bookmark_set:
+    - M
   change_dir:
     - b
   change_focus:
@@ -44,6 +47,8 @@ keymap:
     - W
   jump_to_current:
     - J
+  link:
+    - A
   new:
     - a
   open_sys:
@@ -71,11 +76,14 @@ keymap:
   tertiary:
     - <m-enter>
     - <middlemouse>
+  toggle_exec:
+    - X
   toggle_follow:
     - u
   toggle_hidden:
     - .
-  toggle_version_control: []
+  toggle_version_control:
+    - i
   trash:
     - t
   v_split:
@@ -99,33 +107,35 @@ options:
   show_hidden: false
   version_control:
     enable: true
+profiling: false
 theme:
-  icon_glyph_set: devicons
-  text_colour_set: env
-  icon_colour_set: github
-  highlights:
-    ignored: Comment
-    bookmarks: Title
-    quickfix: Label
-    version_control: Comment
   discrete_colour_map:
     black: "#202020"
-    red: "#ff4c41"
-    green: "#96bc00"
-    yellow: "#f6a311"
     blue: "#4eb5e0"
-    magenta: "#f587c5"
-    cyan: "#52bcaf"
-    white: "#feffff"
-
     bright_black: "#000000"
-    bright_red: "#ff8883"
-    bright_green: "#8dc437"
-    bright_yellow: "#ffa84f"
     bright_blue: "#58c7ff"
-    bright_magenta: "#ffa3cc"
     bright_cyan: "#5ac8a9"
+    bright_green: "#8dc437"
+    bright_magenta: "#ffa3cc"
+    bright_red: "#ff8883"
     bright_white: "#feffff"
+    bright_yellow: "#ffa84f"
+    cyan: "#52bcaf"
+    green: "#96bc00"
+    magenta: "#f587c5"
+    red: "#ff4c41"
+    white: "#feffff"
+    yellow: "#f6a311"
+  highlights:
+    bookmarks: Title
+    ignored: Comment
+    marks: Keyword
+    quickfix: Label
+    version_control: Comment
+  icon_colour_set: github
+  icon_glyph_set: devicons
+  text_colour_set: env
+
 view:
   open_direction: left
   sort_by:

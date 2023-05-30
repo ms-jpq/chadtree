@@ -14,6 +14,7 @@ from ..fs.types import Mode, Node
 class HLGroups:
     bookmarks: str
     ignored: str
+    marks: str
     quickfix: str
     version_control: str
 

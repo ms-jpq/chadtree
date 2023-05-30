@@ -246,6 +246,30 @@ Clear filter.
 
 ---
 
+## Bookmarks
+
+##### `chadtree_settings.keymap.bookmark_goto`
+
+Goto bookmark [1-9].
+
+**default:**
+
+```json
+["m"]
+```
+
+##### `chadtree_settings.keymap.bookmark_set`
+
+Set bookmark [1-9].
+
+**default:**
+
+```json
+["M"]
+```
+
+---
+
 ## Selecting
 
 ##### `chadtree_settings.keymap.select`
@@ -286,6 +310,20 @@ ie. `uwu/owo/` under `unix` will create `uwu/` then `owo/` under it. Both are fo
 ["a"]
 ```
 
+##### `chadtree_settings.keymap.link`
+
+Create links at location under cursor from selection.
+
+Links are always relative.
+
+Intermediary folders are created automatically.
+
+**default:**
+
+```json
+["A"]
+```
+
 ##### `chadtree_settings.keymap.rename`
 
 Rename file under cursor.
@@ -294,6 +332,18 @@ Rename file under cursor.
 
 ```json
 ["r"]
+```
+
+##### `chadtree_settings.keymap.toggle_exec`
+
+Toggle all the `+x` bits of the selected / highlighted files.
+
+Except for directories, where `-x` will prevent reading.
+
+**default:**
+
+```json
+["X"]
 ```
 
 ##### `chadtree_settings.keymap.copy`
@@ -369,5 +419,5 @@ Toggle version control integration on and off
 **default:**
 
 ```json
-[]
+["i"]
 ```

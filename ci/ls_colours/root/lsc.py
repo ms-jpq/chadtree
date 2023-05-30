@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from json import dump
+from os.path import normcase
 from pathlib import Path
 from subprocess import check_output
 from sys import stdout
@@ -23,7 +24,7 @@ _PARSING = {
 
 def main() -> None:
     lsc = {
-        dest: check_output((str(_LSC_SH), str(file_name)), text=True)
+        dest: check_output((str(_LSC_SH), normcase(file_name)), text=True)
         for file_name, dest in _PARSING.items()
     }
     dump(lsc, stdout, ensure_ascii=False, check_circular=False)
