@@ -36,7 +36,7 @@ Use `:CHADhelp {topic}` or `:CHADhelp {topic} --web` to visit a particular topic
 
 ### `CHADdeps`
 
-`:CHADdeps` will install all of CHADTree's depdencies locally.
+`:CHADdeps` will install all of CHADTree's dependencies locally.
 
 Dependencies will be privately installed inside CHADTree's git root under `.vars/runtime`.
 

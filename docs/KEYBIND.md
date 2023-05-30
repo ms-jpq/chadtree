@@ -298,7 +298,7 @@ Clear selection.
 
 ##### `chadtree_settings.keymap.new`
 
-Create new file at location under cursor. Files ending with platform specifc path seperator will be folders.
+Create new file at location under cursor. Files ending with platform specific path separator will be folders.
 
 Intermediary folders are created automatically.
 
