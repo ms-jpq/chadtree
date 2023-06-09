@@ -39,7 +39,6 @@ async def _bookmark_set(
             )
         }
         if (mark := await Nvim.input_list(opts)) is not None:
-            print(node.path, state.bookmarks.values())
             if not mark:
                 bookmarks = {}
             else:
