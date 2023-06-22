@@ -1,13 +1,13 @@
 from mimetypes import guess_type
 from os.path import altsep, normpath, sep
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from typing import AsyncContextManager, Optional, cast
 
 from pynvim_pp.buffer import Buffer
 from pynvim_pp.hold import hold_win
 from pynvim_pp.logging import log
 from pynvim_pp.nvim import Nvim
-from pynvim_pp.types import NvimError
+from pynvim_pp.types import NoneType, NvimError
 from pynvim_pp.window import Window
 from std2 import anext
 from std2.aitertools import achain, to_async
@@ -25,6 +25,17 @@ from .wm import (
     new_window,
     resize_fm_windows,
 )
+
+_LUA = (Path(__file__).resolve(strict=True).parent / "edit_file.lua").read_text("utf-8")
+
+
+async def edit_file(buf: Buffer, path: PurePath) -> None:
+    name = normpath(path)
+    if await Nvim.api.has("nvim-0.6"):
+        await Nvim.api.exec_lua(NoneType, _LUA, (buf, name))
+    else:
+        escaped = await Nvim.fn.fnameescape(str, name)
+        await Nvim.exec(f"edit! {escaped}")
 
 
 async def _show_file(
@@ -84,8 +95,11 @@ async def _show_file(
             if buf:
                 await win.set_buf(buf)
             else:
-                escaped = await Nvim.fn.fnameescape(str, normpath(path))
-                await Nvim.exec(f"edit! {escaped}")
+                buf = await Buffer.create(
+                    listed=True, scratch=False, wipe=False, nofile=False, noswap=False
+                )
+                await win.set_buf(buf)
+                await edit_file(buf, path=path)
 
             await resize_fm_windows(last_used=state.window_order, width=state.width)
             try:
