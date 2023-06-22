@@ -1,4 +1,4 @@
-from asyncio import Event, Lock, Task, create_task, gather
+from asyncio import FIRST_COMPLETED, Event, Lock, Task, create_task, gather, wait
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from multiprocessing import cpu_count
@@ -8,7 +8,7 @@ from string import Template
 from sys import executable, exit
 from textwrap import dedent
 from time import monotonic
-from typing import Any, Optional, Sequence, Tuple, cast
+from typing import Any, Optional, Sequence, cast
 
 from pynvim_pp.highlight import highlight
 from pynvim_pp.logging import log, suppress_and_log
@@ -25,7 +25,7 @@ from std2.sys import suicide
 
 from ._registry import ____
 from .consts import RENDER_RETRIES
-from .registry import autocmd, enqueue_event, queue, rpc
+from .registry import autocmd, dequeue_event, enqueue_event, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
 from .settings.types import Settings
@@ -113,38 +113,36 @@ async def init(socket: ServerAddr, ppid: int) -> None:
                 event = Event()
                 lock = Lock()
 
-                async def step(
-                    prev: Optional[Task], method: Method, params: Sequence[Any]
-                ) -> None:
-                    with suppress_and_log():
-                        if prev:
-                            await cancel(prev)
-
-                        if handler := cast(Optional[_CB], handlers.get(method)):
+                async def step(method: Method, params: Sequence[Any]) -> None:
+                    if handler := cast(Optional[_CB], handlers.get(method)):
+                        with suppress_and_log():
                             async with lock:
                                 if stage := await handler(state.val, settings, *params):
                                     state.val = stage.state
                                     staged.val = stage
                                     event.set()
-                        else:
-                            assert False, (method, params)
+                    else:
+                        assert False, (method, params)
 
                 async def c1() -> None:
-                    task: Optional[Task] = None
+                    transcient: Optional[Task] = None
+                    get: Optional[Task] = None
                     while True:
                         with suppress_and_log():
-                            msg: Tuple[
-                                bool, Method, Sequence[Any]
-                            ] = await queue().get()
-                            sync, method, params = msg
-                            t = create_task(
-                                step(
-                                    task,
-                                    method=method,
-                                    params=params,
+                            get = create_task(dequeue_event())
+                            if transcient:
+                                await wait(
+                                    (transcient, get), return_when=FIRST_COMPLETED
                                 )
-                            )
-                            task = t if not sync else task
+                                await cancel(transcient)
+                                transcient = None
+
+                            sync, method, params = await get
+                            task = step(method, params=params)
+                            if sync:
+                                await task
+                            else:
+                                transcient = create_task(task)
 
                 async def c2() -> None:
                     t1, has_drawn = monotonic(), False
