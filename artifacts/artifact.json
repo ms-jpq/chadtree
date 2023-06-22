@@ -557,6 +557,7 @@
       ".lisp": "#87AED7",
       ".litcoffee": "#244776",
       ".livemd": "#083fa1",
+      ".lkml": "#652B81",
       ".ll": "#185619",
       ".lmi": "#3572A5",
       ".logtalk": "#295b9a",
@@ -635,7 +636,6 @@
       ".mmd": "#ff3670",
       ".mo": "#fbb03b",
       ".mod": "#0060ac",
-      ".model.lkml": "#652B81",
       ".moo": "#ff2b2b",
       ".moon": "#ff4585",
       ".move": "#4a137a",
@@ -1073,7 +1073,6 @@
       ".vhs": "#adb2cb",
       ".vht": "#adb2cb",
       ".vhw": "#adb2cb",
-      ".view.lkml": "#652B81",
       ".vim": "#199f4b",
       ".vimrc": "#199f4b",
       ".viw": "#e38c00",
@@ -1097,6 +1096,7 @@
       ".wdl": "#42f1f4",
       ".webapp": "#292929",
       ".webmanifest": "#292929",
+      ".wgsl": "#1a5e9a",
       ".whiley": "#d5c397",
       ".wiki": "#fc5757",
       ".wikitext": "#fc5757",
@@ -1357,8 +1357,8 @@
         "open": ""
       },
       "link": {
-        "broken": "",
-        "normal": ""
+        "broken": "󰌸",
+        "normal": "󰲔"
       },
       "name_exact": {
         ".bashprofile": "",
@@ -1843,8 +1843,8 @@
         "open": "📂"
       },
       "link": {
-        "broken": "",
-        "normal": ""
+        "broken": "󰌸",
+        "normal": "󰲔"
       },
       "name_exact": {
         ".bashprofile": "🐚",
