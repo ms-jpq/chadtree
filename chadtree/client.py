@@ -21,7 +21,7 @@ from std2.contextlib import nullacontext
 from std2.pickle.types import DecodeError
 from std2.platform import OS, os
 from std2.sched import aticker
-from std2.sys import suicide
+from std2.sys import autodie
 
 from ._registry import ____
 from .consts import RENDER_RETRIES
@@ -40,11 +40,11 @@ assert ____ or True
 _CB = RPCallable[Optional[Stage]]
 
 
-def _suicide(ppid: int) -> AbstractAsyncContextManager:
+def _autodie(ppid: int) -> AbstractAsyncContextManager:
     if os is OS.windows:
         return nullacontext(None)
     else:
-        return suicide(ppid)
+        return autodie(ppid)
 
 
 async def _profile(t1: float) -> None:
@@ -82,7 +82,7 @@ async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
 
 
 async def init(socket: ServerAddr, ppid: int) -> None:
-    async with _suicide(ppid):
+    async with _autodie(ppid):
         async with conn(socket, default=_default) as client:
             atomic, handlers = rpc.drain()
             try:
