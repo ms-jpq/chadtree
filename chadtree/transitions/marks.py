@@ -35,11 +35,11 @@ async def _bookmark_set(
             k: v
             for k, v in chain(
                 ((_display_path(state, idx=i), i) for i in range(1, 10)),
-                ((LANG("clear_bookmarks", idx=0), 0),),
+                ((LANG("clear_bookmarks", idx=10), 10),),
             )
         }
         if (mark := await Nvim.input_list(opts)) is not None:
-            if not mark:
+            if mark == 10:
                 bookmarks = {}
             else:
                 bookmarks = {
