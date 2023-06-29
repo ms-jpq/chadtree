@@ -45,6 +45,8 @@ class State:
 
 @dataclass(frozen=True)
 class StoredSession:
+    # TODO: sync across sessions
+    # pid: int
     index: Index
     bookmarks: Mapping[int, PurePath]
     show_hidden: Optional[bool]
