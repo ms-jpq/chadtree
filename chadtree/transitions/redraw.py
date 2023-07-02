@@ -11,7 +11,7 @@ from std2.difflib import trans_inplace
 from std2.pickle.decoder import new_decoder
 from std2.pickle.types import DecodeError
 
-from ..consts import URI
+from ..consts import URI_SCHEME
 from ..state.types import State
 from ..view.types import Derived
 from .shared.wm import find_fm_windows
@@ -103,7 +103,7 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
         if new_row is not None:
             a3.win_set_cursor(win, (new_row, col))
 
-        a3.buf_set_name(buf, f"#{URI}{state.root.path}")
+        a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
 
         try:
             await (a1 + a2 + a3).commit(NoneType)

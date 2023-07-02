@@ -13,7 +13,6 @@ RENDER_RETRIES = 3
 FM_FILETYPE = "CHADTree"
 FM_HL_PREFIX = "chadtree"
 URI_SCHEME = FM_FILETYPE.casefold()
-URI = f"#{URI_SCHEME}://"
 
 DEFAULT_LANG = "en"
 LANG_ROOT = TOP_LEVEL / "locale"
