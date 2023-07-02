@@ -133,7 +133,7 @@ async def find_buffers_with_file(file: PurePath) -> AsyncIterator[Buffer]:
 async def find_current_buffer_path() -> Optional[PurePath]:
     buf = await Buffer.get_current()
     if name := await buf.get_name():
-        if _is_chadtree_buf_name(name):
+        if not _is_chadtree_buf_name(name):
             return await resolve_path(None, path=name)
 
     return None
