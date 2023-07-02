@@ -12,6 +12,7 @@ RENDER_RETRIES = 3
 
 FM_FILETYPE = "CHADTree"
 FM_HL_PREFIX = "chadtree"
+URI = "chadtree://"
 
 DEFAULT_LANG = "en"
 LANG_ROOT = TOP_LEVEL / "locale"
