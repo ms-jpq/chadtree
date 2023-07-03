@@ -103,7 +103,7 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
         if new_row is not None:
             a3.win_set_cursor(win, (new_row, col))
 
-        a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
+        # a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
 
         try:
             await (a1 + a2 + a3).commit(NoneType)
