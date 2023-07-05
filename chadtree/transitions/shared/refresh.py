@@ -15,18 +15,6 @@ from ..shared.wm import find_current_buffer_path
 from ..types import Stage
 
 
-async def _bookmarks(state: State) -> Mapping[int, PurePath]:
-    existing = {
-        bookmarked
-        for bookmarked, exists in (
-            await exists_many(state.bookmarks.values(), follow=False)
-        ).items()
-        if exists
-    }
-    bookmarks = {k: v for k, v in state.bookmarks.items() if v in existing}
-    return bookmarks
-
-
 async def _index(state: State, paths: AbstractSet[PurePath]) -> AbstractSet[PurePath]:
     index = {
         path
@@ -61,10 +49,9 @@ async def refresh(state: State, settings: Settings) -> Stage:
     cwd = state.root.path
     paths = {cwd}
 
-    current, index, bookmarks, selection, window_order, mks = await gather(
+    current, index, selection, window_order, mks = await gather(
         find_current_buffer_path(),
         _index(state, paths=paths),
-        _bookmarks(state),
         _selection(state),
         _window_order(state),
         markers(),
@@ -81,7 +68,6 @@ async def refresh(state: State, settings: Settings) -> Stage:
         state,
         settings=settings,
         index=new_index,
-        bookmarks=bookmarks,
         selection=selection,
         markers=mks,
         paths=paths,

@@ -24,7 +24,6 @@ async def initial(settings: Settings) -> State:
     session = Session(workdir=cwd, storage=storage)
     stored = await load_session(session) if settings.session else None
     index = {cwd} | (stored.index if stored else frozenset())
-    bookmarks = stored.bookmarks if stored else {}
 
     show_hidden = (
         stored.show_hidden
@@ -48,7 +47,6 @@ async def initial(settings: Settings) -> State:
         node,
         settings=settings,
         index=index,
-        bookmarks=bookmarks,
         selection=selection,
         filter_pattern=filter_pattern,
         markers=marks,
@@ -60,7 +58,6 @@ async def initial(settings: Settings) -> State:
     state = State(
         session=session,
         index=index,
-        bookmarks=bookmarks,
         selection=selection,
         filter_pattern=filter_pattern,
         show_hidden=show_hidden,

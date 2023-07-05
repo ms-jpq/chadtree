@@ -87,7 +87,6 @@ def _gen_spacer(depth: int) -> str:
 def _paint(
     settings: Settings,
     index: Index,
-    bookmarks: Mapping[PurePath, int],
     selection: Selection,
     markers: Markers,
     vc: VCStatus,
@@ -175,12 +174,6 @@ def _paint(
             yield icons.link.normal
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
-        if bm := bookmarks.get(path):
-            yield Badge(
-                text=f"@{bm}",
-                group=context.particular_mappings.marks,
-            )
-
         if marks := markers.bookmarks.get(path):
             ordered = "".join(sorted(marks))
             yield Badge(
@@ -244,7 +237,6 @@ def render(
     *,
     settings: Settings,
     index: Index,
-    bookmarks: Mapping[int, PurePath],
     selection: Selection,
     filter_pattern: Optional[FilterPattern],
     markers: Markers,
@@ -255,7 +247,6 @@ def render(
     show = _paint(
         settings,
         index=index,
-        bookmarks={v: k for k, v in bookmarks.items()},
         selection=selection,
         markers=markers,
         vc=vc,

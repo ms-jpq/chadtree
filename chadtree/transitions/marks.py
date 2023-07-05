@@ -1,8 +1,8 @@
-from itertools import chain
-from typing import Optional
+from locale import strxfrm
+from pathlib import PurePath
+from typing import Iterator, MutableMapping, MutableSet, Optional, Tuple
 
 from pynvim_pp.nvim import Nvim
-from std2 import anext
 
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -11,51 +11,12 @@ from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path
 from .focus import _jump
-from .shared.index import indices
 from .types import Stage
 
 
-def _display_path(state: State, idx: int) -> str:
-    display = (
-        display_path(path, state=state) if (path := state.bookmarks.get(idx)) else ""
-    )
-    return f"{idx}. {display}"
-
-
-@rpc(blocking=False)
-async def _bookmark_set(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
-    """
-    Set bookmark
-    """
-
-    if node := await anext(indices(state, is_visual=is_visual), None):
-        opts = {
-            k: v
-            for k, v in chain(
-                ((_display_path(state, idx=i), i) for i in range(1, 10)),
-                ((LANG("clear_bookmarks", idx=10), 10),),
-            )
-        }
-        if (mark := await Nvim.input_list(opts)) is not None:
-            if mark == 10:
-                bookmarks = {}
-            else:
-                bookmarks = {
-                    **{k: v for k, v in state.bookmarks.items() if v != node.path},
-                    **(
-                        {}
-                        if state.bookmarks.get(mark) == node.path
-                        else {mark: node.path}
-                    ),
-                }
-            new_state = await forward(state, settings=settings, bookmarks=bookmarks)
-            return Stage(new_state)
-        else:
-            return None
-    else:
-        return None
+def _display_path(state: State, marks: str, path: PurePath, idx: int) -> str:
+    display = display_path(path, state=state)
+    return f"{idx}. [{marks}] {display}"
 
 
 @rpc(blocking=False)
@@ -66,7 +27,23 @@ async def _bookmark_goto(
     Goto bookmark
     """
 
-    opts = {_display_path(state, idx=i): state.bookmarks.get(i) for i in range(1, 10)}
+    def cont() -> Iterator[Tuple[str, PurePath]]:
+        markers: MutableMapping[str, PurePath] = {}
+        for path, marks in state.markers.bookmarks.items():
+            for mark in marks:
+                markers[mark] = path
+
+        seen: MutableSet[PurePath] = set()
+        for _, path in sorted(markers.items()):
+            if path not in seen:
+                ms = sorted(state.markers.bookmarks.get(path, ()), key=strxfrm)
+                yield "".join(ms), path
+
+    opts = {
+        _display_path(state, marks=marks, path=path, idx=idx): path
+        for idx, (marks, path) in enumerate(cont(), start=1)
+    }
+
     if mark := await Nvim.input_list(opts):
         return await _jump(state, settings=settings, path=mark)
     else:

@@ -250,22 +250,12 @@ Clear filter.
 
 ##### `chadtree_settings.keymap.bookmark_goto`
 
-Goto bookmark [1-9].
+Goto bookmark `A-Z`.
 
 **default:**
 
 ```json
 ["m"]
-```
-
-##### `chadtree_settings.keymap.bookmark_set`
-
-Set bookmark [1-9].
-
-**default:**
-
-```json
-["M"]
 ```
 
 ---

@@ -19,7 +19,6 @@ async def forward(
     settings: Settings,
     root: Union[Node, VoidType] = Void,
     index: Union[Index, VoidType] = Void,
-    bookmarks: Union[Mapping[int, PurePath], VoidType] = Void,
     selection: Union[Selection, VoidType] = Void,
     filter_pattern: Union[Optional[FilterPattern], VoidType] = Void,
     show_hidden: Union[bool, VoidType] = Void,
@@ -34,7 +33,6 @@ async def forward(
     session: Union[Session, VoidType] = Void,
 ) -> State:
     new_index = or_else(index, state.index)
-    new_bookmarks = or_else(bookmarks, state.bookmarks)
     new_selection = or_else(selection, state.selection)
     new_filter_pattern = or_else(filter_pattern, state.filter_pattern)
     new_current = or_else(current, state.current)
@@ -55,7 +53,6 @@ async def forward(
         new_root,
         settings=settings,
         index=new_index,
-        bookmarks=new_bookmarks,
         selection=new_selection,
         filter_pattern=new_filter_pattern,
         markers=new_markers,
@@ -67,7 +64,6 @@ async def forward(
     new_state = State(
         session=or_else(session, state.session),
         index=new_index,
-        bookmarks=new_bookmarks,
         selection=new_selection,
         filter_pattern=new_filter_pattern,
         show_hidden=new_hidden,

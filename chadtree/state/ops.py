@@ -39,13 +39,10 @@ async def load_session(session: Session) -> StoredSession:
     try:
         json = await _load_json(load_path)
         if isinstance(json, MutableMapping):
-            bm = "bookmarks"
-            json[bm] = {int(k): v for k, v in json.get(bm, {}).items()}
+            json.pop("bookmarks", None)
         sessions = _DECODER(json)
     except Exception:
-        return StoredSession(
-            index=frozenset(), bookmarks={}, show_hidden=None, enable_vc=None
-        )
+        return StoredSession(index=frozenset(), show_hidden=None, enable_vc=None)
     else:
         return sessions
 
@@ -53,7 +50,6 @@ async def load_session(session: Session) -> StoredSession:
 async def dump_session(state: State) -> Session:
     stored = StoredSession(
         index=state.index,
-        bookmarks=state.bookmarks,
         show_hidden=state.show_hidden,
         enable_vc=state.enable_vc,
     )

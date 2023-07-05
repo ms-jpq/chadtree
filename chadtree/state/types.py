@@ -35,7 +35,6 @@ class State:
     index: Index
     markers: Markers
     root: Node
-    bookmarks: Mapping[int, PurePath]
     selection: Selection
     show_hidden: bool
     vc: VCStatus
@@ -48,6 +47,5 @@ class StoredSession:
     # TODO: sync across sessions
     # pid: int
     index: Index
-    bookmarks: Mapping[int, PurePath]
     show_hidden: Optional[bool]
     enable_vc: Optional[bool]
