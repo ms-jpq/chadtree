@@ -1,8 +1,10 @@
 from locale import strxfrm
 from pathlib import PurePath
-from typing import Iterator, MutableMapping, MutableSet, Optional, Tuple
+from typing import Any, Iterator, MutableMapping, MutableSet, Optional, Tuple
 
 from pynvim_pp.nvim import Nvim
+from std2.locale import pathsort_key
+from std2.pathlib import is_relative_to
 
 from ..registry import rpc
 from ..settings.localization import LANG
@@ -11,6 +13,10 @@ from ..state.types import State
 from ..view.ops import display_path
 from .focus import _jump
 from .types import Stage
+
+
+def _order(root: PurePath, marks: str, path: PurePath) -> Tuple[bool, str, Any]:
+    return not is_relative_to(path, root), marks, pathsort_key(path)
 
 
 def _display_path(state: State, marks: str, path: PurePath, idx: int) -> str:
@@ -27,6 +33,7 @@ async def _bookmark_goto(
     """
 
     def cont() -> Iterator[Tuple[str, PurePath]]:
+        root = state.root.path
         markers: MutableMapping[str, PurePath] = {}
         for path, marks in state.markers.bookmarks.items():
             for mark in marks:
@@ -36,7 +43,7 @@ async def _bookmark_goto(
                     markers[mark] = path
 
         seen: MutableSet[PurePath] = set()
-        for _, path in sorted(markers.items()):
+        for _, path in sorted(markers.items(), key=lambda kv: _order(root, *kv)):
             if path not in seen:
                 ms = sorted(state.markers.bookmarks.get(path, ()), key=strxfrm)
                 yield "".join(ms), path
