@@ -7,7 +7,6 @@ from pynvim_pp.nvim import Nvim
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..settings.types import Settings
-from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path
 from .focus import _jump
@@ -31,7 +30,10 @@ async def _bookmark_goto(
         markers: MutableMapping[str, PurePath] = {}
         for path, marks in state.markers.bookmarks.items():
             for mark in marks:
-                markers[mark] = path
+                if m := markers.get(mark):
+                    markers[mark] = max(m, path)
+                else:
+                    markers[mark] = path
 
         seen: MutableSet[PurePath] = set()
         for _, path in sorted(markers.items()):
