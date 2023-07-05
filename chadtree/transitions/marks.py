@@ -16,7 +16,7 @@ from .types import Stage
 
 
 def _order(root: PurePath, marks: str, path: PurePath) -> Tuple[bool, str, Any]:
-    return not is_relative_to(path, root), marks, pathsort_key(path)
+    return not is_relative_to(path, root), "", pathsort_key(path)
 
 
 def _display_path(state: State, marks: str, path: PurePath, idx: int) -> str:
