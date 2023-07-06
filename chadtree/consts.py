@@ -1,4 +1,4 @@
-from os import name
+from os import environ, name
 
 from chad_types import TOP_LEVEL
 
@@ -6,6 +6,7 @@ GIL_SWITCH = 1 / 1000
 IS_WIN = name == "nt"
 REQUIREMENTS = TOP_LEVEL / "requirements.txt"
 
+DEBUG = "CHADTREE_DEBUG" in environ
 
 WALK_PARALLELISM_FACTOR = 100
 RENDER_RETRIES = 3

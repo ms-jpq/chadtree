@@ -1,6 +1,7 @@
 from asyncio import FIRST_COMPLETED, Event, Lock, Task, create_task, gather, wait
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
+from logging import DEBUG as DEBUG_LVL
 from multiprocessing import cpu_count
 from pathlib import Path
 from platform import uname
@@ -24,12 +25,13 @@ from std2.sched import aticker
 from std2.sys import autodie
 
 from ._registry import ____
-from .consts import RENDER_RETRIES
+from .consts import DEBUG, RENDER_RETRIES
 from .registry import autocmd, dequeue_event, enqueue_event, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
 from .settings.types import Settings
 from .state.load import initial as initial_state
+from .timeit import timeit
 from .transitions.redraw import redraw
 from .transitions.schedule_update import scheduled_update
 from .transitions.types import Stage
@@ -83,6 +85,9 @@ async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
 
 async def init(socket: ServerAddr, ppid: int) -> None:
     async with _autodie(ppid):
+        if DEBUG:
+            log.setLevel(DEBUG_LVL)
+
         async with conn(socket, default=_default) as client:
             atomic, handlers = rpc.drain()
             try:
@@ -127,6 +132,7 @@ async def init(socket: ServerAddr, ppid: int) -> None:
                 async def c1() -> None:
                     transcient: Optional[Task] = None
                     get: Optional[Task] = None
+                    warn = 0.1
                     while True:
                         with suppress_and_log():
                             get = create_task(dequeue_event())
@@ -134,13 +140,16 @@ async def init(socket: ServerAddr, ppid: int) -> None:
                                 await wait(
                                     (transcient, get), return_when=FIRST_COMPLETED
                                 )
-                                await cancel(transcient)
+                                if not transcient.done():
+                                    with timeit("transcient", warn=warn):
+                                        await cancel(transcient)
                                 transcient = None
 
                             sync, method, params = await get
                             task = step(method, params=params)
                             if sync:
-                                await task
+                                with timeit(method, warn=warn):
+                                    await task
                             else:
                                 transcient = create_task(task)
 

@@ -2,7 +2,7 @@ from asyncio import gather
 from itertools import chain
 from locale import strxfrm
 from ntpath import altsep, sep
-from os import environ, linesep
+from os import linesep
 from os.path import normpath
 from pathlib import PurePath, PureWindowsPath
 from string import whitespace
@@ -16,12 +16,12 @@ from typing import (
     Tuple,
 )
 
-from pynvim_pp.lib import decode, encode
-from std2.asyncio.subprocess import call
+from pynvim_pp.lib import encode
 from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
 
 from ..fs.ops import ancestors, which
+from .nice import nice_call
 from .types import VCStatus
 
 _Stats = Sequence[Tuple[str, PurePath]]
@@ -35,7 +35,7 @@ _GIT_LIST_CMD = (
     "--porcelain",
     "-z",
 )
-_GIT_ENV = {"LC_ALL": "C"}
+
 
 _GIT_SUBMODULE_MARKER = "Entering "
 _SUBMODULE_MARKER = "S"
@@ -44,21 +44,17 @@ _UNTRACKED_MARKER = "?"
 
 
 async def root(git: PurePath, cwd: PurePath) -> PurePath:
-    proc = await call(
-        git,
-        "--no-optional-locks",
-        "rev-parse",
-        "--show-toplevel",
-        cwd=cwd,
+    stdout = await nice_call(
+        (git, "--no-optional-locks", "rev-parse", "--show-toplevel"), cwd=cwd
     )
-    return PurePath(decode(proc.stdout.rstrip()))
+    return PurePath(stdout.rstrip())
 
 
 async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
-    proc = await call(git, *_GIT_LIST_CMD, cwd=cwd)
+    stdout = await nice_call((git, *_GIT_LIST_CMD), cwd=cwd)
 
     def cont() -> Iterator[Tuple[str, PurePath]]:
-        it = iter(decode(proc.stdout).split("\0"))
+        it = iter(stdout.split("\0"))
         for line in it:
             prefix, file = line[:2], line[3:]
             yield prefix, PurePath(file)
@@ -72,19 +68,12 @@ async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePa
 async def _stat_sub_modules(
     git: PurePath, cwd: PurePath
 ) -> Sequence[Tuple[str, PurePath]]:
-    proc = await call(
-        git,
-        "submodule",
-        "foreach",
-        "--recursive",
-        git,
-        *_GIT_LIST_CMD,
-        env={**environ, **_GIT_ENV},
+    stdout = await nice_call(
+        (git, "submodule", "foreach", "--recursive", git, *_GIT_LIST_CMD),
         cwd=cwd,
     )
 
     def cont() -> Iterator[Tuple[str, PurePath]]:
-        stdout = decode(proc.stdout)
         it = iter(stdout)
         sub_module = ROOT
         acc: MutableSequence[str] = []
@@ -142,15 +131,15 @@ async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats
         and isinstance(raw_root, PureWindowsPath)
         and (altsep in str(raw_stats))
     ):
-        proc = await call(cygpath, "--windows", "--", _raw_conv(raw_root))
-        root = PurePath(decode(proc.stdout.rstrip()))
+        stdout = await nice_call((cygpath, "--windows", "--", _raw_conv(raw_root)))
+        root = PurePath(stdout.rstrip())
         stdin = encode("\n".join(map(_raw_conv, (path for _, path in raw_stats))))
-        proc = await call(
-            cygpath, "--windows", "--absolute", "--file", "-", cwd=root, stdin=stdin
+        stdout = await nice_call(
+            (cygpath, "--windows", "--absolute", "--file", "-"), cwd=root, stdin=stdin
         )
         stats = tuple(
             (stat, PurePath(path))
-            for (stat, _), path in zip(raw_stats, decode(proc.stdout).splitlines())
+            for (stat, _), path in zip(raw_stats, stdout.splitlines())
         )
         return root, stats
     else:
