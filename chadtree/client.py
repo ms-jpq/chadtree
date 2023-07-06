@@ -132,7 +132,6 @@ async def init(socket: ServerAddr, ppid: int) -> None:
                 async def c1() -> None:
                     transcient: Optional[Task] = None
                     get: Optional[Task] = None
-                    warn = 0.1
                     while True:
                         with suppress_and_log():
                             get = create_task(dequeue_event())
@@ -141,14 +140,14 @@ async def init(socket: ServerAddr, ppid: int) -> None:
                                     (transcient, get), return_when=FIRST_COMPLETED
                                 )
                                 if not transcient.done():
-                                    with timeit("transcient", warn=warn):
+                                    with timeit("transcient"):
                                         await cancel(transcient)
                                 transcient = None
 
                             sync, method, params = await get
                             task = step(method, params=params)
                             if sync:
-                                with timeit(method, warn=warn):
+                                with timeit(method):
                                     await task
                             else:
                                 transcient = create_task(task)

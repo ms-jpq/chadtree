@@ -37,6 +37,7 @@ from std2.itertools import chunk
 
 from ..consts import WALK_PARALLELISM_FACTOR
 from ..state.types import Index
+from ..timeit import timeit
 from .ops import ancestors, lock
 from .types import Ignored, Mode, Node
 
@@ -150,26 +151,29 @@ async def _join(nodes: Queue) -> Node:
 
 
 async def _new(root: PurePath, index: Index) -> Node:
-    acc: Queue = Queue()
-    bfs_q: Queue = Queue()
+    with timeit("fs->_new"):
+        acc: Queue = Queue()
+        bfs_q: Queue = Queue()
 
-    async def drain() -> AsyncIterator[Sequence[PurePath]]:
+        async def drain() -> AsyncIterator[Sequence[PurePath]]:
+            while not bfs_q.empty():
+                yield await bfs_q.get()
+
+        await bfs_q.put((root,))
         while not bfs_q.empty():
-            yield await bfs_q.get()
+            tasks = [
+                _next(paths, index=index, acc=acc, bfs_q=bfs_q)
+                async for paths in drain()
+            ]
+            await gather(*tasks)
 
-    await bfs_q.put((root,))
-    while not bfs_q.empty():
-        tasks = [
-            _next(paths, index=index, acc=acc, bfs_q=bfs_q) async for paths in drain()
-        ]
-        await gather(*tasks)
-
-    return await _join(acc)
+        return await _join(acc)
 
 
 async def new(root: PurePath, index: Index) -> Node:
-    async with lock():
-        return await _new(root, index=index)
+    with timeit("fs->new"):
+        async with lock():
+            return await _new(root, index=index)
 
 
 async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
@@ -198,11 +202,12 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 
 
 async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
-    async with lock():
-        try:
-            return await _update(root, index=index, paths=paths)
-        except FileNotFoundError:
-            return await _new(root.path, index=index)
+    with timeit("fs->_update"):
+        async with lock():
+            try:
+                return await _update(root, index=index, paths=paths)
+            except FileNotFoundError:
+                return await _new(root.path, index=index)
 
 
 def is_dir(node: Node) -> bool:
