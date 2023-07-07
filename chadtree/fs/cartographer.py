@@ -1,10 +1,9 @@
-from asyncio import Queue, gather
+from asyncio import gather
 from contextlib import suppress
 from fnmatch import fnmatch
 from os import scandir, stat, stat_result
 from os.path import normcase
 from pathlib import Path, PurePath
-from std2.asyncio import pure
 from stat import (
     S_IFDOOR,
     S_ISBLK,
@@ -20,23 +19,10 @@ from stat import (
     S_IWOTH,
     S_IXUSR,
 )
-from typing import (
-    AbstractSet,
-    AsyncIterator,
-    Iterable,
-    Iterator,
-    Mapping,
-    MutableMapping,
-    Optional,
-    Sequence,
-    Tuple,
-    cast,
-)
+from typing import AbstractSet, Iterator, Mapping, Optional, Sequence, Tuple
 
-from std2.asyncio import to_thread
-from std2.itertools import chunk
+from std2.asyncio import pure, to_thread
 
-from ..consts import WALK_PARALLELISM_FACTOR
 from ..state.types import Index
 from ..timeit import timeit
 from .ops import ancestors
@@ -97,88 +83,68 @@ async def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath
     return await to_thread(cont)
 
 
-def _listdir(path: PurePath) -> Iterator[Sequence[PurePath]]:
-    with suppress(NotADirectoryError, FileNotFoundError):
-        with scandir(path) as it:
-            chunked = chunk(it, WALK_PARALLELISM_FACTOR)
-            while True:
-                if chunks := next(chunked, None):
-                    yield tuple(map(PurePath, chunks))
-                else:
-                    break
+async def _iterdir(dir: PurePath) -> Sequence[PurePath]:
+    def cont() -> Sequence[PurePath]:
+        with suppress(NotADirectoryError, FileNotFoundError):
+            with scandir(dir) as it:
+                return tuple(map(PurePath, it))
+
+        return ()
+
+    return await to_thread(cont)
 
 
-async def _next(
-    roots: Iterable[PurePath], index: Index, acc: Queue, bfs_q: Queue
-) -> None:
-    for root in roots:
-        with suppress(PermissionError):
-            mode, pointed = await _fs_stat(root)
-            _ancestors = ancestors(root)
-            node = Node(
-                path=root,
-                mode=mode,
-                pointed=pointed,
-                ancestors=_ancestors,
+async def _next(root: PurePath, index: Index) -> Optional[Node]:
+    with suppress(PermissionError):
+        mode, pointed = await _fs_stat(root)
+        _ancestors = ancestors(root)
+
+        if root in index:
+            paths = await _iterdir(root)
+            walked = await gather(
+                *(gather(pure(path), _next(path, index=index)) for path in paths)
             )
-            await acc.put(node)
-
-            if root in index:
-                for paths in await to_thread(lambda: tuple(_listdir(root))):
-                    await bfs_q.put(paths)
-
-
-async def _join(nodes: Queue) -> Node:
-    root_node: Optional[Node] = None
-    acc: MutableMapping[PurePath, Node] = {}
-
-    while not nodes.empty():
-        node: Node = await nodes.get()
-        path = node.path
-        acc[path] = node
-
-        parent = acc.get(path.parent)
-        if not parent or parent.path == node.path:
-            assert root_node is None
-            root_node = node
+            children = {k: v for k, v in walked}
         else:
-            siblings = cast(MutableMapping[PurePath, Node], parent.children)
-            siblings[path] = node
+            children = {}
 
-    if not root_node:
-        assert False
-    else:
-        return root_node
+        node = Node(
+            path=root,
+            mode=mode,
+            pointed=pointed,
+            ancestors=_ancestors,
+            children=children,
+        )
+
+        return node
+
+    return None
 
 
-async def _new(root: PurePath, index: Index) -> Node:
-    with timeit("fs->_new"):
-        acc: Queue = Queue()
-        bfs_q: Queue = Queue()
-
-        async def drain() -> AsyncIterator[Sequence[PurePath]]:
-            while not bfs_q.empty():
-                yield await bfs_q.get()
-
-        await bfs_q.put((root,))
-        while not bfs_q.empty():
-            tasks = [
-                _next(paths, index=index, acc=acc, bfs_q=bfs_q)
-                async for paths in drain()
-            ]
-            await gather(*tasks)
-
-        return await _join(acc)
+def _orphan(root: PurePath) -> Node:
+    node = Node(
+        mode={Mode.orphan_link},
+        path=root,
+        pointed=root,
+        ancestors=frozenset(),
+        children={},
+    )
+    return node
 
 
 async def new(root: PurePath, index: Index) -> Node:
     with timeit("fs->new"):
-        return await _new(root, index=index)
+        if node := await _next(root, index=index):
+            return node
+        else:
+            return _orphan(root)
 
 
-async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
+async def _update(
+    root: Node, index: Index, paths: AbstractSet[PurePath]
+) -> Optional[Node]:
     if root.path in paths:
-        return await _new(root.path, index=index)
+        return await _next(root.path, index=index)
     else:
         walked = await gather(
             *(
@@ -207,9 +173,11 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
     with timeit("fs->_update"):
         try:
-            return await _update(root, index=index, paths=paths)
+            node = await _update(root, index=index, paths=paths)
         except FileNotFoundError:
-            return await _new(root.path, index=index)
+            return await new(root.path, index=index)
+        else:
+            return node or _orphan(root.path)
 
 
 def is_dir(node: Node) -> bool:

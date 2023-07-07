@@ -37,7 +37,7 @@ class Node:
     path: PurePath
     pointed: Optional[PurePath]
     ancestors: AbstractSet[PurePath]
-    children: Mapping[PurePath, Node] = field(default_factory=dict)
+    children: Mapping[PurePath, Node]
 
 
 @dataclass(frozen=True)
