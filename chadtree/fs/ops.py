@@ -122,19 +122,16 @@ async def exists(path: PurePath, follow: bool) -> bool:
 async def exists_many(
     paths: Iterable[PurePath], follow: bool
 ) -> Mapping[PurePath, bool]:
-    async with lock():
-        existence = await gather(*(exists(path, follow=follow) for path in paths))
-        return {path: exi for path, exi in zip(paths, existence)}
+    existence = await gather(*(exists(path, follow=follow) for path in paths))
+    return {path: exi for path, exi in zip(paths, existence)}
 
 
 async def is_dir(path: PurePath) -> bool:
-    async with lock():
-        return await to_thread(lambda: isdir(path))
+    return await to_thread(lambda: isdir(path))
 
 
 async def is_file(path: PurePath) -> bool:
-    async with lock():
-        return await to_thread(lambda: isfile(path))
+    return await to_thread(lambda: isfile(path))
 
 
 def _mkdir_p(path: PurePath) -> None:
