@@ -19,7 +19,16 @@ from stat import (
     S_IWOTH,
     S_IXUSR,
 )
-from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
+from typing import (
+    AbstractSet,
+    Awaitable,
+    Coroutine,
+    Iterator,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+)
 
 from std2.asyncio import pure, to_thread
 
@@ -92,13 +101,18 @@ async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
 
     _ancestors = ancestors(root)
 
-    children: Mapping[PurePath, Node] = {}
     if root in index:
-        with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
-            with scandir(dirent) as dirents:
-                for child in dirents:
-                    if n := await _next(child, index=index):
-                        children[PurePath(child)] = n
+
+        def cont() -> Iterator[Awaitable[Node]]:
+            with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
+                with scandir(dirent) as dirents:
+                    for child in dirents:
+                        yield _next(child, index=index)
+
+        walked = await gather(*cont())
+        children = {node.path: node for node in walked}
+    else:
+        children = {}
 
     node = Node(
         path=root,
