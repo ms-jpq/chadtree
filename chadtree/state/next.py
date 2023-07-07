@@ -8,6 +8,7 @@ from ..fs.cartographer import update
 from ..fs.types import Node
 from ..nvim.types import Markers
 from ..settings.types import Settings
+from ..timeit import timeit
 from ..version_ctl.types import VCStatus
 from ..view.render import render
 from .types import FilterPattern, Index, Selection, Session, State
@@ -50,17 +51,18 @@ async def forward(
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
 
-    derived = render(
-        new_root,
-        settings=settings,
-        index=new_index,
-        selection=new_selection,
-        filter_pattern=new_filter_pattern,
-        markers=new_markers,
-        vc=new_vc,
-        show_hidden=new_hidden,
-        current=new_current,
-    )
+    with timeit("render"):
+        derived = render(
+            new_root,
+            settings=settings,
+            index=new_index,
+            selection=new_selection,
+            filter_pattern=new_filter_pattern,
+            markers=new_markers,
+            vc=new_vc,
+            show_hidden=new_hidden,
+            current=new_current,
+        )
 
     new_state = State(
         session=or_else(session, state.session),
