@@ -1,6 +1,7 @@
-from asyncio import gather
+from asyncio import gather, sleep
 from contextlib import suppress
 from fnmatch import fnmatch
+from itertools import count
 from os import DirEntry, scandir, stat, stat_result
 from os.path import normcase
 from pathlib import Path, PurePath
@@ -19,14 +20,16 @@ from stat import (
     S_IWOTH,
     S_IXUSR,
 )
-from typing import AbstractSet, Awaitable, Iterator, Mapping, Optional, Tuple, Union
+from typing import AbstractSet, AsyncIterator, Iterator, Mapping, Optional, Tuple, Union
 
-from std2.asyncio import pure, to_thread
+from std2.asyncio import pure
 
 from ..state.types import Index
 from ..timeit import timeit
 from .ops import ancestors
 from .types import Ignored, Mode, Node
+
+_COUNT = count()
 
 _FILE_MODES: Mapping[int, Mode] = {
     S_IXUSR: Mode.executable,
@@ -88,22 +91,20 @@ def _fs_stat(
 
 async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
     root = PurePath(dirent)
-    stat = lambda: _fs_stat(dirent)
 
     if root in index:
 
-        def cont() -> Iterator[Awaitable[Node]]:
+        async def cont() -> AsyncIterator[Node]:
             with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
                 with scandir(dirent) as dirents:
                     for child in dirents:
-                        yield _next(child, index=index)
+                        yield await _next(child, index=index)
 
-        (mode, pointed), *walked = await gather(to_thread(stat), *cont())
-        children = {node.path: node for node in walked}
+        children = {node.path: node async for node in cont()}
     else:
-        mode, pointed = await to_thread(stat)
         children = {}
 
+    mode, pointed = _fs_stat(dirent)
     _ancestors = ancestors(root)
     node = Node(
         path=root,
@@ -112,6 +113,9 @@ async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
         ancestors=_ancestors,
         children=children,
     )
+
+    if next(_COUNT) % 17 == 0:
+        await sleep(0)
 
     return node
 
