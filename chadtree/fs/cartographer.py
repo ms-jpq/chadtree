@@ -90,20 +90,14 @@ def _fs_stat(
 
 
 async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
+    async def cont() -> AsyncIterator[Node]:
+        with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
+            with scandir(dirent) as dirents:
+                for child in dirents:
+                    yield await _next(child, index=index)
+
     root = PurePath(dirent)
-
-    if root in index:
-
-        async def cont() -> AsyncIterator[Node]:
-            with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
-                with scandir(dirent) as dirents:
-                    for child in dirents:
-                        yield await _next(child, index=index)
-
-        children = {node.path: node async for node in cont()}
-    else:
-        children = {}
-
+    children = {node.path: node async for node in cont()} if root in index else {}
     mode, pointed = _fs_stat(dirent)
     _ancestors = ancestors(root)
     node = Node(
