@@ -4,6 +4,7 @@ from fnmatch import fnmatch
 from os import scandir, stat, stat_result
 from os.path import normcase
 from pathlib import Path, PurePath
+from std2.asyncio import pure
 from stat import (
     S_IFDOOR,
     S_ISBLK,
@@ -179,10 +180,13 @@ async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Nod
     if root.path in paths:
         return await _new(root.path, index=index)
     else:
-        children = {
-            k: await _update(v, index=index, paths=paths)
-            for k, v in root.children.items()
-        }
+        walked = await gather(
+            *(
+                gather(pure(k), _update(v, index=index, paths=paths))
+                for k, v in root.children.items()
+            )
+        )
+        children = {k: v for k, v in walked}
         return Node(
             path=root.path,
             mode=root.mode,
