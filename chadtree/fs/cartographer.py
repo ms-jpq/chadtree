@@ -38,7 +38,7 @@ from std2.itertools import chunk
 from ..consts import WALK_PARALLELISM_FACTOR
 from ..state.types import Index
 from ..timeit import timeit
-from .ops import ancestors, lock
+from .ops import ancestors
 from .types import Ignored, Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
@@ -172,8 +172,7 @@ async def _new(root: PurePath, index: Index) -> Node:
 
 async def new(root: PurePath, index: Index) -> Node:
     with timeit("fs->new"):
-        async with lock():
-            return await _new(root, index=index)
+        return await _new(root, index=index)
 
 
 async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
@@ -203,11 +202,10 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 
 async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
     with timeit("fs->_update"):
-        async with lock():
-            try:
-                return await _update(root, index=index, paths=paths)
-            except FileNotFoundError:
-                return await _new(root.path, index=index)
+        try:
+            return await _update(root, index=index, paths=paths)
+        except FileNotFoundError:
+            return await _new(root.path, index=index)
 
 
 def is_dir(node: Node) -> bool:
