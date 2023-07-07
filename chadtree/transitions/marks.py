@@ -8,7 +8,6 @@ from std2.pathlib import is_relative_to
 
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.types import State
 from ..view.ops import display_path
 from .focus import _jump
@@ -25,9 +24,7 @@ def _display_path(state: State, marks: str, path: PurePath, idx: int) -> str:
 
 
 @rpc(blocking=False)
-async def _bookmark_goto(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _bookmark_goto(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Goto bookmark
     """
@@ -54,7 +51,7 @@ async def _bookmark_goto(
     }
 
     if mark := await Nvim.input_list(opts):
-        return await _jump(state, settings=settings, path=mark)
+        return await _jump(state, path=mark)
     else:
         await Nvim.write(LANG("no_bookmarks"), error=True)
         return None

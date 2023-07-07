@@ -6,6 +6,7 @@ from pynvim_pp.types import ExtData
 
 from ..fs.types import Node
 from ..nvim.types import Markers
+from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
 from ..view.types import Derived
 
@@ -26,9 +27,9 @@ class Session:
 
 @dataclass(frozen=True)
 class State:
+    settings: Settings
     session: Session
     current: Optional[PurePath]
-    derived: Derived
     enable_vc: bool
     filter_pattern: Optional[FilterPattern]
     follow: bool
@@ -40,6 +41,10 @@ class State:
     vc: VCStatus
     width: int
     window_order: Mapping[ExtData, None]
+
+    @property
+    def derived(self) -> Derived:
+        raise NotImplementedError()
 
 
 @dataclass(frozen=True)

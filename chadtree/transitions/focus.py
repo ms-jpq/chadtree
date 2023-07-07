@@ -8,26 +8,23 @@ from std2 import anext
 from ..fs.cartographer import is_dir
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.types import State
 from .shared.current import maybe_path_above, new_current_file, new_root
 from .shared.index import indices
 from .types import Stage
 
 
-async def _jump(state: State, settings: Settings, path: PurePath) -> Optional[Stage]:
-    if new_state := await maybe_path_above(state, settings=settings, paths={path}):
+async def _jump(state: State, path: PurePath) -> Optional[Stage]:
+    if new_state := await maybe_path_above(state, paths={path}):
         return Stage(new_state, focus=path)
-    elif stage := await new_current_file(state, settings=settings, current=path):
+    elif stage := await new_current_file(state, current=path):
         return Stage(stage.state, focus=path)
     else:
         return None
 
 
 @rpc(blocking=False)
-async def _jump_to_current(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _jump_to_current(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Jump to active file
     """
@@ -35,27 +32,23 @@ async def _jump_to_current(
     if not (curr := state.current):
         return None
     else:
-        return await _jump(state, settings=settings, path=curr)
+        return await _jump(state, path=curr)
 
 
 @rpc(blocking=False)
-async def _refocus(state: State, settings: Settings, is_visual: bool) -> Stage:
+async def _refocus(state: State, is_visual: bool) -> Stage:
     """
     Follow cwd update
     """
 
     cwd = await Nvim.getcwd()
-    new_state = await new_root(
-        state, settings=settings, new_cwd=cwd, indices=frozenset()
-    )
+    new_state = await new_root(state, new_cwd=cwd, indices=frozenset())
     focus = new_state.root.path
     return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
-async def _change_dir(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _change_dir(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Change root directory
     """
@@ -65,9 +58,7 @@ async def _change_dir(
         return None
     else:
         cwd = node.path if is_dir(node) else node.path.parent
-        new_state = await new_root(
-            state, settings=settings, new_cwd=cwd, indices=frozenset()
-        )
+        new_state = await new_root(state, new_cwd=cwd, indices=frozenset())
         escaped = await Nvim.fn.fnameescape(str, normcase(new_state.root.path))
         await Nvim.exec(f"chdir {escaped}")
         await Nvim.write(LANG("new cwd", cwd=normpath(new_state.root.path)))
@@ -75,9 +66,7 @@ async def _change_dir(
 
 
 @rpc(blocking=False)
-async def _change_focus(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _change_focus(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Refocus root directory
     """
@@ -87,17 +76,13 @@ async def _change_focus(
         return None
     else:
         new_base = node.path if is_dir(node) else node.path.parent
-        new_state = await new_root(
-            state, settings=settings, new_cwd=new_base, indices=frozenset()
-        )
+        new_state = await new_root(state, new_cwd=new_base, indices=frozenset())
         focus = node.path
         return Stage(new_state, focus=focus)
 
 
 @rpc(blocking=False)
-async def _change_focus_up(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _change_focus_up(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Refocus root directory up
     """
@@ -107,9 +92,6 @@ async def _change_focus_up(
         return None
     else:
         new_state = await new_root(
-            state,
-            settings=settings,
-            new_cwd=state.root.path.parent,
-            indices=frozenset(),
+            state, new_cwd=state.root.path.parent, indices=frozenset()
         )
         return Stage(new_state, focus=node.path)

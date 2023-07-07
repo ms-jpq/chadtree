@@ -5,7 +5,6 @@ from std2 import anext
 from ..fs.cartographer import is_dir
 from ..fs.ops import ancestors
 from ..registry import rpc
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from .shared.index import indices
@@ -13,9 +12,7 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-async def _collapse(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _collapse(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Collapse folder
     """
@@ -37,7 +34,5 @@ async def _collapse(
 
         index = (state.index - paths) | {state.root.path}
         invalidate_dirs = {path}
-        new_state = await forward(
-            state, settings=settings, index=index, invalidate_dirs=invalidate_dirs
-        )
+        new_state = await forward(state, index=index, invalidate_dirs=invalidate_dirs)
         return Stage(new_state, focus=path)

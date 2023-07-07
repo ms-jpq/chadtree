@@ -120,9 +120,7 @@ async def _open_fm_window(
 
 
 @rpc(blocking=False)
-async def _open(
-    state: State, settings: Settings, args: Sequence[str]
-) -> Optional[Stage]:
+async def _open(state: State, args: Sequence[str]) -> Optional[Stage]:
     """
     Toggle sidebar
     """
@@ -138,7 +136,7 @@ async def _open(
                 try:
                     cwd = await version_ctl_toplv(git, cwd=state.root.path)
                     new_state = await new_root(
-                        state=state, settings=settings, new_cwd=cwd, indices=frozenset()
+                        state=state, new_cwd=cwd, indices=frozenset()
                     )
                 except CalledProcessError:
                     await Nvim.write(LANG("cannot find version ctl root"), error=True)
@@ -157,19 +155,15 @@ async def _open(
             )
             if not await exists(path, follow=True):
                 await new((path,))
-            next_state = (
-                await maybe_path_above(new_state, settings=settings, paths={path})
-                or new_state
-            )
+            next_state = await maybe_path_above(new_state, paths={path}) or new_state
             await _open_fm_window(
-                settings=settings,
+                state.settings,
                 opts=opts,
                 window_order=new_state.window_order,
                 width=next_state.width,
             )
             await open_file(
                 state=state,
-                settings=settings,
                 path=path,
                 click_type=ClickType.primary,
             )
@@ -177,12 +171,10 @@ async def _open(
         else:
             curr = await find_current_buffer_path()
             stage = (
-                await new_current_file(state=new_state, settings=settings, current=curr)
-                if curr
-                else None
+                await new_current_file(state=new_state, current=curr) if curr else None
             )
             await _open_fm_window(
-                settings=settings,
+                state.settings,
                 opts=opts,
                 window_order=new_state.window_order,
                 width=new_state.width,

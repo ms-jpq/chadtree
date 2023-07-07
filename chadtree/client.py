@@ -117,7 +117,7 @@ async def _go(client: RPClient) -> None:
             if handler := cast(Optional[_CB], handlers.get(method)):
                 with suppress_and_log():
                     async with lock:
-                        if stage := await handler(state.val, settings, *params):
+                        if stage := await handler(state.val, *params):
                             state.val = stage.state
                             staged.val = stage
                             event.set()

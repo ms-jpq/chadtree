@@ -11,7 +11,6 @@ from ..fs.cartographer import is_dir
 from ..fs.ops import is_dir as iis_dir
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.types import State
 from .shared.index import indices
 
@@ -38,7 +37,7 @@ async def _cn(state: State, is_visual: bool, proc: Callable[[PurePath], str]) ->
 
 
 @rpc(blocking=False)
-async def _copy_name(state: State, settings: Settings, is_visual: bool) -> None:
+async def _copy_name(state: State, is_visual: bool) -> None:
     """
     Copy dirname / filename
     """
@@ -51,7 +50,7 @@ async def _copy_name(state: State, settings: Settings, is_visual: bool) -> None:
 
 
 @rpc(blocking=False)
-async def _copy_basename(state: State, settings: Settings, is_visual: bool) -> None:
+async def _copy_basename(state: State, is_visual: bool) -> None:
     """
     Copy basename of dirname / filename
     """
@@ -64,7 +63,7 @@ async def _copy_basename(state: State, settings: Settings, is_visual: bool) -> N
 
 
 @rpc(blocking=False)
-async def _copy_relname(state: State, settings: Settings, is_visual: bool) -> None:
+async def _copy_relname(state: State, is_visual: bool) -> None:
     """
     Copy relname of dirname / filename
     """

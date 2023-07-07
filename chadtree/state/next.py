@@ -7,17 +7,14 @@ from std2.types import Void, VoidType, or_else
 from ..fs.cartographer import update
 from ..fs.types import Node
 from ..nvim.types import Markers
-from ..settings.types import Settings
-from ..timeit import timeit
 from ..version_ctl.types import VCStatus
-from ..view.render import render
+from .cache import DeepState
 from .types import FilterPattern, Index, Selection, Session, State
 
 
 async def forward(
     state: State,
     *,
-    settings: Settings,
     root: Union[Node, VoidType] = Void,
     index: Union[Index, VoidType] = Void,
     selection: Union[Selection, VoidType] = Void,
@@ -51,20 +48,8 @@ async def forward(
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
 
-    with timeit("render"):
-        derived = render(
-            new_root,
-            settings=settings,
-            index=new_index,
-            selection=new_selection,
-            filter_pattern=new_filter_pattern,
-            markers=new_markers,
-            vc=new_vc,
-            show_hidden=new_hidden,
-            current=new_current,
-        )
-
-    new_state = State(
+    new_state = DeepState(
+        settings=state.settings,
         session=or_else(session, state.session),
         index=new_index,
         selection=new_selection,
@@ -77,7 +62,6 @@ async def forward(
         markers=new_markers,
         vc=new_vc,
         current=new_current,
-        derived=derived,
         window_order=or_else(window_order, state.window_order),
     )
 

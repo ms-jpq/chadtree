@@ -25,7 +25,6 @@ from ..consts import (
     THEME_URI,
 )
 from ..registry import rpc
-from ..settings.types import Settings
 from ..state.types import State
 
 _NS = uuid4()
@@ -71,7 +70,7 @@ def _parse_args(args: Sequence[str]) -> Tuple[_Topics, bool]:
 
 
 @rpc(blocking=False)
-async def _help(state: State, settings: Settings, args: Sequence[str]) -> None:
+async def _help(state: State, args: Sequence[str]) -> None:
     """
     Open help doc
     """

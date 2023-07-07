@@ -8,9 +8,9 @@ from ..fs.cartographer import new
 from ..nvim.markers import markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
-from ..view.render import render
 from .ops import load_session
 from .types import Selection, Session, State
+from .cache import DeepState
 
 
 async def initial(settings: Settings) -> State:
@@ -43,19 +43,8 @@ async def initial(settings: Settings) -> State:
     current = None
     filter_pattern = None
 
-    derived = render(
-        node,
+    state = DeepState(
         settings=settings,
-        index=index,
-        selection=selection,
-        filter_pattern=filter_pattern,
-        markers=marks,
-        vc=vc,
-        show_hidden=show_hidden,
-        current=current,
-    )
-
-    state = State(
         session=session,
         index=index,
         selection=selection,
@@ -68,7 +57,6 @@ async def initial(settings: Settings) -> State:
         markers=marks,
         vc=vc,
         current=current,
-        derived=derived,
         window_order={},
     )
     return state

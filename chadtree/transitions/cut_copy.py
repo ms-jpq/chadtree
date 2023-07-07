@@ -13,7 +13,6 @@ from ..fs.types import Node
 from ..lsp.notify import lsp_created, lsp_moved
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path
@@ -32,7 +31,6 @@ def _find_dest(src: PurePath, node: Node) -> PurePath:
 async def _operation(
     *,
     state: State,
-    settings: Settings,
     is_visual: bool,
     nono: AbstractSet[PurePath],
     op_name: str,
@@ -103,7 +101,7 @@ async def _operation(
                     await action(operations)
                 except Exception as e:
                     await Nvim.write(e, error=True)
-                    return await refresh(state, settings=settings)
+                    return await refresh(state)
                 else:
                     parents = {
                         p.parent for p in chain(operations.keys(), operations.values())
@@ -113,7 +111,6 @@ async def _operation(
                     new_selection = {*operations.values()}
                     new_state = await forward(
                         state,
-                        settings=settings,
                         index=index,
                         selection=new_selection,
                         invalidate_dirs=invalidate_dirs,
@@ -136,7 +133,7 @@ async def _operation(
 
 
 @rpc(blocking=False)
-async def _cut(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+async def _cut(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Cut selected
     """
@@ -145,7 +142,6 @@ async def _cut(state: State, settings: Settings, is_visual: bool) -> Optional[St
     nono = {cwd, root} | ancestors(cwd, root)
     return await _operation(
         state=state,
-        settings=settings,
         is_visual=is_visual,
         nono=nono,
         op_name=LANG("cut"),
@@ -155,14 +151,13 @@ async def _cut(state: State, settings: Settings, is_visual: bool) -> Optional[St
 
 
 @rpc(blocking=False)
-async def _copy(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+async def _copy(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Copy selected
     """
 
     return await _operation(
         state=state,
-        settings=settings,
         is_visual=is_visual,
         nono=frozenset(),
         op_name=LANG("copy"),

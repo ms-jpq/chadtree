@@ -27,13 +27,11 @@ from .wm import (
 )
 
 
-async def _show_file(
-    *, state: State, settings: Settings, click_type: ClickType
-) -> None:
+async def _show_file(*, state: State, click_type: ClickType) -> None:
     if click_type is ClickType.tertiary:
         await Nvim.exec("tabnew")
         win = await Window.get_current()
-        for key, val in settings.win_actual_opts.items():
+        for key, val in state.settings.win_actual_opts.items():
             await win.opts.set(key, val=val)
 
     if path := state.current:
@@ -60,8 +58,8 @@ async def _show_file(
                 cast(Window, None),
             ) or await new_window(
                 last_used=state.window_order,
-                win_local=settings.win_actual_opts,
-                open_left=not settings.open_left,
+                win_local=state.settings.win_actual_opts,
+                open_left=not state.settings.open_left,
                 width=None
                 if len(non_fm_windows)
                 else await Nvim.opts.get(int, "columns") - state.width - 1,
@@ -95,7 +93,7 @@ async def _show_file(
 
 
 async def open_file(
-    state: State, settings: Settings, path: PurePath, click_type: ClickType
+    state: State, path: PurePath, click_type: ClickType
 ) -> Optional[Stage]:
     mime, _ = guess_type(path.name, strict=False)
     m_type, _, _ = (mime or "").partition(altsep or sep)
@@ -108,13 +106,14 @@ async def open_file(
             answers=LANG("ask_yesno"),
             answer_key={1: True, 2: False},
         )
-        if m_type in settings.mime.warn and path.suffix not in settings.mime.allow_exts
+        if m_type in state.settings.mime.warn
+        and path.suffix not in state.settings.mime.allow_exts
         else True
     )
 
     if go:
-        new_state = await forward(state, settings=settings, current=path)
-        await _show_file(state=new_state, settings=settings, click_type=click_type)
+        new_state = await forward(state, current=path)
+        await _show_file(state=new_state, click_type=click_type)
         return Stage(new_state, focus=path)
     else:
         return None

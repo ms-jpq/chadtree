@@ -23,7 +23,6 @@ from .types import Stage
 
 async def _remove(
     state: State,
-    settings: Settings,
     is_visual: bool,
     yeet: Callable[[Iterable[PurePath]], Awaitable[None]],
 ) -> Optional[Stage]:
@@ -59,14 +58,11 @@ async def _remove(
                 await yeet(unified)
             except Exception as e:
                 await Nvim.write(e, error=True)
-                return await refresh(state, settings=settings)
+                return await refresh(state)
             else:
                 invalidate_dirs = {path.parent for path in unified}
                 new_state = await forward(
-                    state,
-                    settings=settings,
-                    selection=frozenset(),
-                    invalidate_dirs=invalidate_dirs,
+                    state, selection=frozenset(), invalidate_dirs=invalidate_dirs
                 )
 
                 await kill_buffers(
@@ -77,12 +73,12 @@ async def _remove(
 
 
 @rpc(blocking=False)
-async def _delete(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+async def _delete(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Delete selected
     """
 
-    return await _remove(state, settings=settings, is_visual=is_visual, yeet=remove)
+    return await _remove(state, is_visual=is_visual, yeet=remove)
 
 
 async def _sys_trash(paths: Iterable[PurePath]) -> None:
@@ -99,14 +95,9 @@ async def _sys_trash(paths: Iterable[PurePath]) -> None:
 
 
 @rpc(blocking=False)
-async def _trash(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+async def _trash(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Delete selected
     """
 
-    return await _remove(
-        state,
-        settings=settings,
-        is_visual=is_visual,
-        yeet=_sys_trash,
-    )
+    return await _remove(state, is_visual=is_visual, yeet=_sys_trash)

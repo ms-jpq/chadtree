@@ -8,7 +8,6 @@ from std2.types import Void
 
 from ...fs.ops import ancestors, exists_many
 from ...nvim.markers import markers
-from ...settings.types import Settings
 from ...state.next import forward
 from ...state.types import State
 from ..shared.wm import find_current_buffer_path
@@ -45,7 +44,7 @@ async def _window_order(state: State) -> Mapping[ExtData, None]:
     return window_order
 
 
-async def refresh(state: State, settings: Settings) -> Stage:
+async def refresh(state: State) -> Stage:
     cwd = state.root.path
     invalidate_dirs = {cwd}
 
@@ -66,7 +65,6 @@ async def refresh(state: State, settings: Settings) -> Stage:
 
     new_state = await forward(
         state,
-        settings=settings,
         index=new_index,
         selection=selection,
         markers=mks,

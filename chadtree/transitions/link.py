@@ -11,7 +11,6 @@ from ..fs.ops import ancestors, exists, link, resolve
 from ..lsp.notify import lsp_created
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path
@@ -22,7 +21,7 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+async def _link(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Symlink selected
     """
@@ -60,12 +59,10 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
             await link(operations)
         except Exception as e:
             await Nvim.write(e, error=True)
-            return await refresh(state=state, settings=settings)
+            return await refresh(state)
         else:
             paths = operations.keys()
-            new_state = (
-                await maybe_path_above(state, settings=settings, paths=paths) or state
-            )
+            new_state = await maybe_path_above(state, paths=paths) or state
             await lsp_created(paths)
             focus, *_ = sorted(paths, key=pathsort_key)
             parents = ancestors(*paths)
@@ -74,7 +71,6 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
             new_selection = paths if state.selection else frozenset()
             next_state = await forward(
                 new_state,
-                settings=settings,
                 index=index,
                 invalidate_dirs=invalidate_dirs,
                 selection=new_selection,

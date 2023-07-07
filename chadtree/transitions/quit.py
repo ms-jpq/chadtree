@@ -2,13 +2,12 @@ from pynvim_pp.nvim import Nvim
 from pynvim_pp.window import Window
 
 from ..registry import rpc
-from ..settings.types import Settings
 from ..state.types import State
 from .shared.wm import find_fm_windows_in_tab
 
 
 @rpc(blocking=False)
-async def _quit(state: State, settings: Settings, is_visual: bool) -> None:
+async def _quit(state: State, is_visual: bool) -> None:
     """
     Close sidebar
     """

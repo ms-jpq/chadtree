@@ -5,7 +5,6 @@ from typing import Iterator, Tuple
 
 from ..fs.cartographer import is_dir
 from ..registry import rpc
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from .shared.index import indices
@@ -13,7 +12,7 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-async def _toggle_exec(state: State, settings: Settings, is_visual: bool) -> Stage:
+async def _toggle_exec(state: State, is_visual: bool) -> Stage:
     """
     Toggle chmod +-x
     """
@@ -40,5 +39,5 @@ async def _toggle_exec(state: State, settings: Settings, is_visual: bool) -> Sta
         chmod(path, st.st_mode ^ S_IXUSR ^ S_IXGRP ^ S_IXOTH)
 
     invalidate_dirs = {path.parent for path in stats.keys()}
-    new_state = await forward(state, settings=settings, invalidate_dirs=invalidate_dirs)
+    new_state = await forward(state, invalidate_dirs=invalidate_dirs)
     return Stage(state=new_state)

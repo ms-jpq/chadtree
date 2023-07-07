@@ -13,7 +13,6 @@ from std2.platform import OS, os
 from ..fs.ops import which
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.types import State
 from .shared.index import indices
 
@@ -40,7 +39,7 @@ async def _open_gui(path: PurePath, cwd: PurePath) -> None:
 
 
 @rpc(blocking=False)
-async def _open_sys(state: State, settings: Settings, is_visual: bool) -> None:
+async def _open_sys(state: State, is_visual: bool) -> None:
     """
     Open using finder / dolphin, etc
     """

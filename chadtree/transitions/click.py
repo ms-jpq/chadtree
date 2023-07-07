@@ -7,7 +7,6 @@ from ..fs.cartographer import is_dir
 from ..fs.types import Mode
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from .shared.index import indices
@@ -17,7 +16,7 @@ from .types import ClickType, Stage
 
 
 async def _click(
-    state: State, settings: Settings, is_visual: bool, click_type: ClickType
+    state: State, is_visual: bool, click_type: ClickType
 ) -> Optional[Stage]:
     node = await anext(indices(state, is_visual=is_visual), None)
 
@@ -39,7 +38,6 @@ async def _click(
                     invalidate_dirs = {node.path}
                     new_state = await forward(
                         state,
-                        settings=settings,
                         index=index,
                         invalidate_dirs=invalidate_dirs,
                     )
@@ -47,12 +45,11 @@ async def _click(
             else:
                 nxt = await open_file(
                     state,
-                    settings=settings,
                     path=node.path,
                     click_type=click_type,
                 )
 
-                if settings.close_on_open and click_type != ClickType.secondary:
+                if state.settings.close_on_open and click_type != ClickType.secondary:
                     async for win, _ in find_fm_windows():
                         await win.close()
 
@@ -60,82 +57,50 @@ async def _click(
 
 
 @rpc(blocking=False)
-async def _primary(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _primary(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open
     """
 
-    return await _click(
-        state,
-        settings=settings,
-        is_visual=is_visual,
-        click_type=ClickType.primary,
-    )
+    return await _click(state, is_visual=is_visual, click_type=ClickType.primary)
 
 
 @rpc(blocking=False)
-async def _secondary(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _secondary(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> preview
     """
 
-    return await _click(
-        state,
-        settings=settings,
-        is_visual=is_visual,
-        click_type=ClickType.secondary,
-    )
+    return await _click(state, is_visual=is_visual, click_type=ClickType.secondary)
 
 
 @rpc(blocking=False)
-async def _tertiary(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _tertiary(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in new tab
     """
 
-    return await _click(
-        state,
-        settings=settings,
-        is_visual=is_visual,
-        click_type=ClickType.tertiary,
-    )
+    return await _click(state, is_visual=is_visual, click_type=ClickType.tertiary)
 
 
 @rpc(blocking=False)
-async def _v_split(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _v_split(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in vertical split
     """
 
-    return await _click(
-        state,
-        settings=settings,
-        is_visual=is_visual,
-        click_type=ClickType.v_split,
-    )
+    return await _click(state, is_visual=is_visual, click_type=ClickType.v_split)
 
 
 @rpc(blocking=False)
-async def _h_split(
-    state: State, settings: Settings, is_visual: bool
-) -> Optional[Stage]:
+async def _h_split(state: State, is_visual: bool) -> Optional[Stage]:
     """
     Folders -> toggle
     File -> open in horizontal split
     """
 
-    return await _click(
-        state, settings=settings, is_visual=is_visual, click_type=ClickType.h_split
-    )
+    return await _click(state, is_visual=is_visual, click_type=ClickType.h_split)

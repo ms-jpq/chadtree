@@ -11,7 +11,6 @@ from ..fs.ops import ancestors, exists, mkdir, new
 from ..lsp.notify import lsp_created
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from .shared.current import maybe_path_above
@@ -21,7 +20,7 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-async def _new(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+async def _new(state: State, is_visual: bool) -> Optional[Stage]:
     """
     new file / folder
     """
@@ -51,19 +50,15 @@ async def _new(state: State, settings: Settings, is_visual: bool) -> Optional[St
                         await new((path,))
                 except Exception as e:
                     await Nvim.write(e, error=True)
-                    return await refresh(state=state, settings=settings)
+                    return await refresh(state=state)
                 else:
-                    new_state = (
-                        await maybe_path_above(state, settings=settings, paths={path})
-                        or state
-                    )
+                    new_state = await maybe_path_above(state, paths={path}) or state
                     parents = ancestors(path)
                     invalidate_dirs = (parents - state.index) | {path.parent}
                     index = state.index | parents
                     new_selection = {path} if state.selection else frozenset()
                     next_state = await forward(
                         new_state,
-                        settings=settings,
                         index=index,
                         invalidate_dirs=invalidate_dirs,
                         selection=new_selection,

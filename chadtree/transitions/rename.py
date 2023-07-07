@@ -11,7 +11,6 @@ from ..fs.ops import ancestors, exists, rename
 from ..lsp.notify import lsp_moved
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from .shared.current import maybe_path_above
@@ -22,7 +21,7 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional[Stage]:
+async def _rename(state: State, is_visual: bool) -> Optional[Stage]:
     """
     rename file / folder
     """
@@ -53,7 +52,7 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                     await rename(operations)
                 except Exception as e:
                     await Nvim.write(e, error=True)
-                    return await refresh(state=state, settings=settings)
+                    return await refresh(state=state)
                 else:
                     async with hold_win(win=None):
                         for win, new_path in killed.items():
@@ -61,12 +60,7 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                             escaped = await Nvim.fn.fnameescape(str, normpath(new_path))
                             await Nvim.exec(f"edit! {escaped}")
 
-                    new_state = (
-                        await maybe_path_above(
-                            state, settings=settings, paths={new_path}
-                        )
-                        or state
-                    )
+                    new_state = await maybe_path_above(state, paths={new_path}) or state
                     parents = ancestors(new_path)
                     invalidate_dirs = (parents - state.index) | {
                         old_path.parent,
@@ -76,7 +70,6 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                     new_selection = {new_path} if state.selection else frozenset()
                     next_state = await forward(
                         new_state,
-                        settings=settings,
                         index=index,
                         invalidate_dirs=invalidate_dirs,
                         selection=new_selection,
