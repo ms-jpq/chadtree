@@ -19,16 +19,7 @@ from stat import (
     S_IWOTH,
     S_IXUSR,
 )
-from typing import (
-    AbstractSet,
-    Awaitable,
-    Coroutine,
-    Iterator,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import AbstractSet, Awaitable, Iterator, Mapping, Optional, Tuple, Union
 
 from std2.asyncio import pure, to_thread
 
@@ -97,9 +88,7 @@ def _fs_stat(
 
 async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
     root = PurePath(dirent)
-    mode, pointed = await to_thread(lambda: _fs_stat(dirent))
-
-    _ancestors = ancestors(root)
+    stat = lambda: _fs_stat(dirent)
 
     if root in index:
 
@@ -109,11 +98,13 @@ async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
                     for child in dirents:
                         yield _next(child, index=index)
 
-        walked = await gather(*cont())
+        (mode, pointed), *walked = await gather(to_thread(stat), *cont())
         children = {node.path: node for node in walked}
     else:
+        mode, pointed = await to_thread(stat)
         children = {}
 
+    _ancestors = ancestors(root)
     node = Node(
         path=root,
         mode=mode,

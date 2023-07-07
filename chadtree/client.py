@@ -15,7 +15,7 @@ from pynvim_pp.highlight import highlight
 from pynvim_pp.logging import log, suppress_and_log
 from pynvim_pp.nvim import Nvim, conn
 from pynvim_pp.rpc import MsgType, ServerAddr
-from pynvim_pp.types import Method, NoneType, NvimError, RPCallable
+from pynvim_pp.types import Method, NoneType, NvimError, RPCallable, RPClient
 from std2.asyncio import cancel
 from std2.cell import RefCell
 from std2.contextlib import nullacontext
@@ -83,99 +83,100 @@ async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
     await enqueue_event(True, method=method, params=params)
 
 
-async def init(socket: ServerAddr, ppid: int) -> None:
-    async with _autodie(ppid):
-        if DEBUG:
-            log.setLevel(DEBUG_LVL)
-
-        async with conn(socket, default=_default) as client:
-            atomic, handlers = rpc.drain()
-            try:
-                settings = await initial_settings(handlers.values())
-            except DecodeError as e:
-                tpl = """
+async def _go(client: RPClient) -> None:
+    atomic, handlers = rpc.drain()
+    try:
+        settings = await initial_settings(handlers.values())
+    except DecodeError as e:
+        tpl = """
                 Some options may have changed.
                 See help doc on Github under [docs/CONFIGURATION.md]
 
 
                 ${e}
                 """
-                ms = Template(dedent(tpl)).substitute(e=e)
-                await Nvim.write(ms, error=True)
-                exit(1)
+        ms = Template(dedent(tpl)).substitute(e=e)
+        await Nvim.write(ms, error=True)
+        exit(1)
+    else:
+        hl = highlight(*settings.view.hl_context.groups)
+        await (atomic + autocmd.drain() + hl).commit(NoneType)
+        state = RefCell(await initial_state(settings))
+
+        init_locale(settings.lang)
+
+        for f in handlers.values():
+            ff = _trans(f)
+            client.register(ff)
+
+        staged = RefCell[Optional[Stage]](None)
+        event = Event()
+        lock = Lock()
+
+        async def step(method: Method, params: Sequence[Any]) -> None:
+            if handler := cast(Optional[_CB], handlers.get(method)):
+                with suppress_and_log():
+                    async with lock:
+                        if stage := await handler(state.val, settings, *params):
+                            state.val = stage.state
+                            staged.val = stage
+                            event.set()
             else:
-                hl = highlight(*settings.view.hl_context.groups)
-                await (atomic + autocmd.drain() + hl).commit(NoneType)
-                state = RefCell(await initial_state(settings))
+                assert False, (method, params)
 
-                init_locale(settings.lang)
+        async def c1() -> None:
+            transcient: Optional[Task] = None
+            get: Optional[Task] = None
+            while True:
+                with suppress_and_log():
+                    get = create_task(dequeue_event())
+                    if transcient:
+                        await wait((transcient, get), return_when=FIRST_COMPLETED)
+                        if not transcient.done():
+                            with timeit("transcient"):
+                                await cancel(transcient)
+                        transcient = None
 
-                for f in handlers.values():
-                    ff = _trans(f)
-                    client.register(ff)
-
-                staged = RefCell[Optional[Stage]](None)
-                event = Event()
-                lock = Lock()
-
-                async def step(method: Method, params: Sequence[Any]) -> None:
-                    if handler := cast(Optional[_CB], handlers.get(method)):
-                        with suppress_and_log():
-                            async with lock:
-                                if stage := await handler(state.val, settings, *params):
-                                    state.val = stage.state
-                                    staged.val = stage
-                                    event.set()
+                    sync, method, params = await get
+                    task = step(method, params=params)
+                    if sync:
+                        with timeit(method):
+                            await task
                     else:
-                        assert False, (method, params)
+                        transcient = create_task(task)
 
-                async def c1() -> None:
-                    transcient: Optional[Task] = None
-                    get: Optional[Task] = None
-                    while True:
-                        with suppress_and_log():
-                            get = create_task(dequeue_event())
-                            if transcient:
-                                await wait(
-                                    (transcient, get), return_when=FIRST_COMPLETED
-                                )
-                                if not transcient.done():
-                                    with timeit("transcient"):
-                                        await cancel(transcient)
-                                transcient = None
+        async def c2() -> None:
+            t1, has_drawn = monotonic(), False
 
-                            sync, method, params = await get
-                            task = step(method, params=params)
-                            if sync:
-                                with timeit(method):
-                                    await task
+            while True:
+                with suppress_and_log():
+                    await event.wait()
+                    try:
+                        if stage := staged.val:
+                            state = stage.state
+
+                            for _ in range(RENDER_RETRIES - 1):
+                                with suppress(NvimError):
+                                    await redraw(state, focus=stage.focus)
+                                    break
                             else:
-                                transcient = create_task(task)
+                                try:
+                                    await redraw(state, focus=stage.focus)
+                                except NvimError as e:
+                                    log.warn("%s", e)
 
-                async def c2() -> None:
-                    t1, has_drawn = monotonic(), False
+                            if settings.profiling and not has_drawn:
+                                has_drawn = True
+                                await _profile(t1=t1)
+                    finally:
+                        event.clear()
 
-                    while True:
-                        with suppress_and_log():
-                            await event.wait()
-                            try:
-                                if stage := staged.val:
-                                    state = stage.state
+        await gather(c1(), c2(), _sched(settings))
 
-                                    for _ in range(RENDER_RETRIES - 1):
-                                        with suppress(NvimError):
-                                            await redraw(state, focus=stage.focus)
-                                            break
-                                    else:
-                                        try:
-                                            await redraw(state, focus=stage.focus)
-                                        except NvimError as e:
-                                            log.warn("%s", e)
 
-                                    if settings.profiling and not has_drawn:
-                                        has_drawn = True
-                                        await _profile(t1=t1)
-                            finally:
-                                event.clear()
-
-                await gather(c1(), c2(), _sched(settings))
+async def init(socket: ServerAddr, ppid: int) -> None:
+    if DEBUG:
+        log.setLevel(DEBUG_LVL)
+    async with _autodie(ppid):
+        async with conn(socket, default=_default) as client:
+            await _go(client)
