@@ -31,6 +31,7 @@ async def forward(
     paths: Union[AbstractSet[PurePath], VoidType] = Void,
     window_order: Union[Mapping[ExtData, None], VoidType] = Void,
     session: Union[Session, VoidType] = Void,
+    trace: bool = True
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)

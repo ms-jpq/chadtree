@@ -73,6 +73,7 @@ async def refresh(state: State, settings: Settings) -> Stage:
         paths=paths,
         current=new_current or Void,
         window_order=window_order,
+        trace=False,
     )
 
     return Stage(new_state)
