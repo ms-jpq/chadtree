@@ -119,13 +119,17 @@ async def new(root: PurePath, index: Index) -> Node:
         return await _next(root, index=index)
 
 
-async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
-    if root.path in paths:
+async def _update(
+    root: Node, index: Index, invalidate_dirs: AbstractSet[PurePath]
+) -> Node:
+    if root.path in invalidate_dirs:
         return await _next(root.path, index=index)
     else:
         walked = await gather(
             *(
-                gather(pure(k), _update(v, index=index, paths=paths))
+                gather(
+                    pure(k), _update(v, index=index, invalidate_dirs=invalidate_dirs)
+                )
                 for k, v in root.children.items()
             )
         )
@@ -147,10 +151,12 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
     )
 
 
-async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
+async def update(
+    root: Node, *, index: Index, invalidate_dirs: AbstractSet[PurePath]
+) -> Node:
     with timeit("fs->_update"):
         try:
-            return await _update(root, index=index, paths=paths)
+            return await _update(root, index=index, invalidate_dirs=invalidate_dirs)
         except FileNotFoundError:
             return await new(root.path, index=index)
 

@@ -68,14 +68,15 @@ async def _link(state: State, settings: Settings, is_visual: bool) -> Optional[S
             )
             await lsp_created(paths)
             focus, *_ = sorted(paths, key=pathsort_key)
-            ancestry = ancestors(*paths)
-            index = state.index | ancestry
+            parents = ancestors(*paths)
+            invalidate_dirs = (parents - state.index) | {path.parent for path in paths}
+            index = state.index | parents
             new_selection = paths if state.selection else frozenset()
             next_state = await forward(
                 new_state,
                 settings=settings,
                 index=index,
-                paths=ancestry,
+                invalidate_dirs=invalidate_dirs,
                 selection=new_selection,
             )
             return Stage(next_state, focus=focus)

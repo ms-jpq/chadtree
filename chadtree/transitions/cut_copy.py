@@ -105,17 +105,18 @@ async def _operation(
                     await Nvim.write(e, error=True)
                     return await refresh(state, settings=settings)
                 else:
-                    paths = {
+                    parents = {
                         p.parent for p in chain(operations.keys(), operations.values())
                     }
-                    index = state.index | paths
+                    invalidate_dirs = parents
+                    index = state.index | parents
                     new_selection = {*operations.values()}
                     new_state = await forward(
                         state,
                         settings=settings,
                         index=index,
                         selection=new_selection,
-                        paths=paths,
+                        invalidate_dirs=invalidate_dirs,
                     )
                     focus = next(
                         iter(sorted(new_selection, key=pathsort_key)),

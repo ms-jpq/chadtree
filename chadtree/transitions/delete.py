@@ -61,9 +61,12 @@ async def _remove(
                 await Nvim.write(e, error=True)
                 return await refresh(state, settings=settings)
             else:
-                paths = {path.parent for path in unified}
+                invalidate_dirs = {path.parent for path in unified}
                 new_state = await forward(
-                    state, settings=settings, selection=frozenset(), paths=paths
+                    state,
+                    settings=settings,
+                    selection=frozenset(),
+                    invalidate_dirs=invalidate_dirs,
                 )
 
                 await kill_buffers(

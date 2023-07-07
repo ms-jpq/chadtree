@@ -31,12 +31,13 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
     if not node:
         return None
     else:
-        child = await Nvim.input(question=LANG("pencil"), default=node.path.name)
+        old_path = node.path
+        child = await Nvim.input(question=LANG("pencil"), default=old_path.name)
         if not child:
             return None
         else:
-            new_path = PurePath(abspath(node.path.parent / child))
-            operations = {node.path: new_path}
+            new_path = PurePath(abspath(old_path.parent / child))
+            operations = {old_path: new_path}
             if await exists(new_path, follow=False):
                 await Nvim.write(
                     LANG("already_exists", name=normpath(new_path)), error=True
@@ -45,8 +46,8 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
             else:
                 killed = await kill_buffers(
                     last_used=state.window_order,
-                    paths={node.path},
-                    reopen={node.path: new_path},
+                    paths={old_path},
+                    reopen={old_path: new_path},
                 )
                 try:
                     await rename(operations)
@@ -66,14 +67,18 @@ async def _rename(state: State, settings: Settings, is_visual: bool) -> Optional
                         )
                         or state
                     )
-                    paths = ancestors(new_path)
-                    index = state.index | paths
+                    parents = ancestors(new_path)
+                    invalidate_dirs = (parents - state.index) | {
+                        old_path.parent,
+                        new_path.parent,
+                    }
+                    index = state.index | parents
                     new_selection = {new_path} if state.selection else frozenset()
                     next_state = await forward(
                         new_state,
                         settings=settings,
                         index=index,
-                        paths=paths,
+                        invalidate_dirs=invalidate_dirs,
                         selection=new_selection,
                     )
                     await lsp_moved(operations)

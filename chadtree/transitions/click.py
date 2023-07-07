@@ -35,10 +35,13 @@ async def _click(
                     await Nvim.write(LANG("filter_click"))
                     return None
                 else:
-                    paths = {node.path}
-                    index = state.index ^ paths
+                    index = state.index ^ {node.path}
+                    invalidate_dirs = {node.path}
                     new_state = await forward(
-                        state, settings=settings, index=index, paths=paths
+                        state,
+                        settings=settings,
+                        index=index,
+                        invalidate_dirs=invalidate_dirs,
                     )
                     return Stage(new_state)
             else:

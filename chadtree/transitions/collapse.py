@@ -36,5 +36,8 @@ async def _collapse(
         }
 
         index = (state.index - paths) | {state.root.path}
-        new_state = await forward(state, settings=settings, index=index, paths=paths)
+        invalidate_dirs = {path}
+        new_state = await forward(
+            state, settings=settings, index=index, invalidate_dirs=invalidate_dirs
+        )
         return Stage(new_state, focus=path)

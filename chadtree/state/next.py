@@ -28,10 +28,10 @@ async def forward(
     markers: Union[Markers, VoidType] = Void,
     vc: Union[VCStatus, VoidType] = Void,
     current: Union[PurePath, VoidType] = Void,
-    paths: Union[AbstractSet[PurePath], VoidType] = Void,
+    invalidate_dirs: Union[AbstractSet[PurePath], VoidType] = Void,
     window_order: Union[Mapping[ExtData, None], VoidType] = Void,
     session: Union[Session, VoidType] = Void,
-    trace: bool = True
+    trace: bool = True,
 ) -> State:
     new_index = or_else(index, state.index)
     new_selection = or_else(selection, state.selection)
@@ -41,8 +41,8 @@ async def forward(
         Node,
         root
         or (
-            await update(state.root, index=new_index, paths=paths)
-            if not isinstance(paths, VoidType)
+            await update(state.root, index=new_index, invalidate_dirs=invalidate_dirs)
+            if not isinstance(invalidate_dirs, VoidType)
             else state.root
         ),
     )

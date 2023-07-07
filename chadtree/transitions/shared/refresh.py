@@ -47,11 +47,11 @@ async def _window_order(state: State) -> Mapping[ExtData, None]:
 
 async def refresh(state: State, settings: Settings) -> Stage:
     cwd = state.root.path
-    paths = {cwd}
+    invalidate_dirs = {cwd}
 
     current, index, selection, window_order, mks = await gather(
         find_current_buffer_path(),
-        _index(state, paths=paths),
+        _index(state, paths=invalidate_dirs),
         _selection(state),
         _window_order(state),
         markers(),
@@ -70,7 +70,7 @@ async def refresh(state: State, settings: Settings) -> Stage:
         index=new_index,
         selection=selection,
         markers=mks,
-        paths=paths,
+        invalidate_dirs=invalidate_dirs,
         current=new_current or Void,
         window_order=window_order,
         trace=False,

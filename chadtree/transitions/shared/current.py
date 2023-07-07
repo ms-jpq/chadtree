@@ -21,9 +21,14 @@ async def new_current_file(
 
     parents = ancestors(current)
     if state.root.path in parents:
+        invalidate_dirs = parents - state.index
         index = state.index | parents
         new_state = await forward(
-            state, settings=settings, index=index, paths=parents, current=current
+            state,
+            settings=settings,
+            index=index,
+            invalidate_dirs=invalidate_dirs,
+            current=current,
         )
     else:
         new_state = await forward(state, settings=settings, current=current)

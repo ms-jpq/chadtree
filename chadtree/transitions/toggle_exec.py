@@ -39,5 +39,6 @@ async def _toggle_exec(state: State, settings: Settings, is_visual: bool) -> Sta
     for path, st in stats.items():
         chmod(path, st.st_mode ^ S_IXUSR ^ S_IXGRP ^ S_IXOTH)
 
-    new_state = await forward(state, settings=settings, paths=stats.keys())
+    invalidate_dirs = {path.parent for path in stats.keys()}
+    new_state = await forward(state, settings=settings, invalidate_dirs=invalidate_dirs)
     return Stage(state=new_state)
