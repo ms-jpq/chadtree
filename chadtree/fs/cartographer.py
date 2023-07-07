@@ -96,6 +96,9 @@ async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
                 for child in dirents:
                     yield await _next(child, index=index)
 
+    if next(_COUNT) % 17 == 0:
+        await sleep(0)
+
     root = PurePath(dirent)
     children = {node.path: node async for node in cont()} if root in index else {}
     mode, pointed = _fs_stat(dirent)
@@ -107,9 +110,6 @@ async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
         ancestors=_ancestors,
         children=children,
     )
-
-    if next(_COUNT) % 17 == 0:
-        await sleep(0)
 
     return node
 
