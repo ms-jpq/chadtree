@@ -1,7 +1,7 @@
 from asyncio import gather
 from contextlib import suppress
 from fnmatch import fnmatch
-from os import scandir, stat, stat_result
+from os import DirEntry, scandir, stat, stat_result
 from os.path import normcase
 from pathlib import Path, PurePath
 from stat import (
@@ -19,7 +19,7 @@ from stat import (
     S_IWOTH,
     S_IXUSR,
 )
-from typing import AbstractSet, Iterator, Mapping, Optional, Sequence, Tuple
+from typing import AbstractSet, Iterator, Mapping, Optional, Tuple, Union
 
 from std2.asyncio import pure, to_thread
 
@@ -60,89 +60,63 @@ def _fs_modes(stat: stat_result) -> Iterator[Mode]:
             yield mode
 
 
-async def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
-    def cont() -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
-        try:
-            info = stat(path, follow_symlinks=False)
-        except FileNotFoundError:
-            return {Mode.orphan_link}, None
-        else:
-            if S_ISLNK(info.st_mode):
-                try:
-                    pointed = Path(path).resolve(strict=True)
-                    link_info = stat(pointed, follow_symlinks=False)
-                except (FileNotFoundError, NotADirectoryError, RuntimeError):
-                    return {Mode.orphan_link}, None
-                else:
-                    mode = {*_fs_modes(link_info)}
-                    return mode | {Mode.link}, pointed
-            else:
-                mode = {*_fs_modes(info)}
-                return mode, None
-
-    return await to_thread(cont)
-
-
-async def _iterdir(dir: PurePath) -> Sequence[PurePath]:
-    def cont() -> Sequence[PurePath]:
-        with suppress(NotADirectoryError, FileNotFoundError):
-            with scandir(dir) as it:
-                return tuple(map(PurePath, it))
-
-        return ()
-
-    return await to_thread(cont)
-
-
-async def _next(root: PurePath, index: Index) -> Optional[Node]:
-    with suppress(PermissionError):
-        mode, pointed = await _fs_stat(root)
-        _ancestors = ancestors(root)
-
-        if root in index:
-            paths = await _iterdir(root)
-            walked = await gather(
-                *(gather(pure(path), _next(path, index=index)) for path in paths)
-            )
-            children = {k: v for k, v in walked}
-        else:
-            children = {}
-
-        node = Node(
-            path=root,
-            mode=mode,
-            pointed=pointed,
-            ancestors=_ancestors,
-            children=children,
+def _fs_stat(
+    dirent: Union[PurePath, DirEntry[str]]
+) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
+    try:
+        info = (
+            stat(dirent, follow_symlinks=False)
+            if isinstance(dirent, PurePath)
+            else dirent.stat(follow_symlinks=False)
         )
+    except (FileNotFoundError, PermissionError):
+        return {Mode.orphan_link}, None
+    else:
+        if S_ISLNK(info.st_mode):
+            try:
+                pointed = Path(dirent).resolve(strict=True)
+                link_info = stat(pointed, follow_symlinks=False)
+            except (FileNotFoundError, NotADirectoryError, RuntimeError):
+                return {Mode.orphan_link}, None
+            else:
+                mode = {*_fs_modes(link_info)}
+                return mode | {Mode.link}, pointed
+        else:
+            mode = {*_fs_modes(info)}
+            return mode, None
 
-        return node
 
-    return None
+async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
+    root = PurePath(dirent)
+    mode, pointed = await to_thread(lambda: _fs_stat(dirent))
 
+    _ancestors = ancestors(root)
 
-def _orphan(root: PurePath) -> Node:
+    children: Mapping[PurePath, Node] = {}
+    if root in index:
+        with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
+            with scandir(dirent) as dirents:
+                for child in dirents:
+                    if n := await _next(child, index=index):
+                        children[PurePath(child)] = n
+
     node = Node(
-        mode={Mode.orphan_link},
         path=root,
-        pointed=root,
-        ancestors=frozenset(),
-        children={},
+        mode=mode,
+        pointed=pointed,
+        ancestors=_ancestors,
+        children=children,
     )
+
     return node
 
 
 async def new(root: PurePath, index: Index) -> Node:
     with timeit("fs->new"):
-        if node := await _next(root, index=index):
-            return node
-        else:
-            return _orphan(root)
+        return await _next(root, index=index)
 
 
-async def _update(
-    root: Node, index: Index, paths: AbstractSet[PurePath]
-) -> Optional[Node]:
+async def _update(root: Node, index: Index, paths: AbstractSet[PurePath]) -> Node:
     if root.path in paths:
         return await _next(root.path, index=index)
     else:
@@ -173,11 +147,9 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 async def update(root: Node, *, index: Index, paths: AbstractSet[PurePath]) -> Node:
     with timeit("fs->_update"):
         try:
-            node = await _update(root, index=index, paths=paths)
+            return await _update(root, index=index, paths=paths)
         except FileNotFoundError:
             return await new(root.path, index=index)
-        else:
-            return node or _orphan(root.path)
 
 
 def is_dir(node: Node) -> bool:
