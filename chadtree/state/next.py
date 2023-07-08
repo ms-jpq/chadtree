@@ -40,7 +40,12 @@ async def forward(
         Node,
         root
         or (
-            await update(state.root, index=new_index, invalidate_dirs=invalidate_dirs)
+            await update(
+                state.executor,
+                root=state.root,
+                index=new_index,
+                invalidate_dirs=invalidate_dirs,
+            )
             if not isinstance(invalidate_dirs, VoidType)
             else state.root
         ),
@@ -51,6 +56,7 @@ async def forward(
     new_vim_focus = or_else(vim_focus, state.vim_focus)
 
     new_state = DeepState(
+        executor=state.executor,
         settings=state.settings,
         session=or_else(session, state.session),
         vim_focus=new_vim_focus,

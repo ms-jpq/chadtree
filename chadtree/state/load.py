@@ -9,11 +9,13 @@ from ..nvim.markers import markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
 from .cache import DeepState
+from .executor import CurrentExecutor
 from .ops import load_session
 from .types import Selection, Session, State
 
 
 async def initial(settings: Settings) -> State:
+    executor = CurrentExecutor()
     cwd, marks = await gather(Nvim.getcwd(), markers())
     storage = (
         Path(await Nvim.fn.stdpath(str, "cache")) / "chad_sessions"
@@ -37,13 +39,14 @@ async def initial(settings: Settings) -> State:
     )
 
     selection: Selection = frozenset()
-    node = await new(cwd, index=index)
+    node = await new(executor, root=cwd, index=index)
     vc = VCStatus()
 
     current = None
     filter_pattern = None
 
     state = DeepState(
+        executor=executor,
         settings=settings,
         session=session,
         vim_focus=True,

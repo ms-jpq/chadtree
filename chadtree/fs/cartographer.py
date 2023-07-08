@@ -24,6 +24,7 @@ from typing import AbstractSet, AsyncIterator, Iterator, Mapping, Optional, Tupl
 
 from std2.asyncio import pure
 
+from ..state.executor import CurrentExecutor
 from ..state.types import Index
 from ..timeit import timeit
 from .ops import ancestors
@@ -114,11 +115,6 @@ async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
     return node
 
 
-async def new(root: PurePath, index: Index) -> Node:
-    with timeit("fs->new"):
-        return await _next(root, index=index)
-
-
 async def _update(
     root: Node, index: Index, invalidate_dirs: AbstractSet[PurePath]
 ) -> Node:
@@ -143,22 +139,33 @@ async def _update(
         )
 
 
+async def new(exec: CurrentExecutor, root: PurePath, index: Index) -> Node:
+    with timeit("fs->new"):
+        return await exec.run(_next(root, index=index))
+
+
+async def update(
+    exec: CurrentExecutor,
+    root: Node,
+    *,
+    index: Index,
+    invalidate_dirs: AbstractSet[PurePath],
+) -> Node:
+    with timeit("fs->_update"):
+        try:
+            return await exec.run(
+                _update(root=root, index=index, invalidate_dirs=invalidate_dirs)
+            )
+        except FileNotFoundError:
+            return await new(exec, root=root.path, index=index)
+
+
 def user_ignored(node: Node, ignores: Ignored) -> bool:
     return (
         node.path.name in ignores.name_exact
         or any(fnmatch(node.path.name, pattern) for pattern in ignores.name_glob)
         or any(fnmatch(normcase(node.path), pattern) for pattern in ignores.path_glob)
     )
-
-
-async def update(
-    root: Node, *, index: Index, invalidate_dirs: AbstractSet[PurePath]
-) -> Node:
-    with timeit("fs->_update"):
-        try:
-            return await _update(root, index=index, invalidate_dirs=invalidate_dirs)
-        except FileNotFoundError:
-            return await new(root.path, index=index)
 
 
 def is_dir(node: Node) -> bool:

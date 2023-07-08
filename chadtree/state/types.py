@@ -9,6 +9,7 @@ from ..nvim.types import Markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
 from ..view.types import Derived
+from .executor import CurrentExecutor
 
 Index = AbstractSet[PurePath]
 Selection = Index
@@ -27,6 +28,7 @@ class Session:
 
 @dataclass(frozen=True)
 class State:
+    executor: CurrentExecutor
     settings: Settings
     session: Session
     vim_focus: bool
