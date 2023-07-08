@@ -29,8 +29,8 @@ from .consts import DEBUG, RENDER_RETRIES
 from .registry import autocmd, dequeue_event, enqueue_event, rpc
 from .settings.load import initial as initial_settings
 from .settings.localization import init as init_locale
-from .settings.types import Settings
 from .state.load import initial as initial_state
+from .state.types import State
 from .timeit import timeit
 from .transitions.redraw import redraw
 from .transitions.schedule_update import scheduled_update
@@ -64,11 +64,12 @@ async def _profile(t1: float) -> None:
     await Nvim.write(dedent(msg))
 
 
-async def _sched(settings: Settings) -> None:
+async def _sched(ref: RefCell[State]) -> None:
     await enqueue_event(False, method=vc_refresh.method)
 
-    async for _ in aticker(settings.polling_rate, immediately=False):
-        await enqueue_event(False, method=scheduled_update.method)
+    async for _ in aticker(ref.val.settings.polling_rate, immediately=False):
+        if ref.val.vim_focus:
+            await enqueue_event(False, method=scheduled_update.method)
 
 
 def _trans(handler: _CB) -> _CB:
@@ -171,7 +172,7 @@ async def _go(client: RPClient) -> None:
                     finally:
                         event.clear()
 
-        await gather(c1(), c2(), _sched(settings))
+        await gather(c1(), c2(), _sched(state))
 
 
 async def init(socket: ServerAddr, ppid: int) -> None:

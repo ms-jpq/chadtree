@@ -47,7 +47,7 @@ async def load_session(session: Session) -> StoredSession:
         return sessions
 
 
-async def dump_session(state: State) -> Session:
+async def dump_session(state: State) -> None:
     stored = StoredSession(
         index=state.index,
         show_hidden=state.show_hidden,
@@ -67,5 +67,3 @@ async def dump_session(state: State) -> Session:
         Path(f.name).replace(path)
 
     await to_thread(cont)
-
-    return state.session

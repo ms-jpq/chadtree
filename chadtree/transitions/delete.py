@@ -11,7 +11,6 @@ from ..fs.ops import ancestors, remove, unify_ancestors, which
 from ..lsp.notify import lsp_removed
 from ..registry import rpc
 from ..settings.localization import LANG
-from ..settings.types import Settings
 from ..state.next import forward
 from ..state.types import State
 from ..view.ops import display_path

@@ -29,6 +29,7 @@ class Session:
 class State:
     settings: Settings
     session: Session
+    vim_focus: bool
     current: Optional[PurePath]
     enable_vc: bool
     filter_pattern: Optional[FilterPattern]

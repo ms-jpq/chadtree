@@ -29,6 +29,7 @@ async def forward(
     invalidate_dirs: Union[AbstractSet[PurePath], VoidType] = Void,
     window_order: Union[Mapping[ExtData, None], VoidType] = Void,
     session: Union[Session, VoidType] = Void,
+    vim_focus: Union[bool, VoidType] = Void,
     trace: bool = True,
 ) -> State:
     new_index = or_else(index, state.index)
@@ -47,10 +48,12 @@ async def forward(
     new_markers = or_else(markers, state.markers)
     new_vc = or_else(vc, state.vc)
     new_hidden = or_else(show_hidden, state.show_hidden)
+    new_vim_focus = or_else(vim_focus, state.vim_focus)
 
     new_state = DeepState(
         settings=state.settings,
         session=or_else(session, state.session),
+        vim_focus=new_vim_focus,
         index=new_index,
         selection=new_selection,
         filter_pattern=new_filter_pattern,

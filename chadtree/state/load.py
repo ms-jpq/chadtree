@@ -8,9 +8,9 @@ from ..fs.cartographer import new
 from ..nvim.markers import markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
+from .cache import DeepState
 from .ops import load_session
 from .types import Selection, Session, State
-from .cache import DeepState
 
 
 async def initial(settings: Settings) -> State:
@@ -46,6 +46,7 @@ async def initial(settings: Settings) -> State:
     state = DeepState(
         settings=settings,
         session=session,
+        vim_focus=True,
         index=index,
         selection=selection,
         filter_pattern=filter_pattern,

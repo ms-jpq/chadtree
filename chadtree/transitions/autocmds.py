@@ -22,12 +22,23 @@ async def save_session(state: State) -> Stage:
     Save CHADTree state
     """
 
-    session = await dump_session(state)
-    new_state = await forward(state, session=session)
+    await dump_session(state)
+    new_state = await forward(state, vim_focus=False)
     return Stage(new_state)
 
 
 _ = autocmd("FocusLost", "ExitPre") << f"lua {NAMESPACE}.{save_session.method}()"
+
+
+@rpc(blocking=False)
+async def _focus_gained(state: State) -> Stage:
+    """ """
+
+    new_state = await forward(state, vim_focus=True)
+    return Stage(new_state)
+
+
+_ = autocmd("FocusGained") << f"lua {NAMESPACE}.{_focus_gained.method}()"
 
 
 @rpc(blocking=False)
