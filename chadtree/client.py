@@ -15,8 +15,15 @@ from typing import Any, Optional, Sequence, cast
 from pynvim_pp.highlight import highlight
 from pynvim_pp.logging import log, suppress_and_log
 from pynvim_pp.nvim import Nvim, conn
-from pynvim_pp.rpc_types import MsgType, NvimError, RPCallable, ServerAddr
-from pynvim_pp.types import Method, NoneType, RPClient
+from pynvim_pp.rpc_types import (
+    Method,
+    MsgType,
+    NvimError,
+    RPCallable,
+    RPClient,
+    ServerAddr,
+)
+from pynvim_pp.types import NoneType
 from std2.asyncio import cancel
 from std2.cell import RefCell
 from std2.contextlib import nullacontext

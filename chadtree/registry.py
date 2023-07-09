@@ -4,7 +4,7 @@ from typing import Any, Awaitable, Callable, Sequence, Tuple
 
 from pynvim_pp.autocmd import AutoCMD
 from pynvim_pp.handler import RPC
-from pynvim_pp.types import Method
+from pynvim_pp.rpc_types import Method
 
 _MSG = Tuple[bool, Method, Sequence[Any]]
 
