@@ -28,5 +28,5 @@ jobs:
         with:
           python-version: ${{ matrix.python_ver }}
 
-      - name: Lint
-        run: make lint
+      - run: |-
+          make lint
