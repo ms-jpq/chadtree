@@ -6,7 +6,8 @@ from pynvim_pp.atomic import Atomic
 from pynvim_pp.buffer import Buffer
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.operators import operator_marks
-from pynvim_pp.types import NoneType, NvimError
+from pynvim_pp.types import NoneType
+from pynvim_pp.rpc_types import NvimError
 from std2.difflib import trans_inplace
 from std2.pickle.decoder import new_decoder
 from std2.pickle.types import DecodeError

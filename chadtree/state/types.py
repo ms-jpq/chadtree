@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path, PurePath
 from typing import AbstractSet, Mapping, Optional
 
-from pynvim_pp.types import ExtData
+from pynvim_pp.rpc_types import ExtData
 
 from ..fs.types import Node
 from ..nvim.types import Markers

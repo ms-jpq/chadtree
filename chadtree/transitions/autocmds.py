@@ -2,7 +2,7 @@ from itertools import chain
 from typing import Optional
 
 from pynvim_pp.nvim import Nvim
-from pynvim_pp.types import NvimError
+from pynvim_pp.rpc_types import NvimError
 from pynvim_pp.window import Window
 
 from ..fs.ops import is_file

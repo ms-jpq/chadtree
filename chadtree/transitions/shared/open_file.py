@@ -7,7 +7,7 @@ from pynvim_pp.buffer import Buffer
 from pynvim_pp.hold import hold_win
 from pynvim_pp.logging import log
 from pynvim_pp.nvim import Nvim
-from pynvim_pp.types import NvimError
+from pynvim_pp.rpc_types import NvimError
 from pynvim_pp.window import Window
 from std2 import anext
 from std2.aitertools import achain, to_async

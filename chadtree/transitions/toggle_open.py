@@ -4,7 +4,7 @@ from subprocess import CalledProcessError
 from typing import Mapping, Optional, Sequence
 
 from pynvim_pp.nvim import Nvim
-from pynvim_pp.types import ExtData
+from pynvim_pp.rpc_types import ExtData
 from pynvim_pp.window import Window
 from std2 import anext
 from std2.argparse import ArgparseError, ArgParser

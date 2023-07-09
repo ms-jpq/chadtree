@@ -2,6 +2,7 @@ from asyncio import FIRST_COMPLETED, Event, Lock, Task, create_task, gather, wai
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from logging import DEBUG as DEBUG_LVL
+from logging import INFO
 from multiprocessing import cpu_count
 from pathlib import Path
 from platform import uname
@@ -14,8 +15,8 @@ from typing import Any, Optional, Sequence, cast
 from pynvim_pp.highlight import highlight
 from pynvim_pp.logging import log, suppress_and_log
 from pynvim_pp.nvim import Nvim, conn
-from pynvim_pp.rpc import MsgType, ServerAddr
-from pynvim_pp.types import Method, NoneType, NvimError, RPCallable, RPClient
+from pynvim_pp.rpc_types import MsgType, NvimError, RPCallable, ServerAddr
+from pynvim_pp.types import Method, NoneType, RPClient
 from std2.asyncio import cancel
 from std2.cell import RefCell
 from std2.contextlib import nullacontext
@@ -176,8 +177,7 @@ async def _go(client: RPClient) -> None:
 
 
 async def init(socket: ServerAddr, ppid: int) -> None:
-    if DEBUG:
-        log.setLevel(DEBUG_LVL)
+    log.setLevel(DEBUG_LVL if DEBUG else INFO)
     async with _autodie(ppid):
         async with conn(socket, default=_default) as client:
             await _go(client)

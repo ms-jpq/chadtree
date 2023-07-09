@@ -2,7 +2,7 @@ from asyncio import gather
 from pathlib import PurePath
 from typing import AbstractSet, Mapping
 
-from pynvim_pp.types import ExtData
+from pynvim_pp.rpc_types import ExtData
 from pynvim_pp.window import Window
 from std2.types import Void
 

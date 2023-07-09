@@ -2,7 +2,7 @@ from asyncio import gather
 from typing import Optional
 
 from pynvim_pp.nvim import Nvim
-from pynvim_pp.types import NvimError
+from pynvim_pp.rpc_types import NvimError
 from std2.asyncio import pure
 
 from ..registry import rpc

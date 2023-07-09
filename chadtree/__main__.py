@@ -136,7 +136,8 @@ elif command == "run":
             import yaml
 
             from .client import init
-    except ImportError:
+    except ImportError as e:
+        print(e)
         msg = """
         Please update dependencies using :CHADdeps
         -

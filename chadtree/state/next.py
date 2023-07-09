@@ -1,7 +1,7 @@
 from pathlib import PurePath
 from typing import AbstractSet, Mapping, Optional, Union, cast
 
-from pynvim_pp.types import ExtData
+from pynvim_pp.rpc_types import ExtData
 from std2.types import Void, VoidType, or_else
 
 from ..fs.cartographer import update

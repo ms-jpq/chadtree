@@ -18,8 +18,9 @@ from pynvim_pp.buffer import Buffer
 from pynvim_pp.keymap import Keymap
 from pynvim_pp.lib import resolve_path
 from pynvim_pp.nvim import Nvim
+from pynvim_pp.rpc_types import ExtData
 from pynvim_pp.tabpage import Tabpage
-from pynvim_pp.types import ExtData, NoneType
+from pynvim_pp.types import NoneType
 from pynvim_pp.window import Window
 
 from ...consts import FM_FILETYPE, URI_SCHEME

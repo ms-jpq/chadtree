@@ -15,7 +15,8 @@ from typing import (
 
 from pynvim_pp.atomic import Atomic
 from pynvim_pp.nvim import Nvim
-from pynvim_pp.types import NoneType, RPCallable
+from pynvim_pp.rpc_types import RPCallable
+from pynvim_pp.types import NoneType
 from pynvim_pp.window import Window
 from std2.configparser import hydrate
 from std2.graphlib import merge
