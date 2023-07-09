@@ -7,7 +7,8 @@ from asyncio import (
     sleep,
     wrap_future,
 )
-from threading import Event, Thread
+from concurrent.futures import Future as TFuture
+from threading import Thread
 from typing import Awaitable, Optional, TypeVar
 
 from std2.asyncio import cancel
@@ -17,13 +18,14 @@ _T = TypeVar("_T")
 
 class CurrentExecutor:
     def __init__(self) -> None:
-        self._ready = Event()
+        self._ready: TFuture = TFuture()
+        self._rdy = wrap_future(self._ready)
         self._loop: Optional[AbstractEventLoop] = None
         self._fut: Optional[Future] = None
 
         async def cont() -> None:
             self._loop = get_running_loop()
-            self._ready.set()
+            self._ready.set_result(None)
             while True:
                 await sleep(1)
 
@@ -31,7 +33,7 @@ class CurrentExecutor:
         self._th.start()
 
     async def run(self, co: Awaitable[_T]) -> _T:
-        self._ready.wait()
+        await self._rdy
         assert self._loop
         if self._fut:
 
