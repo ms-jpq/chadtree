@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from os import environ, sep
 from pathlib import Path
 from subprocess import check_call, check_output, run
+from sys import executable
 from typing import Iterator
 
 _TOP_LV = Path(__file__).resolve(strict=True).parent.parent
@@ -36,7 +37,7 @@ def _git_clone(path: Path) -> None:
 
 
 def _build() -> None:
-    check_call(("python3", "-m", "ci"), cwd=_TOP_LV)
+    check_call((executable, "-m", "ci"), cwd=_TOP_LV)
 
 
 def _git_alert(cwd: Path) -> None:
