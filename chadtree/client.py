@@ -1,4 +1,13 @@
-from asyncio import FIRST_COMPLETED, Event, Lock, Task, create_task, gather, wait
+from asyncio import (
+    FIRST_COMPLETED,
+    Event,
+    Lock,
+    Task,
+    create_task,
+    gather,
+    get_running_loop,
+    wait,
+)
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from logging import DEBUG as DEBUG_LVL
@@ -136,23 +145,29 @@ async def _go(client: RPClient) -> None:
         async def c1() -> None:
             transcient: Optional[Task] = None
             get: Optional[Task] = None
-            while True:
-                with suppress_and_log():
-                    get = create_task(dequeue_event())
-                    if transcient:
-                        await wait((transcient, get), return_when=FIRST_COMPLETED)
-                        if not transcient.done():
-                            with timeit("transcient"):
-                                await cancel(transcient)
-                        transcient = None
+            try:
+                while True:
+                    with suppress_and_log():
+                        get = create_task(dequeue_event())
+                        if transcient:
+                            await wait((transcient, get), return_when=FIRST_COMPLETED)
+                            if not transcient.done():
+                                with timeit("transcient"):
+                                    await cancel(transcient)
+                            transcient = None
 
-                    sync, method, params = await get
-                    task = step(method, params=params)
-                    if sync:
-                        with timeit(method):
-                            await task
-                    else:
-                        transcient = create_task(task)
+                        sync, method, params = await get
+                        task = step(method, params=params)
+                        if sync:
+                            with timeit(method):
+                                await task
+                        else:
+                            transcient = create_task(task)
+            finally:
+                loop = get_running_loop()
+                await cancel(
+                    *(get or loop.create_future(), transcient or loop.create_future())
+                )
 
         async def c2() -> None:
             t1, has_drawn = monotonic(), False

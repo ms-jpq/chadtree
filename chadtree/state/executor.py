@@ -4,7 +4,6 @@ from asyncio import (
     get_running_loop,
     run,
     run_coroutine_threadsafe,
-    sleep,
     wrap_future,
 )
 from concurrent.futures import Future as TFuture
@@ -26,8 +25,7 @@ class CurrentExecutor:
         async def cont() -> None:
             self._loop = get_running_loop()
             self._ready.set_result(None)
-            while True:
-                await sleep(1)
+            await self._loop.create_future()
 
         self._th = Thread(daemon=True, target=lambda: run(cont()))
         self._th.start()
