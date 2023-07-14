@@ -62,10 +62,7 @@ async def _rename(state: State, is_visual: bool) -> Optional[Stage]:
 
                     new_state = await maybe_path_above(state, paths={new_path}) or state
                     parents = ancestors(new_path)
-                    invalidate_dirs = (parents - state.index) | {
-                        old_path.parent,
-                        new_path.parent,
-                    }
+                    invalidate_dirs = {old_path.parent, new_path.parent}
                     index = state.index | parents
                     new_selection = {new_path} if state.selection else frozenset()
                     next_state = await forward(

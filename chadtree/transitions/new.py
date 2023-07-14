@@ -53,9 +53,8 @@ async def _new(state: State, is_visual: bool) -> Optional[Stage]:
                     return await refresh(state=state)
                 else:
                     new_state = await maybe_path_above(state, paths={path}) or state
-                    parents = ancestors(path)
-                    invalidate_dirs = (parents - state.index) | {path.parent}
-                    index = state.index | parents
+                    invalidate_dirs = {path.parent}
+                    index = state.index | ancestors(path)
                     new_selection = {path} if state.selection else frozenset()
                     next_state = await forward(
                         new_state,

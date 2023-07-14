@@ -18,7 +18,7 @@ async def new_current_file(state: State, current: PurePath) -> Stage:
 
     parents = ancestors(current)
     if state.root.path in parents:
-        invalidate_dirs = parents - state.index
+        invalidate_dirs = {current.parent}
         index = state.index | parents
         new_state = await forward(
             state,
