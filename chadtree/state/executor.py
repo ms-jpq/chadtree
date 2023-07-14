@@ -33,11 +33,11 @@ class CurrentExecutor:
     async def run(self, co: Awaitable[_T]) -> _T:
         await self._rdy
         assert self._loop
-        if self._fut:
+        if f := self._fut:
+            self._fut = None
 
             async def cont() -> None:
-                assert self._fut
-                await cancel(self._fut)
+                await cancel(f)
 
             die = run_coroutine_threadsafe(cont(), loop=self._loop)
             await wrap_future(die)
