@@ -23,6 +23,7 @@ from stat import (
 from typing import AbstractSet, AsyncIterator, Iterator, Mapping, Optional, Tuple, Union
 
 from std2.asyncio import pure
+from std2.pathlib import is_relative_to
 
 from ..state.executor import CurrentExecutor
 from ..state.types import Index
@@ -115,10 +116,14 @@ async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
     return node
 
 
+def _cross_over(root: PurePath, invalid: PurePath) -> bool:
+    return is_relative_to(root, invalid) or is_relative_to(invalid, root)
+
+
 async def _update(
     root: Node, index: Index, invalidate_dirs: AbstractSet[PurePath]
 ) -> Node:
-    if root.path in invalidate_dirs:
+    if any((_cross_over(root.path, invalid=invalid) for invalid in invalidate_dirs)):
         return await _next(root.path, index=index)
     else:
         walked = await gather(
