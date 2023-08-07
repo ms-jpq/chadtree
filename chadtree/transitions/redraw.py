@@ -104,12 +104,12 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
         a3.call_function("setpos", ("'>", (buf.number, r2 + 1, c2, 0)))
         if new_row is not None:
             lines = len(state.derived.hashed)
-            t = max(1, new_row - win_height // 2)
-            b = min(lines, new_row + win_height // 2)
-            if row > b:
-                a3.win_set_cursor(win, (t, 0))
-            if row < t:
-                a3.win_set_cursor(win, (b, 0))
+            lo = max(1, new_row - win_height // 2)
+            hi = min(lines, new_row + win_height // 2)
+            if row > hi or row < lo:
+                a3.win_set_cursor(win, (new_row, 0))
+                a3.win_set_cursor(win, (lo, 0))
+                a3.win_set_cursor(win, (hi, 0))
             a3.win_set_cursor(win, (new_row, col))
 
         # a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
