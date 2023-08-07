@@ -29,7 +29,8 @@ async def new_current_file(state: State, current: PurePath) -> Stage:
     else:
         new_state = await forward(state, current=current)
 
-    return Stage(new_state)
+    focus = current if state.follow else None
+    return Stage(new_state, focus=focus)
 
 
 async def new_root(

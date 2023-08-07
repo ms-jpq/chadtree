@@ -4,17 +4,7 @@ from fnmatch import fnmatch
 from locale import strxfrm
 from os.path import extsep, sep
 from pathlib import PurePath
-from typing import (
-    Any,
-    Callable,
-    Iterator,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 
 from pynvim_pp.lib import encode
 from std2.platform import OS, os

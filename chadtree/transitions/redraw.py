@@ -6,8 +6,8 @@ from pynvim_pp.atomic import Atomic
 from pynvim_pp.buffer import Buffer
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.operators import operator_marks
-from pynvim_pp.types import NoneType
 from pynvim_pp.rpc_types import NvimError
+from pynvim_pp.types import NoneType
 from std2.difflib import trans_inplace
 from std2.pickle.decoder import new_decoder
 from std2.pickle.types import DecodeError
@@ -66,6 +66,7 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
     use_extmarks = await Nvim.api.has("nvim-0.6")
 
     async for win, buf in find_fm_windows():
+        win_height = await win.get_height()
         p_count = await buf.line_count()
         n_count = len(state.derived.lines)
         row, col = await win.get_cursor()
@@ -102,6 +103,13 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
         a3.call_function("setpos", ("'<", (buf.number, r1 + 1, c1 + 1, 0)))
         a3.call_function("setpos", ("'>", (buf.number, r2 + 1, c2, 0)))
         if new_row is not None:
+            lines = len(state.derived.hashed)
+            t = max(1, new_row - win_height // 2)
+            b = min(lines, new_row + win_height // 2)
+            if row > b:
+                a3.win_set_cursor(win, (t, 0))
+            if row < t:
+                a3.win_set_cursor(win, (b, 0))
             a3.win_set_cursor(win, (new_row, col))
 
         # a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
