@@ -14,7 +14,6 @@ from std2.aitertools import achain, to_async
 from std2.contextlib import nullacontext
 
 from ...settings.localization import LANG
-from ...settings.types import Settings
 from ...state.next import forward
 from ...state.types import State
 from ..types import ClickType, Stage
