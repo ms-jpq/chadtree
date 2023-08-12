@@ -1,4 +1,4 @@
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from typing import Optional, Sequence
 from uuid import uuid4
 
@@ -8,6 +8,7 @@ from pynvim_pp.nvim import Nvim
 from pynvim_pp.operators import operator_marks
 from pynvim_pp.rpc_types import NvimError
 from pynvim_pp.types import NoneType
+from pynvim_pp.window import Window
 from std2.difflib import trans_inplace
 from std2.pickle.decoder import new_decoder
 from std2.pickle.types import DecodeError
@@ -23,6 +24,7 @@ class UnrecoverableError(Exception):
 
 
 _NS = uuid4()
+_LUA = (Path(__file__).resolve(strict=True).parent / "winline.lua").read_text("UTF-8")
 
 
 _DECODER = new_decoder[Sequence[str]](Sequence[str])
@@ -59,6 +61,10 @@ def _update(
     return atomic
 
 
+async def _winline(win: Window) -> Optional[int]:
+    return await Nvim.fn.luaeval(NoneType, _LUA, (win,))
+
+
 async def redraw(state: State, focus: Optional[PurePath]) -> None:
     focus_row = state.derived.path_row_lookup.get(focus) if focus else None
 
@@ -66,7 +72,6 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
     use_extmarks = await Nvim.api.has("nvim-0.6")
 
     async for win, buf in find_fm_windows():
-        win_height = await win.get_height()
         p_count = await buf.line_count()
         n_count = len(state.derived.lines)
         row, col = await win.get_cursor()
@@ -103,13 +108,16 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
         a3.call_function("setpos", ("'<", (buf.number, r1 + 1, c1 + 1, 0)))
         a3.call_function("setpos", ("'>", (buf.number, r2 + 1, c2, 0)))
         if new_row is not None:
-            lines = len(state.derived.hashed)
-            lo = max(1, new_row - win_height // 2)
-            hi = min(lines, new_row + win_height // 2)
-            if row > hi or row < lo:
-                a3.win_set_cursor(win, (new_row, 0))
-                a3.win_set_cursor(win, (lo, 0))
-                a3.win_set_cursor(win, (hi, 0))
+            if win_line := await _winline(win):
+                win_height = await win.get_height()
+                win_lo = win_line
+                win_hi = win_line + win_height - 1
+                win_p = await Nvim.fn.line(int, ".", win)
+                if win_p < win_lo or win_p > win_hi:
+                    lo = max(1, new_row - win_height // 2)
+                    hi = min(n_count, new_row + win_height // 2)
+                    a3.win_set_cursor(win, (lo, 0))
+                    a3.win_set_cursor(win, (hi, 0))
             a3.win_set_cursor(win, (new_row, col))
 
         # a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")

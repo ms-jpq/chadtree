@@ -1,4 +1,4 @@
-(function (args)
+(function(args)
   local method, params = unpack(args)
   if vim.lsp then
     local clients = vim.lsp.get_active_clients()
@@ -7,4 +7,3 @@
     end
   end
 end)(...)
-
