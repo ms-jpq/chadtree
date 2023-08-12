@@ -84,11 +84,7 @@ async def _update_follow(state: State) -> Optional[Stage]:
     """
 
     try:
-        if (
-            (current := await find_current_buffer_path())
-            and await is_file(current)
-            and state.current != current
-        ):
+        if (current := await find_current_buffer_path()) and await is_file(current):
             stage = await new_current_file(state, current=current)
             return stage
         else:
