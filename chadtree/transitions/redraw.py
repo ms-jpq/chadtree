@@ -105,16 +105,18 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
             win_height = await win.get_height()
             win_lo = await Nvim.fn.line(int, "w0", win)
             win_hi = await Nvim.fn.line(int, "w$", win)
+            lo = max(1, new_row - win_height // 2)
+            hi = min(n_count, new_row + win_height // 2)
+
             if new_row < win_lo or new_row > win_hi:
-                lo = max(1, new_row - win_height // 2)
-                hi = min(n_count, new_row + win_height // 2)
                 a3.win_set_cursor(win, (lo, 0))
                 a3.win_set_cursor(win, (hi, 0))
             a3.win_set_cursor(win, (new_row, col))
 
         # a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
 
+        a4 = a1 + a2 + a3
         try:
-            await (a1 + a2 + a3).commit(NoneType)
+            await a4.commit(NoneType)
         except NvimError as e:
             raise UnrecoverableError(e)
