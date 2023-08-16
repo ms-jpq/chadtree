@@ -111,6 +111,9 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
             if new_row < win_lo or new_row > win_hi:
                 a3.win_set_cursor(win, (lo, 0))
                 a3.win_set_cursor(win, (hi, 0))
+                a3.win_set_cursor(win, (lo, 0))
+                a3.win_set_cursor(win, (hi, 0))
+
             a3.win_set_cursor(win, (new_row, col))
 
         # a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
