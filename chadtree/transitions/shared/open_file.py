@@ -85,10 +85,10 @@ async def _show_file(*, state: State, click_type: ClickType) -> None:
                 await Nvim.exec(f"edit! {escaped}")
 
             await resize_fm_windows(last_used=state.window_order, width=state.width)
-            try:
-                await Nvim.exec("filetype detect")
-            except NvimError as e:
-                log.warn("%s", e)
+            # try:
+            #     await Nvim.exec("filetype detect")
+            # except NvimError as e:
+            #     log.warn("%s", e)
 
 
 async def open_file(
