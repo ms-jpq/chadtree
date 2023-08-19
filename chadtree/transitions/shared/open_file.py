@@ -1,6 +1,7 @@
 from mimetypes import guess_type
-from os.path import altsep, normpath, sep
+from os.path import normpath
 from pathlib import PurePath
+from posixpath import sep
 from typing import AsyncContextManager, Optional, cast
 
 from pynvim_pp.buffer import Buffer
@@ -95,7 +96,7 @@ async def open_file(
     state: State, path: PurePath, click_type: ClickType
 ) -> Optional[Stage]:
     mime, _ = guess_type(path.name, strict=False)
-    m_type, _, _ = (mime or "").partition(altsep or sep)
+    m_type, _, _ = (mime or "").partition(sep)
 
     question = LANG("mime_warn", name=path.name, mime=str(mime))
 
