@@ -55,12 +55,10 @@ async def _new(state: State, is_visual: bool) -> Optional[Stage]:
                     new_state = await maybe_path_above(state, paths={path}) or state
                     invalidate_dirs = {path.parent}
                     index = state.index | ancestors(path)
-                    new_selection = {path} if state.selection else frozenset()
                     next_state = await forward(
                         new_state,
                         index=index,
                         invalidate_dirs=invalidate_dirs,
-                        selection=new_selection,
                     )
                     await lsp_created((path,))
                     return Stage(next_state, focus=path)

@@ -67,11 +67,9 @@ async def _link(state: State, is_visual: bool) -> Optional[Stage]:
             focus, *_ = sorted(paths, key=pathsort_key)
             invalidate_dirs = {path.parent for path in paths}
             index = state.index | ancestors(*paths)
-            new_selection = paths if state.selection else frozenset()
             next_state = await forward(
                 new_state,
                 index=index,
                 invalidate_dirs=invalidate_dirs,
-                selection=new_selection,
             )
             return Stage(next_state, focus=focus)

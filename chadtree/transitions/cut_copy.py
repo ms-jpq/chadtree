@@ -112,7 +112,7 @@ async def _operation(
                     new_state = await forward(
                         state,
                         index=index,
-                        selection=new_selection,
+                        selection=new_selection if is_move else selection,
                         invalidate_dirs=invalidate_dirs,
                     )
                     focus = next(
