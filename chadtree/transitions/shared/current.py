@@ -39,7 +39,9 @@ async def new_root(
     indices: AbstractSet[PurePath],
 ) -> State:
     index = state.index | ancestors(new_cwd) | {new_cwd} | indices
-    root = await new(state.executor, root=new_cwd, index=index)
+    root = await new(
+        state.executor, follow_links=state.follow_links, root=new_cwd, index=index
+    )
     selection = {path for path in state.selection if root.path in ancestors(path)}
     return await forward(state, root=root, selection=selection, index=index)
 

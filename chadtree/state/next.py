@@ -21,6 +21,7 @@ async def forward(
     filter_pattern: Union[Optional[FilterPattern], VoidType] = Void,
     show_hidden: Union[bool, VoidType] = Void,
     follow: Union[bool, VoidType] = Void,
+    follow_links: Union[bool, VoidType] = Void,
     enable_vc: Union[bool, VoidType] = Void,
     width: Union[int, VoidType] = Void,
     markers: Union[Markers, VoidType] = Void,
@@ -36,6 +37,7 @@ async def forward(
     new_selection = or_else(selection, state.selection)
     new_filter_pattern = or_else(filter_pattern, state.filter_pattern)
     new_current = or_else(current, state.current)
+    new_follow_links = or_else(follow_links, state.follow_links)
     new_root = cast(
         Node,
         root
@@ -43,6 +45,7 @@ async def forward(
             await update(
                 state.executor,
                 root=state.root,
+                follow_links=new_follow_links,
                 index=new_index,
                 invalidate_dirs=invalidate_dirs,
             )
@@ -65,6 +68,7 @@ async def forward(
         filter_pattern=new_filter_pattern,
         show_hidden=new_hidden,
         follow=or_else(follow, state.follow),
+        follow_links=new_follow_links,
         enable_vc=or_else(enable_vc, state.enable_vc),
         width=or_else(width, state.width),
         root=new_root,

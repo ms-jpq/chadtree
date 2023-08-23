@@ -91,19 +91,24 @@ def _fs_stat(
             return mode, None
 
 
-async def _next(dirent: Union[PurePath, DirEntry[str]], index: Index) -> Node:
+async def _next(
+    dirent: Union[PurePath, DirEntry[str]], follow_links: bool, index: Index
+) -> Node:
     async def cont() -> AsyncIterator[Node]:
         with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
             with scandir(dirent) as dirents:
                 for child in dirents:
-                    yield await _next(child, index=index)
+                    yield await _next(child, follow_links=follow_links, index=index)
 
     if next(_COUNT) % 17 == 0:
         await sleep(0)
 
     root = PurePath(dirent)
-    children = {node.path: node async for node in cont()} if root in index else {}
     mode, pointed = _fs_stat(dirent)
+    if root in index and (follow_links or pointed is None):
+        children = {node.path: node async for node in cont()}
+    else:
+        children = {}
     _ancestors = ancestors(root)
     node = Node(
         path=root,
@@ -121,15 +126,21 @@ def _cross_over(root: PurePath, invalid: PurePath) -> bool:
 
 
 async def _update(
-    root: Node, index: Index, invalidate_dirs: AbstractSet[PurePath]
+    root: Node, follow_links: bool, index: Index, invalidate_dirs: AbstractSet[PurePath]
 ) -> Node:
     if any((_cross_over(root.path, invalid=invalid) for invalid in invalidate_dirs)):
-        return await _next(root.path, index=index)
+        return await _next(root.path, follow_links=follow_links, index=index)
     else:
         walked = await gather(
             *(
                 gather(
-                    pure(k), _update(v, index=index, invalidate_dirs=invalidate_dirs)
+                    pure(k),
+                    _update(
+                        v,
+                        follow_links=follow_links,
+                        index=index,
+                        invalidate_dirs=invalidate_dirs,
+                    ),
                 )
                 for k, v in root.children.items()
             )
@@ -144,25 +155,35 @@ async def _update(
         )
 
 
-async def new(exec: CurrentExecutor, root: PurePath, index: Index) -> Node:
+async def new(
+    exec: CurrentExecutor, root: PurePath, follow_links: bool, index: Index
+) -> Node:
     with timeit("fs->new"):
-        return await exec.run(_next(root, index=index))
+        return await exec.run(_next(root, follow_links=follow_links, index=index))
 
 
 async def update(
     exec: CurrentExecutor,
     root: Node,
     *,
+    follow_links: bool,
     index: Index,
     invalidate_dirs: AbstractSet[PurePath],
 ) -> Node:
     with timeit("fs->_update"):
         try:
             return await exec.run(
-                _update(root=root, index=index, invalidate_dirs=invalidate_dirs)
+                _update(
+                    root=root,
+                    follow_links=follow_links,
+                    index=index,
+                    invalidate_dirs=invalidate_dirs,
+                )
             )
         except FileNotFoundError:
-            return await new(exec, root=root.path, index=index)
+            return await new(
+                exec, follow_links=follow_links, root=root.path, index=index
+            )
 
 
 def user_ignored(node: Node, ignores: Ignored) -> bool:

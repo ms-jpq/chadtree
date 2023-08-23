@@ -48,6 +48,9 @@
 "follow_mode_indi": |-
   🐶 follow mode: ${follow}
 
+"follow_links_indi": |-
+  🔗 follow mode: ${follow}
+
 "hourglass": |-
   ⏳...⌛️
 
@@ -76,7 +79,7 @@
   ✏️  :
 
 "clear_bookmarks": |-
-  ${idx}. 🔖 Clear! 
+  ${idx}. 🔖 Clear!
 
 "no_bookmarks": |-
   ⚠️  Error - no bookmarks found

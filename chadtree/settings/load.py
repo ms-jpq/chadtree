@@ -50,6 +50,7 @@ class _OpenDirection(Enum):
 class _UserOptions:
     close_on_open: bool
     follow: bool
+    follow_links: bool
     lang: Optional[str]
     mimetypes: MimetypeOptions
     page_increment: int
@@ -149,6 +150,7 @@ async def initial(specs: Iterable[RPCallable]) -> Settings:
         settings = Settings(
             close_on_open=options.close_on_open,
             follow=options.follow,
+            follow_links=options.follow_links,
             ignores=config.ignore,
             keymap=keymap,
             lang=options.lang,

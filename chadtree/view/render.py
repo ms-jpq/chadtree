@@ -80,6 +80,7 @@ def _paint(
     selection: Selection,
     markers: Markers,
     vc: VCStatus,
+    follow_links: bool,
     show_hidden: bool,
     current: Optional[PurePath],
 ) -> Callable[[Node, int], Optional[_Render]]:
@@ -133,7 +134,12 @@ def _paint(
     def gen_icon(node: Node) -> Iterator[str]:
         yield " "
         if is_dir(node):
-            yield icons.folder.open if node.path in index else icons.folder.closed
+            if node.pointed and not follow_links:
+                yield icons.link.normal
+            elif node.path in index:
+                yield icons.folder.open
+            else:
+                yield icons.folder.closed
         else:
             yield (
                 icons.name_exact.get(node.path.name, "")
@@ -161,7 +167,10 @@ def _paint(
             yield icons.link.broken
         elif Mode.link in mode:
             yield " "
-            yield icons.link.normal
+            if is_dir(node) and not follow_links:
+                yield icons.folder.closed
+            else:
+                yield icons.link.normal
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
         if marks := markers.bookmarks.get(path):
@@ -231,6 +240,7 @@ def render(
     filter_pattern: Optional[FilterPattern],
     markers: Markers,
     vc: VCStatus,
+    follow_links: bool,
     show_hidden: bool,
     current: Optional[PurePath],
 ) -> Derived:
@@ -240,6 +250,7 @@ def render(
         selection=selection,
         markers=markers,
         vc=vc,
+        follow_links=follow_links,
         show_hidden=show_hidden,
         current=current,
     )

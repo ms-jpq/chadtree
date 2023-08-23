@@ -102,6 +102,16 @@ CHADTree will highlight currently open file, and open all its parents.
 true
 ```
 
+#### `chadtree_settings.options.follow_links`
+
+CHADTree will follow symlinks
+
+**default:**
+
+```json
+true
+```
+
 #### `chadtree_settings.options.lang`
 
 CHADTree will guess your locale from [unix environmental variables](https://pubs.opengroup.org/onlinepubs/7908799/xbd/envvar.html).
@@ -304,4 +314,3 @@ Set of window local options to for CHADTree windows
 ### chadtree_settings.theme
 
 See help docs on [themes](https://github.com/ms-jpq/chadtree/tree/chad/docs/THEME.md)
-

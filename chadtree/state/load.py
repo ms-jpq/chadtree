@@ -39,7 +39,9 @@ async def initial(settings: Settings) -> State:
     )
 
     selection: Selection = frozenset()
-    node = await new(executor, root=cwd, index=index)
+    node = await new(
+        executor, follow_links=settings.follow_links, root=cwd, index=index
+    )
     vc = VCStatus()
 
     current = None
@@ -55,6 +57,7 @@ async def initial(settings: Settings) -> State:
         filter_pattern=filter_pattern,
         show_hidden=show_hidden,
         follow=settings.follow,
+        follow_links=settings.follow_links,
         enable_vc=enable_vc,
         width=settings.width,
         root=node,

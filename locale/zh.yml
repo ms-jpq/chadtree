@@ -48,6 +48,9 @@
 "follow_mode_indi": |-
   🐶 跟随模式: ${follow}
 
+"follow_links_indi": |-
+  🔗 跟随模式: ${follow}
+
 "hourglass": |-
   ⏳...⌛️
 

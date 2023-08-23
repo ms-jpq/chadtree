@@ -18,6 +18,7 @@ class DeepState(State):
                 filter_pattern=self.filter_pattern,
                 markers=self.markers,
                 vc=self.vc,
+                follow_links=self.follow_links,
                 show_hidden=self.show_hidden,
                 current=self.current,
             )

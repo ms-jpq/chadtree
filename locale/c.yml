@@ -48,6 +48,9 @@
 "follow_mode_indi": |-
   !! follow mode: ${follow}
 
+"follow_links_indi": |-
+  !! follow links: ${follow}
+
 "hourglass": |-
   Wait...
 

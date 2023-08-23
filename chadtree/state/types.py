@@ -31,6 +31,7 @@ class State:
     executor: CurrentExecutor
     settings: Settings
     session: Session
+    follow_links: bool
     vim_focus: bool
     current: Optional[PurePath]
     enable_vc: bool
