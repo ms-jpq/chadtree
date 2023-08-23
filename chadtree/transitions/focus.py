@@ -5,7 +5,7 @@ from typing import Optional
 from pynvim_pp.nvim import Nvim
 from std2 import anext
 
-from ..fs.cartographer import is_dir
+from ..fs.cartographer import act_like_dir
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..state.types import State
@@ -57,7 +57,11 @@ async def _change_dir(state: State, is_visual: bool) -> Optional[Stage]:
     if not node:
         return None
     else:
-        cwd = node.path if is_dir(node) else node.path.parent
+        cwd = (
+            node.path
+            if act_like_dir(node, follow_links=state.follow_links)
+            else node.path.parent
+        )
         new_state = await new_root(state, new_cwd=cwd, indices=frozenset())
         escaped = await Nvim.fn.fnameescape(str, normcase(new_state.root.path))
         await Nvim.exec(f"chdir {escaped}")
@@ -75,7 +79,11 @@ async def _change_focus(state: State, is_visual: bool) -> Optional[Stage]:
     if not node:
         return None
     else:
-        new_base = node.path if is_dir(node) else node.path.parent
+        new_base = (
+            node.path
+            if act_like_dir(node, follow_links=state.follow_links)
+            else node.path.parent
+        )
         new_state = await new_root(state, new_cwd=new_base, indices=frozenset())
         focus = node.path
         return Stage(new_state, focus=focus)

@@ -6,7 +6,7 @@ from pynvim_pp.nvim import Nvim
 from std2 import anext
 from std2.locale import pathsort_key
 
-from ..fs.cartographer import is_dir
+from ..fs.cartographer import act_like_dir
 from ..fs.ops import ancestors, exists, link, resolve
 from ..lsp.notify import lsp_created
 from ..registry import rpc
@@ -30,7 +30,11 @@ async def _link(state: State, is_visual: bool) -> Optional[Stage]:
     if node is None:
         return None
     else:
-        parent = node.path if is_dir(node) else node.path.parent
+        parent = (
+            node.path
+            if act_like_dir(node, follow_links=state.follow_links)
+            else node.path.parent
+        )
         selection = state.selection or {node.path}
         operations: MutableMapping[PurePath, PurePath] = {}
         for selected in selection:

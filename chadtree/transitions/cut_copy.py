@@ -7,7 +7,7 @@ from pynvim_pp.nvim import Nvim
 from std2 import anext
 from std2.locale import pathsort_key
 
-from ..fs.cartographer import is_dir
+from ..fs.cartographer import act_like_dir
 from ..fs.ops import ancestors, copy, cut, exists, unify_ancestors
 from ..fs.types import Node
 from ..lsp.notify import lsp_created, lsp_moved
@@ -22,8 +22,10 @@ from .shared.wm import kill_buffers
 from .types import Stage
 
 
-def _find_dest(src: PurePath, node: Node) -> PurePath:
-    parent = node.path if is_dir(node) else node.path.parent
+def _find_dest(src: PurePath, node: Node, follow_links: bool) -> PurePath:
+    parent = (
+        node.path if act_like_dir(node, follow_links=follow_links) else node.path.parent
+    )
     dst = parent / src.name
     return dst
 
@@ -48,7 +50,10 @@ async def _operation(
         await Nvim.write(LANG("operation not permitted on root"), error=True)
         return None
     else:
-        pre_operations = {src: _find_dest(src, node) for src in unified}
+        pre_operations = {
+            src: _find_dest(src, node=node, follow_links=state.follow_links)
+            for src in unified
+        }
         pre_existing = {
             s: d for s, d in pre_operations.items() if await exists(d, follow=False)
         }

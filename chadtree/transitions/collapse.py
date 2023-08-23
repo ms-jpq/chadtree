@@ -2,7 +2,7 @@ from typing import Optional
 
 from std2 import anext
 
-from ..fs.cartographer import is_dir
+from ..fs.cartographer import act_like_dir
 from ..fs.ops import ancestors
 from ..registry import rpc
 from ..state.next import forward
@@ -21,7 +21,7 @@ async def _collapse(state: State, is_visual: bool) -> Optional[Stage]:
     if not node:
         return None
     else:
-        if is_dir(node):
+        if act_like_dir(node, follow_links=state.follow_links):
             path = node.path if node.path in state.index else node.path.parent
         else:
             path = node.path.parent

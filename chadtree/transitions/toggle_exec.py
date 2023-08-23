@@ -3,7 +3,7 @@ from pathlib import PurePath
 from stat import S_ISDIR, S_IXGRP, S_IXOTH, S_IXUSR
 from typing import Iterator, Tuple
 
-from ..fs.cartographer import is_dir
+from ..fs.cartographer import act_like_dir
 from ..registry import rpc
 from ..state.next import forward
 from ..state.types import State
@@ -20,7 +20,7 @@ async def _toggle_exec(state: State, is_visual: bool) -> Stage:
     selected = state.selection or {
         node.path
         async for node in indices(state, is_visual=is_visual)
-        if not is_dir(node)
+        if not act_like_dir(node, follow_links=state.follow_links)
     }
 
     def cont() -> Iterator[Tuple[PurePath, stat_result]]:

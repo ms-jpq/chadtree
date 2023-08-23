@@ -196,3 +196,10 @@ def user_ignored(node: Node, ignores: Ignored) -> bool:
 
 def is_dir(node: Node) -> bool:
     return Mode.folder in node.mode
+
+
+def act_like_dir(node: Node, follow_links: bool) -> bool:
+    if node.pointed and not follow_links:
+        return False
+    else:
+        return is_dir(node)

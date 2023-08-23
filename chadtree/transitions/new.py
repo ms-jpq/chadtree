@@ -6,7 +6,7 @@ from typing import Optional
 from pynvim_pp.nvim import Nvim
 from std2 import anext
 
-from ..fs.cartographer import is_dir
+from ..fs.cartographer import act_like_dir
 from ..fs.ops import ancestors, exists, mkdir, new
 from ..lsp.notify import lsp_created
 from ..registry import rpc
@@ -29,7 +29,11 @@ async def _new(state: State, is_visual: bool) -> Optional[Stage]:
     if not node:
         return None
     else:
-        parent = node.path if is_dir(node) else node.path.parent
+        parent = (
+            node.path
+            if act_like_dir(node, follow_links=state.follow_links)
+            else node.path.parent
+        )
 
         child = await Nvim.input(question=LANG("pencil"), default="")
 
