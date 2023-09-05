@@ -162,6 +162,16 @@ Change how many lines `{` and `}` scroll
 5
 ```
 
+#### `chadtree_settings.options.min_diagnostics_severity`
+
+Lower is more severe.
+
+**default:**
+
+```json
+2
+```
+
 #### `chadtree_settings.options.polling_rate`
 
 CHADTree's background refresh rate

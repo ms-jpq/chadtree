@@ -57,6 +57,7 @@ class _UserOptions:
     polling_rate: SupportsFloat
     session: bool
     show_hidden: bool
+    min_diagnostics_severity: int
     version_control: VersionCtlOpts
 
 
@@ -157,6 +158,7 @@ async def initial(specs: Iterable[RPCallable]) -> Settings:
             keymap=keymap,
             lang=options.lang,
             mime=options.mimetypes,
+            min_diagnostics_severity=options.min_diagnostics_severity,
             open_left=view.open_direction is _OpenDirection.left,
             page_increment=options.page_increment,
             polling_rate=float(options.polling_rate),

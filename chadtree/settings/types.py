@@ -37,4 +37,5 @@ class Settings:
     width: int
     win_actual_opts: Mapping[str, Union[bool, str]]
     win_local_opts: Mapping[str, Union[bool, str]]
+    min_diagnostics_severity: int
     xdg: bool

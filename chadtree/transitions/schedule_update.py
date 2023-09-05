@@ -24,7 +24,7 @@ async def scheduled_update(state: State) -> Optional[Stage]:
     try:
         stage, diagnostics, vc, _ = await gather(
             refresh(state=state),
-            poll(),
+            poll(state.settings.min_diagnostics_severity),
             status(cwd) if state.enable_vc else pure(VCStatus()),
             store,
         )

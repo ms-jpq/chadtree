@@ -30,7 +30,7 @@ async def _when_idle(state: State) -> None:
 
     async def cont() -> None:
         await sleep(state.settings.idle_timeout)
-        diagnostics = await poll()
+        diagnostics = await poll(state.settings.min_diagnostics_severity)
         await forward(state, diagnostics=diagnostics)
 
     _CELL.val = create_task(cont())

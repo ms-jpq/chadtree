@@ -19,14 +19,18 @@ else:
     _C = Counter[int]
 
 
-async def poll() -> Diagnostics:
+async def poll(min_severity: int) -> Diagnostics:
     diagnostics: Mapping[str, Mapping[str, int]] = cast(
         Mapping[str, Mapping[str, int]], await Nvim.fn.luaeval(NoneType, _LUA, ())
     )
 
     raw = {
         PurePath(path): Counter(
-            {int(severity): count for severity, count in (counts or {}).items()}
+            {
+                s: count
+                for severity, count in (counts or {}).items()
+                if (s := int(severity)) <= min_severity
+            }
         )
         for path, counts in (diagnostics or {}).items()
     }

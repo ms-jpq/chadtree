@@ -103,6 +103,7 @@ options:
       - font
       - image
       - video
+  min_diagnostics_severity: 2
   page_increment: 5
   polling_rate: 2.0
   session: true
