@@ -134,6 +134,15 @@ theme:
     marks: Keyword
     quickfix: Label
     version_control: Comment
+    diagnostics:
+      1: DiagnosticError
+      2: DiagnosticWarn
+      3: DiagnosticInfo
+      4: DiagnosticHint
+      5: DiagnosticOk
+    diagnostic_unknown: DiagnosticOk
+    diagnostic_context: Comment
+
   icon_colour_set: github
   icon_glyph_set: devicons
   text_colour_set: env

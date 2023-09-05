@@ -16,6 +16,9 @@ class HLGroups:
     ignored: str
     marks: str
     quickfix: str
+    diagnostics: Mapping[int, str]
+    diagnostic_unknown: str
+    diagnostic_context: str
     version_control: str
 
 

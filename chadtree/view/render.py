@@ -1,4 +1,4 @@
-from collections import UserString, defaultdict
+from collections import UserString
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
@@ -18,16 +18,6 @@ from ..state.types import Diagnostics, FilterPattern, Index, Selection
 from ..version_ctl.types import VCStatus
 from .ops import encode_for_display
 from .types import Badge, Derived, Highlight, Sortby
-
-_DHL = defaultdict(
-    lambda: "DiagnosticOk",
-    {
-        1: "DiagnosticError",
-        2: "DiagnosticWarn",
-        3: "DiagnosticInfo",
-        4: "DiagnosticHint",
-    },
-)
 
 
 class _CompVals(IntEnum):
@@ -185,17 +175,22 @@ def _paint(
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
         if diagnostic := diagnostics.get(path, {}):
-            group = ""
+            dl = len(diagnostic)
             for idx, (severity, count) in enumerate(sorted(diagnostic.items())):
-                group = group or _DHL[severity]
-                if not idx:
-                    yield Badge(text="{", group=group)
-                yield Badge(
-                    text=f"{count}",
-                    group=group,
+                group = context.particular_mappings.diagnostics.get(
+                    severity, context.particular_mappings.diagnostic_unknown
                 )
-                if idx + 1 == len(diagnostic):
-                    yield Badge(text="}", group=group)
+                lhs, rhs = not idx, idx + 1 == dl
+                r = " " if dl > 1 and not rhs else ""
+                if lhs:
+                    yield Badge(
+                        text="{", group=context.particular_mappings.diagnostic_context
+                    )
+                yield Badge(text=f"{count}{r}", group=group)
+                if rhs:
+                    yield Badge(
+                        text="}", group=context.particular_mappings.diagnostic_context
+                    )
 
         if marks := markers.bookmarks.get(path):
             ordered = "".join(sorted(marks))
