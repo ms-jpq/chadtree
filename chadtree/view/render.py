@@ -174,7 +174,9 @@ def _paint(
                 yield icons.link.normal
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
+        l = ""
         if diagnostic := diagnostics.get(path, {}):
+            l = " "
             dl = len(diagnostic)
             for idx, (severity, count) in enumerate(sorted(diagnostic.items())):
                 group = context.particular_mappings.diagnostics.get(
@@ -195,19 +197,19 @@ def _paint(
         if marks := markers.bookmarks.get(path):
             ordered = "".join(sorted(marks))
             yield Badge(
-                text=f"<{ordered}>",
+                text=f"{l}<{ordered}>",
                 group=context.particular_mappings.bookmarks,
             )
 
         if qf_count := markers.quick_fix.get(path):
             yield Badge(
-                text=f"({qf_count})",
+                text=f"{l}({qf_count})",
                 group=context.particular_mappings.quickfix,
             )
 
         if stat := vc.status.get(path):
             yield Badge(
-                text=f" [{stat}]",
+                text=f"{l}[{stat}]",
                 group=context.particular_mappings.version_control,
             )
 
