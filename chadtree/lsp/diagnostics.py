@@ -1,3 +1,4 @@
+import sys
 from collections import Counter
 from pathlib import Path, PurePath
 from typing import Mapping, MutableMapping, cast
@@ -12,6 +13,11 @@ _LUA = (Path(__file__).resolve(strict=True).parent / "diagnostics.lua").read_tex
     "UTF-8"
 )
 
+if sys.version_info < (3, 9):
+    _C = Counter
+else:
+    _C = Counter[int]
+
 
 async def poll() -> Diagnostics:
     diagnostics: Mapping[str, Mapping[str, int]] = cast(
@@ -25,7 +31,7 @@ async def poll() -> Diagnostics:
         for path, counts in (diagnostics or {}).items()
     }
 
-    acc: MutableMapping[PurePath, Counter[int]] = {}
+    acc: MutableMapping[PurePath, _C] = {}
     for path, counts in raw.items():
         for parent in ancestors(path):
             c = acc.setdefault(parent, Counter())
