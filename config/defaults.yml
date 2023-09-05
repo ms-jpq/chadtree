@@ -141,7 +141,7 @@ theme:
       4: DiagnosticHint
       5: DiagnosticOk
     diagnostic_unknown: DiagnosticOk
-    diagnostic_context: Comment
+    diagnostic_context: Menu
 
   icon_colour_set: github
   icon_glyph_set: devicons
