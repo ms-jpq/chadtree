@@ -185,16 +185,17 @@ def _paint(
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
         if diagnostic := diagnostics.get(path, {}):
+            group = ""
             for idx, (severity, count) in enumerate(sorted(diagnostic.items())):
+                group = group or _DHL[severity]
                 if not idx:
-                    yield Badge(text="{", group="DiagnosticInfo")
-                group = _DHL[severity]
+                    yield Badge(text="{", group=group)
                 yield Badge(
                     text=f"{count}",
                     group=group,
                 )
                 if idx + 1 == len(diagnostic):
-                    yield Badge(text="}", group="DiagnosticInfo")
+                    yield Badge(text="}", group=group)
 
         if marks := markers.bookmarks.get(path):
             ordered = "".join(sorted(marks))
