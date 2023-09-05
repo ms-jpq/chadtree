@@ -1,9 +1,11 @@
+from collections import Counter
 from pathlib import Path, PurePath
-from typing import Mapping, cast
+from typing import Mapping, MutableMapping, cast
 
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.types import NoneType
 
+from ..fs.ops import ancestors
 from ..state.types import Diagnostics
 
 _LUA = (Path(__file__).resolve(strict=True).parent / "diagnostics.lua").read_text(
@@ -16,9 +18,17 @@ async def poll() -> Diagnostics:
         Mapping[str, Mapping[str, int]], await Nvim.fn.luaeval(NoneType, _LUA, ())
     )
 
-    return {
-        PurePath(path): {
-            int(severity): count for severity, count in (counts or {}).items()
-        }
+    raw = {
+        PurePath(path): Counter(
+            {int(severity): count for severity, count in (counts or {}).items()}
+        )
         for path, counts in (diagnostics or {}).items()
     }
+
+    acc: MutableMapping[PurePath, Counter[int]] = {}
+    for path, counts in raw.items():
+        for parent in ancestors(path):
+            c = acc.setdefault(parent, Counter())
+            c += counts
+
+    return {**acc, **raw}
