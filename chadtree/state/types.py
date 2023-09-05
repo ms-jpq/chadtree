@@ -13,6 +13,7 @@ from .executor import CurrentExecutor
 
 Index = AbstractSet[PurePath]
 Selection = Index
+Diagnostics = Mapping[PurePath, Mapping[int, int]]
 
 
 @dataclass(frozen=True)
@@ -44,6 +45,7 @@ class State:
     show_hidden: bool
     vc: VCStatus
     width: int
+    diagnostics: Diagnostics
     window_order: Mapping[ExtData, None]
 
     @property

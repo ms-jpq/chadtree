@@ -62,6 +62,7 @@ async def initial(settings: Settings) -> State:
         width=settings.width,
         root=node,
         markers=marks,
+        diagnostics={},
         vc=vc,
         current=current,
         window_order={},

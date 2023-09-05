@@ -82,6 +82,7 @@ class _UserView:
 class _UserConfig:
     keymap: Mapping[str, AbstractSet[str]]
     options: _UserOptions
+    idle_timeout: SupportsFloat
     ignore: Ignored
     view: _UserView
     theme: _UserTheme
@@ -152,6 +153,7 @@ async def initial(specs: Iterable[RPCallable]) -> Settings:
             follow=options.follow,
             follow_links=options.follow_links,
             ignores=config.ignore,
+            idle_timeout=float(config.idle_timeout),
             keymap=keymap,
             lang=options.lang,
             mime=options.mimetypes,

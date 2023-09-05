@@ -28,6 +28,7 @@ class Settings:
     open_left: bool
     page_increment: int
     polling_rate: float
+    idle_timeout: float
     profiling: bool
     session: bool
     show_hidden: bool

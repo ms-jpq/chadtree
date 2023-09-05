@@ -1,4 +1,4 @@
-from collections import UserString
+from collections import UserString, defaultdict
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from locale import strxfrm
@@ -14,10 +14,20 @@ from ..fs.cartographer import is_dir, user_ignored
 from ..fs.types import Mode, Node
 from ..nvim.types import Markers
 from ..settings.types import Settings
-from ..state.types import FilterPattern, Index, Selection
+from ..state.types import Diagnostics, FilterPattern, Index, Selection
 from ..version_ctl.types import VCStatus
 from .ops import encode_for_display
 from .types import Badge, Derived, Highlight, Sortby
+
+_DHL = defaultdict(
+    lambda: "DiagnosticOk",
+    {
+        1: "DiagnosticError",
+        2: "DiagnosticWarn",
+        3: "DiagnosticInfo",
+        4: "DiagnosticHint",
+    },
+)
 
 
 class _CompVals(IntEnum):
@@ -79,6 +89,7 @@ def _paint(
     index: Index,
     selection: Selection,
     markers: Markers,
+    diagnostics: Diagnostics,
     vc: VCStatus,
     follow_links: bool,
     show_hidden: bool,
@@ -173,6 +184,18 @@ def _paint(
                 yield icons.link.normal
 
     def gen_badges(path: PurePath) -> Iterator[Badge]:
+        if diagnostic := diagnostics.get(path, {}):
+            for idx, (severity, count) in enumerate(sorted(diagnostic.items())):
+                if not idx:
+                    yield Badge(text="{", group="DiagnosticInfo")
+                group = _DHL[severity]
+                yield Badge(
+                    text=f"{count}",
+                    group=group,
+                )
+                if idx + 1 == len(diagnostic):
+                    yield Badge(text="}", group="DiagnosticInfo")
+
         if marks := markers.bookmarks.get(path):
             ordered = "".join(sorted(marks))
             yield Badge(
@@ -239,6 +262,7 @@ def render(
     selection: Selection,
     filter_pattern: Optional[FilterPattern],
     markers: Markers,
+    diagnostics: Diagnostics,
     vc: VCStatus,
     follow_links: bool,
     show_hidden: bool,
@@ -249,6 +273,7 @@ def render(
         index=index,
         selection=selection,
         markers=markers,
+        diagnostics=diagnostics,
         vc=vc,
         follow_links=follow_links,
         show_hidden=show_hidden,

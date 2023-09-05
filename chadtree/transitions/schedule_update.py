@@ -5,6 +5,7 @@ from pynvim_pp.nvim import Nvim
 from pynvim_pp.rpc_types import NvimError
 from std2.asyncio import pure
 
+from ..lsp.diagnostics import poll
 from ..registry import rpc
 from ..state.next import forward
 from ..state.ops import dump_session
@@ -21,13 +22,14 @@ async def scheduled_update(state: State) -> Optional[Stage]:
     store = dump_session(state) if state.vim_focus else pure(None)
 
     try:
-        stage, vc, _ = await gather(
+        stage, diagnostics, vc, _ = await gather(
             refresh(state=state),
+            poll(),
             status(cwd) if state.enable_vc else pure(VCStatus()),
             store,
         )
     except NvimError:
         return None
     else:
-        new_state = await forward(stage.state, vc=vc)
+        new_state = await forward(stage.state, diagnostics=diagnostics, vc=vc)
         return Stage(new_state, focus=stage.focus)

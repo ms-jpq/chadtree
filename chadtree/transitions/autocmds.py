@@ -1,11 +1,15 @@
+from asyncio import Task, create_task, sleep
 from itertools import chain
 from typing import Optional
 
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.rpc_types import NvimError
 from pynvim_pp.window import Window
+from std2.asyncio import cancel
+from std2.cell import RefCell
 
 from ..fs.ops import is_file
+from ..lsp.diagnostics import poll
 from ..nvim.markers import markers
 from ..registry import NAMESPACE, autocmd, rpc
 from ..state.next import forward
@@ -14,6 +18,25 @@ from ..state.types import State
 from .shared.current import new_current_file, new_root
 from .shared.wm import find_current_buffer_path
 from .types import Stage
+
+_CELL = RefCell[Optional[Task]](None)
+
+
+@rpc(blocking=False)
+async def _when_idle(state: State) -> None:
+    if task := _CELL.val:
+        _CELL.val = None
+        await cancel(task)
+
+    async def cont() -> None:
+        await sleep(state.settings.idle_timeout)
+        diagnostics = await poll()
+        await forward(state, diagnostics=diagnostics)
+
+    _CELL.val = create_task(cont())
+
+
+_ = autocmd("CursorHold", "CursorHoldI") << f"lua {NAMESPACE}.{_when_idle.method}()"
 
 
 @rpc(blocking=False)

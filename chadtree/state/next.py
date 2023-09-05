@@ -9,7 +9,7 @@ from ..fs.types import Node
 from ..nvim.types import Markers
 from ..version_ctl.types import VCStatus
 from .cache import DeepState
-from .types import FilterPattern, Index, Selection, Session, State
+from .types import Diagnostics, FilterPattern, Index, Selection, Session, State
 
 
 async def forward(
@@ -25,6 +25,7 @@ async def forward(
     enable_vc: Union[bool, VoidType] = Void,
     width: Union[int, VoidType] = Void,
     markers: Union[Markers, VoidType] = Void,
+    diagnostics: Union[Diagnostics, VoidType] = Void,
     vc: Union[VCStatus, VoidType] = Void,
     current: Union[PurePath, VoidType] = Void,
     invalidate_dirs: Union[AbstractSet[PurePath], VoidType] = Void,
@@ -73,6 +74,7 @@ async def forward(
         width=or_else(width, state.width),
         root=new_root,
         markers=new_markers,
+        diagnostics=or_else(diagnostics, state.diagnostics),
         vc=new_vc,
         current=new_current,
         window_order=or_else(window_order, state.window_order),
