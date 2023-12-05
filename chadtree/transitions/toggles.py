@@ -54,6 +54,18 @@ async def _toggle_follow_links(state: State, is_visual: bool) -> Stage:
 
 
 @rpc(blocking=False)
+async def _toggle_follow_ignore(state: State, is_visual: bool) -> Stage:
+    """
+    Toggle --follow
+    """
+
+    follow_links = not state.follow_links
+    new_state = await forward(state, follow_links=follow_links)
+    await Nvim.write(LANG("follow_links_indi", follow=str(new_state.follow_links)))
+    return Stage(new_state)
+
+
+@rpc(blocking=False)
 async def _toggle_version_control(state: State, is_visual: bool) -> Stage:
     """
     Toggle version control

@@ -51,6 +51,9 @@
 "follow_links_indi": |-
   !! follow links: ${follow}
 
+"follow_ignore_indi": |-
+  !! follow ignore: ${follow}
+
 "hourglass": |-
   Wait...
 

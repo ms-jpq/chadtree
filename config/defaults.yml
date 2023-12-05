@@ -81,6 +81,8 @@ keymap:
     - u
   toggle_follow_links:
     - U
+  toggle_follow_ignore:
+    - T
   toggle_hidden:
     - .
   toggle_version_control:
@@ -93,6 +95,7 @@ options:
   close_on_open: false
   follow: true
   follow_links: true
+  follow_ignore: false
   lang: null
   mimetypes:
     allow_exts:

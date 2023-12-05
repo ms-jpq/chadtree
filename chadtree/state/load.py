@@ -58,6 +58,7 @@ async def initial(settings: Settings) -> State:
         show_hidden=show_hidden,
         follow=settings.follow,
         follow_links=settings.follow_links,
+        follow_ignore=settings.follow_ignore,
         enable_vc=enable_vc,
         width=settings.width,
         root=node,

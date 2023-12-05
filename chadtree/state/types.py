@@ -33,6 +33,7 @@ class State:
     settings: Settings
     session: Session
     follow_links: bool
+    follow_ignore: bool
     vim_focus: bool
     current: Optional[PurePath]
     enable_vc: bool

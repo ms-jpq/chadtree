@@ -21,6 +21,7 @@ class Settings:
     close_on_open: bool
     follow: bool
     follow_links: bool
+    follow_ignore: bool
     ignores: Ignored
     keymap: Mapping[str, AbstractSet[str]]
     lang: Optional[str]

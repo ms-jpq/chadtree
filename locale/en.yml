@@ -51,6 +51,9 @@
 "follow_links_indi": |-
   🔗 follow mode: ${follow}
 
+"follow_ignore_indi": |-
+  🌫️ follow mode: ${follow}
+
 "hourglass": |-
   ⏳...⌛️
 

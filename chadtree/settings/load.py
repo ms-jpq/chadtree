@@ -51,6 +51,7 @@ class _UserOptions:
     close_on_open: bool
     follow: bool
     follow_links: bool
+    follow_ignore: bool
     lang: Optional[str]
     mimetypes: MimetypeOptions
     page_increment: int
@@ -153,6 +154,7 @@ async def initial(specs: Iterable[RPCallable]) -> Settings:
             close_on_open=options.close_on_open,
             follow=options.follow,
             follow_links=options.follow_links,
+            follow_ignore=options.follow_ignore,
             ignores=config.ignore,
             idle_timeout=float(config.idle_timeout),
             keymap=keymap,

@@ -412,6 +412,16 @@ Toggle `follow_links` on and off. See `chadtree_settings.options.follow_links` f
 ["U"]
 ```
 
+##### `chadtree_settings.keymap.toggle_follow_ignore`
+
+Toggle `follow_ignore` on and off. See `chadtree_settings.options.follow_ignore` for details.
+
+**default:**
+
+```json
+["T"]
+```
+
 ##### `chadtree_settings.keymap.toggle_version_control`
 
 Toggle version control integration on and off
