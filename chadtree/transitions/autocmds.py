@@ -8,7 +8,7 @@ from pynvim_pp.window import Window
 from std2.asyncio import cancel
 from std2.cell import RefCell
 
-from ..fs.ops import is_file
+from ..fs.ops import ancestors, is_file
 from ..lsp.diagnostics import poll
 from ..nvim.markers import markers
 from ..registry import NAMESPACE, autocmd, rpc
@@ -108,8 +108,11 @@ async def _update_follow(state: State) -> Optional[Stage]:
 
     try:
         if (current := await find_current_buffer_path()) and await is_file(current):
-            stage = await new_current_file(state, current=current)
-            return stage
+            if state.vc.ignored & {current, *ancestors(current)}:
+                return None
+            else:
+                stage = await new_current_file(state, current=current)
+                return stage
         else:
             return None
     except NvimError:

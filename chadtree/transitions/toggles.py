@@ -61,7 +61,7 @@ async def _toggle_follow_ignore(state: State, is_visual: bool) -> Stage:
 
     follow_links = not state.follow_links
     new_state = await forward(state, follow_links=follow_links)
-    await Nvim.write(LANG("follow_links_indi", follow=str(new_state.follow_links)))
+    await Nvim.write(LANG("follow_ignore_indi", follow=str(new_state.follow_links)))
     return Stage(new_state)
 
 
