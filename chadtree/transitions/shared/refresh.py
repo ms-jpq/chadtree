@@ -62,6 +62,7 @@ async def refresh(state: State) -> Stage:
         current_ancestors if state.follow else frozenset()
     )
     new_index = index if new_current else index | parent_paths
+    focus = current if state.follow else None
 
     new_state = await forward(
         state,
@@ -74,4 +75,4 @@ async def refresh(state: State) -> Stage:
         trace=False,
     )
 
-    return Stage(new_state)
+    return Stage(new_state, focus=focus)
