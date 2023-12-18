@@ -71,14 +71,12 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
 
 
 def _vc_ignored(node: Node, vc: VCStatus) -> bool:
-    pointer = node.pointed or node.path
-    if (ignored := vc.ignore_cache.get(pointer, None)) is not None:
+    path = node.path
+    if (ignored := vc.ignore_cache.get(path, None)) is not None:
         return ignored
     else:
-        ignored = not vc.ignored.isdisjoint(
-            {pointer} | {*map(PurePath, pointer.parents)}
-        )
-        vc.ignore_cache[pointer] = ignored
+        ignored = not vc.ignored.isdisjoint({path} | {*map(PurePath, path.parents)})
+        vc.ignore_cache[path] = ignored
         return ignored
 
 
@@ -181,7 +179,10 @@ def _paint(
         elif Mode.link in mode:
             yield " "
             if is_dir(node) and not follow_links:
-                yield icons.folder.closed
+                if node.path in index:
+                    yield icons.folder.open
+                else:
+                    yield icons.folder.closed
             else:
                 yield icons.link.normal
 

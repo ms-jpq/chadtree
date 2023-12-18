@@ -30,6 +30,8 @@ async def _click(
             if is_dir(node):
                 if node.path == state.root.path:
                     return None
+                elif node.pointed and not state.follow_links:
+                    return None
                 elif state.filter_pattern:
                     await Nvim.write(LANG("filter_click"))
                     return None

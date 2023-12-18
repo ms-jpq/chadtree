@@ -9,6 +9,7 @@ from pathlib import PurePath, PureWindowsPath
 from string import whitespace
 from subprocess import CalledProcessError
 from typing import (
+    Iterable,
     Iterator,
     MutableMapping,
     MutableSequence,
@@ -18,6 +19,7 @@ from typing import (
 )
 
 from pynvim_pp.lib import encode
+from std2.asyncio import to_thread
 from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
 
@@ -25,7 +27,7 @@ from ..fs.ops import ancestors, which
 from .nice import nice_call
 from .types import VCStatus
 
-_Stats = Sequence[Tuple[str, PurePath]]
+_Stats = Iterable[Tuple[str, PurePath]]
 
 _WHITE_SPACES = {*whitespace}
 _GIT_LIST_CMD = (
@@ -140,7 +142,7 @@ async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats
         stdout = await nice_call(
             (cygpath, "--windows", "--absolute", "--file", "-"), cwd=root, stdin=stdin
         )
-        stats = tuple(
+        stats = (
             (stat, PurePath(path))
             for (stat, _), path in zip(raw_stats, stdout.splitlines())
         )
@@ -192,10 +194,10 @@ async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
                 raw_stats = chain(
                     (_parse_stats_main(main)), _parse_sub_modules(submodules)
                 )
-                parsed_root, stats = await _conv(raw_root, raw_stats=tuple(raw_stats))
+                parsed_root, stats = await _conv(raw_root, raw_stats=raw_stats)
         except CalledProcessError:
             return VCStatus()
         else:
-            return _parse(parsed_root, stats=stats)
+            return await to_thread(lambda: _parse(parsed_root, stats=stats))
     else:
         return VCStatus()
