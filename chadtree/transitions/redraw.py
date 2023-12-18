@@ -1,4 +1,5 @@
-from pathlib import PurePath
+from pathlib import Path, PurePath
+from posixpath import sep
 from typing import Optional, Sequence
 from uuid import uuid4
 
@@ -26,6 +27,18 @@ _NS = uuid4()
 
 
 _DECODER = new_decoder[Sequence[str]](Sequence[str])
+_HOME = Path.home()
+
+
+def _buf_name(root: PurePath) -> str:
+    try:
+        rel = root.relative_to(_HOME)
+    except ValueError:
+        name = root.as_posix()
+    else:
+        name = f"~{sep}{rel.as_posix()}"
+
+    return name
 
 
 def _update(
@@ -61,6 +74,7 @@ def _update(
 
 async def redraw(state: State, focus: Optional[PurePath]) -> None:
     focus_row = state.derived.path_row_lookup.get(focus) if focus else None
+    buf_name = _buf_name(state.root.path)
 
     ns = await Nvim.create_namespace(_NS)
     use_extmarks = await Nvim.api.has("nvim-0.6")
@@ -116,7 +130,8 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
 
             a3.win_set_cursor(win, (new_row, col))
 
-        # a3.buf_set_name(buf, f"#{URI_SCHEME}://{state.root.path}")
+        a3.buf_set_name(buf, f"{URI_SCHEME}://{buf_name}")
+        a3.win_set_var(win, URI_SCHEME, True)
 
         a4 = a1 + a2 + a3
         try:

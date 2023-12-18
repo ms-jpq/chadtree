@@ -1,3 +1,4 @@
+---
 ignored:
   # Allow Latest Dockerfile
   - DL3007

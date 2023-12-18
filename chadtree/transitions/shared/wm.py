@@ -28,7 +28,7 @@ from ...fs.ops import ancestors
 from ...settings.types import Settings
 
 
-def _is_chadtree_buf_name(name: str) -> bool:
+def is_chadtree_buf_name(name: str) -> bool:
     with suppress(ValueError):
         uri = urlsplit(name)
         return uri.scheme == URI_SCHEME
@@ -40,7 +40,7 @@ async def is_fm_buffer(buf: Buffer) -> bool:
     if ft == FM_FILETYPE:
         return True
     elif name := await buf.get_name():
-        return _is_chadtree_buf_name(name)
+        return is_chadtree_buf_name(name)
 
     return False
 
@@ -131,11 +131,15 @@ async def find_buffers_with_file(file: PurePath) -> AsyncIterator[Buffer]:
                 yield buf
 
 
-async def find_current_buffer_path() -> Optional[PurePath]:
-    buf = await Buffer.get_current()
-    if name := await buf.get_name():
-        if not _is_chadtree_buf_name(name):
-            return await resolve_path(None, path=name)
+async def find_current_buffer_path(
+    buf_name: Optional[str] = None,
+) -> Optional[PurePath]:
+    if buf_name is None:
+        buf = await Buffer.get_current()
+        buf_name = await buf.get_name()
+
+    if buf_name and not is_chadtree_buf_name(buf_name):
+        return await resolve_path(None, path=buf_name)
 
     return None
 
