@@ -6,7 +6,6 @@ from pynvim_pp.nvim import Nvim
 from std2 import anext
 
 from ..fs.cartographer import act_like_dir
-from ..fs.ops import ancestors
 from ..registry import rpc
 from ..settings.localization import LANG
 from ..state.types import State

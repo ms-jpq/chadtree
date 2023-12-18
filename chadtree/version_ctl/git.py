@@ -1,4 +1,5 @@
 from asyncio import gather
+from functools import lru_cache
 from itertools import chain
 from locale import strxfrm
 from ntpath import altsep, sep
@@ -50,9 +51,8 @@ async def root(git: PurePath, cwd: PurePath) -> PurePath:
     return PurePath(stdout.rstrip())
 
 
-async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePath]]:
-    stdout = await nice_call((git, *_GIT_LIST_CMD), cwd=cwd)
-
+@lru_cache(maxsize=1)
+def _parse_stats_main(stdout: str) -> Sequence[Tuple[str, PurePath]]:
     def cont() -> Iterator[Tuple[str, PurePath]]:
         it = iter(stdout.split("\0"))
         for line in it:
@@ -65,14 +65,13 @@ async def _stat_main(git: PurePath, cwd: PurePath) -> Sequence[Tuple[str, PurePa
     return tuple(cont())
 
 
-async def _stat_sub_modules(
-    git: PurePath, cwd: PurePath
-) -> Sequence[Tuple[str, PurePath]]:
-    stdout = await nice_call(
-        (git, "submodule", "foreach", "--recursive", git, *_GIT_LIST_CMD),
-        cwd=cwd,
-    )
+async def _stat_main(git: PurePath, cwd: PurePath) -> str:
+    stdout = await nice_call((git, *_GIT_LIST_CMD), cwd=cwd)
+    return stdout
 
+
+@lru_cache(maxsize=1)
+def _parse_sub_modules(stdout: str) -> Sequence[Tuple[str, PurePath]]:
     def cont() -> Iterator[Tuple[str, PurePath]]:
         it = iter(stdout)
         sub_module = ROOT
@@ -113,6 +112,14 @@ async def _stat_sub_modules(
     return tuple(cont())
 
 
+async def _stat_sub_modules(git: PurePath, cwd: PurePath) -> str:
+    stdout = await nice_call(
+        (git, "submodule", "foreach", "--recursive", git, *_GIT_LIST_CMD),
+        cwd=cwd,
+    )
+    return stdout
+
+
 def _stat_name(stat: str) -> str:
     markers = {
         "!!": _IGNORED_MARKER,
@@ -126,11 +133,7 @@ def _raw_conv(path: PurePath) -> str:
 
 
 async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats]:
-    if (
-        (cygpath := which("cygpath"))
-        and isinstance(raw_root, PureWindowsPath)
-        and (altsep in str(raw_stats))
-    ):
+    if (cygpath := which("cygpath")) and isinstance(raw_root, PureWindowsPath):
         stdout = await nice_call((cygpath, "--windows", "--", _raw_conv(raw_root)))
         root = PurePath(stdout.rstrip())
         stdin = encode("\n".join(map(_raw_conv, (path for _, path in raw_stats))))
@@ -174,18 +177,22 @@ def _parse(root: PurePath, stats: _Stats) -> VCStatus:
     return VCStatus(ignored=ignored, status=trimmed)
 
 
-async def status(cwd: PurePath) -> VCStatus:
+async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
     if git := which("git"):
         bin = PurePath(git)
         try:
-            raw_root, *raw_stats = await gather(
+            raw_root, main, submodules = await gather(
                 root(bin, cwd=cwd),
                 _stat_main(bin, cwd=cwd),
                 _stat_sub_modules(bin, cwd=cwd),
             )
-            parsed_root, stats = await _conv(
-                raw_root, raw_stats=tuple(chain.from_iterable(raw_stats))
-            )
+            if main == prev.main and submodules == prev.submodules:
+                return prev
+            else:
+                raw_stats = chain(
+                    (_parse_stats_main(main)), _parse_sub_modules(submodules)
+                )
+                parsed_root, stats = await _conv(raw_root, raw_stats=tuple(raw_stats))
         except CalledProcessError:
             return VCStatus()
         else:

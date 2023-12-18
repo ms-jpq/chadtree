@@ -17,7 +17,7 @@ async def vc_refresh(state: State) -> Optional[Stage]:
 
     if state.enable_vc:
         cwd = await Nvim.getcwd()
-        vc = await status(cwd)
+        vc = await status(cwd, prev=state.vc)
         new_state = await forward(state, vc=vc)
         return Stage(new_state)
     else:

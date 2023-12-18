@@ -132,7 +132,7 @@ async def initial(specs: Iterable[RPCallable]) -> Settings:
     view_opts = ViewOptions(
         hl_context=hl_context,
         icons=icons,
-        sort_by=view.sort_by,
+        sort_by=tuple(view.sort_by),
         use_icons=use_icons,
         time_fmt=view.time_format,
     )

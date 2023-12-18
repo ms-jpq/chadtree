@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum, auto, unique
 from pathlib import PurePath
-from typing import AbstractSet, Mapping, Optional, Sequence
+from typing import AbstractSet, Any, Mapping, Optional, Sequence
 
 
 # https://github.com/coreutils/coreutils/blob/master/src/ls.c
@@ -31,6 +31,11 @@ class Mode(IntEnum):
     file = auto()
 
 
+@dataclass
+class _RenderCache:
+    sort_by: Optional[Sequence[Any]] = None
+
+
 @dataclass(frozen=True)
 class Node:
     mode: AbstractSet[Mode]
@@ -38,6 +43,7 @@ class Node:
     pointed: Optional[PurePath]
     ancestors: AbstractSet[PurePath]
     children: Mapping[PurePath, Node]
+    cache: _RenderCache = field(default_factory=_RenderCache)
 
 
 @dataclass(frozen=True)

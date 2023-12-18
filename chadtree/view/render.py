@@ -1,6 +1,7 @@
 from collections import UserString
 from enum import IntEnum, auto
 from fnmatch import fnmatch
+from functools import lru_cache
 from locale import strxfrm
 from os.path import extsep, sep
 from pathlib import PurePath
@@ -47,27 +48,38 @@ def _suffixx(path: PurePath) -> _Str:
         return _str("")
 
 
+@lru_cache(maxsize=None)
 def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     def comp(node: Node) -> Sequence[Any]:
-        def cont() -> Iterator[Any]:
-            for sb in sortby:
-                if sb is Sortby.is_folder:
-                    yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
-                elif sb is Sortby.ext:
-                    yield "" if is_dir(node) else _suffixx(node.path)
-                elif sb is Sortby.file_name:
-                    yield strxfrm(node.path.name)
-                else:
-                    never(sb)
+        if node.cache.sort_by is None:
 
-        return tuple(cont())
+            def cont() -> Iterator[Any]:
+                for sb in sortby:
+                    if sb is Sortby.is_folder:
+                        yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
+                    elif sb is Sortby.ext:
+                        yield "" if is_dir(node) else _suffixx(node.path)
+                    elif sb is Sortby.file_name:
+                        yield strxfrm(node.path.name)
+                    else:
+                        never(sb)
+
+            node.cache.sort_by = tuple(cont())
+        return node.cache.sort_by
 
     return comp
 
 
 def _vc_ignored(node: Node, vc: VCStatus) -> bool:
     pointer = node.pointed or node.path
-    return not vc.ignored.isdisjoint({pointer} | {*map(PurePath, pointer.parents)})
+    if (ignored := vc.ignore_cache.get(pointer, None)) is not None:
+        return ignored
+    else:
+        ignored = not vc.ignored.isdisjoint(
+            {pointer} | {*map(PurePath, pointer.parents)}
+        )
+        vc.ignore_cache[pointer] = ignored
+        return ignored
 
 
 def _gen_spacer(depth: int) -> str:
