@@ -109,7 +109,7 @@ async def _update_follow(state: State) -> Optional[Stage]:
     """
 
     win = await Window.get_current()
-    if win.vars.get(bool, URI_SCHEME):
+    if await win.vars.get(bool, URI_SCHEME):
         buf = await Buffer.get_current()
         name = await buf.get_name()
         if name and not is_chadtree_buf_name(name):
