@@ -144,10 +144,7 @@ async def find_current_buffer_path(
     return None
 
 
-async def new_fm_buffer(settings: Settings) -> Buffer:
-    buf = await Buffer.create(
-        listed=False, scratch=True, wipe=False, nofile=True, noswap=True
-    )
+async def setup_fm_buf(settings: Settings, buf: Buffer) -> None:
     await buf.opts.set("modifiable", val=False)
     await buf.opts.set("filetype", val=FM_FILETYPE)
     await buf.opts.set("undolevels", val=-1)
@@ -167,7 +164,22 @@ async def new_fm_buffer(settings: Settings) -> Buffer:
             )
 
     await km.drain(buf=buf).commit(NoneType)
+
+
+async def new_fm_buffer(settings: Settings) -> Buffer:
+    buf = await Buffer.create(
+        listed=False, scratch=True, wipe=False, nofile=True, noswap=True
+    )
+    await setup_fm_buf(settings, buf=buf)
     return buf
+
+
+async def restore_non_fm_win(
+    win_local: Mapping[str, Union[bool, str]], win: Window
+) -> None:
+    await win.vars.set(URI_SCHEME, False)
+    for key, val in win_local.items():
+        await win.opts.set(key, val=val)
 
 
 async def new_window(
@@ -190,8 +202,7 @@ async def new_window(
 
     win = await Window.get_current()
     buf = await win.get_buf()
-    for key, val in win_local.items():
-        await win.opts.set(key, val=val)
+    await restore_non_fm_win(win_local, win=win)
     await buf.opts.set("bufhidden", val="wipe")
     return win
 

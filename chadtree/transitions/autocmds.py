@@ -9,7 +9,7 @@ from pynvim_pp.window import Window
 from std2.asyncio import cancel
 from std2.cell import RefCell
 
-from ..consts import URI_SCHEME
+from ..consts import FM_FILETYPE, URI_SCHEME
 from ..fs.ops import ancestors, is_file
 from ..lsp.diagnostics import poll
 from ..nvim.markers import markers
@@ -18,7 +18,12 @@ from ..state.next import forward
 from ..state.ops import dump_session
 from ..state.types import State
 from .shared.current import new_current_file, new_root
-from .shared.wm import find_current_buffer_path, is_chadtree_buf_name
+from .shared.wm import (
+    find_current_buffer_path,
+    is_chadtree_buf_name,
+    restore_non_fm_win,
+    setup_fm_buf,
+)
 from .types import Stage
 
 _CELL = RefCell[Optional[Task]](None)
@@ -109,16 +114,21 @@ async def _update_follow(state: State) -> Optional[Stage]:
     """
 
     win = await Window.get_current()
-    if await win.vars.get(bool, URI_SCHEME):
-        buf = await Buffer.get_current()
-        name = await buf.get_name()
-        if name and not is_chadtree_buf_name(name):
-            await win.vars.set(URI_SCHEME, False)
-            for key, val in state.settings.win_actual_opts.items():
-                await win.opts.set(key, val=val)
+    buf = await Buffer.get_current()
+    name = await buf.get_name()
+    is_fm_win = await win.vars.get(bool, URI_SCHEME)
+    is_fm_buf = await buf.filetype() == FM_FILETYPE
+    is_fm_uri = name and is_chadtree_buf_name(name)
 
-    else:
-        name = None
+    if is_fm_win and not is_fm_buf:
+        await restore_non_fm_win(state.settings.win_actual_opts, win=win)
+
+    if is_fm_uri or is_fm_buf and not is_fm_win:
+        for key, val in state.settings.win_local_opts.items():
+            await win.opts.set(key, val=val)
+
+    if is_fm_uri and not is_fm_buf:
+        await setup_fm_buf(state.settings, buf=buf)
 
     try:
         if (current := await find_current_buffer_path(name)) and await is_file(current):
