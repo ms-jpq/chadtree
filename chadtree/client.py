@@ -49,6 +49,7 @@ from .settings.localization import init as init_locale
 from .state.load import initial as initial_state
 from .state.types import State
 from .timeit import timeit
+from .transitions.autocmds import setup
 from .transitions.redraw import redraw
 from .transitions.schedule_update import scheduled_update
 from .transitions.types import Stage
@@ -195,6 +196,7 @@ async def _go(client: RPClient) -> None:
                     finally:
                         event.clear()
 
+        await setup(settings)
         await gather(c1(), c2(), _sched(state))
 
 

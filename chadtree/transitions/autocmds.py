@@ -14,19 +14,37 @@ from ..fs.ops import ancestors, is_file
 from ..lsp.diagnostics import poll
 from ..nvim.markers import markers
 from ..registry import NAMESPACE, autocmd, rpc
+from ..settings.types import Settings
 from ..state.next import forward
 from ..state.ops import dump_session
 from ..state.types import State
 from .shared.current import new_current_file, new_root
 from .shared.wm import (
     find_current_buffer_path,
-    is_chadtree_buf_name,
+    is_fm_buf_name,
+    is_fm_buffer,
     restore_non_fm_win,
     setup_fm_buf,
 )
 from .types import Stage
 
 _CELL = RefCell[Optional[Task]](None)
+
+
+async def _setup_fm_win(settings: Settings, win: Window) -> None:
+    for key, val in settings.win_local_opts.items():
+        await win.opts.set(key, val=val)
+
+
+async def setup(settings: Settings) -> None:
+    for buf in await Buffer.list(listed=True):
+        name = await buf.get_name()
+        if name and is_fm_buf_name(name):
+            await setup_fm_buf(settings, buf=buf)
+    for win in await Window.list():
+        buf = await win.get_buf()
+        if await is_fm_buffer(buf):
+            await _setup_fm_win(settings, win=win)
 
 
 @rpc(blocking=False)
@@ -118,14 +136,13 @@ async def _update_follow(state: State) -> Optional[Stage]:
     name = await buf.get_name()
     is_fm_win = await win.vars.get(bool, URI_SCHEME)
     is_fm_buf = await buf.filetype() == FM_FILETYPE
-    is_fm_uri = name and is_chadtree_buf_name(name)
+    is_fm_uri = name and is_fm_buf_name(name)
 
     if is_fm_win and not is_fm_buf:
         await restore_non_fm_win(state.settings.win_actual_opts, win=win)
 
     if is_fm_uri or is_fm_buf and not is_fm_win:
-        for key, val in state.settings.win_local_opts.items():
-            await win.opts.set(key, val=val)
+        await _setup_fm_win(state.settings, win=win)
 
     if is_fm_uri and not is_fm_buf:
         await setup_fm_buf(state.settings, buf=buf)
