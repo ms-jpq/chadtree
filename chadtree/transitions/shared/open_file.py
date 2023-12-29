@@ -1,5 +1,6 @@
+from contextlib import suppress
 from mimetypes import guess_type
-from os.path import normpath
+from os.path import getsize, normpath
 from pathlib import PurePath
 from posixpath import sep
 from typing import AsyncContextManager, Optional, cast
@@ -84,10 +85,6 @@ async def _show_file(*, state: State, click_type: ClickType) -> None:
                 await Nvim.exec(f"edit! {escaped}")
 
             await resize_fm_windows(last_used=state.window_order, width=state.width)
-            # try:
-            #     await Nvim.exec("filetype detect")
-            # except NvimError as e:
-            #     log.warn("%s", e)
 
 
 async def open_file(
@@ -95,6 +92,9 @@ async def open_file(
 ) -> Optional[Stage]:
     mime, _ = guess_type(path.name, strict=False)
     m_type, _, _ = (mime or "").partition(sep)
+
+    with suppress(OSError):
+        size = getsize(path)
 
     question = LANG("mime_warn", name=path.name, mime=str(mime))
 
