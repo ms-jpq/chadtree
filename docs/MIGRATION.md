@@ -101,7 +101,7 @@ Yub, this is yuge. The #1 request was for more themes. They have came!
 
 Go see `:CHADhelp theme` for [details](https://github.com/ms-jpq/chadtree/tree/chad/docs/THEME.md).
 
-### Even more Poilsh
+### Even more Polish
 
 - Maintain cursor position in many circumstances, ie. move root up / down, filtering for files, renaming, creating files, etc
 
