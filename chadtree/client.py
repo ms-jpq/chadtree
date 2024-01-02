@@ -83,7 +83,7 @@ async def _profile(t1: float) -> None:
 
 
 async def _sched(ref: RefCell[State]) -> None:
-    await enqueue_event(False, method=vc_refresh.method)
+    await enqueue_event(False, method=scheduled_update.method, params=(True,))
 
     async for _ in aticker(ref.val.settings.polling_rate, immediately=False):
         if ref.val.vim_focus:
@@ -123,6 +123,7 @@ async def _go(client: RPClient) -> None:
         state = RefCell(await initial_state(settings))
 
         init_locale(settings.lang)
+        await setup(settings)
 
         for f in handlers.values():
             ff = _trans(f)
@@ -174,8 +175,8 @@ async def _go(client: RPClient) -> None:
             t1, has_drawn = monotonic(), False
 
             while True:
+                await event.wait()
                 with suppress_and_log():
-                    await event.wait()
                     try:
                         if stage := staged.val:
                             state = stage.state
@@ -196,8 +197,6 @@ async def _go(client: RPClient) -> None:
                     finally:
                         event.clear()
 
-        await setup(settings)
-        event.set()
         await gather(c1(), c2(), _sched(state))
 
 

@@ -17,7 +17,7 @@ from .types import Stage
 
 
 @rpc(blocking=False)
-async def scheduled_update(state: State) -> Optional[Stage]:
+async def scheduled_update(state: State, init: bool = False) -> Optional[Stage]:
     cwd = await Nvim.getcwd()
     store = dump_session(state) if state.vim_focus else pure(None)
 
@@ -25,7 +25,9 @@ async def scheduled_update(state: State) -> Optional[Stage]:
         stage, diagnostics, vc, _ = await gather(
             refresh(state=state),
             poll(state.settings.min_diagnostics_severity),
-            status(cwd, prev=state.vc) if state.enable_vc else pure(VCStatus()),
+            status(cwd, prev=state.vc)
+            if not init and state.enable_vc
+            else pure(VCStatus()),
             store,
         )
     except NvimError:

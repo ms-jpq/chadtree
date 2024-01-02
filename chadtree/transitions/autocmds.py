@@ -22,6 +22,7 @@ from ..state.types import State
 from .shared.current import new_current_file, new_root
 from .shared.wm import (
     find_current_buffer_path,
+    find_fm_buffers,
     is_fm_buf_name,
     is_fm_buffer,
     restore_non_fm_win,
@@ -38,10 +39,8 @@ async def _setup_fm_win(settings: Settings, win: Window) -> None:
 
 
 async def setup(settings: Settings) -> None:
-    for buf in await Buffer.list(listed=True):
-        name = await buf.get_name()
-        if name and is_fm_buf_name(name):
-            await setup_fm_buf(settings, buf=buf)
+    async for buf in find_fm_buffers():
+        await setup_fm_buf(settings, buf=buf)
     for win in await Window.list():
         buf = await win.get_buf()
         if await is_fm_buffer(buf):
