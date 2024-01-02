@@ -116,6 +116,12 @@ To see a list of hot keys:
 
 Either use `:CHADhelp keybind` or open in browser using [`:CHADhelp keybind --web`](https://github.com/ms-jpq/chadtree/tree/chad/docs/KEYBIND.md)
 
+### FAQ
+
+Q: Sometimes Windows will get stuck with CHADTree decorations when I do not want them to be, how do I resolve this?
+
+A: Run `:CHADrestore`
+
 ### Recommendations
 
 Add a hotkey to clear quickfix list:

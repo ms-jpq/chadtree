@@ -1,4 +1,5 @@
 from asyncio import Task, create_task, sleep
+from collections.abc import Sequence
 from itertools import chain
 from typing import Optional
 
@@ -123,6 +124,12 @@ async def _changedir(state: State) -> Stage:
 
 
 _ = autocmd("DirChanged") << f"lua {NAMESPACE}.{_changedir.method}()"
+
+
+@rpc(blocking=False)
+async def _restore(state: State, args: Sequence[str]) -> Optional[Stage]:
+    win = await Window.get_current()
+    await restore_non_fm_win(state.settings.win_actual_opts, win=win)
 
 
 @rpc(blocking=False)

@@ -183,6 +183,9 @@ vim.api.nvim_command [[command! -nargs=* CHADopen lua chad.Open(<f-args>)]]
 set_chad_call("Help")
 vim.api.nvim_command [[command! -nargs=* CHADhelp lua chad.Help(<f-args>)]]
 
+set_chad_call("Restore")
+vim.api.nvim_command [[command! -nargs=0 CHADrestore lua chad.Restore(<f-args>)]]
+
 chad.lsp_ensure_capabilities = function(cfg)
   local spec1 = {
     capabilities = vim.lsp.protocol.make_client_capabilities()
