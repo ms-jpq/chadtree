@@ -127,7 +127,7 @@ _ = autocmd("DirChanged") << f"lua {NAMESPACE}.{_changedir.method}()"
 
 
 @rpc(blocking=False)
-async def _restore(state: State, args: Sequence[str]) -> Optional[Stage]:
+async def _restore(state: State, args: Sequence[str]) -> None:
     win = await Window.get_current()
     await restore_non_fm_win(state.settings.win_actual_opts, win=win)
 
