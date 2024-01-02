@@ -197,6 +197,7 @@ async def _go(client: RPClient) -> None:
                         event.clear()
 
         await setup(settings)
+        event.set()
         await gather(c1(), c2(), _sched(state))
 
 
