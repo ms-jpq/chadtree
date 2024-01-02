@@ -53,7 +53,6 @@ from .transitions.autocmds import setup
 from .transitions.redraw import redraw
 from .transitions.schedule_update import scheduled_update
 from .transitions.types import Stage
-from .transitions.version_ctl import vc_refresh
 
 assert ____ or True
 

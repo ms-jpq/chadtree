@@ -23,7 +23,6 @@ from .transitions import (
     toggle_exec,
     toggle_open,
     toggles,
-    version_ctl,
 )
 
 assert autocmds
@@ -51,6 +50,5 @@ assert stat
 assert toggle_exec
 assert toggle_open
 assert toggles
-assert version_ctl
 
 ____ = None
