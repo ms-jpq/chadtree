@@ -100,6 +100,7 @@ local start = function(deps, ...)
   }
   local params = {
     cwd = cwd,
+    env = {PYTHONSAFEPATH = "1", PYTHONPATH = cwd},
     on_exit = "CHADon_exit",
     on_stdout = (function()
       if deps then
