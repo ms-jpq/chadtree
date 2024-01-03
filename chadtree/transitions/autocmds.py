@@ -24,7 +24,6 @@ from .shared.wm import (
     find_current_buffer_path,
     find_fm_buffers,
     is_fm_buf_name,
-    is_fm_buffer,
     restore_non_fm_win,
     setup_fm_buf,
 )
@@ -33,18 +32,9 @@ from .types import Stage
 _CELL = RefCell[Optional[Task]](None)
 
 
-async def _setup_fm_win(settings: Settings, win: Window) -> None:
-    for key, val in settings.win_local_opts.items():
-        await win.opts.set(key, val=val)
-
-
 async def setup(settings: Settings) -> None:
     async for buf in find_fm_buffers():
         await setup_fm_buf(settings, buf=buf)
-    for win in await Window.list():
-        buf = await win.get_buf()
-        if await is_fm_buffer(buf):
-            await _setup_fm_win(settings, win=win)
 
 
 @rpc(blocking=False)
@@ -146,9 +136,6 @@ async def _update_follow(state: State) -> Optional[Stage]:
 
     if is_fm_win and not is_fm_buf:
         await restore_non_fm_win(state.settings.win_actual_opts, win=win)
-
-    if is_fm_uri or is_fm_buf and not is_fm_win:
-        await _setup_fm_win(state.settings, win=win)
 
     if is_fm_uri and not is_fm_buf:
         await setup_fm_buf(state.settings, buf=buf)

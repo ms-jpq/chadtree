@@ -80,6 +80,7 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
     use_extmarks = await Nvim.api.has("nvim-0.6")
 
     async for win, buf in find_fm_windows():
+        is_fm_win = await win.vars.get(bool, URI_SCHEME)
         p_count = await buf.line_count()
         n_count = len(state.derived.lines)
         row, col = await win.get_cursor()
@@ -132,6 +133,10 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
 
         a3.buf_set_name(buf, f"{URI_SCHEME}://{buf_name}")
         a3.win_set_var(win, URI_SCHEME, True)
+
+        if not is_fm_win:
+            for key, val in state.settings.win_local_opts.items():
+                a3.win_set_option(win, key, val)
 
         a4 = a1 + a2 + a3
         try:

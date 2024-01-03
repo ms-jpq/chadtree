@@ -107,8 +107,6 @@ async def _open_fm_window(
             open_left=settings.open_left,
             width=width,
         )
-        for key, val in settings.win_local_opts.items():
-            await win.opts.set(key, val=val)
 
         await win.set_buf(buf)
 
