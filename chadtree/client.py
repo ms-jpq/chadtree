@@ -122,7 +122,8 @@ async def _go(client: RPClient) -> None:
         state = RefCell(await initial_state(settings))
 
         init_locale(settings.lang)
-        await setup(settings)
+        with suppress_and_log():
+            await setup(settings)
 
         for f in handlers.values():
             ff = _trans(f)
