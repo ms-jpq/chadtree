@@ -197,7 +197,7 @@ Copy paths of files under cursor or visual block.
 **default:**
 
 ```json
-["y"]
+["Y"]
 ```
 
 ##### `chadtree_settings.keymap.copy_basename`
@@ -207,7 +207,7 @@ Copy names of files under cursor or visual block.
 **default:**
 
 ```json
-["Y"]
+["y"]
 ```
 
 ##### `chadtree_settings.keymap.copy_relname`
