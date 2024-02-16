@@ -72,7 +72,6 @@ async def save_session(state: State) -> Stage:
 
     await dump_session(state)
     new_state = await forward(state, vim_focus=False)
-    print("save")
     return Stage(new_state)
 
 
