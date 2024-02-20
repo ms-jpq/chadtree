@@ -65,7 +65,23 @@ _ = autocmd("CursorHold", "CursorHoldI") << f"lua {NAMESPACE}.{_when_idle.method
 
 
 @rpc(blocking=False)
-async def save_session(state: State) -> Stage:
+async def save_session(state: State) -> None:
+    """
+    Save CHADTree state
+    """
+
+    await dump_session(state)
+
+
+_ = autocmd("ExitPre") << f"lua {NAMESPACE}.{save_session.method}()"
+_ = (
+    autocmd("User", modifiers=("CHADSave",))
+    << f"lua {NAMESPACE}.{save_session.method}()"
+)
+
+
+@rpc(blocking=False)
+async def focus_lost(state: State) -> Stage:
     """
     Save CHADTree state
     """
@@ -75,11 +91,7 @@ async def save_session(state: State) -> Stage:
     return Stage(new_state)
 
 
-_ = autocmd("FocusLost", "ExitPre") << f"lua {NAMESPACE}.{save_session.method}()"
-_ = (
-    autocmd("User", modifiers=("CHADSave",))
-    << f"lua {NAMESPACE}.{save_session.method}()"
-)
+_ = autocmd("FocusLost") << f"lua {NAMESPACE}.{focus_lost.method}()"
 
 
 @rpc(blocking=False)
