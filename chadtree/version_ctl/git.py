@@ -116,7 +116,15 @@ def _parse_sub_modules(stdout: str) -> Sequence[Tuple[str, PurePath]]:
 
 async def _stat_sub_modules(git: PurePath, cwd: PurePath) -> str:
     stdout = await nice_call(
-        (git, "submodule", "foreach", "--recursive", git, *_GIT_LIST_CMD),
+        (
+            git,
+            "--no-optional-locks",
+            "submodule",
+            "foreach",
+            "--recursive",
+            git,
+            *_GIT_LIST_CMD,
+        ),
         cwd=cwd,
     )
     return stdout
