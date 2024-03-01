@@ -11,7 +11,7 @@ from chad_types import ASSETS, Hex, IconGlyphs, IconGlyphSet, TextColours, TextC
 
 from ..run import docker_run
 
-_DOCKERFILE = Path(__file__).resolve(strict=True).parent / "Dockerfile"
+_DOCKERFILE = Path(__file__).resolve(strict=True).with_name("Dockerfile")
 _ICON_BASE = ASSETS / "icon_base.yml"
 
 

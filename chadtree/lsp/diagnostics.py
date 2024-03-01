@@ -9,8 +9,8 @@ from pynvim_pp.types import NoneType
 from ..fs.ops import ancestors
 from ..state.types import Diagnostics
 
-_LUA = (Path(__file__).resolve(strict=True).parent / "diagnostics.lua").read_text(
-    "UTF-8"
+_LUA = (
+    Path(__file__).resolve(strict=True).with_name("diagnostics.lua").read_text("UTF-8")
 )
 
 if sys.version_info < (3, 9):

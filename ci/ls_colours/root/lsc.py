@@ -6,7 +6,7 @@ from pathlib import Path
 from subprocess import check_output
 from sys import stdout
 
-_LSC_SH = Path(__file__).parent.resolve(strict=True) / "lsc.sh"
+_LSC_SH = Path(__file__).resolve(strict=True).with_name("lsc.sh")
 
 _SOLARIZED = Path("dircolors-solarized").resolve(strict=True)
 _NORD = Path("nord-dircolors").resolve(strict=True)

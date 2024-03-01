@@ -4,7 +4,7 @@ from typing import Any, Iterable, Mapping
 from pynvim_pp.nvim import Nvim
 from pynvim_pp.types import NoneType
 
-_LUA = (Path(__file__).resolve(strict=True).parent / "notify.lua").read_text("UTF-8")
+_LUA = Path(__file__).resolve(strict=True).with_name("notify.lua").read_text("UTF-8")
 
 
 async def _notify(method: str, params: Any) -> None:

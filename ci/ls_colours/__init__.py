@@ -7,7 +7,7 @@ from chad_types import LSColourSet
 
 from ..run import docker_run
 
-_DOCKERFILE = Path(__file__).resolve(strict=True).parent / "Dockerfile"
+_DOCKERFILE = Path(__file__).resolve(strict=True).with_name("Dockerfile")
 
 
 def load_ls_colours() -> LSColourSet:
