@@ -8,13 +8,13 @@ from asyncio import (
 from concurrent.futures import Future, InvalidStateError, ThreadPoolExecutor
 from contextlib import suppress
 from threading import Thread
-from typing import Any, Awaitable, Callable, Coroutine, Optional, TypeVar
+from typing import Any, Awaitable, Callable, Coroutine, TypeVar
 
 _T = TypeVar("_T")
 
 
 class AsyncExecutor:
-    def __init__(self, threadpool: Optional[ThreadPoolExecutor]) -> None:
+    def __init__(self, threadpool: ThreadPoolExecutor) -> None:
         f: Future = Future()
         self._fut: Future = Future()
 
@@ -28,6 +28,7 @@ class AsyncExecutor:
 
         self._th = Thread(daemon=True, target=lambda: run(cont()))
         self._th.start()
+        self.threadpool = threadpool
         self.loop: AbstractEventLoop = f.result()
 
     def run(self, main: Awaitable[Any]) -> None:

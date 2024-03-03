@@ -1,7 +1,8 @@
-from asyncio import gather, sleep
+from asyncio import gather
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
+from dataclasses import replace
 from fnmatch import fnmatch
-from itertools import count
 from os import DirEntry, scandir, stat, stat_result
 from os.path import normcase
 from pathlib import Path, PurePath
@@ -20,9 +21,19 @@ from stat import (
     S_IWOTH,
     S_IXUSR,
 )
-from typing import AbstractSet, AsyncIterator, Iterator, Mapping, Optional, Tuple, Union
+from typing import (
+    AbstractSet,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from std2.asyncio import pure
+from std2.itertools import batched
 from std2.pathlib import is_relative_to
 
 from ..state.executor import AsyncExecutor
@@ -30,8 +41,6 @@ from ..state.types import Index
 from ..timeit import timeit
 from .ops import ancestors
 from .types import Ignored, Mode, Node
-
-_COUNT = count()
 
 _FILE_MODES: Mapping[int, Mode] = {
     S_IXUSR: Mode.executable,
@@ -42,6 +51,19 @@ _FILE_MODES: Mapping[int, Mode] = {
     S_IWOTH: Mode.other_writable,
     S_IWOTH | S_ISVTX: Mode.sticky_other_writable,
 }
+
+
+def _iter(
+    dirent: Union[PurePath, DirEntry[str]], follow: bool, index: Index, lv: int = 0
+) -> Iterator[PurePath]:
+    if not lv:
+        yield PurePath(dirent)
+    with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
+        with scandir(dirent) as dirents:
+            for child in dirents:
+                yield (path := PurePath(child))
+                if child.is_dir(follow_symlinks=follow) and path in index:
+                    yield from _iter(child, follow=follow, index=index, lv=lv + 1)
 
 
 def _fs_modes(stat: stat_result) -> Iterator[Mode]:
@@ -65,21 +87,15 @@ def _fs_modes(stat: stat_result) -> Iterator[Mode]:
             yield mode
 
 
-def _fs_stat(
-    dirent: Union[PurePath, DirEntry[str]]
-) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
+def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
     try:
-        info = (
-            stat(dirent, follow_symlinks=False)
-            if isinstance(dirent, PurePath)
-            else dirent.stat(follow_symlinks=False)
-        )
+        info = stat(path, follow_symlinks=False)
     except (FileNotFoundError, PermissionError):
         return {Mode.orphan_link}, None
     else:
         if S_ISLNK(info.st_mode):
             try:
-                pointed = Path(dirent).resolve(strict=True)
+                pointed = Path(path).resolve(strict=True)
                 link_info = stat(pointed, follow_symlinks=False)
             except (FileNotFoundError, NotADirectoryError, RuntimeError):
                 return {Mode.orphan_link}, None
@@ -91,34 +107,38 @@ def _fs_stat(
             return mode, None
 
 
-async def _next(
-    dirent: Union[PurePath, DirEntry[str]], follow_links: bool, index: Index
-) -> Node:
-    async def cont() -> AsyncIterator[Node]:
-        with suppress(NotADirectoryError, FileNotFoundError, PermissionError):
-            with scandir(dirent) as dirents:
-                for child in dirents:
-                    yield await _next(child, follow_links=follow_links, index=index)
-
-    if next(_COUNT) % 17 == 0:
-        await sleep(0)
-
-    root = PurePath(dirent)
-    mode, pointed = _fs_stat(dirent)
-    if root in index and (follow_links or pointed is None):
-        children = {node.path: node async for node in cont()}
-    else:
-        children = {}
-    _ancestors = ancestors(root)
+def _fs_node(path: PurePath) -> Node:
+    mode, pointed = _fs_stat(path)
     node = Node(
-        path=root,
+        path=path,
         mode=mode,
         pointed=pointed,
-        ancestors=_ancestors,
-        children=children,
+        ancestors=ancestors(path),
+        children={},
     )
-
     return node
+
+
+def _iter_single_nodes(
+    th: ThreadPoolExecutor, root: PurePath, follow: bool, index: Index
+) -> Iterator[Node]:
+    with timeit("fs->_iter"):
+        dir_stream = batched(_iter(root, index=index, follow=follow), n=32)
+        for seq in th.map(lambda x: tuple(map(_fs_node, x)), dir_stream):
+            yield from seq
+
+
+async def _next(
+    th: ThreadPoolExecutor, root: PurePath, follow_links: bool, index: Index
+) -> Node:
+    nodes: MutableMapping[PurePath, Node] = {}
+
+    for node in _iter_single_nodes(th, root=root, follow=follow_links, index=index):
+        nodes[node.path] = node
+        if parent := nodes.get(node.path.parent):
+            cast(MutableMapping[PurePath, Node], parent.children)[node.path] = node
+
+    return nodes[root]
 
 
 def _cross_over(root: PurePath, invalid: PurePath) -> bool:
@@ -126,17 +146,22 @@ def _cross_over(root: PurePath, invalid: PurePath) -> bool:
 
 
 async def _update(
-    root: Node, follow_links: bool, index: Index, invalidate_dirs: AbstractSet[PurePath]
+    th: ThreadPoolExecutor,
+    root: Node,
+    follow_links: bool,
+    index: Index,
+    invalidate_dirs: AbstractSet[PurePath],
 ) -> Node:
     if any((_cross_over(root.path, invalid=invalid) for invalid in invalidate_dirs)):
-        return await _next(root.path, follow_links=follow_links, index=index)
+        return await _next(th, root=root.path, follow_links=follow_links, index=index)
     else:
         walked = await gather(
             *(
                 gather(
                     pure(k),
                     _update(
-                        v,
+                        th,
+                        root=v,
                         follow_links=follow_links,
                         index=index,
                         invalidate_dirs=invalidate_dirs,
@@ -159,7 +184,9 @@ async def new(
     exec: AsyncExecutor, root: PurePath, follow_links: bool, index: Index
 ) -> Node:
     with timeit("fs->new"):
-        return await exec.submit(_next(root, follow_links=follow_links, index=index))
+        return await exec.submit(
+            _next(exec.threadpool, root=root, follow_links=follow_links, index=index)
+        )
 
 
 async def update(
@@ -174,6 +201,7 @@ async def update(
         try:
             return await exec.submit(
                 _update(
+                    exec.threadpool,
                     root=root,
                     follow_links=follow_links,
                     index=index,
