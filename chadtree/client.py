@@ -1,5 +1,6 @@
 from asyncio import (
     FIRST_COMPLETED,
+    AbstractEventLoop,
     Event,
     Lock,
     Task,
@@ -8,6 +9,7 @@ from asyncio import (
     get_running_loop,
     wait,
 )
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from logging import DEBUG as DEBUG_LVL
@@ -101,7 +103,8 @@ async def _default(_: MsgType, method: Method, params: Sequence[Any]) -> None:
     await enqueue_event(True, method=method, params=params)
 
 
-async def _go(client: RPClient) -> None:
+async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
+    th = ThreadPoolExecutor()
     atomic, handlers = rpc.drain()
     try:
         settings = await initial_settings(handlers.values())
@@ -119,7 +122,7 @@ async def _go(client: RPClient) -> None:
     else:
         hl = highlight(*settings.view.hl_context.groups)
         await (atomic + autocmd.drain() + hl).commit(NoneType)
-        state = RefCell(await initial_state(settings))
+        state = RefCell(await initial_state(settings, th=th))
 
         init_locale(settings.lang)
         with suppress_and_log():
@@ -166,7 +169,6 @@ async def _go(client: RPClient) -> None:
                         else:
                             transcient = create_task(task)
             finally:
-                loop = get_running_loop()
                 await cancel(
                     *(get or loop.create_future(), transcient or loop.create_future())
                 )
@@ -200,8 +202,10 @@ async def _go(client: RPClient) -> None:
         await gather(c1(), c2(), _sched(state))
 
 
-async def init(socket: ServerAddr, ppid: int) -> None:
+async def init(socket: ServerAddr, ppid: int, th: ThreadPoolExecutor) -> None:
+    loop = get_running_loop()
+    loop.set_default_executor(th)
     log.setLevel(DEBUG_LVL if DEBUG else INFO)
     async with _autodie(ppid):
         async with conn(socket, default=_default) as client:
-            await _go(client)
+            await _go(loop, client=client)

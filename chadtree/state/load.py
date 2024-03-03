@@ -1,4 +1,5 @@
 from asyncio import gather
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from pynvim_pp.nvim import Nvim
@@ -9,13 +10,13 @@ from ..nvim.markers import markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
 from .cache import DeepState
-from .executor import CurrentExecutor
+from .executor import AsyncExecutor
 from .ops import load_session
 from .types import Selection, Session, State
 
 
-async def initial(settings: Settings) -> State:
-    executor = CurrentExecutor()
+async def initial(settings: Settings, th: ThreadPoolExecutor) -> State:
+    executor = AsyncExecutor(threadpool=th)
     cwd, marks = await gather(Nvim.getcwd(), markers())
     storage = (
         Path(await Nvim.fn.stdpath(str, "cache")) / "chad_sessions"

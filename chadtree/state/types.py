@@ -9,7 +9,7 @@ from ..nvim.types import Markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
 from ..view.types import Derived
-from .executor import CurrentExecutor
+from .executor import AsyncExecutor
 
 Index = AbstractSet[PurePath]
 Selection = Index
@@ -29,7 +29,7 @@ class Session:
 
 @dataclass(frozen=True)
 class State:
-    executor: CurrentExecutor
+    executor: AsyncExecutor
     settings: Settings
     session: Session
     follow_links: bool

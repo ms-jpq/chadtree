@@ -25,7 +25,7 @@ from typing import AbstractSet, AsyncIterator, Iterator, Mapping, Optional, Tupl
 from std2.asyncio import pure
 from std2.pathlib import is_relative_to
 
-from ..state.executor import CurrentExecutor
+from ..state.executor import AsyncExecutor
 from ..state.types import Index
 from ..timeit import timeit
 from .ops import ancestors
@@ -156,14 +156,14 @@ async def _update(
 
 
 async def new(
-    exec: CurrentExecutor, root: PurePath, follow_links: bool, index: Index
+    exec: AsyncExecutor, root: PurePath, follow_links: bool, index: Index
 ) -> Node:
     with timeit("fs->new"):
-        return await exec.run(_next(root, follow_links=follow_links, index=index))
+        return await exec.submit(_next(root, follow_links=follow_links, index=index))
 
 
 async def update(
-    exec: CurrentExecutor,
+    exec: AsyncExecutor,
     root: Node,
     *,
     follow_links: bool,
@@ -172,7 +172,7 @@ async def update(
 ) -> Node:
     with timeit("fs->_update"):
         try:
-            return await exec.run(
+            return await exec.submit(
                 _update(
                     root=root,
                     follow_links=follow_links,
