@@ -1,7 +1,6 @@
-from asyncio import gather
+from asyncio import gather, sleep
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
-from dataclasses import replace
 from fnmatch import fnmatch
 from os import DirEntry, scandir, stat, stat_result
 from os.path import normcase
@@ -128,12 +127,13 @@ def _iter_single_nodes(
             yield from seq
 
 
-async def _next(
+async def _new(
     th: ThreadPoolExecutor, root: PurePath, follow_links: bool, index: Index
 ) -> Node:
     nodes: MutableMapping[PurePath, Node] = {}
 
     for node in _iter_single_nodes(th, root=root, follow=follow_links, index=index):
+        await sleep(0)
         nodes[node.path] = node
         if parent := nodes.get(node.path.parent):
             cast(MutableMapping[PurePath, Node], parent.children)[node.path] = node
@@ -153,24 +153,18 @@ async def _update(
     invalidate_dirs: AbstractSet[PurePath],
 ) -> Node:
     if any((_cross_over(root.path, invalid=invalid) for invalid in invalidate_dirs)):
-        return await _next(th, root=root.path, follow_links=follow_links, index=index)
+        return await _new(th, root=root.path, follow_links=follow_links, index=index)
     else:
-        walked = await gather(
-            *(
-                gather(
-                    pure(k),
-                    _update(
-                        th,
-                        root=v,
-                        follow_links=follow_links,
-                        index=index,
-                        invalidate_dirs=invalidate_dirs,
-                    ),
-                )
-                for k, v in root.children.items()
+        children: MutableMapping[PurePath, Node] = {}
+        for path, node in root.children.items():
+            new_node = await _update(
+                th,
+                root=node,
+                follow_links=follow_links,
+                index=index,
+                invalidate_dirs=invalidate_dirs,
             )
-        )
-        children = {k: v for k, v in walked}
+            children[path] = new_node
         return Node(
             path=root.path,
             mode=root.mode,
@@ -185,7 +179,7 @@ async def new(
 ) -> Node:
     with timeit("fs->new"):
         return await exec.submit(
-            _next(exec.threadpool, root=root, follow_links=follow_links, index=index)
+            _new(exec.threadpool, root=root, follow_links=follow_links, index=index)
         )
 
 
