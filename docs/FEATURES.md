@@ -36,6 +36,6 @@
 
 ![ls_l.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/ls_l.png)
 
-## Mimetype warning
+## MimeType warning
 
 ![mimetype.png](https://raw.githubusercontent.com/ms-jpq/chadtree/chad/docs/img/mimetype.png)

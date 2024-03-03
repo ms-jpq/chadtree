@@ -1,4 +1,4 @@
-from asyncio import gather, sleep
+from asyncio import sleep
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from fnmatch import fnmatch
@@ -31,7 +31,6 @@ from typing import (
     cast,
 )
 
-from std2.asyncio import pure
 from std2.itertools import batched
 from std2.pathlib import is_relative_to
 
