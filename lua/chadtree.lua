@@ -147,8 +147,6 @@ local set_chad_call = function(cmd)
         start(
         false,
         "run",
-        "--ppid",
-        vim.api.nvim_call_function("getpid", {}),
         "--socket",
         server
       )

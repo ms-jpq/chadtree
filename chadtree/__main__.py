@@ -151,7 +151,7 @@ elif command == "run":
         exit(1)
     else:
         with ThreadPoolExecutor() as th:
-            arun(init(args.socket, ppid=args.ppid, th=th))
+            arun(init(args.socket, th=th))
 
 
 else:
