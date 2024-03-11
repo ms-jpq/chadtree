@@ -8,10 +8,10 @@ from asyncio import (
     gather,
     get_running_loop,
     wait,
+    wrap_future,
 )
-from asyncio.futures import wrap_future
 from concurrent.futures import Future, ThreadPoolExecutor
-from contextlib import suppress
+from contextlib import AbstractAsyncContextManager, suppress
 from functools import wraps
 from logging import DEBUG as DEBUG_LVL
 from logging import INFO
@@ -38,8 +38,11 @@ from pynvim_pp.rpc_types import (
 from pynvim_pp.types import NoneType
 from std2.asyncio import cancel
 from std2.cell import RefCell
+from std2.contextlib import nullacontext
 from std2.pickle.types import DecodeError
+from std2.platform import OS, os
 from std2.sched import aticker
+from std2.sys import autodie
 
 from ._registry import ____
 from .consts import DEBUG, RENDER_RETRIES
@@ -57,6 +60,13 @@ from .transitions.types import Stage
 assert ____ or True
 
 _CB = RPCallable[Optional[Stage]]
+
+
+def _autodie(ppid: int) -> AbstractAsyncContextManager:
+    if os is OS.windows:
+        return nullacontext(None)
+    else:
+        return autodie(ppid)
 
 
 async def _profile(t1: float) -> None:
@@ -193,10 +203,11 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
         await gather(c1(), c2(), _sched(state))
 
 
-async def init(socket: ServerAddr, th: ThreadPoolExecutor) -> None:
+async def init(socket: ServerAddr, ppid: int, th: ThreadPoolExecutor) -> None:
     loop = get_running_loop()
     loop.set_default_executor(th)
     log.setLevel(DEBUG_LVL if DEBUG else INFO)
+
     die: Future = Future()
 
     async def cont() -> None:
