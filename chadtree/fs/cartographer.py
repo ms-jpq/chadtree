@@ -141,6 +141,8 @@ async def _new(
             await sleep(0)
         nodes[node.path] = node
         if parent := nodes.get(node.path.parent):
+            if parent == node:
+                continue
             cast(MutableMapping[PurePath, Node], parent.children)[node.path] = node
 
     return nodes[root]
