@@ -138,27 +138,6 @@ def _stat_name(stat: str) -> str:
     return markers.get(stat, stat)
 
 
-def _raw_conv(path: PurePath) -> str:
-    return normpath(path).replace(sep, altsep)
-
-
-async def _conv(raw_root: PurePath, raw_stats: _Stats) -> Tuple[PurePath, _Stats]:
-    if (cygpath := which("cygpath")) and isinstance(raw_root, PureWindowsPath):
-        stdout = await nice_call((cygpath, "--windows", "--", _raw_conv(raw_root)))
-        root = PurePath(stdout.rstrip())
-        stdin = encode("\n".join(map(_raw_conv, (path for _, path in raw_stats))))
-        stdout = await nice_call(
-            (cygpath, "--windows", "--absolute", "--file", "-"), cwd=root, stdin=stdin
-        )
-        stats = (
-            (stat, PurePath(path))
-            for (stat, _), path in zip(raw_stats, stdout.splitlines())
-        )
-        return root, stats
-    else:
-        return raw_root, raw_stats
-
-
 def _parse(root: PurePath, stats: _Stats) -> VCStatus:
     above = ancestors(root)
     ignored: MutableSet[PurePath] = set()
@@ -199,13 +178,12 @@ async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
             if main == prev.main and submodules == prev.submodules:
                 return prev
             else:
-                raw_stats = chain(
+                stats = chain(
                     (_parse_stats_main(main)), _parse_sub_modules(submodules)
                 )
-                parsed_root, stats = await _conv(raw_root, raw_stats=raw_stats)
         except CalledProcessError:
             return VCStatus()
         else:
-            return await to_thread(lambda: _parse(parsed_root, stats=stats))
+            return await to_thread(lambda: _parse(raw_root, stats=stats))
     else:
         return VCStatus()
