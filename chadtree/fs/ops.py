@@ -88,7 +88,12 @@ async def fs_stat(path: PurePath) -> FSstat:
         group = _get_groupname(stats.st_gid)
         date_mod = datetime.fromtimestamp(stats.st_mtime)
         size = stats.st_size
-        link = readlink(path) if S_ISLNK(stats.st_mode) or is_junction(path) else None
+        try:
+            link = (
+                readlink(path) if S_ISLNK(stats.st_mode) or is_junction(path) else None
+            )
+        except OSError:
+            link = None
         fs_stat = FSstat(
             permissions=permissions,
             user=user,
