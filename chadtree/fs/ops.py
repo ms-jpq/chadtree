@@ -39,7 +39,7 @@ class FSstat:
     group: str
     date_mod: datetime
     size: int
-    link: Optional[str]
+    link: Optional[PurePath]
 
 
 @lru_cache(maxsize=None)
@@ -93,14 +93,16 @@ async def fs_stat(path: PurePath) -> FSstat:
                 readlink(path) if S_ISLNK(stats.st_mode) or is_junction(path) else None
             )
         except OSError:
-            link = None
+            plink = None
+        else:
+            plink = PurePath(link) if link else None
         fs_stat = FSstat(
             permissions=permissions,
             user=user,
             group=group,
             date_mod=date_mod,
             size=size,
-            link=link,
+            link=plink,
         )
         return fs_stat
 
