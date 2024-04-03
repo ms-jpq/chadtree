@@ -1,10 +1,9 @@
-import sys
 from asyncio import sleep
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from fnmatch import fnmatch
 from os import DirEntry, scandir, stat, stat_result
-from os.path import isjunction, normcase
+from os.path import normcase
 from pathlib import Path, PurePath
 from stat import (
     S_IFDOOR,
@@ -39,6 +38,7 @@ from ..consts import WALK_PARALLELISM_FACTOR
 from ..state.executor import AsyncExecutor
 from ..state.types import Index
 from ..timeit import timeit
+from .nt import is_junction
 from .ops import ancestors
 from .types import Ignored, Mode, Node
 
@@ -51,14 +51,6 @@ _FILE_MODES: Mapping[int, Mode] = {
     S_IWOTH: Mode.other_writable,
     S_IWOTH | S_ISVTX: Mode.sticky_other_writable,
 }
-
-if sys.version_info < (3, 12):
-
-    def isjunction(path: PurePath) -> bool:
-        return False
-
-else:
-    from os.path import isjunction
 
 
 def _iter(
@@ -101,7 +93,7 @@ def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
     except (FileNotFoundError, PermissionError):
         return {Mode.orphan_link}, None
     else:
-        if S_ISLNK(info.st_mode) or isjunction(path):
+        if S_ISLNK(info.st_mode) or is_junction(path):
             try:
                 pointed = Path(path).resolve(strict=True)
                 link_info = stat(pointed, follow_symlinks=False)

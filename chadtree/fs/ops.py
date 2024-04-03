@@ -18,6 +18,8 @@ from typing import AbstractSet, Iterable, Mapping, Optional
 from std2.asyncio import to_thread
 from std2.stat import RW_R__R__, RWXR_XR_X
 
+from .nt import is_junction
+
 _FOLDER_MODE = RWXR_XR_X
 _FILE_MODE = RW_R__R__
 
@@ -86,7 +88,7 @@ async def fs_stat(path: PurePath) -> FSstat:
         group = _get_groupname(stats.st_gid)
         date_mod = datetime.fromtimestamp(stats.st_mtime)
         size = stats.st_size
-        link = readlink(path) if S_ISLNK(stats.st_mode) else None
+        link = readlink(path) if S_ISLNK(stats.st_mode) or is_junction(path) else None
         fs_stat = FSstat(
             permissions=permissions,
             user=user,
