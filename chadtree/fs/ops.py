@@ -95,7 +95,7 @@ async def fs_stat(path: PurePath) -> FSstat:
         except OSError:
             plink = None
         else:
-            plink = PurePath(link) if link else None
+            plink = PurePath(normpath(link)) if link else None
         fs_stat = FSstat(
             permissions=permissions,
             user=user,
