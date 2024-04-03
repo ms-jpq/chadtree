@@ -90,7 +90,7 @@ async def fs_stat(path: PurePath) -> FSstat:
         size = stats.st_size
         try:
             link = (
-                readlink(path) if S_ISLNK(stats.st_mode) or is_junction(path) else None
+                readlink(path) if S_ISLNK(stats.st_mode) or is_junction(stats) else None
             )
         except OSError:
             plink = None

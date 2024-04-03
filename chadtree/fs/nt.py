@@ -1,12 +1,13 @@
 import sys
-from pathlib import PurePath
+from os import stat_result
+from stat import S_ISDIR
 
-if sys.version_info >= (3, 12) and sys.platform == "win32":
+if sys.platform == "win32":
 
-    from os.path import isjunction
+    def is_junction(st: stat_result) -> bool:
+        return bool(S_ISDIR(st.st_mode) and st.st_reparse_tag)
 
-    is_junction = isjunction
 else:
 
-    def is_junction(path: PurePath) -> bool:
+    def is_junction(st: stat_result) -> bool:
         return False

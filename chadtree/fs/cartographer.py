@@ -93,7 +93,7 @@ def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
     except (FileNotFoundError, PermissionError):
         return {Mode.orphan_link}, None
     else:
-        if S_ISLNK(info.st_mode) or is_junction(path):
+        if S_ISLNK(info.st_mode) or is_junction(info):
             try:
                 pointed = Path(path).resolve(strict=True)
                 link_info = stat(pointed, follow_symlinks=False)
