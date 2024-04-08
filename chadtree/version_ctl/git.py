@@ -2,10 +2,9 @@ from asyncio import gather
 from functools import lru_cache
 from itertools import chain
 from locale import strxfrm
-from ntpath import altsep, sep
 from os import linesep
 from os.path import normpath
-from pathlib import PurePath, PureWindowsPath
+from pathlib import PurePath
 from string import whitespace
 from subprocess import CalledProcessError
 from typing import (
@@ -18,7 +17,6 @@ from typing import (
     Tuple,
 )
 
-from pynvim_pp.lib import encode
 from std2.asyncio import to_thread
 from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
@@ -48,9 +46,16 @@ _UNTRACKED_MARKER = "?"
 
 async def root(git: PurePath, cwd: PurePath) -> PurePath:
     stdout = await nice_call(
-        (git, "--no-optional-locks", "rev-parse", "--show-toplevel"), cwd=cwd
+        (
+            git,
+            "--no-optional-locks",
+            "rev-parse",
+            "--path-format=relative",
+            "--show-toplevel",
+        ),
+        cwd=cwd,
     )
-    return PurePath(stdout.rstrip())
+    return PurePath(normpath(cwd / stdout.rstrip()))
 
 
 @lru_cache(maxsize=1)
@@ -178,9 +183,7 @@ async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
             if main == prev.main and submodules == prev.submodules:
                 return prev
             else:
-                stats = chain(
-                    (_parse_stats_main(main)), _parse_sub_modules(submodules)
-                )
+                stats = chain((_parse_stats_main(main)), _parse_sub_modules(submodules))
         except CalledProcessError:
             return VCStatus()
         else:
