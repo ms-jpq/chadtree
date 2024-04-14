@@ -180,10 +180,7 @@ async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
                 _stat_main(bin, cwd=cwd),
                 _stat_sub_modules(bin, cwd=cwd),
             )
-            if main == prev.main and submodules == prev.submodules:
-                return prev
-            else:
-                stats = chain((_parse_stats_main(main)), _parse_sub_modules(submodules))
+            stats = chain((_parse_stats_main(main)), _parse_sub_modules(submodules))
         except CalledProcessError:
             return VCStatus()
         else:
