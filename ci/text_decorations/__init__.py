@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from json import loads
 from pathlib import Path
 from typing import Mapping, Tuple
@@ -11,8 +12,23 @@ from chad_types import ASSETS, Hex, IconGlyphs, IconGlyphSet, TextColours, TextC
 
 from ..run import docker_run
 
+
+@dataclass(frozen=True)
+class _TCAliases:
+    ext_exact: Mapping[str, str]
+    name_exact: Mapping[str, str]
+    name_glob: Mapping[str, str]
+
+
+@dataclass(frozen=True)
+class _Aliases:
+    icon_colours: Mapping[str, str]
+    text_colours: _TCAliases
+
+
 _DOCKERFILE = Path(__file__).resolve(strict=True).with_name("Dockerfile")
 _ICON_BASE = ASSETS / "icon_base.yml"
+_ALIASES = ASSETS / "aliases.yml"
 
 
 def _process_exts(exts: Mapping[str, str]) -> Mapping[str, str]:
@@ -62,11 +78,15 @@ def _make_lightmode(colours: TextColours) -> TextColours:
 def load_text_decors() -> Tuple[IconGlyphSet, TextColourSet]:
     i_decode = new_decoder[IconGlyphSet](IconGlyphSet, strict=False)
     c_decode = new_decoder[TextColourSet](TextColourSet, strict=False)
+    a_decode = new_decoder[_Aliases](_Aliases)
 
-    yaml = safe_load(_ICON_BASE.read_text("UTF-8"))
+    icon_base = safe_load(_ICON_BASE.read_text("UTF-8"))
+    aliases = safe_load(_ALIASES.read_text("UTF-8"))
+
     json = loads(docker_run(_DOCKERFILE))
-    data = merge(json, yaml)
+    data = merge(json, icon_base)
     icon_spec = i_decode(data)
+    ali = a_decode(aliases)
 
     icon_set = IconGlyphSet(
         ascii=_process_icons(icon_spec.ascii),

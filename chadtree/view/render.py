@@ -51,6 +51,10 @@ def _suffixx(path: PurePath) -> _Str:
         return _EMPTY
 
 
+def _lax_suffix(path: PurePath) -> str:
+    return path.suffix or path.name
+
+
 @lru_cache(maxsize=None)
 def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
     def comp(node: Node) -> Sequence[Any]:
@@ -105,7 +109,7 @@ def _paint(
         if ignored:
             return context.particular_mappings.ignored
         else:
-            return context.icon_exts.get(node.path.suffix)
+            return context.icon_exts.get(_lax_suffix(node.path))
 
     def search_text_hl(node: Node, ignored: bool) -> Optional[str]:
         if ignored:
@@ -125,7 +129,7 @@ def _paint(
             if fnmatch(node.path.name, pattern):
                 return hl
 
-        if hl := context.ext_exact.get(node.path.suffix):
+        if hl := context.ext_exact.get(_lax_suffix(node.path)):
             return hl
 
         for mode in s_modes:
@@ -158,7 +162,7 @@ def _paint(
             yield (
                 (
                     icons.name_exact.get(node.path.name, "")
-                    or icons.ext_exact.get(node.path.suffix, "")
+                    or icons.ext_exact.get(_lax_suffix(node.path), "")
                     or next(
                         (
                             v
