@@ -34,7 +34,7 @@ from typing import (
 from std2.itertools import batched
 from std2.pathlib import is_relative_to
 
-from ..consts import WALK_PARALLELISM_FACTOR
+from ..consts import BATCH_FACTOR
 from ..state.executor import AsyncExecutor
 from ..state.types import Index
 from ..timeit import timeit
@@ -123,9 +123,7 @@ def _iter_single_nodes(
     th: ThreadPoolExecutor, root: PurePath, follow: bool, index: Index
 ) -> Iterator[Node]:
     with timeit("fs->_iter"):
-        dir_stream = batched(
-            _iter(root, index=index, follow=follow), n=WALK_PARALLELISM_FACTOR
-        )
+        dir_stream = batched(_iter(root, index=index, follow=follow), n=BATCH_FACTOR)
         for seq in th.map(lambda x: tuple(map(_fs_node, x)), dir_stream):
             yield from seq
 
@@ -138,7 +136,7 @@ async def _new(
     for idx, node in enumerate(
         _iter_single_nodes(th, root=root, follow=follow_links, index=index), start=1
     ):
-        if idx % WALK_PARALLELISM_FACTOR == 0:
+        if idx % BATCH_FACTOR == 0:
             await sleep(0)
         nodes[node.path] = node
         if parent := nodes.get(node.path.parent):
