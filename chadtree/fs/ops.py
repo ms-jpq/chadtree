@@ -25,7 +25,7 @@ _FILE_MODE = RW_R__R__
 
 
 def ancestors(*paths: PurePath) -> AbstractSet[PurePath]:
-    return {*chain.from_iterable(PurePath(path).parents for path in paths)}
+    return {*chain.from_iterable(path.parents for path in paths)}
 
 
 def unify_ancestors(paths: AbstractSet[PurePath]) -> AbstractSet[PurePath]:

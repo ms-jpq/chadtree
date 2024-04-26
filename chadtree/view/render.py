@@ -39,13 +39,16 @@ class _str(UserString):
         return True
 
 
+_EMPTY = _str("")
+
+
 def _suffixx(path: PurePath) -> _Str:
     if path.suffix:
         return strxfrm(path.suffix)
     elif path.stem.startswith(extsep):
         return strxfrm(path.stem)
     else:
-        return _str("")
+        return _EMPTY
 
 
 @lru_cache(maxsize=None)
@@ -153,17 +156,21 @@ def _paint(
                 yield icons.folder.closed
         else:
             yield (
-                icons.name_exact.get(node.path.name, "")
-                or icons.ext_exact.get(node.path.suffix, "")
-                or next(
-                    (
-                        v
-                        for k, v in icons.name_glob.items()
-                        if fnmatch(node.path.name, k)
-                    ),
-                    icons.default_icon,
+                (
+                    icons.name_exact.get(node.path.name, "")
+                    or icons.ext_exact.get(node.path.suffix, "")
+                    or next(
+                        (
+                            v
+                            for k, v in icons.name_glob.items()
+                            if fnmatch(node.path.name, k)
+                        ),
+                        icons.default_icon,
+                    )
                 )
-            ) if settings.view.use_icons else icons.default_icon
+                if settings.view.use_icons
+                else icons.default_icon
+            )
         yield " "
 
     def gen_name(node: Node) -> Iterator[str]:

@@ -39,7 +39,6 @@ from ..state.executor import AsyncExecutor
 from ..state.types import Index
 from ..timeit import timeit
 from .nt import is_junction
-from .ops import ancestors
 from .types import Ignored, Mode, Node
 
 _FILE_MODES: Mapping[int, Mode] = {
@@ -113,7 +112,6 @@ def _fs_node(path: PurePath) -> Node:
         path=path,
         mode=mode,
         pointed=pointed,
-        ancestors=ancestors(path),
         children={},
     )
     return node
@@ -175,7 +173,6 @@ async def _update(
             path=root.path,
             mode=root.mode,
             pointed=root.pointed,
-            ancestors=root.ancestors,
             children=children,
         )
 

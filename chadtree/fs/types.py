@@ -41,7 +41,6 @@ class Node:
     mode: AbstractSet[Mode]
     path: PurePath
     pointed: Optional[PurePath]
-    ancestors: AbstractSet[PurePath]
     children: Mapping[PurePath, Node]
     cache: _RenderCache = field(default_factory=_RenderCache)
 
