@@ -283,13 +283,13 @@ CHADTree can sort by the following criterion. Reorder them if you want a differe
 **legal keys: some of**
 
 ```json
-["is_folder", "ext", "file_name"]
+["is_folder", "ext", "file_name_lower", "file_name"]
 ```
 
 **default:**
 
 ```json
-["is_folder", "ext", "file_name"]
+["is_folder", "ext", "file_name_lower", "file_name"]
 ```
 
 #### `chadtree_settings.view.width`

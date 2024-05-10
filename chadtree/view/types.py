@@ -37,6 +37,7 @@ class HLcontext:
 class Sortby(Enum):
     is_folder = auto()
     ext = auto()
+    file_name_lower = auto()
     file_name = auto()
 
 

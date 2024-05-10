@@ -156,6 +156,7 @@ view:
   sort_by:
     - is_folder
     - ext
+    - file_name_lower
     - file_name
   time_format: "%Y-%m-%d %H:%M"
   width: 40

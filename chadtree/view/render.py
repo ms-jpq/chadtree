@@ -66,6 +66,8 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
                         yield _CompVals.FOLDER if is_dir(node) else _CompVals.FILE
                     elif sb is Sortby.ext:
                         yield "" if is_dir(node) else _suffixx(node.path)
+                    elif sb is Sortby.file_name_lower:
+                        yield strxfrm(node.path.name.casefold())
                     elif sb is Sortby.file_name:
                         yield strxfrm(node.path.name)
                     else:
