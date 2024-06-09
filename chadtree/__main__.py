@@ -98,11 +98,13 @@ if command == "deps":
         print(msg, io_out.getvalue(), file=stderr)
         exit(1)
     else:
+        quiet = () if stderr.isatty() else ("--quiet",)
         proc = run(
             (
                 _RT_PY,
                 "-m",
                 "pip",
+                *quiet,
                 "install",
                 "--upgrade",
                 "--requirement",
