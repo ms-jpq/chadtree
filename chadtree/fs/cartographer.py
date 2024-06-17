@@ -1,3 +1,4 @@
+from __future__ import annotations
 from asyncio import sleep
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
