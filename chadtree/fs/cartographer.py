@@ -1,3 +1,4 @@
+from __future__ import annotations
 from asyncio import sleep
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
@@ -53,7 +54,7 @@ _FILE_MODES: Mapping[int, Mode] = {
 
 
 def _iter(
-    dirent: Union[PurePath, DirEntry], follow: bool, index: Index, lv: int = 0
+    dirent: Union[PurePath, DirEntry[str]], follow: bool, index: Index, lv: int = 0
 ) -> Iterator[PurePath]:
     if not lv:
         yield PurePath(dirent)
