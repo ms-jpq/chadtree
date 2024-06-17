@@ -53,7 +53,7 @@ _FILE_MODES: Mapping[int, Mode] = {
 
 
 def _iter(
-    dirent: Union[PurePath, DirEntry[str]], follow: bool, index: Index, lv: int = 0
+    dirent: Union[PurePath, DirEntry], follow: bool, index: Index, lv: int = 0
 ) -> Iterator[PurePath]:
     if not lv:
         yield PurePath(dirent)
