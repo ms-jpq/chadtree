@@ -10,7 +10,7 @@ from .shared.index import indices
 
 
 @rpc(blocking=False)
-async def _stat(state: State, is_visual: bool) -> None:
+async def stat(state: State, is_visual: bool) -> None:
     """
     Print file stat to cmdline
     """
