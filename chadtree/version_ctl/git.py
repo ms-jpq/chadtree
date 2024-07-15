@@ -48,12 +48,13 @@ async def root(git: PurePath, cwd: PurePath) -> PurePath:
     stdout = await nice_call(
         (
             git,
+            "-C",
+            cwd,
             "--no-optional-locks",
             "rev-parse",
             "--path-format=relative",
             "--show-toplevel",
-        ),
-        cwd=cwd,
+        )
     )
     return PurePath(normpath(cwd / stdout.rstrip()))
 
@@ -73,7 +74,7 @@ def _parse_stats_main(stdout: str) -> Sequence[Tuple[str, PurePath]]:
 
 
 async def _stat_main(git: PurePath, cwd: PurePath) -> str:
-    stdout = await nice_call((git, *_GIT_LIST_CMD), cwd=cwd)
+    stdout = await nice_call((git, "-C", cwd, *_GIT_LIST_CMD))
     return stdout
 
 
@@ -123,6 +124,8 @@ async def _stat_sub_modules(git: PurePath, cwd: PurePath) -> str:
     stdout = await nice_call(
         (
             git,
+            "-C",
+            cwd,
             "--no-optional-locks",
             "submodule",
             "foreach",
@@ -130,7 +133,6 @@ async def _stat_sub_modules(git: PurePath, cwd: PurePath) -> str:
             git,
             *_GIT_LIST_CMD,
         ),
-        cwd=cwd,
     )
     return stdout
 
