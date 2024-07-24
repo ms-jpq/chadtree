@@ -105,10 +105,12 @@ _RGB_TABLE: AbstractSet[str] = {"38", "48"}
 
 _E_BASIC_TABLE: Mapping[int, _AnsiColour] = {i: c for i, c in enumerate(_AnsiColour)}
 
-_E_GREY_TABLE: Mapping[int, _Colour] = {
+_E_GRAY_TABLE: Mapping[int, _Colour] = {
     i: _Colour(r=s, g=s, b=s)
     for i, s in enumerate((round(step / 23 * 255) for step in range(24)), 232)
 }
+
+_LEN_LO = len(_E_BASIC_TABLE)
 
 
 def _parse_8(codes: Iterator[str]) -> Union[_AnsiColour, _Colour, None]:
@@ -118,18 +120,20 @@ def _parse_8(codes: Iterator[str]) -> Union[_AnsiColour, _Colour, None]:
         return None
     else:
         if ansi_code in _ANSI_RANGE:
-            basic = _E_BASIC_TABLE.get(ansi_code)
-            if basic:
+            if basic := _E_BASIC_TABLE.get(ansi_code):
                 return basic
-            grey = _E_GREY_TABLE.get(ansi_code)
-            if grey:
+            elif grey := _E_GRAY_TABLE.get(ansi_code):
                 return grey
-            ratio = 255 / 5
-            code = ansi_code - 16
-            r = code // 36
-            g = code % 36 // 6
-            b = code % 36 % 6
-            return _Colour(r=round(r * ratio), g=round(g * ratio), b=round(b * ratio))
+            else:
+                code = ansi_code - _LEN_LO
+                r = code // 36
+                g = code % 36 // 6
+                b = code % 6
+                xt_r = 55 + r * 40
+                xt_g = 55 + g * 40
+                xt_b = 55 + b * 40
+                clr = _Colour(r=xt_r, g=xt_g, b=xt_b)
+                return clr
         else:
             return None
 
