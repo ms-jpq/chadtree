@@ -213,8 +213,7 @@ def _parse_codes(
 ) -> Iterator[Union[_Style, Tuple[_Ground, Union[_AnsiColour, _Colour]]]]:
     it = (code.lstrip("0") for code in codes.split(";"))
     for code in it:
-        style = _STYLE_TABLE.get(code)
-        if style:
+        if style := _STYLE_TABLE.get(code):
             yield style
             continue
         ground = _GROUND_TABLE.get(code)
@@ -273,6 +272,7 @@ def _parseHLGroup(styling: _Styling, discrete_colours: Mapping[str, str]) -> HLg
         cterm=cterm,
         ctermfg=ctermfg,
         ctermbg=ctermbg,
+        gui=cterm,
         guifg=guifg,
         guibg=guibg,
     )
