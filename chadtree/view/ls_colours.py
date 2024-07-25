@@ -129,9 +129,9 @@ def _parse_8(codes: Iterator[str]) -> Union[_AnsiColour, _Colour, None]:
                 r = code // 36
                 g = code % 36 // 6
                 b = code % 6
-                xt_r = 55 + r * 40
-                xt_g = 55 + g * 40
-                xt_b = 55 + b * 40
+                xt_r = 55 + r * 40 if r else 0
+                xt_g = 55 + g * 40 if g else 0
+                xt_b = 55 + b * 40 if b else 0
                 clr = _Colour(r=xt_r, g=xt_g, b=xt_b)
                 return clr
         else:
