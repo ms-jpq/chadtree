@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S -- PYTHONSAFEPATH= python3
 
 from datetime import datetime, timezone
 from os import environ, sep
