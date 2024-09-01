@@ -1,7 +1,5 @@
 from asyncio import (
     AbstractEventLoop,
-    Task,
-    create_task,
     get_running_loop,
     run,
     run_coroutine_threadsafe,
@@ -9,11 +7,8 @@ from asyncio import (
 )
 from concurrent.futures import Future, InvalidStateError, ThreadPoolExecutor
 from contextlib import suppress
-from functools import wraps
 from threading import Thread
-from typing import Any, Awaitable, Callable, Coroutine, Optional, TypeVar, cast
-
-from std2.asyncio import Locker, cancel
+from typing import Any, Awaitable, Callable, Coroutine, TypeVar
 
 _T = TypeVar("_T")
 
@@ -58,26 +53,3 @@ class AsyncExecutor:
     def submit(self, co: Awaitable[_T]) -> Awaitable[_T]:
         f = run_coroutine_threadsafe(co, loop=self.loop)
         return wrap_future(f)
-
-
-_F = TypeVar("_F", bound=Callable[..., Coroutine])
-
-
-def Cancellation() -> Callable[[_F], _F]:
-    lock = Locker()
-    task: Optional[Task] = None
-
-    def cont(fn: _F) -> _F:
-        @wraps(fn)
-        async def wrapped(*__a: Any, **__kw: Any) -> Any:
-            nonlocal task
-            async with lock():
-                if t := task:
-                    await cancel(t)
-                t = create_task(fn(*__a, **__kw))
-                task = t
-            return await t
-
-        return cast(_F, wrapped)
-
-    return cont

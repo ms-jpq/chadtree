@@ -1,4 +1,4 @@
-from asyncio import gather
+from asyncio import CancelledError, gather
 from functools import lru_cache
 from itertools import chain
 from locale import strxfrm
@@ -17,7 +17,7 @@ from typing import (
     Tuple,
 )
 
-from std2.asyncio import to_thread
+from std2.asyncio import Cancellation, to_thread
 from std2.pathlib import ROOT
 from std2.string import removeprefix, removesuffix
 
@@ -42,6 +42,9 @@ _GIT_SUBMODULE_MARKER = "Entering "
 _SUBMODULE_MARKER = "S"
 _IGNORED_MARKER = "I"
 _UNTRACKED_MARKER = "?"
+
+
+_die = Cancellation()
 
 
 async def root(git: PurePath, cwd: PurePath) -> PurePath:
@@ -173,7 +176,8 @@ def _parse(root: PurePath, stats: _Stats) -> VCStatus:
     return VCStatus(ignored=ignored, status=trimmed)
 
 
-async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
+@_die
+async def _status(cwd: PurePath) -> VCStatus:
     if git := which("git"):
         bin = PurePath(git)
         try:
@@ -189,3 +193,10 @@ async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
             return await to_thread(lambda: _parse(raw_root, stats=stats))
     else:
         return VCStatus()
+
+
+async def status(cwd: PurePath, prev: VCStatus) -> VCStatus:
+    try:
+        return await _status(cwd)
+    except CancelledError:
+        return prev
