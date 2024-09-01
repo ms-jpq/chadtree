@@ -15,10 +15,9 @@ from shutil import which as _which
 from stat import S_ISDIR, S_ISLNK, filemode
 from typing import AbstractSet, Iterable, Mapping, Optional
 
-from std2.asyncio import to_thread
+from std2.asyncio import Locker, to_thread
 from std2.stat import RW_R__R__, RWXR_XR_X
 
-from ..state.executor import Locker
 from .nt import is_junction
 
 _FOLDER_MODE = RWXR_XR_X

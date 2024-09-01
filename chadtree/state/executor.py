@@ -1,6 +1,5 @@
 from asyncio import (
     AbstractEventLoop,
-    Lock,
     Task,
     create_task,
     get_running_loop,
@@ -10,9 +9,11 @@ from asyncio import (
 )
 from concurrent.futures import Future, InvalidStateError, ThreadPoolExecutor
 from contextlib import suppress
-from functools import lru_cache, wraps
+from functools import wraps
 from threading import Thread
 from typing import Any, Awaitable, Callable, Coroutine, Optional, TypeVar, cast
+
+from std2.asyncio import Locker, cancel
 
 _T = TypeVar("_T")
 
@@ -59,28 +60,22 @@ class AsyncExecutor:
         return wrap_future(f)
 
 
-def Locker() -> Callable[[], Lock]:
-    @lru_cache(maxsize=None)
-    def lock() -> Lock:
-        return Lock()
-
-    return lock
-
-
 _F = TypeVar("_F", bound=Callable[..., Coroutine])
 
 
-def Canceller() -> Callable[[_F], _F]:
+def Cancellation() -> Callable[[_F], _F]:
+    lock = Locker()
     task: Optional[Task] = None
 
     def cont(fn: _F) -> _F:
         @wraps(fn)
         async def wrapped(*__a: Any, **__kw: Any) -> Any:
             nonlocal task
-            if t := task:
-                t.cancel()
-            t = create_task(fn(*__a, **__kw))
-            task = t
+            async with lock():
+                if t := task:
+                    await cancel(t)
+                t = create_task(fn(*__a, **__kw))
+                task = t
             return await t
 
         return cast(_F, wrapped)
