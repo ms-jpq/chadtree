@@ -1,4 +1,4 @@
-from asyncio import Lock, gather
+from asyncio import gather
 from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
@@ -18,6 +18,7 @@ from typing import AbstractSet, Iterable, Mapping, Optional
 from std2.asyncio import to_thread
 from std2.stat import RW_R__R__, RWXR_XR_X
 
+from ..state.executor import Locker
 from .nt import is_junction
 
 _FOLDER_MODE = RWXR_XR_X
@@ -42,9 +43,7 @@ class FSstat:
     link: Optional[PurePath]
 
 
-@lru_cache(maxsize=None)
-def lock() -> Lock:
-    return Lock()
+_lock = Locker()
 
 
 try:
@@ -167,7 +166,7 @@ async def _new(path: PurePath) -> None:
 
 
 async def new(paths: Iterable[PurePath]) -> None:
-    async with lock():
+    async with _lock():
         await gather(*map(_new, paths))
 
 
@@ -180,7 +179,7 @@ async def _rename(src: PurePath, dst: PurePath) -> None:
 
 
 async def rename(operations: Mapping[PurePath, PurePath]) -> None:
-    async with lock():
+    async with _lock():
         await gather(*(_rename(src, dst) for src, dst in operations.items()))
 
 
@@ -196,7 +195,7 @@ async def _remove(path: PurePath) -> None:
 
 
 async def remove(paths: Iterable[PurePath]) -> None:
-    async with lock():
+    async with _lock():
         await gather(*map(_remove, paths))
 
 
@@ -208,7 +207,7 @@ async def _cut(src: PurePath, dst: PurePath) -> None:
 
 
 async def cut(operations: Mapping[PurePath, PurePath]) -> None:
-    async with lock():
+    async with _lock():
         await gather(*(_cut(src, dst) for src, dst in operations.items()))
 
 
@@ -224,7 +223,7 @@ async def _copy(src: PurePath, dst: PurePath) -> None:
 
 
 async def copy(operations: Mapping[PurePath, PurePath]) -> None:
-    async with lock():
+    async with _lock():
         await gather(*(_copy(src, dst) for src, dst in operations.items()))
 
 
@@ -238,5 +237,5 @@ async def _link(src: PurePath, dst: PurePath) -> None:
 
 
 async def link(operations: Mapping[PurePath, PurePath]) -> None:
-    async with lock():
+    async with _lock():
         await gather(*(_link(src, dst) for dst, src in operations.items()))
