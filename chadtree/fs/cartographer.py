@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 from asyncio import sleep
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Executor
 from contextlib import suppress
 from fnmatch import fnmatch
 from os import DirEntry, scandir, stat, stat_result
@@ -119,7 +120,7 @@ def _fs_node(path: PurePath) -> Node:
 
 
 def _iter_single_nodes(
-    th: ThreadPoolExecutor, root: PurePath, follow: bool, index: Index
+    th: Executor, root: PurePath, follow: bool, index: Index
 ) -> Iterator[Node]:
     with timeit("fs->_iter"):
         dir_stream = batched(_iter(root, index=index, follow=follow), n=BATCH_FACTOR)
@@ -127,9 +128,7 @@ def _iter_single_nodes(
             yield from seq
 
 
-async def _new(
-    th: ThreadPoolExecutor, root: PurePath, follow_links: bool, index: Index
-) -> Node:
+async def _new(th: Executor, root: PurePath, follow_links: bool, index: Index) -> Node:
     nodes: MutableMapping[PurePath, Node] = {}
 
     for idx, node in enumerate(
@@ -151,7 +150,7 @@ def _cross_over(root: PurePath, invalid: PurePath) -> bool:
 
 
 async def _update(
-    th: ThreadPoolExecutor,
+    th: Executor,
     root: Node,
     follow_links: bool,
     index: Index,
