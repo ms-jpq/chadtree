@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from asyncio import (
+    FIRST_COMPLETED,
     AbstractEventLoop,
     Condition,
     create_task,
@@ -11,11 +12,12 @@ from asyncio import (
     wait,
     wrap_future,
 )
-from concurrent.futures import Future as CFuture
-from contextlib import contextmanager
-from threading import Lock as CLock
-from threading import Thread
-from typing import Generic, Iterator, TypeVar, cast
+from concurrent.futures import Future, InvalidStateError
+from contextlib import suppress
+from threading import Lock, Thread
+from typing import Coroutine, Generic, TypeVar, cast
+
+from std2.asyncio import cancel
 
 _T_co = TypeVar("_T_co")
 
@@ -23,10 +25,11 @@ _T_co = TypeVar("_T_co")
 class Worker(Generic[_T_co]):
 
     def __init__(self) -> None:
+        self._lock = Lock()
         self._idle = Condition()
-        self._interrupt_lock = CLock()
         self._loop: AbstractEventLoop = cast(AbstractEventLoop, None)
-        fut = CFuture()
+        self._interrupt_fut: Future = Future()
+        fut: Future = Future()
 
         async def cont() -> None:
             self._loop = get_running_loop()
@@ -37,12 +40,20 @@ class Worker(Generic[_T_co]):
         self._th.start()
         fut.result()
 
-    @contextmanager
-    def _interrupt(self) -> Iterator[None]:
-        with self._interrupt_lock:
-            pass
-            self._interrupt_fut = CFuture()
-            yield
+    def interrupt(self) -> None:
+        with suppress(InvalidStateError):
+            self._interrupt_fut.set_result(None)
+        with self._lock:
+            self._interrupt_fut = Future()
+
+    async def _with_interrupt(self, co: Coroutine) -> None:
+        with self._lock:
+            f = self._interrupt_fut
+        fut = wrap_future(f)
+        task = create_task(co)
+        done, _ = await wait((task, fut), return_when=FIRST_COMPLETED)
+        if fut in done:
+            await cancel(task)
 
     async def idle(self) -> None:
         async def cont() -> None:
