@@ -5,7 +5,18 @@ from functools import lru_cache
 from locale import strxfrm
 from os.path import extsep, sep
 from pathlib import PurePath
-from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, Union, cast
+from typing import (
+    Any,
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterator,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 from pynvim_pp.lib import encode
 from std2.platform import OS, os
@@ -103,7 +114,7 @@ def _paint(
     follow_links: bool,
     show_hidden: bool,
     current: Optional[PurePath],
-) -> Callable[[Node, int], Optional[_Render]]:
+) -> Callable[[Node, int], Awaitable[Optional[_Render]]]:
     icons = settings.view.icons
     context = settings.view.hl_context
 
@@ -255,7 +266,7 @@ def _paint(
             hl = Highlight(group=text_group, begin=text_begin, end=text_end)
             yield hl
 
-    def show(node: Node, depth: int) -> Optional[_Render]:
+    async def show(node: Node, depth: int) -> Optional[_Render]:
         _user_ignored = user_ignored(node, ignores=settings.ignores)
         vc_ignored = _vc_ignored(node, vc=vc)
         ignored = vc_ignored or _user_ignored
@@ -278,7 +289,7 @@ def _paint(
     return show
 
 
-def render(
+async def render(
     node: Node,
     *,
     settings: Settings,
@@ -306,25 +317,27 @@ def render(
     comp = _gen_comp(settings.view.sort_by)
     keep_open = {node.path}
 
-    def render(node: Node, *, depth: int, cleared: bool) -> Iterator[_NRender]:
+    async def rend(node: Node, *, depth: int, cleared: bool) -> AsyncIterator[_NRender]:
         clear = (
             cleared
             or not filter_pattern
             or fnmatch(node.path.name, filter_pattern.pattern)
         )
 
-        if rend := show(node, depth):
+        if shown := await show(node, depth):
 
-            def gen_children() -> Iterator[_NRender]:
+            async def gen_children() -> AsyncIterator[_NRender]:
                 for child in sorted(node.children.values(), key=comp):
-                    yield from render(child, depth=depth + 1, cleared=clear)
+                    async for r in rend(child, depth=depth + 1, cleared=clear):
+                        yield r
 
-            children = tuple(gen_children())
+            children = [r async for r in gen_children()]
             if clear or children or node.path in keep_open:
-                yield (node, *rend)
-            yield from iter(children)
+                yield (node, *shown)
+            for child in children:
+                yield child
 
-    rendered = render(node, depth=0, cleared=False)
+    rendered = [r async for r in rend(node, depth=0, cleared=False)]
     _nodes, _lines, _highlights, _badges = zip(*rendered)
     nodes, lines, highlights, badges = (
         cast(Sequence[Node], _nodes),

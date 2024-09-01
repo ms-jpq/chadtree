@@ -1,6 +1,7 @@
 from asyncio import gather
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from uuid import uuid4
 
 from pynvim_pp.nvim import Nvim
 
@@ -9,7 +10,6 @@ from ..fs.cartographer import new
 from ..nvim.markers import markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
-from .cache import DeepState
 from .executor import AsyncExecutor
 from .ops import load_session
 from .types import Selection, Session, State
@@ -48,7 +48,8 @@ async def initial(settings: Settings, th: ThreadPoolExecutor) -> State:
     current = None
     filter_pattern = None
 
-    state = DeepState(
+    state = State(
+        id=uuid4(),
         executor=executor,
         settings=settings,
         session=session,
@@ -68,5 +69,6 @@ async def initial(settings: Settings, th: ThreadPoolExecutor) -> State:
         vc=vc,
         current=current,
         window_order={},
+        node_row_lookup=(),
     )
     return state

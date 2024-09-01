@@ -1,5 +1,6 @@
 from pathlib import PurePath
 from typing import AbstractSet, Mapping, Optional, Union, cast
+from uuid import uuid4
 
 from pynvim_pp.rpc_types import ExtData
 from std2.types import Void, VoidType, or_else
@@ -8,7 +9,6 @@ from ..fs.cartographer import update
 from ..fs.types import Node
 from ..nvim.types import Markers
 from ..version_ctl.types import VCStatus
-from .cache import DeepState
 from .types import Diagnostics, FilterPattern, Index, Selection, Session, State
 
 
@@ -60,7 +60,8 @@ async def forward(
     new_hidden = or_else(show_hidden, state.show_hidden)
     new_vim_focus = or_else(vim_focus, state.vim_focus)
 
-    new_state = DeepState(
+    new_state = State(
+        id=uuid4(),
         executor=state.executor,
         settings=state.settings,
         session=or_else(session, state.session),
@@ -80,6 +81,7 @@ async def forward(
         vc=new_vc,
         current=new_current,
         window_order=or_else(window_order, state.window_order),
+        node_row_lookup=state.node_row_lookup,
     )
 
     return new_state

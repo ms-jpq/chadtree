@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path, PurePath
-from typing import AbstractSet, Mapping, Optional
+from typing import AbstractSet, Mapping, Optional, Sequence
+from uuid import UUID
 
 from pynvim_pp.rpc_types import ExtData
 
@@ -8,7 +9,6 @@ from ..fs.types import Node
 from ..nvim.types import Markers
 from ..settings.types import Settings
 from ..version_ctl.types import VCStatus
-from ..view.types import Derived
 from .executor import AsyncExecutor
 
 Index = AbstractSet[PurePath]
@@ -29,6 +29,7 @@ class Session:
 
 @dataclass(frozen=True)
 class State:
+    id: UUID
     executor: AsyncExecutor
     settings: Settings
     session: Session
@@ -48,10 +49,7 @@ class State:
     width: int
     diagnostics: Diagnostics
     window_order: Mapping[ExtData, None]
-
-    @property
-    def derived(self) -> Derived:
-        raise NotImplementedError()
+    node_row_lookup: Sequence[Node]
 
 
 @dataclass(frozen=True)

@@ -12,6 +12,7 @@ from asyncio import (
 )
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractAsyncContextManager, suppress
+from dataclasses import replace
 from functools import wraps
 from logging import DEBUG as DEBUG_LVL
 from logging import INFO
@@ -36,7 +37,7 @@ from pynvim_pp.rpc_types import (
     ServerAddr,
 )
 from pynvim_pp.types import NoneType
-from std2.asyncio import cancel
+from std2.asyncio import Cancellation, cancel
 from std2.cell import RefCell
 from std2.contextlib import nullacontext
 from std2.pickle.types import DecodeError
@@ -60,6 +61,8 @@ from .transitions.types import Stage
 assert ____ or True
 
 _CB = RPCallable[Optional[Stage]]
+
+_die = Cancellation()
 
 
 def _autodie(ppid: int) -> AbstractAsyncContextManager:
@@ -123,7 +126,7 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
     else:
         hl = highlight(*settings.view.hl_context.groups)
         await (atomic + autocmd.drain() + hl).commit(NoneType)
-        state = RefCell(await initial_state(settings, th=th))
+        state_ref = RefCell(await initial_state(settings, th=th))
 
         init_locale(settings.lang)
         with suppress_and_log():
@@ -141,8 +144,8 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
             if handler := cast(Optional[_CB], handlers.get(method)):
                 with suppress_and_log():
                     async with lock:
-                        if stage := await handler(state.val, *params):
-                            state.val = stage.state
+                        if stage := await handler(state_ref.val, *params):
+                            state_ref.val = stage.state
                             staged.val = stage
                             event.set()
             else:
@@ -177,30 +180,45 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
         async def c2() -> None:
             t1, has_drawn = monotonic(), False
 
+            @_die
+            async def cont() -> None:
+                nonlocal has_drawn
+                with suppress_and_log():
+                    if stage := staged.val:
+                        state = stage.state
+
+                        for _ in range(RENDER_RETRIES - 1):
+                            with suppress(NvimError):
+                                derived = await redraw(state, focus=stage.focus)
+                                next_state = replace(
+                                    state, node_row_lookup=derived.node_row_lookup
+                                )
+                                break
+                        else:
+                            try:
+                                derived = await redraw(state, focus=stage.focus)
+                                next_state = replace(
+                                    state, node_row_lookup=derived.node_row_lookup
+                                )
+                            except NvimError as e:
+                                log.warn("%s", e)
+                                next_state = state
+
+                        state_ref.val = next_state
+
+                        if settings.profiling and not has_drawn:
+                            has_drawn = True
+                            await _profile(t1=t1)
+
             while True:
                 await event.wait()
-                with suppress_and_log():
-                    try:
-                        if stage := staged.val:
-                            state = stage.state
+                try:
 
-                            for _ in range(RENDER_RETRIES - 1):
-                                with suppress(NvimError):
-                                    await redraw(state, focus=stage.focus)
-                                    break
-                            else:
-                                try:
-                                    await redraw(state, focus=stage.focus)
-                                except NvimError as e:
-                                    log.warn("%s", e)
+                    create_task(cont())
+                finally:
+                    event.clear()
 
-                            if settings.profiling and not has_drawn:
-                                has_drawn = True
-                                await _profile(t1=t1)
-                    finally:
-                        event.clear()
-
-        await gather(c1(), c2(), _sched(state))
+        await gather(c1(), c2(), _sched(state_ref))
 
 
 async def init(socket: ServerAddr, ppid: int, th: ThreadPoolExecutor) -> None:

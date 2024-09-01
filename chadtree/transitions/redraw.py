@@ -15,19 +15,33 @@ from std2.pickle.types import DecodeError
 
 from ..consts import URI_SCHEME
 from ..state.types import State
+from ..view.render import render
 from ..view.types import Derived
 from .shared.wm import find_fm_windows
 
 
-class UnrecoverableError(Exception):
-    ...
+class UnrecoverableError(Exception): ...
 
 
 _NS = uuid4()
-
-
 _DECODER = new_decoder[Sequence[str]](Sequence[str])
 _HOME = Path.home()
+
+
+async def _derived(state: State) -> Derived:
+    return await render(
+        state.root,
+        settings=state.settings,
+        index=state.index,
+        selection=state.selection,
+        filter_pattern=state.filter_pattern,
+        markers=state.markers,
+        diagnostics=state.diagnostics,
+        vc=state.vc,
+        follow_links=state.follow_links,
+        show_hidden=state.show_hidden,
+        current=state.current,
+    )
 
 
 def _buf_name(root: PurePath) -> str:
@@ -72,8 +86,9 @@ def _update(
     return atomic
 
 
-async def redraw(state: State, focus: Optional[PurePath]) -> None:
-    focus_row = state.derived.path_row_lookup.get(focus) if focus else None
+async def redraw(state: State, focus: Optional[PurePath]) -> Derived:
+    derived = await _derived(state)
+    focus_row = derived.path_row_lookup.get(focus) if focus else None
     buf_name = _buf_name(state.root.path)
 
     ns = await Nvim.create_namespace(_NS)
@@ -82,7 +97,7 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
     async for win, buf in find_fm_windows():
         is_fm_win = await win.vars.get(bool, URI_SCHEME)
         p_count = await buf.line_count()
-        n_count = len(state.derived.lines)
+        n_count = len(derived.lines)
         row, col = await win.get_cursor()
         (r1, c1), (r2, c2) = await operator_marks(buf, visual_type=None)
         buf_var = await buf.vars.get(NoneType, str(_NS))
@@ -108,7 +123,7 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
             use_extmarks,
             buf=buf,
             ns=ns,
-            derived=state.derived,
+            derived=derived,
             hashed_lines=hashed_lines,
         )
 
@@ -143,3 +158,5 @@ async def redraw(state: State, focus: Optional[PurePath]) -> None:
             await a4.commit(NoneType)
         except NvimError as e:
             raise UnrecoverableError(e)
+
+    return derived
