@@ -314,6 +314,20 @@ Intermediary folders are created automatically.
 ["A"]
 ```
 
+##### `chadtree_settings.keymap.new_link`
+
+Create link at location under cursor and specify name.
+
+Links are always relative.
+
+Intermediary folders are created automatically.
+
+**default:**
+
+```json
+["L"]
+```
+
 ##### `chadtree_settings.keymap.rename`
 
 Rename file under cursor.

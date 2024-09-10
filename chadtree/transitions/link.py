@@ -77,3 +77,47 @@ async def _link(state: State, is_visual: bool) -> Optional[Stage]:
                 invalidate_dirs=invalidate_dirs,
             )
             return Stage(next_state, focus=focus)
+
+
+@rpc(blocking=False)
+async def _new_link(state: State, is_visual: bool) -> Optional[Stage]:
+    """
+    Symlink at cursor
+    """
+
+    node = await anext(indices(state, is_visual=is_visual), None)
+    if node is None:
+        return None
+    else:
+        parent = (
+            node.path
+            if act_like_dir(node, follow_links=state.follow_links)
+            else node.path.parent
+        )
+
+        if not (src := await Nvim.input(question=LANG("pencil"), default="")):
+            return None
+
+        if not (dst := await Nvim.input(question=LANG("link", src=""), default="")):
+            return None
+
+        else:
+            operations = {parent / src: PurePath(dst)}
+
+        try:
+            await link(operations)
+        except Exception as e:
+            await Nvim.write(e, error=True)
+            return await refresh(state)
+        else:
+            paths = operations.keys()
+            await lsp_created(paths)
+            focus, *_ = sorted(paths, key=pathsort_key)
+            index = state.index | ancestors(*paths)
+            invalidate_dirs = {path.parent for path in paths}
+            next_state = await forward(
+                state,
+                index=index,
+                invalidate_dirs=invalidate_dirs,
+            )
+            return Stage(next_state, focus=focus)

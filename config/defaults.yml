@@ -50,6 +50,8 @@ keymap:
     - A
   new:
     - a
+  new_link:
+    - L
   open_sys:
     - o
   primary:
