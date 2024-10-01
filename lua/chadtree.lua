@@ -89,10 +89,18 @@ local main = function(is_xdg)
   end
 end
 
+local flatten = function(list)
+  if vim.iter then
+    return vim.iter(list):flatten():totable()
+  else
+    return vim.tbl_flatten(list)
+  end
+end
+
 local start = function(deps, ...)
   local is_xdg = settings().xdg
   local args =
-    vim.tbl_flatten {
+    flatten {
     deps and py3 or main(is_xdg),
     {"-s", "-u", "-m", "chadtree"},
     {...},
