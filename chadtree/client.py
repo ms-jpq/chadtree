@@ -136,7 +136,7 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
             ff = _trans(f)
             client.register(ff)
 
-        staged = RefCell[Optional[Stage]](None)
+        stage_ref = RefCell[Optional[Stage]](None)
         event = Event()
         lock = Lock()
 
@@ -146,7 +146,7 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
                     async with lock:
                         if stage := await handler(state_ref.val, *params):
                             state_ref.val = stage.state
-                            staged.val = stage
+                            stage_ref.val = stage
                             event.set()
             else:
                 assert False, (method, params)
@@ -184,25 +184,22 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
             async def cont() -> None:
                 nonlocal has_drawn
                 with suppress_and_log():
-                    if stage := staged.val:
+                    if stage := stage_ref.val:
                         state = stage.state
 
-                        for _ in range(RENDER_RETRIES - 1):
-                            with suppress(NvimError):
+                        for attempt in range(1, RENDER_RETRIES + 1):
+                            try:
                                 derived = await redraw(state, focus=stage.focus)
+                            except NvimError as e:
+                                if attempt == RENDER_RETRIES:
+                                    log.warning("%s", e)
+                            else:
                                 next_state = replace(
                                     state, node_row_lookup=derived.node_row_lookup
                                 )
                                 break
                         else:
-                            try:
-                                derived = await redraw(state, focus=stage.focus)
-                                next_state = replace(
-                                    state, node_row_lookup=derived.node_row_lookup
-                                )
-                            except NvimError as e:
-                                log.warn("%s", e)
-                                next_state = state
+                            next_state = state
 
                         state_ref.val = next_state
 
