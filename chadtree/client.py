@@ -17,7 +17,7 @@ from functools import wraps
 from logging import DEBUG as DEBUG_LVL
 from logging import INFO
 from multiprocessing import cpu_count
-from pathlib import Path
+from pathlib import Path, PurePath
 from platform import uname
 from string import Template
 from sys import executable, exit
@@ -136,7 +136,7 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
             ff = _trans(f)
             client.register(ff)
 
-        stage_ref = RefCell[Optional[Stage]](None)
+        focus_ref = RefCell[Optional[PurePath]](None)
         event = Event()
         lock = Lock()
 
@@ -146,7 +146,7 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
                     async with lock:
                         if stage := await handler(state_ref.val, *params):
                             state_ref.val = stage.state
-                            stage_ref.val = stage
+                            focus_ref.val = stage.focus
                             event.set()
             else:
                 assert False, (method, params)
@@ -184,12 +184,10 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
             async def cont() -> None:
                 nonlocal has_drawn
                 with suppress_and_log():
-                    if stage := stage_ref.val:
-                        state = stage.state
-
+                    if state := state_ref.val:
                         for attempt in range(1, RENDER_RETRIES + 1):
                             try:
-                                derived = await redraw(state, focus=stage.focus)
+                                derived = await redraw(state, focus=focus_ref.val)
                             except NvimError as e:
                                 if attempt == RENDER_RETRIES:
                                     log.warning("%s", e)
@@ -197,8 +195,8 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
                                 state_ref.val = replace(
                                     state, node_row_lookup=derived.node_row_lookup
                                 )
+                                focus_ref.val = None
                                 break
-
 
                         if settings.profiling and not has_drawn:
                             has_drawn = True
