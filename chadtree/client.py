@@ -11,7 +11,7 @@ from asyncio import (
     wrap_future,
 )
 from concurrent.futures import Future, ThreadPoolExecutor
-from contextlib import AbstractAsyncContextManager, suppress
+from contextlib import AbstractAsyncContextManager
 from dataclasses import replace
 from functools import wraps
 from logging import DEBUG as DEBUG_LVL
@@ -194,14 +194,11 @@ async def _go(loop: AbstractEventLoop, client: RPClient) -> None:
                                 if attempt == RENDER_RETRIES:
                                     log.warning("%s", e)
                             else:
-                                next_state = replace(
+                                state_ref.val = replace(
                                     state, node_row_lookup=derived.node_row_lookup
                                 )
                                 break
-                        else:
-                            next_state = state
 
-                        state_ref.val = next_state
 
                         if settings.profiling and not has_drawn:
                             has_drawn = True
