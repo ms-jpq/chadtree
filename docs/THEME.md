@@ -82,7 +82,7 @@ Imported from [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-
 
 **no_icons:**
 
-No icons.
+Text-only theme with no icons.
 
 **default:**
 
