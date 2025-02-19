@@ -91,6 +91,7 @@ def load_text_decors() -> Tuple[IconGlyphSet, TextColourSet]:
     icon_set = IconGlyphSet(
         ascii=_process_icons(icon_spec.ascii),
         ascii_hollow=_process_icons(icon_spec.ascii_hollow),
+        no_icons=_process_icons(icon_spec.no_icons),
         devicons=_process_icons(icon_spec.devicons),
         emoji=_process_icons(icon_spec.emoji),
     )

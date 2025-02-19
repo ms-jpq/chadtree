@@ -80,6 +80,9 @@ Imported from [vim-emoji-icon-theme](https://github.com/adelarsq/vim-emoji-icon-
 
 ![ascii_hollow_icons.png](https://github.com/ms-jpq/chadtree/raw/chad/docs/img/icons_ascii_hollow.png)
 
+**no_icons:**
+
+No icons.
 
 **default:**
 

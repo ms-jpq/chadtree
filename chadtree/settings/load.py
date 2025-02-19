@@ -128,6 +128,7 @@ async def initial(specs: Iterable[RPCallable]) -> Settings:
     use_icons = theme.icon_glyph_set not in {
         IconGlyphSetEnum.ascii,
         IconGlyphSetEnum.ascii_hollow,
+        IconGlyphSetEnum.no_icons,
     }
 
     view_opts = ViewOptions(
