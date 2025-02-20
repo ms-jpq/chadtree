@@ -23,6 +23,13 @@ ascii_hollow:
     closed: ▷
     open: ▽
 
+no_icons:
+  <<: *ascii
+  default_icon: ""
+  folder:
+    closed: ""
+    open: ""
+
 devicons: &devicons
   link:
     broken: 󰌸

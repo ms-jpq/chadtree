@@ -164,15 +164,18 @@ def _paint(
 
     def gen_icon(node: Node) -> Iterator[str]:
         yield " "
+
+        icon = None
+
         if is_dir(node):
             if node.pointed and not follow_links:
-                yield icons.link.normal
+                icon = icons.link.normal
             elif node.path in index:
-                yield icons.folder.open
+                icon = icons.folder.open
             else:
-                yield icons.folder.closed
+                icon = icons.folder.closed
         else:
-            yield (
+            icon = (
                 (
                     icons.name_exact.get(node.path.name, "")
                     or icons.ext_exact.get(_lax_suffix(node.path), "")
@@ -188,7 +191,10 @@ def _paint(
                 if settings.view.use_icons
                 else icons.default_icon
             )
-        yield " "
+ 
+        if icon:
+            yield icon
+            yield " "
 
     def gen_name(node: Node) -> Iterator[str]:
         yield encode_for_display(node.path.name)

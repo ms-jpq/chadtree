@@ -54,6 +54,7 @@ class IconGlyphSet:
     ascii: IconGlyphs
     devicons: IconGlyphs
     emoji: IconGlyphs
+    no_icons: IconGlyphs
 
 
 class IconGlyphSetEnum(Enum):
@@ -61,6 +62,7 @@ class IconGlyphSetEnum(Enum):
     ascii = auto()
     devicons = auto()
     emoji = auto()
+    no_icons = auto()
 
 
 """
