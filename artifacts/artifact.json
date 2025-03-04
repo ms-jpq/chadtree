@@ -494,6 +494,7 @@
       ".ipp": "#f34b7d",
       ".ipynb": "#DA5B0B",
       ".isl": "#264b99",
+      ".ispc": "#2D68B1",
       ".iss": "#264b99",
       ".iuml": "#fbbd16",
       ".ivy": "#0060ac",
@@ -965,6 +966,7 @@
       ".sj": "#ff0c5a",
       ".sjs": "#f1e05a",
       ".sl": "#007eff",
+      ".slang": "#1fbec9",
       ".sld": "#1e4aec",
       ".slim": "#2b2b2b",
       ".slint": "#2379F4",
@@ -1268,26 +1270,6 @@
       "folder": {
         "closed": "▷",
         "open": "▽"
-      },
-      "link": {
-        "broken": "-/->",
-        "normal": "->"
-      },
-      "name_exact": {},
-      "name_glob": {},
-      "status": {
-        "active": ">",
-        "inactive": " ",
-        "not_selected": " ",
-        "selected": "*"
-      }
-    },
-    "no_icons": {
-      "default_icon": "",
-      "ext_exact": {},
-      "folder": {
-        "closed": "",
-        "open": ""
       },
       "link": {
         "broken": "-/->",
@@ -2046,6 +2028,26 @@
         "inactive": " ",
         "not_selected": " ",
         "selected": "✸"
+      }
+    },
+    "no_icons": {
+      "default_icon": "",
+      "ext_exact": {},
+      "folder": {
+        "closed": "",
+        "open": ""
+      },
+      "link": {
+        "broken": "-/->",
+        "normal": "->"
+      },
+      "name_exact": {},
+      "name_glob": {},
+      "status": {
+        "active": ">",
+        "inactive": " ",
+        "not_selected": " ",
+        "selected": "*"
       }
     }
   },
