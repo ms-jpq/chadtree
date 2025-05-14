@@ -11,8 +11,10 @@ local cwd = (function()
   return vim.api.nvim_call_function("fnamemodify", {file, ":p:h:h"})
 end)()
 
+local loop = vim.uv or vim.loop
+
 local function defer(timeout, callback)
-  local timer = vim.loop.new_timer()
+  local timer = loop.new_timer()
   timer:start(
     timeout,
     0,
@@ -145,7 +147,7 @@ local set_chad_call = function(cmd)
   chad[cmd] = function(...)
     local args = {...}
     if t1 == 0 then
-      t1 = vim.loop.now()
+      t1 = loop.now()
     end
 
     if not job_id then
@@ -164,7 +166,7 @@ local set_chad_call = function(cmd)
 
     if not err_exit and CHAD[cmd] then
       CHAD[cmd](args)
-      local t2 = vim.loop.now()
+      local t2 = loop.now()
       if settings().profiling and t1 >= 0 then
         print("Init       " .. (t2 - t1) .. "ms")
       end
