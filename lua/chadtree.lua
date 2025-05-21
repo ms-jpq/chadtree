@@ -47,17 +47,27 @@ chad.on_exit = function(args)
   job_id = nil
 end
 
+local has_05 = vim.api.nvim_call_function("has", {"nvim-0.5"}) == 1
+
 chad.on_stdout = function(args)
   local msg = unpack(args)
-  vim.api.nvim_out_write(table.concat(msg, linesep))
+  local lines = table.concat(msg, linesep)
+
+  if has_05 then
+    vim.api.nvim_echo({{lines}}, true, {})
+  else
+    vim.api.nvim_out_write(lines)
+  end
 end
 
 chad.on_stderr = function(args)
   local msg = unpack(args)
-  if vim.api.nvim_call_function("has", {"nvim-0.5"}) == 1 then
-    vim.api.nvim_echo({{table.concat(msg, linesep), "ErrorMsg"}}, true, {})
+  local lines = table.concat(msg, linesep)
+
+  if has_05 then
+    vim.api.nvim_echo({{lines, "ErrorMsg"}}, true, {})
   else
-    vim.api.nvim_err_write(table.concat(msg, linesep))
+    vim.api.nvim_err_write(lines)
   end
 end
 
