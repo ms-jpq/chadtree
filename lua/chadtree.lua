@@ -37,16 +37,21 @@ local job_id = nil
 local err_exit = false
 local has_05 = vim.api.nvim_call_function("has", {"nvim-0.5"}) == 1
 
+local echo = function(msg, error)
+  if has_05 then
+    vim.api.nvim_echo({{msg, error and "ErrorMsg" or nil}}, true, {})
+  elseif error then
+    vim.api.nvim_err_write(msg)
+  else
+    vim.api.nvim_out_write(msg)
+  end
+end
+
 chad.on_exit = function(args)
   local code = unpack(args)
   if not (code == 0 or code == 143) then
-    local msg = "CHADTree EXITED - " .. code
     err_exit = true
-    if has_05 then
-      vim.api.nvim_echo({{msg, "ErrorMsg"}}, true, {})
-    else
-      vim.api.nvim_err_writeln(msg)
-    end
+    echo("CHADTree EXITED - " .. code, true)
   else
     err_exit = false
   end
@@ -55,24 +60,12 @@ end
 
 chad.on_stdout = function(args)
   local msg = unpack(args)
-  local lines = table.concat(msg, linesep)
-
-  if has_05 then
-    vim.api.nvim_echo({{lines}}, true, {})
-  else
-    vim.api.nvim_out_write(lines)
-  end
+  echo(table.concat(msg, linesep), false)
 end
 
 chad.on_stderr = function(args)
   local msg = unpack(args)
-  local lines = table.concat(msg, linesep)
-
-  if has_05 then
-    vim.api.nvim_echo({{lines, "ErrorMsg"}}, true, {})
-  else
-    vim.api.nvim_err_write(lines)
-  end
+  echo(table.concat(msg, linesep), true)
 end
 
 local go, _py3 = pcall(vim.api.nvim_get_var, "python3_host_prog")
