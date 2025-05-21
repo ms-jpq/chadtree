@@ -35,19 +35,23 @@ end
 
 local job_id = nil
 local err_exit = false
+local has_05 = vim.api.nvim_call_function("has", {"nvim-0.5"}) == 1
 
 chad.on_exit = function(args)
   local code = unpack(args)
   if not (code == 0 or code == 143) then
+    local msg = "CHADTree EXITED - " .. code
     err_exit = true
-    vim.api.nvim_err_writeln("CHADTree EXITED - " .. code)
+    if has_05 then
+      vim.api.nvim_echo({{msg, "ErrorMsg"}}, true, {})
+    else
+      vim.api.nvim_err_writeln(msg)
+    end
   else
     err_exit = false
   end
   job_id = nil
 end
-
-local has_05 = vim.api.nvim_call_function("has", {"nvim-0.5"}) == 1
 
 chad.on_stdout = function(args)
   local msg = unpack(args)
