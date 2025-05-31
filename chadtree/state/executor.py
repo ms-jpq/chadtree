@@ -8,7 +8,7 @@ from asyncio import (
 from concurrent.futures import Future, InvalidStateError, ThreadPoolExecutor
 from contextlib import suppress
 from threading import Thread
-from typing import Any, Awaitable, Callable, Coroutine, TypeVar
+from typing import Any, Awaitable, Callable, Coroutine, TypeVar, cast
 
 _T = TypeVar("_T")
 
@@ -51,5 +51,5 @@ class AsyncExecutor:
         return fut
 
     def submit(self, co: Awaitable[_T]) -> Awaitable[_T]:
-        f = run_coroutine_threadsafe(co, loop=self.loop)
+        f: Future = run_coroutine_threadsafe(cast(Coroutine, co), loop=self.loop)
         return wrap_future(f)
