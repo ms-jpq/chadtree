@@ -136,6 +136,7 @@
       ".brs": "#662D91",
       ".bs": "#66AABB",
       ".bsl": "#814CCC",
+      ".bst": "#006bff",
       ".bsv": "#12223c",
       ".builder": "#701516",
       ".builds": "#0060ac",
@@ -442,6 +443,7 @@
       ".hh": "#878787",
       ".hhi": "#878787",
       ".hic": "#db5855",
+      ".hip": "#4F3A4F",
       ".hlsl": "#aace60",
       ".hlsli": "#aace60",
       ".hocon": "#9ff8ee",
@@ -494,6 +496,7 @@
       ".ipp": "#f34b7d",
       ".ipynb": "#DA5B0B",
       ".isl": "#264b99",
+      ".ispc": "#2D68B1",
       ".iss": "#264b99",
       ".iuml": "#fbbd16",
       ".ivy": "#0060ac",
@@ -545,8 +548,10 @@
       ".kicad_mod": "#2f4aab",
       ".kicad_pcb": "#2f4aab",
       ".kicad_sch": "#2f4aab",
+      ".kicad_sym": "#2f4aab",
       ".kicad_wks": "#2f4aab",
       ".kid": "#951531",
+      ".kk": "#215166",
       ".kml": "#0060ac",
       ".kojo": "#c22d40",
       ".krl": "#28430A",
@@ -606,6 +611,8 @@
       ".m": "#438eff",
       ".m2": "#d8ffff",
       ".m3": "#223388",
+      ".m3u": "#179C7D",
+      ".m3u8": "#179C7D",
       ".ma": "#dd1100",
       ".mak": "#427819",
       ".make": "#427819",
@@ -930,6 +937,7 @@
       ".ruby": "#701516",
       ".rviz": "#cb171e",
       ".s": "#005daa",
+      ".sail": "#259dd5",
       ".sarif": "#292929",
       ".sas": "#B34936",
       ".sass": "#a53b70",
@@ -944,7 +952,7 @@
       ".scenic": "#fdc700",
       ".sch": "#0060ac",
       ".sci": "#ca0f21",
-      ".scm": "#1e4aec",
+      ".scm": "#8ea64c",
       ".sco": "#1a1a1a",
       ".scpt": "#101F1F",
       ".scrbl": "#3c5caa",
@@ -965,6 +973,7 @@
       ".sj": "#ff0c5a",
       ".sjs": "#f1e05a",
       ".sl": "#007eff",
+      ".slang": "#1fbec9",
       ".sld": "#1e4aec",
       ".slim": "#2b2b2b",
       ".slint": "#2379F4",
@@ -1142,7 +1151,7 @@
       ".vue": "#41b883",
       ".vw": "#dad8d8",
       ".vxml": "#0060ac",
-      ".vy": "#2980b9",
+      ".vy": "#9F4CF2",
       ".w": "#5ce600",
       ".wast": "#04133b",
       ".wat": "#04133b",
@@ -1268,26 +1277,6 @@
       "folder": {
         "closed": "▷",
         "open": "▽"
-      },
-      "link": {
-        "broken": "-/->",
-        "normal": "->"
-      },
-      "name_exact": {},
-      "name_glob": {},
-      "status": {
-        "active": ">",
-        "inactive": " ",
-        "not_selected": " ",
-        "selected": "*"
-      }
-    },
-    "no_icons": {
-      "default_icon": "",
-      "ext_exact": {},
-      "folder": {
-        "closed": "",
-        "open": ""
       },
       "link": {
         "broken": "-/->",
@@ -1567,6 +1556,7 @@
         ".db": "🎲",
         ".dds": "🎨",
         ".deb": "📦",
+        ".def": "🔟",
         ".dib": "📝",
         ".diff": "💊",
         ".dll": "🔟",
@@ -1989,6 +1979,7 @@
         "ios": "📱",
         "jenkinsfile": "🎩",
         "justfile": "🔨",
+        "keystore": "🔐",
         "lib": "📚",
         "license": "📜",
         "license.txt": "📜",
@@ -2046,6 +2037,26 @@
         "inactive": " ",
         "not_selected": " ",
         "selected": "✸"
+      }
+    },
+    "no_icons": {
+      "default_icon": "",
+      "ext_exact": {},
+      "folder": {
+        "closed": "",
+        "open": ""
+      },
+      "link": {
+        "broken": "-/->",
+        "normal": "->"
+      },
+      "name_exact": {},
+      "name_glob": {},
+      "status": {
+        "active": ">",
+        "inactive": " ",
+        "not_selected": " ",
+        "selected": "*"
       }
     }
   },
