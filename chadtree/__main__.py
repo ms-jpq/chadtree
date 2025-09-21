@@ -3,6 +3,7 @@ from asyncio import run as arun
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext, redirect_stderr, redirect_stdout
 from io import StringIO
+from os.path import expanduser
 from pathlib import Path, PurePath
 from subprocess import DEVNULL, STDOUT, CalledProcessError, run
 from sys import (
@@ -61,7 +62,7 @@ def parse_args() -> Namespace:
 args = parse_args()
 command: Union[Literal["deps"], Literal["run"]] = args.command
 
-_XDG = Path(args.xdg) if args.xdg is not None else None
+_XDG = Path(expanduser(args.xdg)) if args.xdg is not None else None
 
 _RT_DIR = _XDG / "chadrt" if _XDG else RT_DIR
 _RT_PY = (
