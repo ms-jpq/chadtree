@@ -39,6 +39,8 @@ class Sortby(Enum):
     ext = auto()
     file_name_lower = auto()
     file_name = auto()
+    mtime = auto()          # Modification time (newest first)
+    mtime_reverse = auto()  # Modification time (oldest first)
 
 
 @dataclass(frozen=True)

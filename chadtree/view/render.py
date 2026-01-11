@@ -1,4 +1,5 @@
 from collections import UserString
+from datetime import datetime
 from enum import IntEnum, auto
 from fnmatch import fnmatch
 from functools import lru_cache
@@ -81,6 +82,12 @@ def _gen_comp(sortby: Sequence[Sortby]) -> Callable[[Node], Any]:
                         yield strxfrm(node.path.name.casefold())
                     elif sb is Sortby.file_name:
                         yield strxfrm(node.path.name)
+                    elif sb is Sortby.mtime:
+                        # For newest first, we use negative timestamp
+                        yield -(node.mtime.timestamp() if node.mtime else 0)
+                    elif sb is Sortby.mtime_reverse:
+                        # For oldest first, use positive timestamp
+                        yield node.mtime.timestamp() if node.mtime else 0
                     else:
                         never(sb)
 
