@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import IntEnum, auto, unique
 from pathlib import PurePath
 from typing import AbstractSet, Any, Mapping, Optional, Sequence
@@ -42,6 +43,7 @@ class Node:
     path: PurePath
     pointed: Optional[PurePath]
     children: Mapping[PurePath, Node]
+    mtime: Optional[datetime] = None  # Modification time
     cache: _RenderCache = field(default_factory=_RenderCache)
 
 

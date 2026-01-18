@@ -4,6 +4,7 @@ from asyncio import sleep
 from concurrent.futures import Executor
 from contextlib import suppress
 from fnmatch import fnmatch
+from datetime import datetime
 from os import DirEntry, scandir, stat, stat_result
 from os.path import normcase
 from pathlib import Path, PurePath
@@ -88,33 +89,35 @@ def _fs_modes(stat: stat_result) -> Iterator[Mode]:
             yield mode
 
 
-def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath]]:
+def _fs_stat(path: PurePath) -> Tuple[AbstractSet[Mode], Optional[PurePath], Optional[datetime]]:
     try:
         info = stat(path, follow_symlinks=False)
     except (FileNotFoundError, PermissionError):
-        return {Mode.orphan_link}, None
+        return {Mode.orphan_link}, None, None
     else:
+        mtime = datetime.fromtimestamp(info.st_mtime)
         if S_ISLNK(info.st_mode) or is_junction(info):
             try:
                 pointed = Path(path).resolve(strict=True)
                 link_info = stat(pointed, follow_symlinks=False)
             except (FileNotFoundError, NotADirectoryError, RuntimeError, PermissionError):
-                return {Mode.orphan_link}, None
+                return {Mode.orphan_link}, None, None
             else:
                 mode = {*_fs_modes(link_info)}
-                return mode | {Mode.link}, pointed
+                return mode | {Mode.link}, pointed, mtime
         else:
             mode = {*_fs_modes(info)}
-            return mode, None
+            return mode, None, mtime
 
 
 def _fs_node(path: PurePath) -> Node:
-    mode, pointed = _fs_stat(path)
+    mode, pointed, mtime = _fs_stat(path)
     node = Node(
         path=path,
         mode=mode,
         pointed=pointed,
         children={},
+        mtime=mtime,
     )
     return node
 
@@ -174,6 +177,7 @@ async def _update(
             mode=root.mode,
             pointed=root.pointed,
             children=children,
+            mtime=root.mtime,
         )
 
 
